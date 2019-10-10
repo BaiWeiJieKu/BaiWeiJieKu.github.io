@@ -13,6 +13,7 @@ code{
 }
 
 pre {
+    background: rgba(0, 0, 0, 0.95);
     margin: 12px 0;
      padding: 8px 12px;
     //  overflow-x: auto;
@@ -32,7 +33,7 @@ pre {
 .highlight {
     border-radius: 3px;
 
-    background: #272822;
+    background: #C7EDCC;
     .hll { background-color: #272822; }
     .c { color: #75715e } /* Comment */
     .err { color: #960050; background-color: #1e0010 } /* Error */
