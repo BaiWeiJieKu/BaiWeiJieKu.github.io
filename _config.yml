@@ -40,17 +40,17 @@ google_analytics_id: UA-72449510-4 # google 分析追踪id
 
 # Build settings
 markdown: kramdown
-highlighter: rouge
+#highlighter: rouge
 kramdown:
   input: GFM
-  extensions:
-    - autolink
-    - footnotes
-    - smart
-  use_coderay: true
-  syntax_highlighter: rouge
-  coderay:
-    coderay_line_numbers:  nil
+  # extensions:
+  #   - autolink
+  #   - footnotes
+  #   - smart
+  # use_coderay: true
+  # syntax_highlighter: rouge
+  # coderay:
+  #   coderay_line_numbers:  nil
 
 # port
 # port: 1234
