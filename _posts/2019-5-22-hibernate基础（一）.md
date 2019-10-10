@@ -78,7 +78,7 @@ music-id: 2602106546
 
 ```
 
-```properties
+```
 hbm2ddl.auto：该属性可帮助程序员实现正向工程:create | update | create-drop | validate
 
 create : 会根据 .hbm.xml  文件来生成数据表, 但是每次运行都会删除上一次的表 ,重新生成表, 哪怕二次没有任何改变 

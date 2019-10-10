@@ -13,21 +13,21 @@ music-id: 2602106546
 
 - i18n.properties：
 
-```properties
+```
 i18n.username=Username
 i18n.password=Password
 ```
 
 - i18n_en_US.properties：
 
-```properties
+```
 i18n.username=Username
 i18n.password=Password
 ```
 
 - i18n_zh_CN.properties：
 
-```properties
+```
 i18n.username=\u7528\u6237\u540D
 i18n.password=\u5BC6\u7801
 ```
@@ -748,7 +748,7 @@ public class Employee {
 
 #### 空检查
 
-```properties
+```
 @Null 验证对象是否为null 
 @NotNull 验证对象是否不为null, 无法查检长度为0的字符串 
 @NotBlank 检查约束字符串是不是Null还有被Trim的长度是否大于0,只对字符串,且会去掉前后空格. 
@@ -759,7 +759,7 @@ public class Employee {
 
 #### 真假检查
 
-```properties
+```
 @AssertTrue 验证 Boolean 对象是否为 true 
 @AssertFalse 验证 Boolean 对象是否为 false
 ```
@@ -768,7 +768,7 @@ public class Employee {
 
 #### 长度检查
 
-```properties
+```
 @Size(min=, max=) 验证对象（Array,Collection,Map,String）长度是否在给定的范围之内
 ```
 
@@ -776,7 +776,7 @@ public class Employee {
 
 #### 日期检查
 
-```properties
+```
 @Past 验证 Date 和 Calendar 对象是否在当前时间之前，验证成立的话被注释的元素一定是一个过去的日期
 
 @Future 验证 Date 和 Calendar 对象是否在当前时间之后 ，验证成立的话被注释的元素一定是一个将来的日期
@@ -791,7 +791,7 @@ flags: 指定 Pattern.Flag 的数组，表示正则表达式的相关选项
 
 #### 数值检查
 
-```properties
+```
 @Min 验证 Number 和 String 对象是否大等于指定的值 
 
 @Max 验证 Number 和 String 对象是否小等于指定的值
