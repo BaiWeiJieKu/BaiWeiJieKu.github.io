@@ -355,7 +355,6 @@ public class BrowserProperties {
 #### 短信验证码登录
 
 - 发送手机验证码：
-
 - core.validate.code.sms.SmsCodeSender(短信验证码发送接口)
 - core.validate.code.sms.DefaultSmsCodeSender(默认手机验证码发送实现类)
 - core.validate.code.ValidateCodeBeanConfig(验证码容器配置类)
@@ -368,6 +367,34 @@ public class BrowserProperties {
 - core.authentication.mobile.SmsCodeAuthenticationProvider(实现手机登录校验逻辑)
 - core.authentication.mobile.SmsCodeAuthenticationSecurityConfig(手机验证码安全认证配置)
 - browser.BrowserSecurityConfig
+
+#### 社交账号登录
+
+![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/shejiao.png)
+
+![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/oauth.png)
+
+##### QQ登录
+
+- 第6步：获取用户信息Api
+
+- core.social.qq.api.QQ(获取QQ用户消息接口)
+- core.social.qq.api.QQUserInfo(QQ用户信息)
+- core.social.qq.api.QQImpl(获取QQ用户信息实现类)
+- 前五步获取连接
+- core.social.qq.connet.QQServiceProvider(QQ服务提供类)
+- core.social.qq.connet.QQAdapter(QQ适配器)
+- core.social.qq.connet.QQConnectionFactory(QQ连接工厂)
+- core.social.SocialConfig(社交配置)
+- demo.security.MyUserDetailsService(用户详情信息Service)
+- core.properties.QQProperties
+- core.properties.SocialProperties
+- core.properties.SecurityProperties
+- core.social.qq.config.QQAutoConfig(QQ认证配置)
+- application.properties中：
+- imooc.security.social.weixin.app-id = wxd99431bbff8305a0
+  imooc.security.social.weixin.app-secret = 60f78681d063590a469f1b297feff3c4
+- browser.BrowserSecurityConfig(浏览器安全配置类)
 
 ### 浏览器安全模块(jar)
 
