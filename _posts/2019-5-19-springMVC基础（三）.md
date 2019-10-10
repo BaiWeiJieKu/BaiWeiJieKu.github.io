@@ -185,7 +185,7 @@ public class UserNameNotMatchPasswordException extends RuntimeException{
 
 #### 映射异常
 
-```
+```xml
 	<!-- 配置使用 SimpleMappingExceptionResolver 来映射异常 -->
 	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
 		<property name="exceptionAttribute" value="ex"></property>

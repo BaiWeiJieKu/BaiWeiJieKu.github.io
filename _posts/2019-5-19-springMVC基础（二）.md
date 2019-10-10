@@ -13,21 +13,21 @@ music-id: 2602106546
 
 - i18n.properties：
 
-```
+```properties
 i18n.username=Username
 i18n.password=Password
 ```
 
 - i18n_en_US.properties：
 
-```
+```properties
 i18n.username=Username
 i18n.password=Password
 ```
 
 - i18n_zh_CN.properties：
 
-```
+```properties
 i18n.username=\u7528\u6237\u540D
 i18n.password=\u5BC6\u7801
 ```
@@ -36,7 +36,7 @@ i18n.password=\u5BC6\u7801
 
 #### 配置文件
 
-```
+```xml
 	<!-- 配置国际化资源文件 -->
 	<bean id="messageSource"
 		class="org.springframework.context.support.ResourceBundleMessageSource">
@@ -49,7 +49,7 @@ i18n.password=\u5BC6\u7801
 
 #### 页面
 
-```
+```html
 	<fmt:message key="i18n.username"></fmt:message>
 	<br><br>
 	
@@ -68,7 +68,7 @@ i18n.password=\u5BC6\u7801
 - 果不加`<mvc:annotation-driven></mvc:annotation-driven>`这个配置，那么以前通过`@RequestMapping("/success")`映射的就不好使了
 - 通常这两个是需要一起来用的
 
-```
+```xml
 	<!-- 配置直接转发的页面 -->
 	<!-- 可以直接相应转发的页面, 而无需再经过 Handler 的方法.  -->
 	<mvc:view-controller path="/success" view-name="success"/>
@@ -109,7 +109,7 @@ public class HelloView implements View{
 
 ```
 
-```
+```xml
 	
 	<!-- 配置视图  BeanNameViewResolver 解析器: 使用视图的名字来解析视图 -->
 	<!-- 通过 order 属性来定义视图解析器的优先级, order 值越小优先级越高 -->
@@ -145,7 +145,7 @@ public class HelloView implements View{
 
 #### web.xml
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="http://java.sun.com/xml/ns/javaee"
@@ -462,7 +462,7 @@ public class EmployeeHandler {
   上下文中定义一个  **DefaultServletHttpRequestHandler**，它会对进入DispatcherServlet的  请求进行筛查，如果发现是没有经过映射的请求，就将该请求交由WEB  应用服务器默认的 Servlet 处理，如果不是静态资源的请求，才由  DispatcherServlet继续处理
 - 一般 WEB应用服务器默认的Servlet的名称都是default。若所使用的WEB 服务器(比如Tomcat服务器)的默认 Servlet 名称不是 default，则需要通过default-  servlet-name 属性显式指定
 
-```
+```xml
 	<!--  
 		default-servlet-handler 将在 SpringMVC 上下文中定义一个 DefaultServletHttpRequestHandler,
 		它会对进入 DispatcherServlet 的请求进行筛查, 如果发现是没有经过映射的请求, 就将该请求交由 WEB 应用服务器默认的 
@@ -484,7 +484,7 @@ public class EmployeeHandler {
 
 - 若将 DispatcherServlet 请求映射配置为/，表示拦截静态资源但不拦截动态资源，若想访问静态资源，可在web.xml中直接进行配置，不需要配置springmvc.xml
 
-```
+```xml
 	<!--servlet静态资源配置在Tomcat的web.xml中，名称默认为default-->
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
@@ -523,7 +523,7 @@ public class EmployeeHandler {
 
 - 若将 DispatcherServlet 请求映射配置为/，表示拦截静态资源但不拦截动态资源，若想访问静态资源，可在web.xml中进行配置，并且配合springmvc.xml进行使用
 
-```
+```xml
 <servlet>
 		<servlet-name>springDispatcherServlet</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -541,7 +541,7 @@ public class EmployeeHandler {
 	</servlet-mapping>
 ```
 
-```
+```xml
 <!--
 location表示静态资源的位置
 mapping表示实际的请求格式
@@ -557,7 +557,7 @@ mapping表示实际的请求格式
 
 - 前台路径
 
-```
+```html
 <!--
 这个路径出现在jsp页面中，所以是前台路径
 前台路径的参考路径为：当前web服务器的根：http://127.0.0.1:8080
@@ -653,7 +653,7 @@ public class EmployeeConverter implements Converter<String, Employee> {
 
 - 配置
 
-```
+```xml
 
 	<mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven>
 	
@@ -725,7 +725,7 @@ public class Employee {
 
 ```
 
-```
+```xml
 	<mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven>	
 	
 	<!-- 配置 ConversionService -->
@@ -748,7 +748,7 @@ public class Employee {
 
 #### 空检查
 
-```
+```properties
 @Null 验证对象是否为null 
 @NotNull 验证对象是否不为null, 无法查检长度为0的字符串 
 @NotBlank 检查约束字符串是不是Null还有被Trim的长度是否大于0,只对字符串,且会去掉前后空格. 
@@ -759,7 +759,7 @@ public class Employee {
 
 #### 真假检查
 
-```
+```properties
 @AssertTrue 验证 Boolean 对象是否为 true 
 @AssertFalse 验证 Boolean 对象是否为 false
 ```
@@ -768,7 +768,7 @@ public class Employee {
 
 #### 长度检查
 
-```
+```properties
 @Size(min=, max=) 验证对象（Array,Collection,Map,String）长度是否在给定的范围之内
 ```
 
@@ -776,7 +776,7 @@ public class Employee {
 
 #### 日期检查
 
-```
+```properties
 @Past 验证 Date 和 Calendar 对象是否在当前时间之前，验证成立的话被注释的元素一定是一个过去的日期
 
 @Future 验证 Date 和 Calendar 对象是否在当前时间之后 ，验证成立的话被注释的元素一定是一个将来的日期
@@ -791,7 +791,7 @@ flags: 指定 Pattern.Flag 的数组，表示正则表达式的相关选项
 
 #### 数值检查
 
-```
+```properties
 @Min 验证 Number 和 String 对象是否大等于指定的值 
 
 @Max 验证 Number 和 String 对象是否小等于指定的值

@@ -19,7 +19,7 @@ music-id: 2602106546
 - BeanNameUrlHandlerMapping
 - SimpleUrlHandlerMapping
 
-```
+```xml
 <!--注册处理器映射器-->
 <bean class="org.springframework.web.servlet.handle.SimpleUrlHandlerMapping">
 	<property name="mappings">
@@ -267,7 +267,7 @@ public class MyController extends MultiActionController  {
 
 - 注意处理器类的映射路径的写法：要求必须以/xxx/*的路径方式定义映射路径。其中*为通配符，在访问时使用要访问的方法名代替
 
-```
+```xml
 <!--注册处理器映射器-->
 <bean class="org.springframework.web.servlet.handle.SimpleUrlHandlerMapping">
 	<property name="mappings">
@@ -311,7 +311,7 @@ private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolv
 - 另外，还需要配置一个 PropertiesMethodNameResolver 方法名解析器，并指定请求与要执行的方法名之间的映射关系。注意，这里的指定的请求，必须要加上.do，否则，无法完成匹配，将报 404 错误
 - 最后，将配置好的方法名解析器，注入给处理器。
 
-```
+```xml
 <!--注册处理器映射器-->
 <bean class="org.springframework.web.servlet.handle.SimpleUrlHandlerMapping">
 	<property name="mappings">
@@ -346,7 +346,7 @@ private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolv
 - **arameterMethodNameResolver** :方法名解析器
 - 该方法名解析器中的方法名作为请求参数的值出现。例如请求时可以写为 /xxx?ooo=doFirst，则会访问 xxx 所映射的处理器的 doFirst()方法。其中 ooo 为该请求所携带的参数名，而 doFirst 则作为其参数值出现
 
-```
+```xml
 <!--注册处理器映射器-->
 <bean class="org.springframework.web.servlet.handle.SimpleUrlHandlerMapping">
 	<property name="mappings">
@@ -380,7 +380,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 
 - 也就是说，对于方法名称解析器 ParameterMethodNameResolver 的注册，可以修改为如下形式，即不指定 paramName 的属性值
 
-```
+```xml
 <!--配置方法名解析器-->
 <bean id="parameterMethodNameResolver" class="org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver">
 </bean>
@@ -429,7 +429,7 @@ public class LinkedHashMap<K,V> extends HashMap<K,V> implements Map<K,V>
 - **HashMap 是一个单向查找数组**
 - HashMap 的本质是一个单向链表数组，看 HashMap 的源码，其用于存放数据的底层数据结构为一个数组，而数组元素为一个 Node对象
 
-```
+```java
  /**
      * The table, initialized on first use, and resized as
      * necessary. When allocated, length is always a power of two.
@@ -441,7 +441,7 @@ public class LinkedHashMap<K,V> extends HashMap<K,V> implements Map<K,V>
 
 - 跟踪 Node类可知，其为 HashMap 类的内部类，为一个可单向链表的数据结构：因为其只能通过 next 查找下一个元素，而无法查找上一个元素
 
-```
+```java
 static class Node<K,V> implements Map.Entry<K,V> {
         final int hash;
         final K key;
@@ -455,7 +455,7 @@ static class Node<K,V> implements Map.Entry<K,V> {
 - LinkedHashMap 的本质是一个 HashMap，但其将 Entry 内部类进行了扩展。HashMap 中
   的 Entry 是单向的，只能通过 next 查找下一个元素。而 LinkedHashMap 中的 Entry 变为了双向的，可以通过 before 查找上一个元素，通过 after 查找下一个元素。即从性能上说， LinkedHashMap 的操作性能要高于 HashMap
 
-```
+```java
 transient LinkedHashMap.Entry<K,V> head;
 ```
 
