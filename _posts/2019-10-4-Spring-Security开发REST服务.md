@@ -377,7 +377,6 @@ public class BrowserProperties {
 ##### QQ登录
 
 - 第6步：获取用户信息Api
-
 - core.social.qq.api.QQ(获取QQ用户消息接口)
 - core.social.qq.api.QQUserInfo(QQ用户信息)
 - core.social.qq.api.QQImpl(获取QQ用户信息实现类)
@@ -395,6 +394,9 @@ public class BrowserProperties {
 - imooc.security.social.weixin.app-id = wxd99431bbff8305a0
   imooc.security.social.weixin.app-secret = 60f78681d063590a469f1b297feff3c4
 - browser.BrowserSecurityConfig(浏览器安全配置类)
+- core.social.ImoocSpringSocialConfigurer(重写点击QQ登录的URL)
+- core.social.qq.connet.QQOAuth2Template
+- 暂停第五章（1）
 
 ### 浏览器安全模块(jar)
 
