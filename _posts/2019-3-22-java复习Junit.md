@@ -83,11 +83,29 @@ public class TestCase1 {
 
 ```
 
-
+- @Test：在junit3中，是通过对测试类和测试方法的命名来确定是否是测试，且所有的测试类必须继承junit的测试基类。在junit4中，定义一个测试方法变得简单很多，只需要在方法前加上@Test就行了。
+- @Ignore：有时候我们想暂时不运行某些测试方法\测试类，可以在方法前加上这个注解。在运行结果中，junit会统计忽略的用例数，来提醒你。但是不建议经常这么做
+- @BeforeClass：当我们运行几个有关联的用例时，可能会在数据准备或其它前期准备中执行一些相同的命令，这个时候为了让代码更清晰，更少冗余，可以将公用的部分提取出来，放在一个方法里，并为这个方法注解@BeforeClass。意思是在测试类里所有用例运行之前，运行一次这个方法。
+- @AfterClass：跟@BeforeClass对应，在测试类里所有用例运行之后，运行一次。用于处理一些测试后续工作
+- @Before：与@BeforeClass的区别在于，@Before不止运行一次，它会在每个用例运行之前都运行一次。
+- @After：与@Before对应。
 
 ### Assert
 
 ![](http://stepimagewm.how2j.cn/8832.png)
+
+| assertArrayEquals(expecteds, actuals) |                  查看两个数组是否相等。                  |
+| :-----------------------------------: | :------------------------------------------------------: |
+|    assertEquals(expected, actual)     | 查看两个对象是否相等。类似于字符串比较使用的equals()方法 |
+|    assertNotEquals(first, second)     |                 查看两个对象是否不相等。                 |
+|          assertNull(object)           |                    查看对象是否为空。                    |
+|         assertNotNull(object)         |                   查看对象是否不为空。                   |
+|     assertSame(expected, actual)      |  查看两个对象的引用是否相等。类似于使用“==”比较两个对象  |
+|   assertNotSame(unexpected, actual)   | 查看两个对象的引用是否不相等。类似于使用“!=”比较两个对象 |
+|         assertTrue(condition)         |                 查看运行结果是否为true。                 |
+|        assertFalse(condition)         |                查看运行结果是否为false。                 |
+|      assertThat(actual, matcher)      |               查看实际值是否满足指定的条件               |
+|                fail()                 |                        让测试失败                        |
 
 
 
