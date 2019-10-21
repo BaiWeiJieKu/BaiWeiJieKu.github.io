@@ -268,3 +268,316 @@ public class SplitterTest {
 
 ```
 
+
+
+#### Strings
+
+```java
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
+import org.junit.Test;
+import java.nio.charset.Charset;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
+
+public class StringsTest {
+
+    @Test
+    public void testStringsMethod() {
+        //“ ”转null
+        assertThat(Strings.emptyToNull(""), nullValue());
+        
+        //null转“ ”
+        assertThat(Strings.nullToEmpty(null), equalTo(""));
+        assertThat(Strings.nullToEmpty("hello"), equalTo("hello"));
+        
+        //获取公共前缀
+        assertThat(Strings.commonPrefix("Hello", "Hit"), equalTo("H"));
+        assertThat(Strings.commonPrefix("Hello", "Xit"), equalTo(""));
+        
+        //获取公共后缀
+        assertThat(Strings.commonSuffix("Hello", "Echo"), equalTo("o"));
+        
+        //重复字符串
+        assertThat(Strings.repeat("Alex", 3), equalTo("AlexAlexAlex"));
+        
+        //判断是否为null或“”
+        assertThat(Strings.isNullOrEmpty(null), equalTo(true));
+        assertThat(Strings.isNullOrEmpty(""), equalTo(true));
+        
+		//向字符串头部或尾部添加内容
+        assertThat(Strings.padStart("Alex", 3, 'H'), equalTo("Alex"));
+        assertThat(Strings.padStart("Alex", 5, 'H'), equalTo("HAlex"));
+        assertThat(Strings.padEnd("Alex", 5, 'H'), equalTo("AlexH"));
+    }
+
+    @Test
+    public void testCharsets() {
+        //获取字符集
+        Charset charset = Charset.forName("UTF-8");
+        assertThat(Charsets.UTF_8, equalTo(charset));
+    }
+
+    /**
+     * functor
+     */
+    @Test
+    public void testCharMatcher() {
+        //判断字符是否为数字
+        assertThat(CharMatcher.javaDigit().matches('5'), equalTo(true));
+        assertThat(CharMatcher.javaDigit().matches('x'), equalTo(false));
+        
+		//获取字符在字符串中的数量
+        assertThat(CharMatcher.is('A').countIn("Alex Sharing the Google Guava to Us"), equalTo(1));
+        
+        //把字符串中的空格替换为指定内容
+        assertThat(CharMatcher.breakingWhitespace().collapseFrom("      hello Guava     ", '*'), equalTo("*hello*Guava*"));
+        
+        //去除字符串中的数字和空格
+        assertThat(CharMatcher.javaDigit().or(CharMatcher.whitespace()).removeFrom("hello 234 world"), equalTo("helloworld"));
+        
+        //只保留字符串中的数字和空格
+        assertThat(CharMatcher.javaDigit().or(CharMatcher.whitespace()).retainFrom("hello 234 world"), equalTo(" 234 "));
+
+    }
+
+    public Integer text(){
+        return 0;
+    }
+}
+
+```
+
+
+
+### IO
+
+#### Files
+
+```java
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.common.collect.FluentIterable;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.*;
+import org.junit.After;
+import org.junit.Test;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+
+public class FilesTest {
+
+    private final String SOURCE_FILE = "C:\\source.txt";
+    private final String TARGET_FILE = "C:\\target.txt";
+
+    /**
+     * 拷贝文件
+     */
+    @Test
+    public void testCopyFileWithGuava() throws IOException {
+        File targetFile = new File(TARGET_FILE);
+        File sourceFile = new File(SOURCE_FILE);
+        Files.copy(sourceFile, targetFile);
+        //判断文件是否存在
+        assertThat(targetFile.exists(), equalTo(true));
+        //比较源文件和复制后的文件hashcode是否相同
+        HashCode sourceHashCode = Files.asByteSource(sourceFile).hash(Hashing.sha256());
+        HashCode targetHashCode = Files.asByteSource(targetFile).hash(Hashing.sha256());
+        assertThat(sourceHashCode.toString(), equalTo(targetHashCode.toString()));
+    }
+
+    /**
+     * 使用jdk的NIO拷贝文件
+     */
+    @Test
+    public void testCopyFileWithJDKNio2() throws IOException {
+        java.nio.file.Files.copy(
+                Paths.get("C:\\resources", "io", "source.txt"),
+                Paths.get("C:\\resources", "io", "target.txt"),
+                StandardCopyOption.REPLACE_EXISTING
+        );
+        File targetFile = new File(TARGET_FILE);
+
+        assertThat(targetFile.exists(), equalTo(true));
+    }
+
+    /**
+     * 移动文件
+     */
+    @Test
+    public void testMoveFile() throws IOException {
+        try {
+            //TARGET_FILE若存在,将被删除,重新生成
+            Files.move(new File(SOURCE_FILE), new File(TARGET_FILE));
+            assertThat(new File(TARGET_FILE).exists(), equalTo(true));
+            assertThat(new File(SOURCE_FILE).exists(), equalTo(false));
+        } finally {
+            Files.move(new File(TARGET_FILE), new File(SOURCE_FILE));
+        }
+    }
+
+    /**
+     * 读取文件内容
+     */
+    @Test
+    public void testToString() throws IOException {
+
+        final String expectedString = "today we will share the guava io knowledge.\n" +
+                "but only for the basic usage. if you wanted to get the more details information\n" +
+                "please read the guava document or source code.\n" +
+                "\n" +
+                "The guava source code is very cleanly and nice.";
+		//读取文件内容(一行一行读)
+        List<String> strings = Files.readLines(new File(SOURCE_FILE), Charsets.UTF_8);
+		//把读取到的每一行用换行符连接起来
+        String result = Joiner.on("\n").join(strings);
+        assertThat(result, equalTo(expectedString));
+    }
+	
+    /**
+     * 读取文件内容(按条件读取)
+     */
+    @Test
+    public void testToProcessString() throws IOException {
+        /**
+         * [43, 79, 46, 0, 47]
+         */
+        LineProcessor<List<Integer>> lineProcessor = new LineProcessor<List<Integer>>() {
+
+            private final List<Integer> lengthList = new ArrayList<>();
+
+            @Override
+            public boolean processLine(String line) throws IOException {
+                if (line.length() == 0) return false;
+                lengthList.add(line.length());
+                return true;//return false,不再读取下面内容
+            }
+
+            @Override
+            public List<Integer> getResult() {
+                return lengthList;
+            }
+        };
+        List<Integer> result = Files.asCharSource(new File(SOURCE_FILE), Charsets.UTF_8).readLines(lineProcessor);
+
+        System.out.println(result);
+    }
+
+	/**
+     * 写文件
+     */
+    @Test
+    public void testFileWrite() throws IOException {
+        String testPath = "C:\\testFileWrite.txt";
+        File testFile = new File(testPath);
+        //如果存在先删除
+        testFile.deleteOnExit();
+        String content1 = "content 1";
+        //写入
+        Files.asCharSink(testFile, Charsets.UTF_8).write(content1);
+        String actully = Files.asCharSource(testFile, Charsets.UTF_8).read();
+        assertThat(actully, equalTo(content1));
+    }
+
+    /**
+     * 追加内容
+     */
+    @Test
+    public void testFileAppend() throws IOException {
+        String testPath = "C:\\testFileAppend.txt";
+        File testFile = new File(testPath);
+        testFile.deleteOnExit();
+        
+        CharSink charSink = Files.asCharSink(testFile, Charsets.UTF_8, FileWriteMode.APPEND);
+        charSink.write("content1");
+        
+        String actullay = Files.asCharSource(testFile, Charsets.UTF_8).read();
+        assertThat(actullay, equalTo("content1"));
+
+        charSink.write("content2");
+        actullay = Files.asCharSource(testFile, Charsets.UTF_8).read();
+        assertThat(actullay, equalTo("content1content2"));
+    }
+
+    /**
+     * 递归获取文件树
+     */
+    @Test
+    public void testRecursive() {
+        List<File> list = new ArrayList<>();
+        this.recursiveList(new File("C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main"), list);
+        list.forEach(System.out::println);
+    }
+
+    private void recursiveList(File root, List<File> fileList) {
+        /*if (root.isHidden())
+            return;
+        fileList.add(root);
+        if (!root.isFile()) {
+            File[] files = root.listFiles();
+            for (File f : files) {
+                recursiveList(f, fileList);
+            }
+        }*/
+
+
+        if (root.isHidden()) return;
+        if (root.isFile())
+            fileList.add(root);
+        else {
+            File[] files = root.listFiles();
+            for (File f : files) {
+                recursiveList(f, fileList);
+            }
+        }
+    }
+
+    /**
+    *获取某路径目录
+    */
+    @Test
+    public void testTreeFilesPreOrderTraversal() {
+        File root = new File("C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main");
+//        FluentIterable<File> files = Files.fileTreeTraverser().preOrderTraversal(root);
+        FluentIterable<File> files = Files.fileTreeTraverser().preOrderTraversal(root).filter(File::isFile);
+        files.stream().forEach(System.out::println);
+    }
+
+    //preOrderTraversal postOrderTraversal顺序不一样
+    @Test
+    public void testTreeFilesPostOrderTraversal() {
+        File root = new File("C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main");
+        FluentIterable<File> files = Files.fileTreeTraverser().postOrderTraversal(root);
+        files.stream().forEach(System.out::println);
+    }
+
+    /**
+    *获取path下子目录
+    */
+    @Test
+    public void testTreeFilesChild() {
+        File root = new File("C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main");
+        Iterable<File> children = Files.fileTreeTraverser().children(root);
+
+        children.forEach(System.out::println);
+    }
+
+    @After
+    public void tearDown() {
+        File targetFile = new File(TARGET_FILE);
+        if (targetFile.exists())
+            targetFile.delete();
+    }
+}
+
+```
+
