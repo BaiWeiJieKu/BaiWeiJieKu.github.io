@@ -325,35 +325,20 @@ public class TestCollection {
 #### 变数组
 
 - toArray可以把一个ArrayList对象转换为数组。
-- 需要注意的是，如果要转换为一个Hero数组，那么需要传递一个Hero数组类型的对象给toArray()，这样toArray方法才知道，你希望转换为哪种类型的数组，否则只能转换为Object数组
+- 需要注意的是，该方法是一个泛型方法：`<T> T[] toArray(T[] a);` 如果`toArray`方法中没有传递任何参数的话返回的是`Object`类型数组。
 
 ```java
-package collection;
+String [] s= new String[]{
+    "dog", "lazy", "a", "over", "jumps", "fox", "brown", "quick", "A"
+};
+List<String> list = Arrays.asList(s);
+Collections.reverse(list);
+s=list.toArray(new String[0]);//没有指定类型的话会报错
 
-import java.util.ArrayList;
-
-import charactor.Hero;
-
-public class TestCollection {
-	public static void main(String[] args) {
-		ArrayList heros = new ArrayList();
-
-		// 初始化5个对象
-		for (int i = 0; i < 5; i++) {
-			heros.add(new Hero("hero " + i));
-		}
-		Hero specialHero = new Hero("special hero");
-		heros.add(specialHero);
-		System.out.println(heros);
-		Hero hs[] = (Hero[])heros.toArray(new Hero[]{});
-		System.out.println("数组:" +hs);
-
-	}
-}
-
+/*
+由于JVM优化，new String[0]作为Collection.toArray()方法的参数现在使用更好，new String[0]就是起一个模板的作用，指定了返回数组的类型，0是为了节省空间，因为它只是为了说明返回的类型。
+*/
 ```
-
-![](http://stepimagewm.how2j.cn/2460.png)
 
 #### 加所有
 
