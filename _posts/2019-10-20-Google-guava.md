@@ -581,3 +581,312 @@ public class FilesTest {
 
 ```
 
+
+
+### collections
+
+#### FluentIterable
+
+- 主要用于**过滤、转换集合中的数据**
+
+```java
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import org.junit.Test;
+import java.util.ArrayList;
+import java.util.List;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.*;
+
+public class FluentIterableExampleTest
+{
+
+    private FluentIterable<String> build()
+    {
+        ArrayList<String> list = Lists.newArrayList("Alex", "Wang", "Guava", "Scala");
+        return FluentIterable.from(list);
+    }
+	
+    /**
+    * 迭代器过滤
+    */
+    @Test
+    public void testFilter()
+    {
+        FluentIterable<String> fit = build();
+        assertThat(fit.size(), equalTo(4));
+		
+        //过滤掉集合中为null和长度<=4的元素
+        FluentIterable<String> result = fit.filter(e -> e != null && e.length() > 4);
+        assertThat(result.size(), equalTo(2));
+    }
+
+    /**
+    * 集合追加
+    */
+    @Test
+    public void testAppend()
+    {
+        FluentIterable<String> fit = build();
+        ArrayList<String> append = Lists.newArrayList("APPEND");
+        assertThat(fit.size(), equalTo(4));
+        //把一个集合中的元素全部添加到另一个集合中
+        FluentIterable<String> appendFI = fit.append(append);
+        assertThat(appendFI.size(), equalTo(5));
+        assertThat(appendFI.contains("APPEND"), is(true));
+    }
+
+    /**
+    * 判断集合里的元素
+    */
+    @Test
+    public void testMatch()
+    {
+        FluentIterable<String> fit = build();
+        //如果全部符合条件，返回true
+        boolean result = fit.allMatch(e -> e != null && e.length() >= 4);
+        assertThat(result, is(true));
+		//如果有符合条件的任意一个元素，返回true
+        result = fit.anyMatch(e -> e != null && e.length() == 5);
+        assertThat(result, is(true));
+
+        //获取第一个满足条件的元素
+        Optional<String> optional = fit.firstMatch(e -> e != null && e.length() == 5);
+        assertThat(optional.isPresent(), is(true));
+        assertThat(optional.get(), equalTo("Guava"));
+    }
+
+    /**
+    * 获取头元素和尾元素
+    */
+    @Test
+    public void testFirst$Last()
+    {
+        FluentIterable<String> fit = build();
+        
+        //获取头元素
+        Optional<String> optional = fit.first();
+        assertThat(optional.isPresent(), is(true));
+        assertThat(optional.get(), equalTo("Alex"));
+
+        //获取尾元素
+        optional = fit.last();
+        assertThat(optional.isPresent(), is(true));
+        assertThat(optional.get(), equalTo("Scala"));
+    }
+
+    /**
+    * 获取集合中指定数量和元素
+    */
+    @Test
+    public void testLimit()
+    {
+        FluentIterable<String> fit = build();
+        
+        FluentIterable<String> limit = fit.limit(3);
+        System.out.println(limit);
+        assertThat(limit.contains("Scala"), is(false));
+
+        limit = fit.limit(300);
+        System.out.println(limit);
+        assertThat(limit.contains("Scala"), is(true));
+
+    }
+
+    /**
+     * 集合拷贝
+     */
+    @Test
+    public void testCopyIn()
+    {
+        FluentIterable<String> fit = build();
+        
+        ArrayList<String> list = Lists.newArrayList("Java");
+        ArrayList<String> result = fit.copyInto(list);
+
+        assertThat(result.size(), equalTo(5));
+        assertThat(result.contains("Scala"), is(true));
+    }
+
+    /**
+    * 循环集合中的元素
+    */
+    @Test
+    public void testCycle()
+    {
+        FluentIterable<String> fit = build();
+        
+        FluentIterable<String> cycle = fit.cycle().limit(20);
+        cycle.forEach(System.out::println);
+    }
+
+    /**
+    * 转化集合中的元素
+    */
+    @Test
+    public void testTransform()
+    {
+        FluentIterable<String> fit = build();
+        //把集合中的元素转换为对应的长度，是一个List<Integer>
+        fit.transform(e -> e.length()).forEach(System.out::println);
+    }
+
+    /**
+    * 转化集合中的元素并合并
+    */
+    @Test
+    public void testTransformAndConcat()
+    {
+        FluentIterable<String> fit = build();
+        
+        List<Integer> list = Lists.newArrayList(1);
+        FluentIterable<Integer> result = fit.transformAndConcat(e -> list);
+        result.forEach(System.out::println);//1 1 1 1
+    }
+
+    /**
+     *转化集合中的元素并合并
+     */
+    @Test
+    public void testTransformAndConcatInAction()
+    {
+        ArrayList<Integer> cTypes = Lists.newArrayList(1, 2);
+        //使用1作为查询条件得到一个list，里面有两个对象
+        //使用2作为查询条件得到一个list2，里面有三个对象
+        //使用transformAndConcat可以把list1和list2合并为一个list
+        FluentIterable.from(cTypes).transformAndConcat(this::search)
+                .forEach(System.out::println);
+    }
+
+    /**
+     *连接集合中的元素
+     */
+    @Test
+    public void testJoin()
+    {
+        FluentIterable<String> fit = build();
+        String result = fit.join(Joiner.on(','));
+        assertThat(result, equalTo("Alex,Wang,Guava,Scala"));
+    }
+
+
+    private List<Customer> search(int type)
+    {
+        if (type == 1)
+        {
+            return Lists.newArrayList(new Customer(type, "Alex"), new Customer(type, "Tina"));
+        } else
+        {
+            return Lists.newArrayList(new Customer(type, "Wang"), new Customer(type, "Wen"), new Customer(type, "Jun"));
+        }
+    }
+
+    class Customer
+    {
+        final int type;
+        final String name;
+
+        Customer(int type, String name)
+        {
+            this.type = type;
+            this.name = name;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "Customer{" +
+                    "type=" + type +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
+    }
+}
+```
+
+
+
+#### Lists
+
+```java
+import com.google.common.base.Joiner;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import org.junit.Test;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+
+public class ListsExampleTest
+{
+
+    /**
+    *求笛卡尔积
+    */
+    @Test
+    public void testCartesianProduct()
+    {
+
+        List<List<String>> result = Lists.cartesianProduct(
+                Lists.newArrayList("1", "2"),
+                Lists.newArrayList("A", "B")
+        );
+        System.out.println(result);//1A,1B,2A,2B
+    }
+
+    /**
+    *转换集合中的元素
+    */
+    @Test
+    public void testTransform()
+    {
+        ArrayList<String> sourceList = Lists.newArrayList("Scala", "Guava", "Lists");
+        Lists.transform(sourceList, e -> e.toUpperCase()).forEach(System.out::println);
+
+
+    }
+
+    /**
+    *创建一个指定容积的集合
+    */
+    @Test
+    public void testNewArrayListWithCapacity()
+    {
+        ArrayList<String> result = Lists.newArrayListWithCapacity(10);
+        result.add("x");
+        result.add("y");
+        result.add("z");
+        System.out.println(result);
+
+
+    }
+
+    /**
+    *反转集合中元素的顺序
+    */
+    @Test
+    public void testReverse(){
+        ArrayList<String> list = Lists.newArrayList("1", "2", "3");
+        assertThat(Joiner.on(",").join(list),equalTo("1,2,3"));
+
+        List<String> result = Lists.reverse(list);
+        assertThat(Joiner.on(",").join(result),equalTo("3,2,1"));
+    }
+
+    /**
+    *集合分区
+    */
+    @Test
+    public void testPartition(){
+        ArrayList<String> list = Lists.newArrayList("1", "2", "3","4");
+        List<List<String>> result = Lists.partition(list, 30);
+        System.out.println(result.get(0));
+    }
+}
+```
+
