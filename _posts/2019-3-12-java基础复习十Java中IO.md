@@ -892,6 +892,9 @@ end
 
 ## 总结
 
-![](http://stepimagewm.how2j.cn/5678.png)
+![](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/IO-%E6%93%8D%E4%BD%9C%E6%96%B9%E5%BC%8F%E5%88%86%E7%B1%BB.png)
+
+![](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-6/IO-%E6%93%8D%E4%BD%9C%E5%AF%B9%E8%B1%A1%E5%88%86%E7%B1%BB.png)
 
 本文参考自：http://how2j.cn
+
