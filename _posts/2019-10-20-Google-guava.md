@@ -890,3 +890,278 @@ public class ListsExampleTest
 }
 ```
 
+
+
+#### sets
+
+```java
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.junit.Test;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+
+public class SetsExampleTest
+{
+
+    /**
+    * 创建set
+    */
+    @Test
+    public void testCreate()
+    {
+        HashSet<Integer> set = Sets.newHashSet(1, 2, 3);
+        assertThat(set.size(), equalTo(3));
+
+        ArrayList<Integer> list = Lists.newArrayList(1, 1, 2, 3);
+        assertThat(list.size(), equalTo(4));
+
+        //把list变为set
+        HashSet<Integer> set2 = Sets.newHashSet(list);
+        assertThat(set2.size(), equalTo(3));
+
+
+    }
+
+    /**
+    * 笛卡尔积
+    */
+    @Test
+    public void testCartesianProduct()
+    {
+
+        Set<List<Integer>> set = Sets.cartesianProduct(Sets.newHashSet(1, 2), Sets.newHashSet(3, 4), Sets.newHashSet(5, 6));
+
+        //[[1,4,5],[1,4,6],[1,3,5],[1,3,6],[2,4,5],[2,4,6],[2,3,5],[2,3,6]]
+        System.out.println(set);
+
+
+    }
+
+    /**
+    * 返回大小为set的所有子集的集合
+    */
+    @Test
+    public void testCombinations()
+    {
+        HashSet<Integer> set = Sets.newHashSet(1, 2, 3);
+        Set<Set<Integer>> combinations = Sets.combinations(set, 2);
+        combinations.forEach(System.out::println);
+        //[1,2],[1,3],[2,3]
+    }
+
+    /**
+    * 返回差集
+    */
+    @Test
+    public void testDiff()
+    {
+        HashSet<Integer> set1 = Sets.newHashSet(1, 2, 3);
+        HashSet<Integer> set2 = Sets.newHashSet(1, 4, 6);
+        Sets.SetView<Integer> diffResult1 = Sets.difference(set1, set2);
+        System.out.println(diffResult1);//[2,3]
+        Sets.SetView<Integer> diffResult2 = Sets.difference(set2, set1);
+        System.out.println(diffResult2);//[4,6]
+    }
+
+    /**
+    * 返回交集
+    */
+    @Test
+    public void testIntersection()
+    {
+        HashSet<Integer> set1 = Sets.newHashSet(1, 2, 3);
+        HashSet<Integer> set2 = Sets.newHashSet(1, 4, 6);
+        Sets.intersection(set1, set2).forEach(System.out::println);//[1]
+    }
+
+    /**
+    * 返回并集
+    */
+    @Test
+    public void testUnionSection()
+    {
+        HashSet<Integer> set1 = Sets.newHashSet(1, 2, 3);
+        HashSet<Integer> set2 = Sets.newHashSet(1, 4, 6);
+        Sets.union(set1, set2).forEach(System.out::println);//[1,2,3,4,6]
+    }
+}
+
+```
+
+
+
+#### Maps
+
+```java
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Map;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
+public class MapsExampleTest
+{
+
+    /**
+    * 创建map
+    */
+    @Test
+    public void testCreate()
+    {
+        ArrayList<String> valueList = Lists.newArrayList("1", "2", "3");
+        ImmutableMap<String, String> map = Maps.uniqueIndex(valueList, v -> v + "_key");
+        System.out.println(map);//{1_key=1,2_key=2,3_key=3}
+        
+        Map<String, String> map2 = Maps.asMap(Sets.newHashSet("1", "2", "3"), k -> k + "_value");
+        System.out.println(map2);//{1=1_value,2=2_value,3=3_value}
+    }
+
+    /**
+    * 转换map的value
+    */
+    @Test
+    public void testTransform()
+    {
+        Map<String, String> map = Maps.asMap(Sets.newHashSet("1", "2", "3"), k -> k + "_value");
+        Map<String, String> newMap = Maps.transformValues(map, v -> v + "_transform");
+        //{1=1_value_transform,2=2_value_transform,3=3_value_transform}
+        System.out.println(newMap);
+        assertThat(newMap.containsValue("1_value_transform"), is(true));
+    }
+
+    /**
+    * 过滤
+    */
+    @Test
+    public void testFilter()
+    {
+        Map<String, String> map = Maps.asMap(Sets.newHashSet("1", "2", "3"), k -> k + "_value");
+        Map<String, String> newMap = Maps.filterKeys(map, k -> Lists.newArrayList("1", "2").contains(k));
+        //{1=1_value,2=2_value}
+        assertThat(newMap.containsKey("3"), is(false));
+    }
+}
+```
+
+
+
+#### Multimaps
+
+```java
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
+import org.junit.Test;
+import java.util.HashMap;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.*;
+
+public class MultimapsExampleTest
+{
+
+    @Test
+    public void testBasic()
+    {
+        //允许键重复的map,value存的是一个链表
+        LinkedListMultimap<String, String> multipleMap = LinkedListMultimap.create();
+        HashMap<String, String> hashMap = Maps.newHashMap();
+        hashMap.put("1", "1");
+        hashMap.put("1", "2");
+        assertThat(hashMap.size(), equalTo(1));
+
+
+        multipleMap.put("1", "1");
+        multipleMap.put("1", "2");
+        assertThat(multipleMap.size(), equalTo(2));
+        System.out.println(multipleMap.get("1"));//[1,2]
+    }
+}
+```
+
+
+
+#### BiMap
+
+- 双向映射
+
+```java
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import org.junit.Test;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.*;
+
+public class BiMapExampleTest
+{
+
+    @Test
+    public void testCreateAndPut()
+    {
+        HashBiMap<String, String> biMap = HashBiMap.create();
+        biMap.put("1", "2");
+        biMap.put("1", "3");
+        assertThat(biMap.containsKey("1"), is(true));
+        assertThat(biMap.size(), equalTo(1));
+		//要保证键和值都是惟一的
+        try
+        {
+            biMap.put("2", "3");
+            fail();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+    * 反转键和值
+    */
+    @Test
+    public void testBiMapInverse()
+    {
+        HashBiMap<String, String> biMap = HashBiMap.create();
+        biMap.put("1", "2");
+        biMap.put("2", "3");
+        biMap.put("3", "4");
+
+        assertThat(biMap.containsKey("1"), is(true));
+        assertThat(biMap.containsKey("2"), is(true));
+        assertThat(biMap.containsKey("3"), is(true));
+        assertThat(biMap.size(), equalTo(3));
+
+        //反转后的BiMap，即key/value互相切换的映射。
+        //反转的map并不是一个新的map，而是一个视图，这意味着，你在这个反转后的map中的任何增删改操作都会影响原来的map
+        BiMap<String, String> inverseKey = biMap.inverse();
+        assertThat(inverseKey.containsKey("2"), is(true));
+        assertThat(inverseKey.containsKey("3"), is(true));
+        assertThat(inverseKey.containsKey("4"), is(true));
+        assertThat(inverseKey.size(), equalTo(3));
+    }
+
+    /**
+    * 覆盖原有值
+    */
+    @Test
+    public void testCreateAndForcePut()
+    {
+        HashBiMap<String, String> biMap = HashBiMap.create();
+        biMap.put("1", "2");
+        assertThat(biMap.containsKey("1"), is(true));
+        biMap.forcePut("2", "2");
+        //{2=2}
+        assertThat(biMap.containsKey("1"), is(false));
+        assertThat(biMap.containsKey("2"), is(true));
+    }
+}
+```
+

@@ -38,14 +38,23 @@ GenericServlet 是一个通用的协议无关的 Servlet，它实现了 Servlet 
 ```
 95.解释下 Servlet 的生命周期。
 
-对每一个客户端的请求，Servlet 引擎载入 Servlet，调用它的 init()方法，完成 Servlet 的初始化。然后，Servlet 对象通过为每一个请求单独调用 service()方法来处理所有随后来自客户端的请求，最后，调用Servlet(译者注：这里应该是Servlet 而不是server)的destroy()方法把Servlet删除掉。
+Web容器加载Servlet并将其实例化后，Servlet生命周期开始，容器运行其init()方法进行Servlet的初始化；
+请求到达时调用Servlet的service()方法，service()方法会根据需要调用与请求对应的doGet或doPost等方法；
+当服务器关闭或项目被卸载时服务器会将Servlet实例销毁，此时会调用Servlet的destroy()方法。
+init方法和destroy方法只会执行一次，service方法客户端每次请求Servlet都会执行。
+Servlet中有时会用到一些需要初始化与销毁的资源，因此可以把初始化资源的代码放入init方法中，销毁资源的代码放入destroy方法中
 ```
 
 ```
 96.doGet()方法和 doPost()方法有什么区别？
 
-doGet：GET 方法会把名值对追加在请求的 URL 后面。因为 URL 对字符数目有限制，进而限制了用在客户端请求的参数值的数目。并且请求中的参数值是可见的，因此，敏感信息不能用这种方式传递。 
-doPOST：POST 方法通过把请求参数值放在请求体中来克服 GET 方法的限制，因此，可以发送的参数的数目是没有限制的。最后，通过 POST 请求传递的敏感信息对外部客户端是不可见的。
+①get请求用来从服务器上获得资源，而post是用来向服务器提交数据；
+
+②get将表单中数据按照name=value的形式，添加到action 所指向的URL 后面，并且两者使用"?"连接，而各个变量之间使用"&"连接；post是将表单中的数据放在HTTP协议的请求头或消息体中，传递到action所指向URL；
+
+③get传输的数据要受到URL长度限制（最大长度是 2048 个字符）；而post可以传输大量的数据，上传文件通常要使用post方式；
+
+④使用get时参数会显示在地址栏上，如果这些数据不是敏感数据，那么可以使用get；对于敏感数据还是应用使用post；
 ```
 
 ```
@@ -83,9 +92,13 @@ HTTP 头部(HTTP Header)：它们包含了更多关于响应的信息。比如�
 ```
 102.什么是 cookie？session 和 cookie 有什么区别？
 
-cookie 是 Web 服务器发送给浏览器的一块信息。浏览器会在本地文件中给每一个 Web 服务器存储 cookie。以后浏览器在给特定的 Web 服务器发请求的时候，同时会发送所有为该服务器存储的 cookie。下面列出了 session 和 cookie 的区别： 
-无论客户端浏览器做怎么样的设置，session 都应该能正常工作。客户端可以选择禁用 cookie，但是，session 仍然是能够工作的，因为客户端无法禁用服务端的 session。 
-在存储的数据量方面 session 和 cookies 也是不一样的。session 能够存储任意的 Java 对象， cookie 只能存储 String 类型的对象。 
+Cookie 和 Session都是用来跟踪浏览器用户身份的会话方式
+Cookie 一般用来保存用户信息 比如①我们在 Cookie 中保存已经登录过得用户信息，下次访问网站的时候页面可以自动帮你登录的一些基本信息给填了；②一般的网站都会有保持登录也就是说下次你再访问网站的时候就不需要重新登录了，这是因为用户登录的时候我们可以存放了一个 Token 在 Cookie 中，下次登录的时候只需要根据 Token 值来查找用户即可(为了安全考虑，重新登录一般要将 Token 重写)；③登录一次网站后访问网站其他页面不需要重新登录。
+
+Session 的主要作用就是通过服务端记录用户的状态。 典型的场景是购物车，当你要添加商品到购物车的时候，系统不知道是哪个用户操作的，因为 HTTP 协议是无状态的。服务端给特定的用户创建特定的 Session 之后就可以标识这个用户并且跟踪这个用户了。
+
+Cookie 数据保存在客户端(浏览器端)，如果使用 Cookie 的一些敏感信息不要写入 Cookie 中，最好能将 Cookie 信息加密然后使用到的时候再去服务器端解密。只能存放字符串
+Session 数据保存在服务器端。安全性更高，可以存放对象
 ```
 
 ```
@@ -103,13 +116,41 @@ HTTP 隧道是一种利用 HTTP 或者是 HTTPS 把多种网络协议封装起�
 ```
 105.sendRedirect()和 forward()方法有什么区别？
 
-sendRedirect()方法会创建一个新的请求，而 forward()方法只是把请求转发到一个新的目标上。重定向(redirect)以后，之前请求作用域范围以内的对象就失效了，因为会产生一个新的请求，而转发(forwarding)以后，之前请求作用域范围以内的对象还是能访问的。一般认为sendRedirect()比 forward()要慢。
+转发是服务器行为，重定向是客户端行为。
+转发（Forward） 通过RequestDispatcher对象的forward方法实现的。
+request.getRequestDispatcher("login_success.jsp").forward(request, response);
+forward是服务器请求资源,服务器直接访问目标地址的URL,把那个URL的响应内容读取过来,然后把这些内容再发给浏览器.浏览器根本不知道服务器发送的内容从哪里来的,所以它的地址栏还是原来的地址。
+forward:转发页面和转发到的页面可以共享request里面的数据
+forward:一般用于用户登陆的时候,根据角色转发到相应的模块。
+
+重定向（Redirect） 是利用服务器返回的状态码来实现的。客户端浏览器请求服务器的时候，服务器会返回一个状态码。服务器通过 HttpServletResponse 的 setStatus(int status) 方法设置状态码。如果服务器返回301或者302，则浏览器会到新的网址重新请求该资源。
+redirect是服务端根据逻辑,发送一个状态码,告诉浏览器重新去请求那个地址.所以地址栏显示的是新的URL。
+redirect:不能共享数据。
+redirect:一般用于用户注销登陆时返回主页面和跳转到其它的网站等
 ```
 
 ```
 106.什么是 URL 编码和 URL 解码？
 
 URL 编码是负责把 URL 里面的空格和其他的特殊字符替换成对应的十六进制表示，反之就是解码。
+```
+
+```
+如何让页面做到自动刷新？
+
+自动刷新不仅可以实现一段时间之后自动跳转到另一个页面，还可以实现一段时间之后自动刷新本页面。
+Servlet中通过HttpServletResponse对象设置Header属性实现自动刷新
+
+Response.setHeader("Refresh","5;URL=http://localhost:8080/servlet/example.htm");
+其中5为时间，单位为秒。URL指定就是要跳转的页面（如果设置自己的路径，就会实现每过5秒自动刷新本页面一次）
+```
+
+```
+如何解决servlet的线程安全问题？
+
+Servlet不是线程安全的，多线程并发的读写会导致数据不同步的问题。
+解决的办法是尽量不要定义name属性，而是要把name变量分别定义在doGet()和doPost()方法内。
+多线程的并发的读写Servlet类属性会导致数据不同步。但是如果只是并发地读取属性而不写入，则不存在数据不同步的问题。因此Servlet里的只读属性最好定义为final类型的。
 ```
 
 
@@ -141,23 +182,11 @@ JSP 页面可以很容易的和静态模板结合，包括：HTML 或者 XML，�
 ```
 
 ```
-110.什么是 JSP 指令(Directive)？JSP 中有哪些不同类型的指令？
+110.include指令include的行为的区别?
 
-Directive 是当 JSP 页面被编译成 Servlet 的时候，JSP 引擎要处理的指令。Directive 用来设置页面级别的指令，从外部文件插入数据，指定自定义的标签库。Directive是定义在<%@ 和 %>之间的。下面列出了不同类型的 Directive： 
-包含指令(Include directive)：用来包含文件和合并文件内容到当前的页面。 
-页面指令(Page directive)：用来定义 JSP 页面中特定的属性，比如错误页面和缓冲区。 Taglib 指令： 用来声明页面中使用的自定义的标签库。
-```
+include指令： JSP可以通过include指令来包含其他文件。被包含的文件可以是JSP文件、HTML文件或文本文件。包含的文件就好像是该JSP文件的一部分，会被同时编译执行。 语法格式如下： <%@ include file="文件相对 url 地址" %>
 
-```
-111.什么是 JSP 动作(JSP action)？
-
-JSP 动作以 XML 语法的结构来控制 Servlet 引擎的行为。当 JSP 页面被请求的时候，JSP 动作会被执行。它们可以被动态的插入到文件中，重用 JavaBean 组件，转发用户到其他的页面，或者是给 Java 插件产生 HTML 代码。下面列出了可用的动作： 
-jsp:include-当 JSP 页面被请求的时候包含一个文件。 
-jsp:useBean-找出或者是初始化 Javabean。 
-jsp:setProperty-设置 JavaBean 的属性。 
-jsp:getProperty-获取 JavaBean 的属性。 
-jsp:forward-把请求转发到新的页面。 
-jsp:plugin-产生特定浏览器的代码。
+include动作： <jsp:include>动作元素用来包含静态和动态的文件。该动作把指定文件插入正在生成的页面。语法格式如下： <jsp:include page="相对 URL 地址" flush="true" />
 ```
 
 ```
@@ -182,15 +211,15 @@ JSP 表达式是 Web 服务器把脚本语言表达式的值转化成一个 Stri
 115.隐含对象是什么意思？有哪些隐含对象？
 
 JSP 隐含对象是页面中的一些 Java 对象，JSP 容器让这些 Java 对象可以为开发者所使用。开发者不用明确的声明就可以直接使用他们。JSP 隐含对象也叫做预定义变量。下面列出了 JSP页面中的隐含对象： 
-application 
-page 
-request 
-response 
-session 
-exception 
-out 
-config 
-pageContext
+application ：封装服务器运行环境的对象；
+page ：JSP页面本身（相当于Java程序中的this）；
+request ：封装客户端的请求，其中包含来自GET或POST请求的参数；
+response ：封装服务器对客户端的响应；
+session ：封装用户会话的对象；
+exception ：封装页面抛出异常的对象。
+out ：输出服务器响应的输出流对象；
+config ：Web应用的配置对象；
+pageContext：通过该对象可以获取其他对象；
 ```
 
 ```
@@ -199,6 +228,27 @@ jsp 和Servlet 有什么区别？
 jsp是html页面中内嵌的Java代码，侧重页面显示；
 Servlet是html代码和Java代码分离，侧重逻辑控制，mvc设计思想中jsp位于视图层，servlet位于控制层
 JVM只能识别Java类，并不能识别jsp代码！web容器收到以.jsp为扩展名的url请求时，会将访问请求交给tomcat中jsp引擎处理，每个jsp页面第一次被访问时，jsp引擎将jsp代码解释为一个servlet源程序，接着编译servlet源程序生成.class文件，再有web容器servlet引擎去装载执行servlet程序，实现页面交互
+```
+
+```
+request.getAttribute()和 request.getParameter()有何区别?
+
+从获取方向来看：
+getParameter()是获取 POST/GET 传递的参数值；
+getAttribute()是获取对象容器中的数据值；
+
+从用途来看：
+getParameter()用于客户端重定向时，即点击了链接或提交按扭时传值用，即用于在用表单或url重定向传值时接收数据用。返回的是String,用于读取提交的表单中的值;
+getAttribute() 用于服务器端重定向时,返回的是Object，需进行转换,可用setAttribute()设置成任意对象，使用很灵活，可随时用
+```
+
+```
+JSP中的四种作用域是那几个？
+
+page代表与一个页面相关的对象和属性。
+request代表与Web客户机发出的一个请求相关的对象和属性。一个请求可能跨越多个页面，涉及多个Web组件；需要在页面显示的临时数据可以置于此作用域。
+session代表与某个用户与服务器建立的一次会话相关的对象和属性。跟某个用户相关的数据应该放在用户自己的session中。
+application代表与整个Web应用程序相关的对象和属性，它实质上是跨越整个Web应用程序，包括多个页面、请求和会话的一个全局作用域。
 ```
 
 
