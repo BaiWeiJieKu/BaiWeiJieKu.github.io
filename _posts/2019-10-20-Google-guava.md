@@ -1165,3 +1165,332 @@ public class BiMapExampleTest
 }
 ```
 
+
+
+#### Table
+
+```java
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import org.junit.Test;
+import java.util.Map;
+import java.util.Set;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.*;
+
+public class TableExampleTest
+{
+    //ArrayTable
+    //TreeBaseTable
+    //HashBaseTable
+    //ImmutableTable
+
+    @Test
+    public void test()
+    {
+        Table<String, String, String> table = HashBasedTable.create();
+        table.put("Language", "Java", "1.8");
+        table.put("Language", "Scala", "2.3");
+        table.put("Database", "Oracle", "12C");
+        table.put("Database", "Mysql", "7.0");
+        System.out.println(table);
+        //{Language={java=1.8,Scala=2.3},Database={Oracle=12c,Mysql=7.0}}
+
+        Map<String, String> language = table.row("Language");
+        assertThat(language.containsKey("Java"), is(true));
+        //Map<String,Map<String,String>>
+        assertThat(table.row("Language").get("Java"), equalTo("1.8"));
+        Map<String, String> result = table.column("Java");
+        System.out.println(result);//{Language=1.8}
+
+        Set<Table.Cell<String, String, String>> cells = table.cellSet();
+        System.out.println(cells);
+        //[(Language,java)=1.8, (Language,Scala)=2.3,(Database,Oracle)=12c,(Database,Mysql)=7.0]
+    }
+}
+```
+
+
+
+#### Range
+
+```java
+import com.google.common.collect.*;
+import org.junit.Test;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.*;
+
+public class RangeExampleTest
+{
+    /**
+     * {x|a<=x<=b}
+     */
+    @Test
+    public void testClosedRange()
+    {
+        Range<Integer> closedRange = Range.closed(0, 9);
+        System.out.println(closedRange);//[0..9]
+
+        assertThat(closedRange.contains(5), is(true));
+        //最小点
+        assertThat(closedRange.lowerEndpoint(), equalTo(0));
+        //最大点
+        assertThat(closedRange.upperEndpoint(), equalTo(9));
+    }
+
+    /**
+     * {x|a<x<b}
+     */
+    @Test
+    public void testOpenRange()
+    {
+        Range<Integer> openRange = Range.open(0, 9);
+        System.out.println(openRange);//(0..9)
+
+        assertThat(openRange.contains(5), is(true));
+
+        assertThat(openRange.lowerEndpoint(), equalTo(0));
+        assertThat(openRange.upperEndpoint(), equalTo(9));
+        assertThat(openRange.contains(0), is(false));
+        assertThat(openRange.contains(9), is(false));
+    }
+
+    /**
+     * {x|a<x<=b}
+     */
+    @Test
+    public void testOpenClosedRange()
+    {
+        Range<Integer> openClosedRange = Range.openClosed(0, 9);
+        System.out.println(openClosedRange);
+
+        assertThat(openClosedRange.contains(5), is(true));
+
+        assertThat(openClosedRange.lowerEndpoint(), equalTo(0));
+        assertThat(openClosedRange.upperEndpoint(), equalTo(9));
+        assertThat(openClosedRange.contains(0), is(false));
+        assertThat(openClosedRange.contains(9), is(true));
+    }
+
+
+    /**
+     * {x|a<=x<b}
+     */
+    @Test
+    public void testClosedOpenRange()
+    {
+        Range<Integer> closedOpen = Range.closedOpen(0, 9);
+        System.out.println(closedOpen);
+
+        assertThat(closedOpen.contains(5), is(true));
+
+        assertThat(closedOpen.lowerEndpoint(), equalTo(0));
+        assertThat(closedOpen.upperEndpoint(), equalTo(9));
+        assertThat(closedOpen.contains(0), is(true));
+        assertThat(closedOpen.contains(9), is(false));
+    }
+
+    /**
+     * {x|x>a}
+     */
+    @Test
+    public void testGreaterThan()
+    {
+        Range<Integer> range = Range.greaterThan(10);
+        assertThat(range.contains(10), is(false));
+        assertThat(range.contains(Integer.MAX_VALUE), is(true));
+    }
+
+    @Test
+    public void testMapRange()
+    {
+        TreeMap<String, Integer> treeMap = Maps.newTreeMap();
+
+        treeMap.put("Scala", 1);
+        treeMap.put("Guava", 2);
+        treeMap.put("Java", 3);
+        treeMap.put("Kafka", 4);
+        System.out.println(treeMap);
+        //{Guava=2,Java=3,Kafka=4,Scala=1}
+
+        NavigableMap<String, Integer> result = Maps.subMap(treeMap, Range.openClosed("Guava", "Java"));
+        System.out.println(result);
+        //{Java=3}
+    }
+
+    @Test
+    public void testOtherMethod()
+    {
+        Range<Integer> atLeastRange = Range.atLeast(2);
+        System.out.println(atLeastRange);//[2..+无穷)
+        assertThat(atLeastRange.contains(2), is(true));
+        
+        System.out.println(Range.lessThan(10));//(-无穷..10)
+        System.out.println(Range.atMost(5));//(-无穷..5]
+        System.out.println(Range.all());//(-无穷..+无穷)
+        System.out.println(Range.downTo(10, BoundType.CLOSED));//10--正无穷
+        System.out.println(Range.upTo(10, BoundType.CLOSED));//负无穷到10
+    }
+
+    @Test
+    public void testRangeMap()
+    {
+        RangeMap<Integer, String> gradeScale = TreeRangeMap.create();
+        gradeScale.put(Range.closed(0, 60), "E");
+        gradeScale.put(Range.closed(61, 70), "D");
+        gradeScale.put(Range.closed(71, 80), "C");
+        gradeScale.put(Range.closed(81, 90), "B");
+        gradeScale.put(Range.closed(91, 100), "A");
+
+        assertThat(gradeScale.get(77), equalTo("C"));
+    }
+}
+```
+
+#### Ordering
+
+```java
+package com.wangwenjun.guava.collections;
+
+import com.google.common.collect.Ordering;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.*;
+
+/***************************************
+ * @author:Alex Wang
+ * @Date:2018/1/15
+ * QQ: 532500648
+ * QQ群:463962286
+ ***************************************/
+public class OrderingExampleTest
+{
+
+    @Test
+    public void testJDKOrder()
+    {
+        List<Integer> list = Arrays.asList(1, 5, 3, 8, 2);
+        System.out.println(list);
+        Collections.sort(list);
+        System.out.println(list);
+    }
+
+    //list中有null排序会抛出异常
+    @Test(expected = NullPointerException.class)
+    public void testJDKOrderIssue()
+    {
+        List<Integer> list = Arrays.asList(1, 5, null, 3, 8, 2);
+        System.out.println(list);
+        Collections.sort(list);//会抛出异常
+        System.out.println(list);
+    }
+
+    @Test
+    public void testOrderNaturalByNullFirst()
+    {
+        List<Integer> list = Arrays.asList(1, 5, null, 3, 8, 2);
+        //如果有null，排序后放在第一位
+        Collections.sort(list, Ordering.natural().nullsFirst());
+        System.out.println(list);
+    }
+
+    @Test
+    public void testOrderNaturalByNullLast()
+    {
+        List<Integer> list = Arrays.asList(1, 5, null, 3, 8, 2);
+        //如果有null，排序后放在最后一位
+        Collections.sort(list, Ordering.natural().nullsLast());
+        System.out.println(list);
+    }
+
+    @Test
+    public void testOrderNatural()
+    {
+        List<Integer> list = Arrays.asList(1, 5, 3, 8, 2);
+        Collections.sort(list);
+        assertThat(Ordering.natural().isOrdered(list), is(true));//是否按照自然顺序
+    }
+
+
+    @Test
+    public void testOrderReverse()
+    {
+        List<Integer> list = Arrays.asList(1, 5, 3, 8, 2);
+        Collections.sort(list, Ordering.natural().reverse());//按自然顺序的倒序排序
+        System.out.println(list);
+    }
+}
+```
+
+
+
+#### ImmutableCollections
+
+```java
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.junit.Test;
+import java.util.Arrays;
+import static junit.framework.Assert.fail;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
+/**
+*不可变集合工具
+*/
+public class ImmutableCollectionsTest
+{
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testOf()
+    {
+        ImmutableList<Integer> list = ImmutableList.of(1, 2, 3);
+        assertThat(list, notNullValue());
+        list.add(4);
+        fail();
+    }
+
+    @Test
+    public void testCopy()
+    {
+        Integer[] array = {1, 2, 3, 4, 5};
+        System.out.println(ImmutableList.copyOf(array));
+    }
+
+    @Test
+    public void testBuilder()
+    {
+        ImmutableList<Integer> list = ImmutableList.<Integer>builder()
+                .add(1)
+                .add(2, 3, 4).addAll(Arrays.asList(5, 6))
+                .build();
+        System.out.println(list);
+    }
+
+    @Test
+    public void testImmutableMap()
+    {
+        ImmutableMap<String, String> map = ImmutableMap.<String, String>builder().put("Oracle", "12c")
+                .put("Mysql", "7.0").build();
+        System.out.println(map);
+        try
+        {
+            map.put("Scala", "2.3.0");
+            fail();
+        } catch (Exception e)
+        {
+            assertThat(e instanceof UnsupportedOperationException, is(true));
+        }
+    }
+}
+```
+
