@@ -1177,68 +1177,59 @@ public class TestThread {
 ![](http://stepimagewm.how2j.cn/794.png)
 
 ```java
-package multiplethread;
-  
-import charactor.Hero;
-   
-public class TestThread {
-     
-    public static void main(String[] args) {
-        final Hero ahri = new Hero();
-        ahri.name = "九尾妖狐";
-        final Hero annie = new Hero();
-        annie.name = "安妮";
-        
-        Thread t1 = new Thread(){
-            public void run(){
-            	//占有九尾妖狐
-            	synchronized (ahri) {
-            		System.out.println("t1 已占有九尾妖狐");
-					try {
-						//停顿1000毫秒，另一个线程有足够的时间占有安妮
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					System.out.println("t1 试图占有安妮");
-					System.out.println("t1 等待中 。。。。");
-					synchronized (annie) {
-						System.out.println("do something");
-					}
-				}	
-            	
-            }
-        };
-        t1.start();
-        Thread t2 = new Thread(){
-        	public void run(){
-        		//占有安妮
-        		synchronized (annie) {
-        			System.out.println("t2 已占有安妮");
-        			try {
-        				
-        				//停顿1000秒，另一个线程有足够的时间占有暂用九尾妖狐
-        				Thread.sleep(1000);
-        			} catch (InterruptedException e) {
-        				// TODO Auto-generated catch block
-        				e.printStackTrace();
-        			}
-        			System.out.println("t2 试图占有九尾妖狐");
-        			System.out.println("t2 等待中 。。。。");
-        			synchronized (ahri) {
-        				System.out.println("do something");
-        			}
-        		}	
-        		
-        	}
-        };
-        t2.start();
-   }
-       
-}
+public class DeadlockTest {
+	//定义2个资源
+    private static final Integer a = 0;
+    private static final Integer b = 1;
 
+    public static void main(String[] args) {
+        //启动2个线程,分别调用getA()和getB()
+        new Thread(DeadlockTest::getA).start();
+        new Thread(DeadlockTest::getB).start();
+    }
+	static void getA() {
+		//用synchronized 对a对象加锁
+        synchronized (a) {
+            System.out.println(Thread.currentThread().getName() + "获取到A锁");
+            try {
+                //等待500ms,再去获取B资源锁,让另一个线程有时间去独占b
+                Thread.sleep(500);
+                getB();
+                System.out.println(Thread.currentThread().getName() + "获取到B锁");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static void getB() {
+        synchronized (b) {
+            System.out.println(Thread.currentThread().getName() + "获取到B锁");
+             try {
+                //等待500ms,再去获取A资源锁,让另一个线程有时间去独占a
+                Thread.sleep(500);
+            	getA();
+            	System.out.println(Thread.currentThread().getName() + "获取到A锁");
+             } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+/*
+Thread-0获取到A锁
+Thread-1获取到B锁
+
+Thread-0在拿到a对象的监视器锁（后文简称“A锁”）之后，又要去拿b对象的监视器锁（简称“B锁”），而此时B锁在Thread-1手中，于是Thread-0只能阻塞，等待B锁被Thread-1释放。对Thread-1而言，亦是如此，死锁产生。
+
+互斥条件:在上面代码中就是通过synchronized加锁，该锁是独占的、排它的。一个线程获取到之后，不允许第二个线程同时获取。
+
+请求和保持条件：Thread-0拿到A锁的同时，又要请求B锁，但B锁被 Thread-1占有，所以要阻塞自己，等待B资源。
+
+不剥夺条件：Thread-0不能抢占Thread-1已拥有的资源，只能等待其主动释放。
+
+环路等待条件：hread-0等待Thread-1占用的资源B，Thread-1等待Thread-0占用的资源A，形成环路等待条件。
+*/
 ```
 
 ## 交互
