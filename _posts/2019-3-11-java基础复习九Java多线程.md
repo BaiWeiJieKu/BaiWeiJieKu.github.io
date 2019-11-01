@@ -247,6 +247,8 @@ public class TestThread {
 
 - Thread.sleep(1000); 表示当前线程暂停1000毫秒 ，其他线程不受影响 
 - Thread.sleep(1000); 会抛出InterruptedException 中断异常，因为当前线程sleep的时候，有可能被停止，这时就会抛出 InterruptedException
+- 线程休眠：指的是让线程暂缓执行一下，等到了预计时间之后再恢复执行。线程休眠会交出CPU，让CPU去执行其他的任务。
+- sleep方法不会释放锁，也就是说如果当前线程持有对某个对象的锁，即使调用sleep方法，其他线程也无法访问这个对象
 
 ```java
 package multiplethread;
@@ -280,6 +282,7 @@ public class TestThread {
 ### 加入线程
 
 - 所有进程，至少会有一个线程即主线程，即main方法开始执行，就会有一个看不见的主线程存在。
+- 如果在主线程中调用join方法时就会让主线程休眠，让调用该方法的线程run方法先执行完毕之后在开始执行主线程
 
 ```java
 package multiplethread;
@@ -448,7 +451,10 @@ public class TestThread {
 
 ### 临时暂停
 
-- 当前线程，临时暂停，使得其他线程可以有更多的机会占用CPU资源
+- 暂停当前正在执行的线程对象，并执行其他线程。
+- 意思就是调用yield方法会让当前线程交出CPU权限，让CPU去执行其他的线程。它跟sleep方法类似，同样不会释放锁。
+- 但是yield不能控制具体的交出CPU的时间，另外，yield方法只能让拥有相同优先级的线程有获取CPU执行时间的机会。
+- 调用yield方法并不会让线程进入阻塞状态，而是让线程重回就绪状态，它只需要等待重新获取CPU执行时间
 
 ```java
 package multiplethread;
