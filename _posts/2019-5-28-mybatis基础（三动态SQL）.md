@@ -72,9 +72,13 @@ music-id: 2602106546
 
 
 
-### trim
+### trim字符串截取
 
 - 字符串截取(where(封装查询条件), set(封装修改条件))
+
+#### 选择性查询
+
+
 
 ```java
 public List<Employee> getEmpsByConditionTrim(Employee employee);
@@ -124,9 +128,39 @@ public List<Employee> getEmpsByConditionTrim(Employee employee);
 	}
 ```
 
+#### 选择性插入
+
+```xml
+<insert id="insertSelective" parameterType="com.zjl.domain">
+    insert into table_name
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="id != null">
+        	id,
+        </if>
+        <if test="createDate != null">
+        	create_date,
+        </if>
+        <if test="modifiedDate != null">
+        	modified_date,
+        </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+        <if test="id != null">
+        	#{id,jdbcType=BIGINT},
+        </if>
+        <if test="createDate != null">
+        	#{createDate,jdbcType=TIMESTAMP},
+        </if>
+        <if test="modifiedDate != null">
+        	#{modifiedDate,jdbcType=TIMESTAMP},
+        </if>
+    </trim>
+</insert>
+```
 
 
-### choose
+
+### choose多分支
 
 ```java
 public List<Employee> getEmpsByConditionChoose(Employee employee);
@@ -168,7 +202,7 @@ public List<Employee> getEmpsByConditionChoose(Employee employee);
 
 
 
-### set
+### set选择性更新
 
 - 主要用于选择性更新，对象中哪几个字段不为空就更新哪几个字段
 
@@ -221,7 +255,7 @@ openSession.commit();
 
 
 
-### foreach
+### foreach遍历集合
 
 ```java
 /查询员工id'在给定集合中的
