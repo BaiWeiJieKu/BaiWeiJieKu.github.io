@@ -137,7 +137,7 @@ public List<Employee> getEmpsByConditionChoose(Employee employee);
 	 <select id="getEmpsByConditionChoose" resultType="com.atguigu.mybatis.bean.Employee">
 	 	select * from tbl_employee 
 	 	<where>
-	 		<!-- 如果带了id就用id查，如果带了lastName就用lastName查;只会进入其中一个 -->
+	 <!-- 如果带了id就用id查，如果带了lastName就用lastName查;只会进入其中一个相当于switch -->
 	 		<choose>
 	 			<when test="id!=null">
 	 				id=#{id}
@@ -169,6 +169,8 @@ public List<Employee> getEmpsByConditionChoose(Employee employee);
 
 
 ### set
+
+- 主要用于选择性更新，对象中哪几个字段不为空就更新哪几个字段
 
 ```java
 public void updateEmp(Employee employee);
