@@ -199,7 +199,7 @@ Spring Boot的版本仲裁中心；
 </dependency>
 ```
 
-**spring-boot-starter**-==web==：
+**spring-boot-starter**-web：
 
 ​	spring-boot-starter：spring-boot场景启动器；帮我们导入了web模块正常运行所依赖的组件；
 
@@ -270,7 +270,7 @@ public @interface EnableAutoConfiguration {
 
 ​		Spring的底层注解@Import，给容器中导入一个组件；导入的组件由AutoConfigurationPackages.Registrar.class；
 
-==将主配置类（@SpringBootApplication标注的类）的所在包及下面所有子包里面的所有组件扫描到Spring容器；==
+将主配置类（@SpringBootApplication标注的类）的所在包及下面所有子包里面的所有组件扫描到Spring容器；
 
 ​	@**Import**(EnableAutoConfigurationImportSelector.class)；
 
@@ -288,7 +288,7 @@ public @interface EnableAutoConfiguration {
 
 
 
-==Spring Boot在启动的时候从类路径下的META-INF/spring.factories中获取EnableAutoConfiguration指定的值，将这些值作为自动配置类导入到容器中，自动配置类就生效，帮我们进行自动配置工作；==以前我们需要自己配置的东西，自动配置类都帮我们；
+Spring Boot在启动的时候从类路径下的META-INF/spring.factories中获取EnableAutoConfiguration指定的值，将这些值作为自动配置类导入到容器中，自动配置类就生效，帮我们进行自动配置工作；以前我们需要自己配置的东西，自动配置类都帮我们；
 
 J2EE的整体整合解决方案和自动配置都在spring-boot-autoconfigure-1.5.9.RELEASE.jar；
 
@@ -1984,7 +1984,7 @@ public class MyLocaleResolver implements LocaleResolver {
     }
 }
 
-
+//在配置类中注册--------------------------------
  @Bean
     public LocaleResolver localeResolver(){
         return new MyLocaleResolver();
