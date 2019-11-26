@@ -581,14 +581,27 @@ Spring Boot里面没有Spring的配置文件，我们自己编写的配置文件
 想让Spring的配置文件生效，加载进来；@**ImportResource**标注在一个配置类上
 
 ```java
-//在springboot启动类上添加注解
+
+
+/**
+ *  @SpringBootApplication 来标注一个主程序类，说明这是一个Spring Boot应用
+ *  在springboot启动类上添加@ImportResource注解，导入Spring的配置文件让其生效
+ */
 @ImportResource(locations = {"classpath:beans.xml"})
-//导入Spring的配置文件让其生效
+@SpringBootApplication
+public class HelloWorldMainApplication {
+
+    public static void main(String[] args) {
+
+        // Spring应用启动起来
+        SpringApplication.run(HelloWorldMainApplication.class,args);
+    }
+}
 ```
 
 
 
-不来编写Spring的配置文件
+不推荐编写xml的Spring的配置文件
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -603,7 +616,7 @@ Spring Boot里面没有Spring的配置文件，我们自己编写的配置文件
 
 SpringBoot推荐给容器中添加组件的方式；推荐使用全注解的方式
 
-1、配置类**@Configuration**------>Spring配置文件
+1、springboot使用配置类**@Configuration**编写Spring的相关配置
 
 2、使用**@Bean**给容器中添加组件
 
@@ -626,7 +639,7 @@ public class MyAppConfig {
 }
 ```
 
-##4、配置文件占位符
+## 4、配置文件占位符
 
 ### 1、随机数
 
@@ -725,9 +738,7 @@ springboot 启动会扫描以下位置的application.properties或者application
 
 SpringBoot会从这四个位置全部加载主配置文件；**互补配置**；
 
-
-
-==我们还可以通过spring.config.location来改变默认的配置文件位置==
+我们还可以通过spring.config.location来改变默认的配置文件位置
 
 **项目打包好以后，我们可以使用命令行参数的形式，启动项目的时候来指定配置文件的新位置；指定配置文件和默认加载的这些配置文件共同起作用形成互补配置；**
 
@@ -735,7 +746,7 @@ java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --spring.config.location=G
 
 ## 7、外部配置加载顺序
 
-**==SpringBoot也可以从以下位置加载配置； 优先级从高到低；高优先级的配置覆盖低优先级的配置，所有的配置会形成互补配置==**
+**SpringBoot也可以从以下位置加载配置； 优先级从高到低；高优先级的配置覆盖低优先级的配置，所有的配置会形成互补配置**
 
 **1.命令行参数**
 
@@ -757,9 +768,9 @@ java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --server.port=8087  --serv
 
 
 
-==**由jar包外向jar包内进行寻找；**==
+**由jar包外向jar包内进行寻找；**
 
-==**优先加载带profile**==
+**优先加载带profile**
 
 **6.jar包外部的application-{profile}.properties或application.yml(带spring.profile)配置文件**
 
@@ -767,7 +778,7 @@ java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --server.port=8087  --serv
 
 
 
-==**再来加载不带profile**==
+**再来加载不带profile**
 
 **8.jar包外部的application.properties或application.yml(不带spring.profile)配置文件**
 
@@ -793,11 +804,11 @@ java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --server.port=8087  --serv
 
 ### 1、**自动配置原理：**
 
-1）、SpringBoot启动的时候加载主配置类，开启了自动配置功能 ==@EnableAutoConfiguration==
+1）、SpringBoot启动的时候加载主配置类，开启了自动配置功能 @EnableAutoConfiguration
 
 **2）、@EnableAutoConfiguration 作用：**
 
- -  利用EnableAutoConfigurationImportSelector给容器中导入一些组件？
+ -  利用EnableAutoConfigurationImportSelector选择器来给容器中选择性的导入一些组件
 
 - 可以查看selectImports()方法的内容；
 
@@ -813,7 +824,7 @@ java -jar spring-boot-02-config-02-0.0.1-SNAPSHOT.jar --server.port=8087  --serv
 
     
 
-**==将 类路径下  META-INF/spring.factories 里面配置的所有EnableAutoConfiguration的值加入到了容器中；==**
+**将 类路径下  META-INF/spring.factories 里面配置的所有EnableAutoConfiguration的值加入到了容器中；**
 
 ```properties
 # Auto Configure
@@ -875,11 +886,7 @@ public class HttpEncodingAutoConfiguration {
 
 
 
-
-
-
-
-5）、所有在配置文件中能配置的属性都是在xxxxProperties类中封装者‘；配置文件能配置什么就可以参照某个功能对应的这个属性类
+5）、所有在配置文件中能配置的属性都是在xxxxProperties类中封装者；配置文件能配置什么就可以参照某个功能对应的这个属性类
 
 ```java
 @ConfigurationProperties(prefix = "spring.http.encoding")  //从配置文件中获取指定的值和bean的属性进行绑定
@@ -887,8 +894,6 @@ public class HttpEncodingProperties {
 
    public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 ```
-
-
 
 
 
@@ -902,19 +907,13 @@ public class HttpEncodingProperties {
 
 ​	**4）、给容器中自动配置类添加组件的时候，会从properties类中获取某些属性。我们就可以在配置文件中指定这些属性的值；**
 
-
-
 xxxxAutoConfigurartion：自动配置类；
 
 给容器中添加组件
 
 xxxxProperties:封装配置文件中相关属性；
 
-
-
 ### 2、细节
-
-
 
 #### 1、@Conditional派生注解（Spring注解版原生的@Conditional作用）
 
@@ -939,7 +938,7 @@ xxxxProperties:封装配置文件中相关属性；
 
 我们怎么知道哪些自动配置类生效；
 
-**==我们可以通过在properties中启用  debug=true属性；来让控制台打印自动配置报告==**，这样我们就可以很方便的知道哪些自动配置类生效；
+**我们可以通过在properties中启用  debug=true属性；来让控制台打印自动配置报告**，这样我们就可以很方便的知道哪些自动配置类生效；
 
 ```java
 =========================
@@ -967,10 +966,6 @@ Negative matches:（没有启动，没有匹配成功的自动配置类）
          - @ConditionalOnClass did not find required classes 'org.aspectj.lang.annotation.Aspect', 'org.aspectj.lang.reflect.Advice' (OnClassCondition)
         
 ```
-
-
-
-
 
 # 三、日志
 
@@ -1012,7 +1007,7 @@ JUL、JCL、Jboss-logging、logback、log4j、log4j2、slf4j....
 
 SpringBoot：底层是Spring框架，Spring框架默认是用JCL；‘
 
-​	**==SpringBoot选用 SLF4j和logback；==**
+​	**SpringBoot选用 SLF4j和logback；**
 
 
 
@@ -1054,11 +1049,11 @@ a（slf4j+logback）: Spring（commons-logging）、Hibernate（jboss-logging）
 
 **如何让系统中所有的日志都统一到slf4j；**
 
-==1、将系统中其他日志框架先排除出去；==
+1、将系统中其他日志框架先排除出去；
 
-==2、用中间包来替换原有的日志框架；==
+2、用中间包来替换原有的日志框架；
 
-==3、我们导入slf4j其他的实现==
+3、我们导入slf4j其他的实现
 
 
 
@@ -1071,15 +1066,13 @@ a（slf4j+logback）: Spring（commons-logging）、Hibernate（jboss-logging）
 		</dependency>
 ```
 
-
-
 SpringBoot使用它来做日志功能；
 
 ```xml
 	<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-logging</artifactId>
-		</dependency>
+	</dependency>
 ```
 
 底层依赖关系
@@ -1124,7 +1117,7 @@ public abstract class LogFactory {
 		</dependency>
 ```
 
-**==SpringBoot能自动适配所有的日志，而且底层使用slf4j+logback的方式记录日志，引入其他框架的时候，只需要把这个框架依赖的日志框架排除掉即可；==**
+**SpringBoot能自动适配所有的日志，而且底层使用slf4j+logback的方式记录日志，引入其他框架的时候，只需要把这个框架依赖的日志框架排除掉即可；**
 
 ## 4、日志使用；
 
@@ -1163,7 +1156,7 @@ SpringBoot默认帮我们配置好了日志；
     		%msg：日志消息，
     		%n是换行符
         %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n
-SpringBoot修改日志的默认配置
+SpringBoot在配置文件中修改日志的默认配置
 
 ```properties
 logging.level.com.atguigu=trace
@@ -1269,10 +1262,6 @@ slf4j+log4j的方式；
 </dependency>
 
 ```
-
-
-
-
 
 切换为log4j2
 
