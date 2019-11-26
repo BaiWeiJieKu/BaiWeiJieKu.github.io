@@ -1303,7 +1303,7 @@ slf4j+log4j的方式；
 
 **自动配置原理？**
 
-这个场景SpringBoot帮我们配置了什么？能不能修改？能修改哪些配置？能不能扩展？xxx
+这个场景SpringBoot帮我们配置了什么？能不能修改？能修改哪些配置？能不能扩展？
 
 ```
 xxxxAutoConfiguration：帮我们给容器中自动配置组件；
@@ -1324,7 +1324,7 @@ public class ResourceProperties implements ResourceLoaderAware {
 
 
 ```java
-	WebMvcAuotConfiguration：
+//WebMvcAuotConfiguration类：
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			if (!this.resourceProperties.isAddMappings()) {
@@ -1414,7 +1414,7 @@ localhost:8080/webjars/jquery/3.3.1/jquery.js
 
 
 
-2）、"/**" 访问当前项目的任何资源，都去（静态资源的文件夹）找映射
+2）、"/**" 访问当前项目的任何资源（包括纯静态的HTML页面），都去（静态资源的文件夹）找映射
 
 ```
 "classpath:/META-INF/resources/", 
@@ -1428,9 +1428,18 @@ localhost:8080/abc ===  去静态资源文件夹里面找abc
 
 3）、欢迎页； 静态资源文件夹下的所有index.html页面；被"/**"映射；
 
-​	localhost:8080/   找index页面
+​	localhost:8080/   找静态资源文件夹下的index页面
 
 4）、所有的 **/favicon.ico  都是在静态资源文件下找；
+
+5）、可以自己在配置文件中指定静态资源文件夹，**但是如果这样做那springboot默认配置的静态文件夹就会全部失效**
+
+```properties
+#自己指定静态文件夹
+spring.resources.static-location=classpath:/hello/,classpath:/word/
+```
+
+
 
 
 
@@ -1456,10 +1465,11 @@ SpringBoot推荐的Thymeleaf；
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
           	2.1.6
 		</dependency>
-切换thymeleaf版本
+
+<!--在pom文件中配置切换thymeleaf版本-->
 <properties>
 		<thymeleaf.version>3.0.9.RELEASE</thymeleaf.version>
-		<!-- 布局功能的支持程序  thymeleaf3主程序  layout2以上版本 -->
+		<!-- 布局功能的支持程序  thymeleaf3主程序适配layout2以上版本 -->
 		<!-- thymeleaf2   layout1-->
 		<thymeleaf-layout-dialect.version>2.2.2</thymeleaf-layout-dialect.version>
   </properties>
@@ -1477,17 +1487,18 @@ public class ThymeleafProperties {
 
 	private static final MimeType DEFAULT_CONTENT_TYPE = MimeType.valueOf("text/html");
 
+    //视图解析器默认前缀
 	public static final String DEFAULT_PREFIX = "classpath:/templates/";
-
+	//视图解析器默认后缀
 	public static final String DEFAULT_SUFFIX = ".html";
-  	//
+  	
 ```
 
 只要我们把HTML页面放在classpath:/templates/，thymeleaf就能自动渲染；
 
 使用：
 
-1、导入thymeleaf的名称空间
+1、在HTML页面最上面导入thymeleaf的名称空间
 
 ```xml
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
@@ -1598,68 +1609,67 @@ Special tokens:
 
 https://docs.spring.io/spring-boot/docs/1.5.10.RELEASE/reference/htmlsingle/#boot-features-developing-web-applications
 
-### 1. Spring MVC auto-configuration
+### 1. Spring MVC 默认配置
 
 Spring Boot 自动配置好了SpringMVC
 
-以下是SpringBoot对SpringMVC的默认配置:**==（WebMvcAutoConfiguration）==**
+以下是SpringBoot对SpringMVC的默认配置:**（WebMvcAutoConfiguration类中）**
 
 - Inclusion of `ContentNegotiatingViewResolver` and `BeanNameViewResolver` beans.
-  - 自动配置了ViewResolver（视图解析器：根据方法的返回值得到视图对象（View），视图对象决定如何渲染（转发？重定向？））
+  - 自动配置了ViewResolver（**视图解析器**：根据方法的返回值得到视图对象（View），视图对象决定如何渲染（转发？重定向？））
   - ContentNegotiatingViewResolver：组合所有的视图解析器的；
-  - ==如何定制：我们可以自己给容器中添加一个视图解析器；自动的将其组合进来；==
+  - 如何定制：**我们可以自己给容器中添加一个视图解析器；自动的将其组合进来**；
 
-- Support for serving static resources, including support for WebJars (see below).静态资源文件夹路径,webjars
+- Support for serving static resources, including support for WebJars (see below).**静态资源文件夹路径,webjars**
 
-- Static `index.html` support. 静态首页访问
+- Static `index.html` support. **静态首页访问**
 
-- Custom `Favicon` support (see below).  favicon.ico
+- Custom `Favicon` support (see below).  **配置图标**favicon.ico
 
   
 
-- 自动注册了 of `Converter`, `GenericConverter`, `Formatter` beans.
+- 自动注册了  `Converter`, `GenericConverter`, `Formatter` beans.
 
-  - Converter：转换器；  public String hello(User user)：类型转换使用Converter
-  - `Formatter`  格式化器；  2017.12.17===Date；
+  - Converter：转换器；  public String hello(User user)：**类型转换使用Converter**
+  - `Formatter`  格式化器；  **日期格式化**，2017.12.17转换为Date类型；
 
 ```java
-		@Bean
-		@ConditionalOnProperty(prefix = "spring.mvc", name = "date-format")//在文件中配置日期格式化的规则
-		public Formatter<Date> dateFormatter() {
-			return new DateFormatter(this.mvcProperties.getDateFormat());//日期格式化组件
-		}
+//在文件中配置日期格式化的规则
+@Bean
+@ConditionalOnProperty(prefix = "spring.mvc", name = "date-format")
+public Formatter<Date> dateFormatter() {
+    return new DateFormatter(this.mvcProperties.getDateFormat());//日期格式化组件
+}
 ```
 
-​	==自己添加的格式化器转换器，我们只需要放在容器中即可==
+​	自己添加的格式化器转换器，我们只需要放在容器中即可
 
 - Support for `HttpMessageConverters` (see below).
 
-  - HttpMessageConverter：SpringMVC用来转换Http请求和响应的；User---Json；
+  - HttpMessageConverter：**SpringMVC用来转换Http请求和响应的；User对象转换为Json格式返回**；
 
   - `HttpMessageConverters` 是从容器中确定；获取所有的HttpMessageConverter；
 
-    ==自己给容器中添加HttpMessageConverter，只需要将自己的组件注册容器中（@Bean,@Component）==
+    自己给容器中添加HttpMessageConverter，只需要将自己的组件注册容器中（@Bean,@Component）
 
     
 
-- Automatic registration of `MessageCodesResolver` (see below).定义错误代码生成规则
+- Automatic registration of `MessageCodesResolver` (see below).**定义错误代码生成规则**
 
 - Automatic use of a `ConfigurableWebBindingInitializer` bean (see below).
 
-  ==我们可以配置一个ConfigurableWebBindingInitializer来替换默认的；（添加到容器）==
+  我们可以配置一个ConfigurableWebBindingInitializer来替换默认的；（添加到容器）
 
   ```
-  初始化WebDataBinder；
-  请求数据=====JavaBean；
+  初始化WebDataBinder数据绑定器；
+  功能：请求数据=====JavaBean；
   ```
 
 **org.springframework.boot.autoconfigure.web：web的所有自动场景；**
 
-If you want to keep Spring Boot MVC features, and you just want to add additional [MVC configuration](https://docs.spring.io/spring/docs/4.3.14.RELEASE/spring-framework-reference/htmlsingle#mvc) (interceptors, formatters, view controllers etc.) you can add your own `@Configuration` class of type `WebMvcConfigurerAdapter`, but **without** `@EnableWebMvc`. If you wish to provide custom instances of `RequestMappingHandlerMapping`, `RequestMappingHandlerAdapter` or `ExceptionHandlerExceptionResolver` you can declare a `WebMvcRegistrationsAdapter` instance providing such components.
-
-If you want to take complete control of Spring MVC, you can add your own `@Configuration` annotated with `@EnableWebMvc`.
-
 ### 2、扩展SpringMVC
+
+- 比如以前用xml格式配置视图映射和拦截器
 
 ```xml
     <mvc:view-controller path="/hello" view-name="success"/>
@@ -1671,9 +1681,9 @@ If you want to take complete control of Spring MVC, you can add your own `@Confi
     </mvc:interceptors>
 ```
 
-**==编写一个配置类（@Configuration），是WebMvcConfigurerAdapter类型；不能标注@EnableWebMvc==**;
+**在springboot中我们可以编写一个配置类（@Configuration）来代替xml配置，是WebMvcConfigurerAdapter类型；不能标注@EnableWebMvc（全面接管，会使默认配置全部失效）**;
 
-既保留了所有的自动配置，也能用我们扩展的配置；
+**既保留了所有的自动配置，也能用我们扩展的配置**；
 
 ```java
 //使用WebMvcConfigurerAdapter可以来扩展SpringMVC的功能
@@ -1796,20 +1806,34 @@ public class WebMvcAutoConfiguration {
 
 ### 1）、默认访问首页
 
+- （使用模板引擎的情况下）
+
 ```java
 
 //使用WebMvcConfigurerAdapter可以来扩展SpringMVC的功能
-//@EnableWebMvc   不要接管SpringMVC
+//方法一，继承WebMvcConfigurerAdapter重写addViewControllers
 @Configuration
 public class MyMvcConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-       // super.addViewControllers(registry);
         //浏览器发送 /atguigu 请求来到 success
-        registry.addViewController("/atguigu").setViewName("success");
+        registry.addViewController("/").setViewName("login");
+        
+        //如果不用模板引擎就把静态HTML页面放到静态资源文件夹下，用转发的形式访问
+        //registry.addViewController("/").setViewName("forward:/login.html");
     }
 
+    
+}
+
+```
+
+```java
+//使用WebMvcConfigurerAdapter可以来扩展SpringMVC的功能
+//方法二，在配置类中向容器中注册一个WebMvcConfigurerAdapter组件
+@Configuration
+public class MyMvcConfig{
     //所有的WebMvcConfigurerAdapter组件都会一起起作用
     @Bean //将组件注册在容器
     public WebMvcConfigurerAdapter webMvcConfigurerAdapter(){
@@ -1823,8 +1847,9 @@ public class MyMvcConfig extends WebMvcConfigurerAdapter {
         return adapter;
     }
 }
-
 ```
+
+
 
 ### 2）、国际化
 
@@ -1989,7 +2014,7 @@ public class MyLocaleResolver implements LocaleResolver {
 
 1）、禁用模板引擎的缓存
 
-```
+```properties
 # 禁用缓存
 spring.thymeleaf.cache=false 
 ```
@@ -1998,7 +2023,7 @@ spring.thymeleaf.cache=false
 
 
 
-登陆错误消息的显示
+登陆错误消息的显示，通过判断msg消息有没有值来确定p标签要不要显示
 
 ```html
 <p style="color: red" th:text="${msg}" th:if="${not #strings.isEmpty(msg)}"></p>
@@ -2013,7 +2038,7 @@ spring.thymeleaf.cache=false
 ```java
 
 /**
- * 登陆检查，
+ * 登陆拦截器
  */
 public class LoginHandlerInterceptor implements HandlerInterceptor {
     //目标方法执行之前
@@ -2047,12 +2072,15 @@ public class LoginHandlerInterceptor implements HandlerInterceptor {
 
 
 
-注册拦截器
+向spring容器中注册拦截器
 
 ```java
-  //所有的WebMvcConfigurerAdapter组件都会一起起作用
+//写在一个自定义的configuration类中
+
+//所有的WebMvcConfigurerAdapter组件都会一起起作用
     @Bean //将组件注册在容器
     public WebMvcConfigurerAdapter webMvcConfigurerAdapter(){
+        //注册视图映射器
         WebMvcConfigurerAdapter adapter = new WebMvcConfigurerAdapter() {
             @Override
             public void addViewControllers(ViewControllerRegistry registry) {
