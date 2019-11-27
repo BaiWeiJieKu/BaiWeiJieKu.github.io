@@ -2265,7 +2265,13 @@ insert的公共片段在div标签中
 
 2017-12-12---Date； 类型转换，格式化;
 
-默认日期是按照/的方式；
+默认日期是按照/的方式；可以通过修改配置文件来修改时间格式
+
+```properties
+spring.mvc.date-format= yyyy-MM-dd
+```
+
+
 
 ### 7）、CRUD-员工修改
 
@@ -2530,7 +2536,7 @@ public class MyExceptionHandler {
 
 
 
-​		2）、转发到/error进行自适应响应效果处理
+​		2）、转发到/error进行自适应响应效果处理，返回页面或json数据
 
 ```java
  @ExceptionHandler(UserNotExistException.class)
@@ -2610,6 +2616,7 @@ server.tomcat.xxx
 2、编写一个**EmbeddedServletContainerCustomizer**：嵌入式的Servlet容器的定制器；来修改Servlet容器的配置
 
 ```java
+//配置嵌入式的servlet容器
 @Bean  //一定要将这个定制器加入到容器中
 public EmbeddedServletContainerCustomizer embeddedServletContainerCustomizer(){
     return new EmbeddedServletContainerCustomizer() {
