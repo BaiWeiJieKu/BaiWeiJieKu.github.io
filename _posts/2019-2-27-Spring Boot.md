@@ -3485,9 +3485,12 @@ static class Generic {
 默认只需要将文件命名为：
 
 ```properties
-schema-*.sql、data-*.sql
+schema-*.sql 建表语句sql文件
+data-*.sql 插入数据的sql文件
 默认规则：schema.sql，schema-all.sql；
-可以使用   
+
+如果想使用自己定义的数据库脚本，可以在springboot的配置文件中指定sql脚本位置和名称，在启动项目时就会自动建表
+在配置文件中配置：   
 	schema:
       - classpath:department.sql
       指定位置
@@ -3495,13 +3498,62 @@ schema-*.sql、data-*.sql
 
 5、操作数据库：自动配置了JdbcTemplate操作数据库
 
+```java
+@Autowired
+JdbcTemplate jdbcTemplate;
+
+
+@GetMappring("/query")
+@ResponseBody
+public Map<String,Object> map(){
+    List<Map<String,Object>>list = jdbcTemplate.queryForList("select * from department");
+}
+
+```
+
+
+
 ## 2、整合Druid数据源
 
+- 引入pom
+- 在yml中进行配置
+
+```yaml
+spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://192.168.15.22:3306/jdbc
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    
+    # 以下配置需要自定义一个配置类来进行数据绑定，详见下面的自动配置类
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+#   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+    filters: stat,wall,log4j
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+```
+
+- 写自动配置类
+
 ```java
-导入druid数据源
+//导入druid数据源
 @Configuration
 public class DruidConfig {
 
+    //与配置文件中的参数进行数据绑定
     @ConfigurationProperties(prefix = "spring.datasource")
     @Bean
     public DataSource druid(){
@@ -3518,7 +3570,7 @@ public class DruidConfig {
         initParams.put("loginUsername","admin");
         initParams.put("loginPassword","123456");
         initParams.put("allow","");//默认就是允许所有访问
-        initParams.put("deny","192.168.15.21");
+        initParams.put("deny","192.168.15.21");//拒绝访问IP
 
         bean.setInitParameters(initParams);
         return bean;
@@ -3579,7 +3631,7 @@ public interface DepartmentMapper {
     @Delete("delete from department where id=#{id}")
     public int deleteDeptById(Integer id);
 
-    @Options(useGeneratedKeys = true,keyProperty = "id")//使用主键
+    @Options(useGeneratedKeys = true,keyProperty = "id")//返回自增主键
     @Insert("insert into department(departmentName) values(#{departmentName})")
     public int insertDept(Department department);
 
@@ -3588,7 +3640,7 @@ public interface DepartmentMapper {
 }
 ```
 
-问题：
+问题：如果数据库字段使用下划线连接单词，那mybatis需要开启**驼峰命名**
 
 自定义MyBatis的配置规则；给容器中添加一个ConfigurationCustomizer；
 
@@ -3612,7 +3664,7 @@ public class MyBatisConfig {
 
 
 ```java
-使用MapperScan批量扫描所有的Mapper接口；
+//如果不给mapper接口加@Mapper注解就需要在配置类中使用MapperScan批量扫描所有的Mapper接口；
 @MapperScan(value = "com.atguigu.springboot.mapper")
 @SpringBootApplication
 public class SpringBoot06DataMybatisApplication {
