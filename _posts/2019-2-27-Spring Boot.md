@@ -3960,7 +3960,7 @@ starter：
 @AutoConfigureAfter  //指定自动配置类的顺序
 @Bean  //给容器中添加组件
 
-@ConfigurationPropertie结合相关xxxProperties类来绑定相关的配置
+@ConfigurationPropertie //结合相关xxxProperties类来绑定相关的配置
 @EnableConfigurationProperties //让xxxProperties生效加入到容器中
 
 自动配置类要能加载
