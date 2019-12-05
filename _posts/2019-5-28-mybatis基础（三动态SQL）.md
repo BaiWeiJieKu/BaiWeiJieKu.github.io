@@ -158,6 +158,51 @@ public List<Employee> getEmpsByConditionTrim(Employee employee);
 </insert>
 ```
 
+#### 插入包含子查询
+
+- 添加数据时默认添加排列顺序：查询表中数据的最大排序号+1
+
+```xml
+<insert id="insertArsDept" parameterType="ArsDept" useGeneratedKeys="true" keyProperty="deptId">
+        insert into ars_dept
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="parentId != null ">parent_id,</if>
+            <if test="deptName != null  and deptName != ''">dept_name,</if>
+            <if test="deptAlias != null  and deptAlias != ''">dept_alias,</if>
+            <if test="inputCode != null  and inputCode != ''">input_code,</if>
+            <if test="fullCode != null  and fullCode != ''">full_code,</if>
+            order_num,
+            <!-- <if test="orderNum != null ">order_num,</if> -->
+            <if test="deptDescription != null  and deptDescription != ''">dept_description,</if>
+            <if test="status != null  and status != ''">status,</if>
+            <if test="delFlag != null  and delFlag != ''">del_flag,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="deptClassId != null ">dept_class_id,</if>
+         </trim>
+    
+        <trim prefix="select " suffixOverrides=",">
+            <if test="parentId != null ">#{parentId},</if>
+            <if test="deptName != null  and deptName != ''">#{deptName},</if>
+            <if test="deptAlias != null  and deptAlias != ''">#{deptAlias},</if>
+            <if test="inputCode != null  and inputCode != ''">#{inputCode},</if>
+            <if test="fullCode != null  and fullCode != ''">#{fullCode},</if>
+            IFNULL((select MAX(order_num)+1 from ars_dept),0),
+            <!-- <if test="orderNum != null ">#{orderNum},</if> -->
+            <if test="deptDescription != null  and deptDescription != ''">#{deptDescription},</if>
+            <if test="status != null  and status != ''">#{status},</if>
+            <if test="delFlag != null  and delFlag != ''">#{delFlag},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="deptClassId != null ">#{deptClassId},</if>
+         </trim>
+    </insert>
+```
+
 
 
 ### choose多分支
