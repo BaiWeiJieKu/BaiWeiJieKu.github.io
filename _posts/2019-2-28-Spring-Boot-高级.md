@@ -542,3 +542,631 @@ public class DeptController {
 - 测试RabbitMQ：账号密码默认为guest
 - AmqpAdmin：管理组件
 - RabbitTemplate：消息发送处理组件
+
+##### 自动配置
+
+-  1、RabbitAutoConfiguration
+   2、有自动配置了连接工厂ConnectionFactory；
+   3、RabbitProperties 封装了 RabbitMQ的配置
+   4、 RabbitTemplate ：给RabbitMQ发送和接受消息；
+   5、 AmqpAdmin ： RabbitMQ系统管理功能组件;
+       AmqpAdmin：创建和删除 Queue，Exchange，Binding
+   6、@EnableRabbit +  @RabbitListener 监听消息队列的内容
+- 配置文件
+
+```properties
+spring.rabbitmq.addresses=47.106.210.183
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
+#spring.rabbitmq.port=5672//默认5672
+#spring.rabbitmq.virtual-host=
+```
+
+- 测试
+
+```java
+package com.mikey.springbootamqp;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootAmqpApplicationTests {
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    /**
+    *发送消息，点对点模式
+    */
+    @Test
+    public void contextLoads() {
+        Map<String,Object> map=new HashMap<>();
+        map.put("msg","这是第一个消息");
+        map.put("data", Arrays.asList("helloworld",123,true));
+		//指定模式，队列名称和数据
+        rabbitTemplate.convertAndSend("exchange.direct","atguigu.news",map);
+
+    }
+
+    /**
+    *接收消息，点对点模式
+    */
+    @Test
+    public void receive(){
+        Object o = rabbitTemplate.receiveAndConvert("atguigu.news");
+        System.out.println("数据类型="+o.getClass());
+        System.out.println("数据="+o);
+    }
+}
+```
+
+##### 消息转换器
+
+- 自定义messageconveter(json格式）
+
+```java
+package com.mikey.springbootamqp.config;
+
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+*RabbitMQ配置类
+*/
+@Configuration
+public class MyAMQPConfig {
+    /**
+    *注册消息转换器（json格式）
+    */
+    @Bean
+    public MessageConverter messageConverter(){
+        return new Jackson2JsonMessageConverter();
+    }
+}
+
+```
+
+```java
+package com.mikey.springbootamqp;
+
+import com.mikey.springbootamqp.bean.Book;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootAmqpApplicationTests {
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Test
+    public void contextLoads() {
+        Map<String,Object> map=new HashMap<>();
+        map.put("msg","这是第一个消息");
+        map.put("data", Arrays.asList("helloworld",123,true));
+
+        rabbitTemplate.convertAndSend("exchange.direct","atguigu.news",map);
+
+
+    }
+
+    @Test
+    public void receive(){
+        Object o = rabbitTemplate.receiveAndConvert("atguigu.news");
+        System.out.println("数据类型="+o.getClass());
+        System.out.println("数据="+o);
+    }
+
+    /**
+     * 发送javaBean
+     */
+    @Test
+    public void testBeanSend(){
+        Book book = new Book("阿姆斯特朗", "回旋喷气式加速炮");
+        System.out.println("Book="+book);
+        rabbitTemplate.convertAndSend("exchange.direct","atguigu.news",book);
+    }
+
+    /**
+     * 接收对象
+     */
+    @Test
+    public void getBeanSend(){
+        Book book = (Book) rabbitTemplate.receiveAndConvert("atguigu.news");
+        System.out.println("messsage="+book);
+    }
+
+    /**
+     * 广播发送
+     */
+    @Test
+    public void sendAll(){
+        rabbitTemplate.convertAndSend("exchange.fanout","",new Book("麦奇","麦奇"));
+    }
+}
+
+```
+
+##### 消息监听器
+
+- 在springboot启动类上添加开启Rabbit注解
+
+```java
+@EnableRabbit
+@SpringBootApplication
+public class MySpringbootApplication{
+    public static void main(String[]args){
+        
+    }
+}
+```
+
+- 编写监听方法
+
+```java
+@Service
+public class BookService{
+    /**
+    *实时监听，只要消息队列中有消息就取出
+    */
+    @RabbitListener(queues = "atguigu.news")
+    public void receive(Book book){
+        System.out.println("收到消息"+book);
+    }
+}
+```
+
+##### 创建消息队列和交换器
+
+```java
+package com.mikey.springbootamqp;
+
+import com.mikey.springbootamqp.bean.Book;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootAmqpApplicationTests {
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private AmqpAdmin amqpAdmin;//操作
+
+    /**
+     * 添加Exchange
+     */
+    @Test
+    public void createExchange(){
+        amqpAdmin.declareExchange(new DirectExchange("amqpadmin.exchange"));
+        System.out.println("创建完成");
+    }
+
+    /**
+     * 添加队列
+     */
+    @Test
+    public void createQueue(){
+        amqpAdmin.declareQueue(new Queue("amqpadmin.queue"));
+        System.out.println("创建队列成功");
+    }
+
+    /**
+     * 添加绑定
+     */
+    @Test
+    public void createBinding(){
+        amqpAdmin.declareBinding(new Binding("amqpadmin.queue",Binding.DestinationType.QUEUE,"amqpadmin.exchange","ampq.haha",null));
+    }
+}
+```
+
+
+
+### 检索
+
+#### ElasticSearch 
+
+- 开源的 ElasticSearch 是目前全文搜索引擎的首选。他可以快速的存储、搜索和分析海量数据。
+- Spring Boot通过整合Spring Data ElasticSearch为我们提供了非常便捷的检索功能支持；
+- Elasticsearch是一个分布式搜索服务，提供Restful API，底层基于Lucene，采用多shard（分片）的方式保证数据安全，并且提供自动resharding的功能，github等大型的站点也是采用了ElasticSearch作为其搜索服务
+
+[学习文档](https://www.elastic.co/guide/cn/elasticsearch/guide/current/query-dsl-intro.html)
+
+#### docker安装
+
+```
+docker run -e ES_JAVA_OPTS="-Xms256m -Xmx256m" -d -p 9200:9200 -p 9300:9300 --name ES01 5acf0e8da90b
+限制堆空间内存，elasticSearch默认占用2G
+```
+
+#### 整合
+
+- 引入spring-boot-starter-data-elasticsearch
+  安装Spring Data 对应版本的ElasticSearch
+  application.yml配置
+  Spring Boot自动配置的
+      ElasticsearchRepository、ElasticsearchTemplate、Jest
+
+```java
+/**
+ * SpringBoot默认支持两种技术来和ES交互；
+ * 1、Jest（默认不生效）
+ *     需要导入jest的工具包（io.searchbox.client.JestClient）
+ * 2、SpringData ElasticSearch【ES版本有可能不合适】
+ *         版本适配说明：https://github.com/spring-projects/spring-data-elasticsearch
+ *        如果版本不适配：2.4.6
+ *            1）、升级SpringBoot版本
+ *            2）、安装对应版本的ES
+ *
+ *         1）、Client 节点信息clusterNodes；clusterName
+ *         2）、ElasticsearchTemplate 操作es
+ *        3）、编写一个 ElasticsearchRepository 的子接口来操作ES；
+ *    两种用法：https://github.com/spring-projects/spring-data-elasticsearch
+ *    1）、编写一个 ElasticsearchRepository
+ */
+```
+
+- 第一种方式：jest
+
+```properties
+spring.elasticsearch.jest.uris=localhsot:9200
+```
+
+```xml
+<dependency>
+	<groupId>io.searchbox</groupId>
+    <artifactId>jest</artifactId>
+    <version>5.3.4</version>
+</dependency>
+```
+
+```java
+package com.mikey.springbootelasticsearch;
+
+import com.mikey.springbootelasticsearch.bean.Article;
+import io.searchbox.client.JestClient;
+import io.searchbox.core.Index;
+import io.searchbox.core.Search;
+import io.searchbox.core.SearchResult;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.IOException;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootelasticsearchApplicationTests {
+
+    @Autowired
+    JestClient jestClient;
+    @Test
+    public void contextLoads() throws IOException {
+        Article article = new Article();
+        article.setId(1);
+        article.setTitle("ElasticSearch");
+        article.setAuthor("阿姆斯特朗炮");
+        article.setContent("Hello world");
+        Index build = new Index.Builder(article).index("atguigu").type("news").build();//构建一个索引功能
+        jestClient.execute(build);
+    }
+
+    /**
+     * 测试搜索
+     */
+    @Test
+    public void search() throws IOException {
+        String json="{\n"+
+                "  \"query\" :{\n"+
+                "    \"match\" :{\n"+
+                "      \"content\" : \"hello\"\n"+
+                "       }\n"+
+                "      }\n"+
+                "}";
+        Search build = new Search.Builder(json).addIndex("atguigu").addType("news").build();
+        SearchResult execute = jestClient.execute(build);
+        System.out.println("Message="+execute.getJsonString());
+    }
+
+}
+```
+
+[学习地址](https://github.com/searchbox-io/Jest/tree/master/jest)
+
+- 第二种方式：springData
+
+- 在pom文件中spring-boot-starter-data-elasticsearch
+
+```properties
+spring.data.elasticsearch.cluster-name=elasticsearch
+spring.data.elasticsearch.cluster-nodes=localhost:9300
+```
+
+- 编写bean
+
+```java
+package com.mikey.springbootelasticsearch.bean;
+
+import org.springframework.data.elasticsearch.annotations.Document;
+
+@Document(indexName = "atguigu",type = "book")
+public class Book {
+    private Integer id;
+    private String bookName;
+    private String author;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", bookName='" + bookName + '\'' +
+                ", author='" + author + '\'' +
+                '}';
+    }
+}
+```
+
+- 编写接口
+
+```java
+package com.atguigu.elastic.repository;
+
+import com.atguigu.elastic.bean.Book;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+
+import java.util.List;
+
+
+public interface BookRepository extends ElasticsearchRepository<Book,Integer> {
+
+    //参照
+    // https://docs.spring.io/spring-data/elasticsearch/docs/3.0.6.RELEASE/reference/html/
+   public List<Book> findByBookNameLike(String bookName);
+
+}
+```
+
+- 测试
+
+```java
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class Springboot03ElasticApplicationTests {
+
+    @Autowired
+    JestClient jestClient;
+
+    @Autowired
+    BookRepository bookRepository;
+
+    @Test
+    public void test02(){
+//        Book book = new Book();
+//        book.setId(1);
+//        book.setBookName("西游记");
+//        book.setAuthor("吴承恩");
+//        bookRepository.index(book);
+
+
+        for (Book book : bookRepository.findByBookNameLike("游")) {
+            System.out.println(book);
+        }
+        ;
+
+    }
+
+}
+```
+
+- 注意：要选择对应的版本不然会报连接超时异常：[参考文档](https://docs.spring.io/spring-data/elasticsearch/docs/3.0.6.RELEASE/reference/html/)
+
+### 任务
+
+#### 异步任务
+
+- 在Java应用中，绝大多数情况下都是通过同步的方式来实现交互处理的；但是在处理与第三方系统交互的时候，容易造成响应迟缓的情况，之前大部分都是使用多线程来完成此类任务，其实，在Spring 3.x之后，就已经内置了@Async来完美解决这个问题。
+- 两个注解：@EnableAysnc、@Aysnc
+- 首先给springboot启动类添加@EnableAysnc注解，开启异步
+- 然后给需要进行异步调用的方法上添加@Aysnc注解就可以了
+
+#### 定时任务
+
+- 项目开发中经常需要执行一些定时任务，比如需要在每天凌晨时候，分析一次前一天的日志信息。
+- Spring为我们提供了异步执行任务调度的方式，提供**TaskExecutor** 、**TaskScheduler** 接口。
+- 两个注解：@EnableScheduling、@Scheduled
+- cron表达式：
+
+| 字段 | 允许值                | 允许的特殊字符  |
+| ---- | --------------------- | --------------- |
+| 秒   | 0-59                  | , - * /         |
+| 分   | 0-59                  | , - * /         |
+| 小时 | 0-23                  | , - * /         |
+| 日期 | 1-31                  | , - * ? / L W C |
+| 月份 | 1-12                  | , - * /         |
+| 星期 | 0-7或SUN-SAT 0,7是SUN | , - * ? / L C # |
+
+| 特殊字符 | 代表含义                   |
+| -------- | -------------------------- |
+| ,        | 枚举                       |
+| -        | 区间                       |
+| *        | 任意                       |
+| /        | 步长                       |
+| ?        | 日/星期冲突匹配            |
+| L        | 最后                       |
+| W        | 工作日                     |
+| C        | 和calendar联系后计算过的值 |
+| #        | 星期，4#2，第2个星期四     |
+
+- 首先启动类加入@EnableScheduling注解
+- 编写需要定时执行的方法
+
+```java
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ScheduledService {
+
+    /**
+     * second(秒), minute（分）, hour（时）, day of month（日）, month（月）, day of week（周几）.
+     * 0 * * * * MON-FRI
+     *  【0 0/5 14,18 * * ?】 每天14点整，和18点整，每隔5分钟执行一次
+     *  【0 15 10 ? * 1-6】 每个月的周一至周六10:15分执行一次
+     *  【0 0 2 ? * 6L】每个月的最后一个周六凌晨2点执行一次
+     *  【0 0 2 LW * ?】每个月的最后一个工作日凌晨2点执行一次
+     *  【0 0 2-4 ? * 1#1】每个月的第一个周一凌晨2点到4点期间，每个整点都执行一次；
+     */
+   // @Scheduled(cron = "0 * * * * MON-SAT")
+    //@Scheduled(cron = "0,1,2,3,4 * * * * MON-SAT")
+   // @Scheduled(cron = "0-4 * * * * MON-SAT")
+    @Scheduled(cron = "0/4 * * * * MON-SAT")  //每4秒执行一次
+    public void hello(){
+        System.out.println("hello ... ");
+    }
+}
+```
+
+#### 邮件
+
+- 邮件发送需要引入spring-boot-starter-mail
+- Spring Boot 自动配置MailSenderAutoConfiguration
+- 定义MailProperties内容，配置在application.yml中
+- 自动装配JavaMailSender
+- 添加依赖
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+```
+
+- 添加配置
+
+```properties
+spring.mail.username=xxxxx@qq.com
+spring.mail.password=xxxx
+spring.mail.host=smtp.qq.com
+spring.mail.properties.mail.smtp.ssl.enable=true
+```
+
+- 测试
+
+```java
+package com.atguigu.task;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.mail.internet.MimeMessage;
+import java.io.File;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class Springboot04TaskApplicationTests {
+
+    @Autowired
+    JavaMailSenderImpl mailSender;
+
+    @Test
+    public void contextLoads() {
+        SimpleMailMessage message = new SimpleMailMessage();
+        //邮件设置
+        message.setSubject("通知-今晚开会");
+        message.setText("今晚7:30开会");
+
+        message.setTo("17512080612@163.com");
+        message.setFrom("534096094@qq.com");
+
+        mailSender.send(message);
+    }
+
+    @Test
+    public void test02() throws  Exception{
+        //1、创建一个复杂的消息邮件
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+        //邮件设置
+        helper.setSubject("通知-今晚开会");
+        helper.setText("<b style='color:red'>今天 7:30 开会</b>",true);
+
+        helper.setTo("17512080612@163.com");
+        helper.setFrom("534096094@qq.com");
+
+        //上传文件
+        helper.addAttachment("1.jpg",new File("C:\\Users\\lfy\\Pictures\\Saved Pictures\\1.jpg"));
+        helper.addAttachment("2.jpg",new File("C:\\Users\\lfy\\Pictures\\Saved Pictures\\2.jpg"));
+
+        mailSender.send(mimeMessage);
+
+    }
+
+}
+```
+
