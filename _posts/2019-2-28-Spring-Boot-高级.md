@@ -1170,3 +1170,832 @@ public class Springboot04TaskApplicationTests {
 }
 ```
 
+
+
+### 安全
+
+- 两大安全框架：shiro,SpringSecutity
+
+#### SpringSecurity
+
+- Spring Security是针对Spring项目的安全框架，也是Spring Boot底层安全模块默认的技术选型。他可以实现强大的web安全控制。对于安全控制，我们仅需引入spring-boot-starter-security模块，进行少量的配置，即可实现强大的安全管理。
+
+- WebSecurityConfigurerAdapter：自定义Security策略
+
+  AuthenticationManagerBuilder：自定义认证策略
+
+  @EnableWebSecurity：开启WebSecurity模式
+
+- 应用程序的两个主要区域是“认证”和“授权”（或者访问控制）。这两个主要区域是Spring Security 的两个目标。
+
+- “认证”（Authentication），是建立一个他声明的主体的过程（一个“主体”一般是指用户，设备或一些可以在你的应用程序中执行动作的其他系统）。
+
+- “授权”（Authorization）指确定一个主体是否允许在你的应用程序执行一个动作的过程。为了抵达需要授权的店，主体的身份已经有认证过程建立。
+
+- Web&安全
+
+  - 登陆/注销
+  - HttpSecurity配置登陆、注销功能
+  - Thymeleaf提供的SpringSecurity标签支持
+  - 需要引入thymeleaf-extras-springsecurity4
+  - sec:authentication=“name”获得当前用户的用户名
+  - sec:authorize=“hasRole(‘ADMIN’)”当前用户必须拥有ADMIN权限时才会显示标签内容
+  - 记住我功能
+  - 表单添加remember-me的checkbox
+  - 配置启用remember-me功能
+  - CSRF（Cross-site request forgery）跨站请求伪造
+  - HttpSecurity启用csrf功能，会为表单添加_csrf的值，提交携带来预防CSRF；
+
+- 初始化向导创建项目
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mikey</groupId>
+    <artifactId>springboot-security</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>springboot-security</name>
+    <description>Demo project for Spring Boot</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.17.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <thymeleaf.version>3.0.9.RELEASE</thymeleaf.version>
+        <thymeleaf-layout-dialect.version>2.3.0</thymeleaf-layout-dialect.version>
+        <thymeleaf-extras-springsecurity4.version>3.0.2.RELEASE</thymeleaf-extras-springsecurity4.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>
+```
+
+- 编写配置类
+
+```
+1、引入SpringSecurity；
+2、编写SpringSecurity的配置类；
+        @EnableWebSecurity   extends WebSecurityConfigurerAdapter
+3、控制请求的访问权限：
+        configure(HttpSecurity http) {
+             http.authorizeRequests().antMatchers("/").permitAll()
+                 .antMatchers("/level1/**").hasRole("VIP1")
+        }
+4、定义认证规则：
+        configure(AuthenticationManagerBuilder auth){
+             auth.inMemoryAuthentication()
+                 .withUser("zhangsan").password("123456").roles("VIP1","VIP2")
+        }
+5、开启自动配置的登陆功能：
+        configure(HttpSecurity http){
+             http.formLogin();
+        }
+6、注销：http.logout();
+7、记住我：Remeberme()；
+
+```
+
+```java
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+@EnableWebSecurity
+public class MySecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        //super.configure(http);
+        //定制请求的授权规则
+        http.authorizeRequests().antMatchers("/").permitAll()
+                .antMatchers("/level1/**").hasRole("VIP1")
+                .antMatchers("/level2/**").hasRole("VIP2")
+                .antMatchers("/level3/**").hasRole("VIP3");
+
+        //开启自动配置的登陆功能，效果，如果没有登陆，没有权限就会来到登陆页面
+        //指定登录界面的访问路径为/userlogin，用户名输入框名字为user，密码输入框名字为pwd
+        http.formLogin().usernameParameter("user").passwordParameter("pwd")
+                .loginPage("/userlogin");
+        //1、/login来到登陆页
+        //2、重定向到/login?error表示登陆失败
+        //3、更多详细规定
+        //4、默认post形式的 /login代表处理登陆
+        //5、一但定制loginPage；那么 loginPage的post请求就是登陆。比如这里我们自定义的访问登录界面的路径是/userlogin，那么在form表单中发送的action请求就是post的/userlogin请求
+
+
+        //开启自动配置的注销功能。
+        http.logout().logoutSuccessUrl("/");//注销成功以后来到首页
+        //1、访问 /logout 表示用户注销，清空session
+        //2、注销成功会返回 /login?logout 页面；
+
+        //开启记住我功能
+        http.rememberMe().rememberMeParameter("remeber");
+        //登陆成功以后，将cookie发给浏览器保存，以后访问页面带上这个cookie，只要通过检查就可以免登录
+        //点击注销会删除cookie
+
+    }
+
+    //定义认证规则
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //super.configure(auth);
+        auth.inMemoryAuthentication()
+                .withUser("zhangsan").password("123456").roles("VIP1","VIP2")
+                .and()
+                .withUser("lisi").password("123456").roles("VIP2","VIP3")
+                .and()
+                .withUser("wangwu").password("123456").roles("VIP1","VIP3");
+
+    }
+}
+```
+
+- 视图页面
+
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h1 align="center">欢迎光临武林秘籍管理系统</h1>
+<div sec:authorize="!isAuthenticated()">
+    <h2 align="center">游客您好，如果想查看武林秘籍 <a th:href="@{/userlogin}">请登录</a></h2>
+</div>
+<div sec:authorize="isAuthenticated()">
+    <h2><span sec:authentication="name"></span>，您好,您的角色有：
+        <span sec:authentication="principal.authorities"></span></h2>
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="注销"/>
+    </form>
+</div>
+
+<hr>
+
+<div sec:authorize="hasRole('VIP1')">
+    <h3>普通武功秘籍</h3>
+    <ul>
+        <li><a th:href="@{/level1/1}">罗汉拳</a></li>
+        <li><a th:href="@{/level1/2}">武当长拳</a></li>
+        <li><a th:href="@{/level1/3}">全真剑法</a></li>
+    </ul>
+
+</div>
+
+<div sec:authorize="hasRole('VIP2')">
+    <h3>高级武功秘籍</h3>
+    <ul>
+        <li><a th:href="@{/level2/1}">太极拳</a></li>
+        <li><a th:href="@{/level2/2}">七伤拳</a></li>
+        <li><a th:href="@{/level2/3}">梯云纵</a></li>
+    </ul>
+
+</div>
+
+<div sec:authorize="hasRole('VIP3')">
+    <h3>绝世武功秘籍</h3>
+    <ul>
+        <li><a th:href="@{/level3/1}">葵花宝典</a></li>
+        <li><a th:href="@{/level3/2}">龟派气功</a></li>
+        <li><a th:href="@{/level3/3}">独孤九剑</a></li>
+    </ul>
+</div>
+
+
+</body>
+</html>
+```
+
+- 注意：记住我功能出现报错：org.xml.sax.SAXParseException原因是模板引擎版本过低，解决办法是更换新版本的themleaf。
+
+
+
+### 分布式
+
+- 在分布式系统中，国内常用zookeeper+dubbo组合，而Spring Boot推荐使用全栈的Spring，Spring Boot+Spring Cloud。
+- 当网站流量很小时，只需一个应用，将所有功能都部署在一起，以减少部署节点和成本。此时，用于简化增删改查工作量的数据访问框架(ORM)是关键。
+- 当访问量逐渐增大，单一应用增加机器带来的加速度越来越小，将应用拆成互不相干的几个应用，以提升效率。此时，用于加速前端页面开发的Web框架(MVC)是关键。
+- 当垂直应用越来越多，应用之间交互不可避免，将核心业务抽取出来，作为独立的服务，逐渐形成稳定的服务中心，使前端应用能更快速的响应多变的市场需求。此时，用于提高业务复用及整合的分布式服务框架(RPC)是关键。
+- 当服务越来越多，容量的评估，小服务资源的浪费等问题逐渐显现，此时需增加一个调度中心基于访问压力实时管理集群容量，提高集群利用率。此时，用于提高机器利用率的资源调度和治理中心(SOA)是关键
+- **ZooKeeper** 是一个分布式的，开放源码的分布式应用程序协调服务。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、域名服务、分布式同步、组服务等。
+- **Dubbo**是Alibaba开源的分布式服务框架，它最大的特点是按照分层的方式来架构，使用这种方式可以使各个层之间解耦合（或者最大限度地松耦合）。从服务模型的角度来看，Dubbo采用的是一种非常简单的模型，要么是提供方提供服务，要么是消费方消费服务，所以基于这一点可以抽象出服务提供方（Provider）和服务消费方（Consumer）两个角色。
+
+#### ZooKeeper+Dubbo
+
+- 实现步骤：
+  - 1、安装zookeeper作为注册中心
+  - 2、编写服务提供者
+  - 3、编写服务消费者
+  - 4、整合dubbo
+
+- 消费者实现：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.atguigu</groupId>
+    <artifactId>consumer-user</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>consumer-user</name>
+    <description>Demo project for Spring Boot</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.12.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.boot</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+
+        <!--引入zookeeper的客户端工具-->
+        <!-- https://mvnrepository.com/artifact/com.github.sgroschupf/zkclient -->
+        <dependency>
+            <groupId>com.github.sgroschupf</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>0.1</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>
+```
+
+```properties
+dubbo.application.name=consumer-user
+
+dubbo.registry.address=zookeeper://118.24.44.169:2181
+```
+
+```java
+package com.atguigu.user;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * 1、引入依赖‘
+ * 2、配置dubbo的注册中心地址
+ * 3、引用服务
+ */
+@SpringBootApplication
+public class ConsumerUserApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ConsumerUserApplication.class, args);
+    }
+}
+```
+
+```java
+package com.atguigu.user.service;
+
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.atguigu.ticket.service.TicketService;
+import org.springframework.stereotype.Service;
+
+@Service//Spring的service
+public class UserService{
+
+    @Reference//注意两个工程的全类名相同
+    TicketService ticketService;
+
+    public void hello(){
+        String ticket = ticketService.getTicket();
+        System.out.println("买到票了："+ticket);
+    }
+
+
+}
+```
+
+```java
+package com.atguigu.ticket.service;
+/**
+*传递接口
+*/
+public interface TicketService {
+
+    public String getTicket();
+}
+```
+
+```java
+package com.atguigu.user;
+
+import com.atguigu.user.service.UserService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class ConsumerUserApplicationTests {
+
+    @Autowired
+    UserService userService;
+
+    @Test
+    public void contextLoads() {
+
+        userService.hello();
+    }
+
+}
+```
+
+- 提供者编写,pom文件同消费者
+
+```properties
+dubbo.application.name=provider-ticket
+
+dubbo.registry.address=zookeeper://118.24.44.169:2181
+# 指明提供服务的类所在的包
+dubbo.scan.base-packages=com.atguigu.ticket.service
+```
+
+```java
+package com.atguigu.ticket;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * 1、将服务提供者注册到注册中心
+ *         1、引入dubbo和zkclient相关依赖
+ *         2、配置dubbo的扫描包和注册中心地址
+ *         3、使用@Service发布服务
+ */
+@SpringBootApplication
+public class ProviderTicketApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ProviderTicketApplication.class, args);
+    }
+}
+```
+
+```java
+package com.atguigu.ticket.service;
+/**
+*服务接口
+*/
+public interface TicketService {
+
+    public String getTicket();
+}
+```
+
+```java
+package com.atguigu.ticket.service;
+
+import com.alibaba.dubbo.config.annotation.Service;
+import org.springframework.stereotype.Component;
+
+/**
+*提供服务的类
+*/
+@Component
+@Service //将服务发布出去，是dubbo的service
+public class TicketServiceImpl implements TicketService {
+    @Override
+    public String getTicket() {
+        return "《厉害了，我的国》";
+    }
+}
+```
+
+
+
+#### springCloud
+
+- Spring Cloud是一个分布式的整体解决方案。Spring Cloud 为开发者提供了在分布式系统（配置管理，服务发现，熔断，路由，微代理，控制总线，一次性token，全局琐，leader选举，分布式session，集群状态）中快速构建的工具，使用Spring Cloud的开发者可以快速的启动服务或构建应用、同时能够快速和云平台资源进行对接。
+
+- SpringCloud分布式开发五大常用组件：
+
+  - 服务发现——Netflix Eureka
+  - 客服端负载均衡——Netflix Ribbon
+  - 断路器——Netflix Hystrix
+  - 服务网关——Netflix Zuul
+  - 分布式配置——Spring Cloud Config
+
+- Spring Cloud 入门
+  1、创建provider
+  2、创建consumer
+  3、引入Spring Cloud
+  4、引入Eureka注册中心
+  5、引入Ribbon进行客户端负载均衡
+
+- 目录结构：
+
+  consumer-user
+
+  eureka-server
+
+  provide-ticket
+
+- 1.创建服务中心：eureka-server    选择服务模块cloud Discovery---》Eureka Server
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.atguigu</groupId>
+	<artifactId>eureka-server</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>eureka-server</name>
+	<description>Demo project for Spring Boot</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.12.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Edgware.SR3</spring-cloud.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka-server</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>
+
+```
+
+```yaml
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: eureka-server  # eureka实例的主机名
+  client:
+    register-with-eureka: false #不把自己注册到eureka上
+    fetch-registry: false #不从eureka上来获取服务的注册信息
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+```
+
+```java
+/**
+*注册中心
+*1.配置Eureka信息
+*2.使用@EnableEurekaServer
+*/
+@EnableEurekaServer
+@SpringBootApplication
+public class EurekaServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(EurekaServerApplication.class, args);
+    }
+}
+```
+
+
+
+-  2.新建provider-ticket 的model
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.atguigu</groupId>
+	<artifactId>provider-ticket</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>provider-ticket</name>
+	<description>Demo project for Spring Boot</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.12.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Edgware.SR3</spring-cloud.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>
+
+```
+
+
+
+```yaml
+server:
+  port: 8002
+spring:
+  application:
+    name: provider-ticket
+
+
+eureka:
+  instance:
+    prefer-ip-address: true # 注册服务的时候使用服务的ip地址
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+```
+
+```java
+package com.atguigu.providerticket;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ProviderTicketApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ProviderTicketApplication.class, args);
+    }
+}
+```
+
+```java
+package com.atguigu.providerticket.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class TicketService {
+
+    public String getTicket(){
+        System.out.println("8002");
+        return "《厉害了，我的国》";
+    }
+}
+```
+
+```java
+package com.atguigu.providerticket.controller;
+
+import com.atguigu.providerticket.service.TicketService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class TicketController {
+
+
+    @Autowired
+    TicketService ticketService;
+
+    @GetMapping("/ticket")
+    public String getTicket(){
+        return ticketService.getTicket();
+    }
+}
+```
+
+- 3.新建model  consumer-user
+
+```yaml
+spring:
+  application:
+    name: consumer-user
+server:
+  port: 8200
+
+eureka:
+  instance:
+    prefer-ip-address: true # 注册服务的时候使用服务的ip地址
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+```
+
+```java
+package com.atguigu.consumeruser;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
+
+@EnableDiscoveryClient //开启发现服务功能
+@SpringBootApplication
+public class ConsumerUserApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ConsumerUserApplication.class, args);
+    }
+
+    //注册模板来访问其他服务器
+    @LoadBalanced //使用负载均衡机制
+    @Bean
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
+    }
+}
+```
+
+```java
+package com.atguigu.consumeruser.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+@RestController
+public class UserController {
+
+    @Autowired
+    RestTemplate restTemplate;
+
+    @GetMapping("/buy")
+    public String buyTicket(String name){
+        //通过RestTemplate来调用远程服务器PROVIDER-TICKET的/ticket接口来获取数据
+        String s = restTemplate.getForObject("http://PROVIDER-TICKET/ticket", String.class);
+        return name+"购买了"+s;
+    }
+}
+```
+
+
+
+
+
+
+
+
+

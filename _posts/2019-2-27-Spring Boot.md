@@ -162,6 +162,20 @@ public class HelloController {
 
 将这个应用打成jar包，直接使用java -jar的命令进行执行；
 
+### 7、热部署
+
+- 在开发中我们修改一个Java文件后想看到效果不得不重启应用，这导致大量时间花费，我们希望不重启应用的情况下，程序可以自动部署（热部署）。有以下四种情况，如何能实现热部署。
+- **Spring Boot Devtools（推荐）**
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+</dependency>
+```
+
+
+
 ## 5、Hello World探究
 
 ### 1、POM文件
