@@ -894,3 +894,213 @@ Body->raw->JSON(application/json)
 }
 ```
 
+### 整合springboot
+
+- pom
+
+```xml
+<properties>
+	<elasticsearch.version>5.5.2</elasticsearch.version>
+</properties>
+
+<dependency>
+	<groupId>org.elasticsearch.client</groupId>
+    <artifactId>transport</artifactId>
+    <version>${elasticsearch.version}</version>
+</dependency>
+<dependency>
+	<groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-core</artifactId>
+    <version>2.7</version>
+</dependency>
+```
+
+- 编写ES配置类
+
+```java
+@Configuration
+public class EsConfig {
+
+    @Bean
+    public TransportClient client() throws UnknownHostException{
+        //新建一个服务地址
+        InetSocketTransportAddress node = new InetSocketTransportAddress(InetAddress.getByName("localhost"),9300);
+
+        Settings settings = Settings.builder()
+                // es集群名称
+                .put("cluster.name", "myes")
+                .build();
+
+        TransportClient client = new PreBuiltTransportClient(settings);
+        client.addTransportAddress(node);
+
+        return client;
+    }
+
+}
+```
+
+- 编写图书接口类
+
+```java
+/**
+ * @title 图书REST接口类
+ * @describe 调ES接口
+ */
+@RestController
+public class BookRest {
+
+    @Autowired
+    private TransportClient client;
+
+    @GetMapping("/")
+    public String index(){
+        return "index";
+    }
+
+    /**
+     * @describe 查询接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */
+    @GetMapping("/get/book/novel")
+    public ResponseEntity<?> get(@RequestParam(name="id",defaultValue="")String id){
+
+        if(id.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        GetResponse result = this.client.prepareGet("book","novel",id).get();
+
+        if(!result.isExists()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(result.getSource(), HttpStatus.OK);
+    }
+
+    /**
+     * @describe 增加接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */
+    @PostMapping("/add/book/novel")
+    public ResponseEntity<?> add(
+            @RequestParam(name="title")String title,
+            @RequestParam(name="author")String author,
+            @RequestParam(name="word_count")int wordCount,
+            @RequestParam(name="publish_date") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date publishDate){
+
+        try {
+            //构建一个json
+            XContentBuilder content = XContentFactory.jsonBuilder()
+                .startObject()
+                .field("title",title)
+                .field("author", author)
+                .field("word_count", wordCount)
+                .field("publish_date", publishDate.getTime())
+                .endObject();
+            //获取返回结果
+            IndexResponse result = this.client.prepareIndex("book","novel").setSource(content).get();
+            return new ResponseEntity<>(result.getId(),HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @describe 删除接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */
+    @DeleteMapping("/delete/book/novel")
+    public ResponseEntity<?> delete(@RequestParam(name="id",defaultValue="")String id){
+        DeleteResponse result = this.client.prepareDelete("book", "novel", id).get();
+        return new ResponseEntity<>(result.toString(),HttpStatus.OK);
+    }
+
+    /**
+     * @describe 修改接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */
+    @DeleteMapping("/update/book/novel")
+    public ResponseEntity<?> update(
+            @RequestParam(name="id",defaultValue="")String id,
+            @RequestParam(name="title",required=false)String title,
+            @RequestParam(name="author",required=false)String author){
+
+        UpdateRequest update = new UpdateRequest("book","novel",id);
+        try {
+            XContentBuilder builder = XContentFactory.jsonBuilder()
+                .startObject();
+            if(!StringUtils.isEmpty(title)){
+                builder.field("title",title);
+            }
+            if(!StringUtils.isEmpty(author)){
+                builder.field("author", author);
+            }
+            builder.endObject();
+            update.doc(builder);
+            UpdateResponse result = this.client.update(update).get();
+            return new ResponseEntity<>(result.toString(),HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @describe 复合查询
+     * @author zc
+     * @version 1.0 2017-09-15
+     */
+    @DeleteMapping("/query/book/novel")
+    public ResponseEntity<?> query(
+            @RequestParam(name="author",required=false)String author,
+            @RequestParam(name="title",required=false)String title,
+            @RequestParam(name="gt_word_count",defaultValue="0") int gtWordCount,
+            @RequestParam(name="lt_word_count",required=false) Integer ltWordCount){
+
+        // 构建布尔查询
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        if(!StringUtils.isEmpty(author)){
+            boolQuery.must(QueryBuilders.matchQuery("author", author));
+        }
+        if(!StringUtils.isEmpty(title)){
+            boolQuery.must(QueryBuilders.matchQuery("title", title));
+        }
+
+        // 构建范围查询
+        RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("word_count")
+            .from(gtWordCount);
+        if(ltWordCount != null && ltWordCount > 0){
+            rangeQuery.to(ltWordCount);
+        }
+
+        // 使用filter构建
+        boolQuery.filter(rangeQuery);
+
+        SearchRequestBuilder builder = this.client.prepareSearch("book")
+            .setTypes("novel")
+            .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+            .setQuery(boolQuery)
+            .setFrom(0)
+            .setSize(10);
+
+        System.out.println("[ES查询请求参数]："+builder);
+
+        SearchResponse response = builder.get();
+
+        List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
+
+        for(SearchHit hit:response.getHits()){
+            result.add(hit.getSource());
+        }
+
+        return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+}
+```
+
