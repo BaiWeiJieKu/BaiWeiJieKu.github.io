@@ -92,7 +92,7 @@ if(主体.hasPermission("查询工资权限标识")){
 - 本案例工程使用maven进行构建，使用SpringMVC、Servlet3.0实现。
 - 创建maven工程 security-springmvc
 
-![](https://i.postimg.cc/JndnwbQp/image.png)
+![](https://i.postimg.cc/JndnwbQp/security-springmvc.png)
 
 #### pom
 
@@ -600,7 +600,7 @@ public void addInterceptors(InterceptorRegistry registry) {
 
 - 创建maven工程 security-spring-security
 
-![](https://i.postimg.cc/dV4Hknn4/image.png)
+![](https://i.postimg.cc/dV4Hknn4/security-spring-security.png)
 
 #### pom
 
