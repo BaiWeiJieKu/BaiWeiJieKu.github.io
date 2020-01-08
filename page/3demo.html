@@ -1,10 +1,12 @@
-﻿---
+---
 layout: demo
 title: Demo
 permalink: /demo/
 icon: play
 type: page
 ---
+
+
 
 <!doctype html>
 <html>
@@ -308,9 +310,9 @@ html {
 ],
 days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   
-	function getTime() {
+    function getTime() {
     
-		var date = new Date(),
+        var date = new Date(),
     second  = date.getSeconds() ,
     minute  = date.getMinutes() ,
     hour    = date.getHours() ,
@@ -319,18 +321,18 @@ days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
     month = date.getMonth() ,
     date = date.getDate() +' . '+ months[month],
         
-		ds = second * -6,
-		dm = minute * -6,
-		dh = hour * -30;
+        ds = second * -6,
+        dm = minute * -6,
+        dh = hour * -30;
     
-		$('.second').css('transform', 'rotate(' + ds + 'deg)');
+        $('.second').css('transform', 'rotate(' + ds + 'deg)');
     $('.minute').css('transform', 'rotate(' + dm + 'deg)');
     $('.hour').css('transform', 'rotate(' + dh + 'deg)');
     
     $('.time').text(time);
     $('.day').text(days[day]);
     $('.date').text( date )
-	}
+    }
   
   function dailer( selector , size){
      for(var s = 0; s < 60 ; s++){
@@ -355,6 +357,7 @@ days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 
 </body>
 </html>
+
 <script src="{{ " /js/masonry.pkgd.min.js " | prepend: site.baseurl }}" charset="utf-8"></script>
 <script src="{{ " /js/waterfall.js " | prepend: site.baseurl }}" charset="utf-8"></script>
 
