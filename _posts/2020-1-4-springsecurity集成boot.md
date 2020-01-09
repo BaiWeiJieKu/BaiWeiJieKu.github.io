@@ -539,3 +539,292 @@ public interface AccessDecisionVoter<S> {
   - （1）如果受保护对象配置的某一个ConfigAttribute被任意的AccessDecisionVoter反对了，则将抛出AccessDeniedException。
   - （2）如果没有反对票，但是有赞成票，则表示通过。
   - （3）如果全部弃权了，则将视参数allowIfAllAbstainDecisions的值而定，true则通过，false则抛出AccessDeniedException。
+
+### 自定义认证
+
+#### 自定义登录页面
+
+- Spring Security的默认配置没有明确设定一个登录页面的URL，因此Spring Security会根据启用的功能自动生成一个登录页面URL，并使用默认URL处理登录的提交内容，登录后跳转的到默认URL等等。尽管自动生成的登录页面很方便快速启动和运行，但大多数应用程序都希望定义自己的登录页面。
+
+- 在项目工程中创建自己的登录页面
+
+```
+webapp---WEB-INF---views---login.jsp
+```
+
+- 在WebConfig.java中配置认证页面地址：
+
+```java
+//默认Url根路径跳转到/login，此url为spring security提供
+@Override
+public void addViewControllers(ViewControllerRegistry registry) {
+    registry.addViewController("/").setViewName("redirect:/login-view");
+    registry.addViewController("/login-view").setViewName("login");
+}
+```
+
+- 在WebSecurityConfig中配置表章登录信息：
+
+```java
+//配置安全拦截机制
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers("/r/**").authenticated() //所有的/r/**请求必须认证通过
+                .anyRequest().permitAll()             //除了/r/**以外的请求都可以直接访问
+                .and()//允许表单登录
+                .formLogin()
+            		.loginPage("/login-view") //配置登录URL
+            		.loginProcessingUrl("/login") //配置登录验证请求地址
+            		.successForwardUrl("/login-success");//自定义登录成功后的跳转地址
+        			.permitAll(); //允许任意用户访问基于表单登录的所有的URL。
+    }
+```
+
+- spring security为防止CSRF（Cross-site request forgery跨站请求伪造）的发生，限制了除了get以外的大多数方法。
+
+- 解决方法1：
+
+  屏蔽CSRF控制，即spring security不再限制CSRF。
+
+  配置WebSecurityConfig
+
+```java
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+    http.csrf().disable()	//屏蔽CSRF控制，即spring security不再限制CSRF
+            ...
+}
+```
+
+- 解决方法2：
+
+  在login.jsp页面添加一个token，spring security会验证token，如果token合法则可以继续请求。
+
+  修改login.jsp
+
+```jsp
+<form action="login" method="post">
+    <input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
+   ...
+</form>
+```
+
+#### 连接数据库
+
+- 添加依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <version>5.1.47</version>
+</dependency>
+```
+
+
+
+- 定义dataSource：在application.properties配置
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/user_db
+spring.datasource.username=root
+spring.datasource.password=mysql
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+```
+
+- 定义Dao:定义模型类型，在model包定义UserDto：
+
+```java
+@Data
+public class UserDto {
+
+    private String id;
+    private String username;
+    private String password;
+    private String fullname;
+    private String mobile;
+}
+```
+
+- 在Dao包定义UserDao：
+
+```java
+@Repository
+public class UserDao {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    public UserDto getUserByUsername(String username){
+        String sql ="select id,username,password,fullname from t_user where username = ?";
+        List<UserDto> list = jdbcTemplate.query(sql, new Object[]{username}, new BeanPropertyRowMapper<>(UserDto.class));
+        if(list == null && list.size() <= 0){
+            return null;
+        }
+        return list.get(0);
+    }
+}
+```
+
+- 在service包下定义SpringDataUserDetailsService：
+
+```java
+@Service
+public class SpringDataUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    UserDao userDao;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        //登录账号
+        System.out.println("username="+username);
+        //根据账号去数据库查询...
+        UserDto user = userDao.getUserByUsername(username);
+        if(user == null){
+            return null;
+        }
+        //注意这里如果使用BCryptPasswordEncoder密码编辑器，在数据库中存储的应该是密文
+        UserDetails userDetails = User.withUsername(user.getFullname()).password(user.getPassword()).authorities("p1").build();
+        return userDetails;
+    }
+}
+```
+
+
+
+### 会话
+
+- 用户认证通过后，为了避免用户的每次操作都进行认证可将用户的信息保存在会话中。spring security提供会话管理，认证通过后将身份信息放入SecurityContextHolder上下文，SecurityContext与当前线程进行绑定，方便获取用户身份。
+
+#### 获取用户身份
+
+- 编写LoginController，实现/r/r1、/r/r2的测试资源，并修改loginSuccess方法，注意getUsername方法，Spring Security获取当前登录用户信息的方法为SecurityContextHolder.getContext().getAuthentication()
+
+```java
+@RestController
+public class LoginController {
+
+    /**
+     * 用户登录成功
+     * @return
+     */
+    @RequestMapping(value = "/login-success",produces = {"text/plain;charset=UTF-8"})
+    public String loginSuccess(){
+        String username = getUsername();
+        return username + " 登录成功";
+    }
+
+   /**
+     * 获取当前登录用户名
+     * @return
+     */
+    private String getUsername(){
+        //获取认证后的用户信息
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //没有认证
+        if(!authentication.isAuthenticated()){
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        String username = null;
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            username = ((org.springframework.security.core.userdetails.UserDetails)principal).getUsername();
+        } else {
+            username = principal.toString();
+
+        }
+        return username;
+    }
+
+    /**
+     * 测试资源1
+     * @return
+     */
+    @GetMapping(value = "/r/r1",produces = {"text/plain;charset=UTF-8"})
+    public String r1(){
+        String username = getUsername();
+        return username + " 访问资源1";
+    }
+
+    /**
+     * 测试资源2
+     * @return
+     */
+    @GetMapping(value = "/r/r2",produces = {"text/plain;charset=UTF-8"})
+    public String r2(){
+        String username = getUsername();
+        return username + " 访问资源2";
+    }
+}
+```
+
+#### 会话控制
+
+- 我们可以通过以下选项准确控制会话何时创建以及Spring Security如何与之交互：
+
+| 机制       | 描述                                                         |
+| ---------- | ------------------------------------------------------------ |
+| always     | 如果没有session存在就创建一个                                |
+| ifRequired | 如果需要就创建一个Session（默认）登录时                      |
+| never      | SpringSecurity 将不会创建Session，但是如果应用中其他地方创建了Session，那么Spring Security将会使用它。 |
+| stateless  | SpringSecurity将绝对不会创建Session，也不使用Session         |
+
+- 通过以下配置方式对该选项进行配置：
+
+```java
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+   http.sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+}
+```
+
+-  默认情况下，Spring Security会为每个登录成功的用户会新建一个Session，就是**ifRequired** 。
+- 若选用**never**，则指示Spring Security对登录成功的用户不创建Session了，但若你的应用程序在某地方新建了session，那么Spring Security会用它的。
+- 若使用**stateless**，则说明Spring Security对登录成功的用户不会创建Session了，你的应用程序也不会允许新建session。并且它会暗示不使用cookie，所以每个请求都需要重新进行身份验证。这种无状态架构适用于REST API及其无状态认证机制。
+
+#### 会话超时
+
+- 可以在sevlet容器中设置Session的超时时间，如下设置Session有效期为3600s；
+
+- spring boot 配置文件：
+
+```properties
+server.servlet.session.timeout=3600s
+```
+
+- session超时之后，可以通过Spring Security 设置跳转的路径。
+
+```java
+http.sessionManagement()
+    .expiredUrl("/login-view?error=EXPIRED_SESSION")
+    .invalidSessionUrl("/login-view?error=INVALID_SESSION");
+```
+
+- expired指session过期，invalidSession指传入的sessionid无效。
+
+#### 安全会话
+
+- 我们可以使用httpOnly和secure标签来保护我们的会话cookie：
+  - **httpOnly**：如果为true，那么浏览器脚本将无法访问cookie
+  - **secure**：如果为true，则cookie将仅通过HTTPS连接发送
+
+```properties
+server.servlet.session.cookie.http-only=true
+server.servlet.session.cookie.secure=true
+```
+
