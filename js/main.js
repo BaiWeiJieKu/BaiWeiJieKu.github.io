@@ -7,8 +7,8 @@
 /**
  * clickMenu
  */
-/*(function() {
-  if (window.innerWidth <= 770) {
+(function() {
+  if (window.innerWidth <= 100) {
     var menuBtn = document.querySelector('#headerMenu')
     var nav = document.querySelector('#headerNav')
     menuBtn.onclick = function(e) {
@@ -26,7 +26,7 @@
       menuBtn.classList.remove('active')
     })
   }
-}());*/
+}());
 
 //////////////////////////back to top////////////////////////////
 (function() {
