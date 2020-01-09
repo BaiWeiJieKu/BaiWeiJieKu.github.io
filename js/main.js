@@ -7,7 +7,7 @@
 /**
  * clickMenu
  */
-(function() {
+/*(function() {
   if (window.innerWidth <= 770) {
     var menuBtn = document.querySelector('#headerMenu')
     var nav = document.querySelector('#headerNav')
@@ -26,7 +26,7 @@
       menuBtn.classList.remove('active')
     })
   }
-}());
+}());*/
 
 //////////////////////////back to top////////////////////////////
 (function() {
