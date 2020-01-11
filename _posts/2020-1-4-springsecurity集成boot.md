@@ -828,3 +828,300 @@ server.servlet.session.cookie.http-only=true
 server.servlet.session.cookie.secure=true
 ```
 
+
+
+### 退出
+
+- Spring security默认实现了logout退出，访问/logout，果然不出所料，退出功能Spring也替我们做好了。
+- 自定义退出成功的页面：
+- 在WebSecurityConfig的protected void configure(HttpSecurity http)中配置：
+
+```
+.and()
+.logout()
+.logoutUrl("/logout")
+.logoutSuccessUrl("/login-view?logout");
+```
+
+- 当退出操作出发时，将发生：
+  - 使HTTP Session 无效
+  - 清除`SecurityContextHolder`
+  - 跳转到 `/login-view?logout`
+
+- 类似于配置登录功能，咱们可以进一步自定义退出功能：
+
+```java
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+    http
+            .authorizeRequests()
+      		//...
+            .and()
+            .logout()                                                    (1)
+                .logoutUrl("/logout")                                    (2)
+                .logoutSuccessUrl("/login-view?logout")                  (3)
+                .logoutSuccessHandler(logoutSuccessHandler)              (4)
+      		    .addLogoutHandler(logoutHandler)                         (5)
+                .invalidateHttpSession(true);                             (6)
+                
+}
+
+/*
+（1）提供系统退出支持，使用WebSecurityConfigurerAdapter会自动被应用
+（2）设置触发退出操作的URL (默认是/logout).
+（3）退出之后跳转的URL。默认是/login?logout。
+（4）定制的 LogoutSuccessHandler ，用于实现用户退出成功时的处理。如果指定了这个选项那么logoutSuccessUrl()的设置会被忽略。
+（5）添加一个LogoutHandler，用于实现用户退出时的清理工作.默认SecurityContextLogoutHandler会被添加为最后一个LogoutHandler。
+（6）指定是否在退出时让HttpSession无效。 默认设置为 true。
+*/
+```
+
+- **注意：如果让logout在GET请求下生效，必须关闭防止CSRF攻击csrf().disable()。如果开启了CSRF，必须使用post方式请求/logout**
+
+#### logoutHandler
+
+- 一般来说，`LogoutHandler`的实现类被用来执行必要的清理，因而他们不应该抛出异常。
+- 下面是Spring Security提供的一些实现：
+  - PersistentTokenBasedRememberMeServices 基于持久化token的**RememberMe**功能的相关清理
+  - TokenBasedRememberMeService 基于token的**RememberMe**功能的相关清理
+  - CookieClearingLogoutHandler 退出时Cookie的相关清理
+  - CsrfLogoutHandler 负责在退出时移除csrfToken
+  - SecurityContextLogoutHandler 退出时SecurityContext的相关清理
+- 链式API提供了调用相应的`LogoutHandler` 实现的快捷方式，比如deleteCookies()。
+
+
+
+### 授权
+
+- 授权的方式包括 **web授权和方法授权**，web授权是通过 url拦截进行授权，方法授权是通过 方法拦截进行授权。他们都会调用accessDecisionManager进行授权决策，若为web授权则拦截器为FilterSecurityInterceptor；若为方法授权则拦截器为MethodSecurityInterceptor。如果同时通过web授权和方法授权则先执行web授权，再执行方法授权，最后决策通过，则允许访问资源，否则将禁止访问。
+
+#### 数据库
+
+- 角色表：
+
+```sql
+CREATE TABLE `t_role` (
+  `id` varchar(32) NOT NULL COMMENT '角色id',
+  `role_name` varchar(255) DEFAULT NULL COMMENT '角色名称',
+  `description` varchar(255) DEFAULT NULL COMMENT '角色描述',
+  `create_time` datetime DEFAULT NULL COMMENT '角色创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '角色修改时间',
+  `status` char(1) NOT NULL COMMENT '角色状态',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_role_name` (`role_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+insert  into `t_role`(`id`,`role_name`,`description`,`create_time`,`update_time`,`status`) values ('1','管理员',NULL,NULL,NULL,'');
+```
+
+- 用户角色关系表：
+
+```sql
+CREATE TABLE `t_user_role` (
+  `user_id` varchar(32) NOT NULL COMMENT '用户id',
+  `role_id` varchar(32) NOT NULL COMMENT '角色id',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `creator` varchar(255) DEFAULT NULL COMMENT '创建者',
+  PRIMARY KEY (`user_id`,`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+
+insert  into `t_user_role`(`user_id`,`role_id`,`create_time`,`creator`) values ('1','1',NULL,NULL);
+
+```
+
+- 权限表：
+
+```sql
+CREATE TABLE `t_permission` (
+  `id` varchar(32) NOT NULL,
+  `code` varchar(32) NOT NULL COMMENT '权限标识符',
+  `description` varchar(64) DEFAULT NULL COMMENT '描述',
+  `url` varchar(128) DEFAULT NULL COMMENT '请求地址',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+insert  into `t_permission`(`id`,`code`,`description`,`url`) values ('1','p1','测试资源1','/r/r1'),('2','p3','测试资源2','/r/r2');
+```
+
+- 角色权限关系表：
+
+```sql
+CREATE TABLE `t_role_permission` (
+  `role_id` varchar(32) NOT NULL COMMENT '角色id',
+  `permission_id` varchar(32) NOT NULL COMMENT '权限id',
+  PRIMARY KEY (`role_id`,`permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+insert  into `t_role_permission`(`role_id`,`permission_id`) values ('1','1'),('1','2');
+```
+
+
+
+#### 修改授权逻辑
+
+- 修改dao接口：在UserDao中添加
+
+```java
+//根据用户id查询用户权限
+public List<String> findPermissionsByUserId(String userId){
+    String sql="SELECT * FROM t_permission WHERE id IN(\n" +
+            "SELECT permission_id FROM t_role_permission WHERE role_id IN(\n" +
+            "\tSELECT role_id FROM t_user_role WHERE user_id = ? \n" +
+            ")\n" +
+            ")";
+
+    List<PermissionDto> list = jdbcTemplate.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(PermissionDto.class));
+    //获取权限标识符
+    List<String> permissions = new ArrayList<>();
+    list.iterator().forEachRemaining(c->permissions.add(c.getCode()));
+    return permissions;
+
+}
+```
+
+- 修改UserDetailService：实现从数据库读取权限
+
+```java
+@Override
+public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    //登录账号
+    System.out.println("username="+username);
+    //根据账号去数据库查询...
+    UserDto user = userDao.getUserByUsername(username);
+    if(user == null){
+        return null;
+    }
+    //查询用户权限
+    List<String> permissions = userDao.findPermissionsByUserId(user.getId());
+    String[] perarray = new String[permissions.size()];
+    permissions.toArray(perarray);
+    //创建userDetails
+    UserDetails userDetails = User.withUsername(user.getFullname()).password(user.getPassword()).authorities(perarray).build();
+    return userDetails;
+}
+```
+
+#### WEB授权
+
+- 我们想进行灵活的授权控制该怎么做呢？通过给`http.authorizeRequests()`添加多个子节点来定制需求到我们的URL
+
+```java
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+    http
+        .authorizeRequests()                                          (1)
+        .antMatchers("/r/r1").hasAuthority("p1")                      (2)
+        .antMatchers("/r/r2").hasAuthority("p2")                      (3)
+        .antMatchers("/r/r3").access("hasAuthority('p1') and hasAuthority('p2')") (4)
+        .antMatchers("/r/**").authenticated()                         (5)
+        .anyRequest().permitAll()                                     (6)
+        .and()
+        .formLogin()
+        // ...
+}
+
+/*
+（1）http.authorizeRequests()方法有多个子节点，每个macher按照他们的声明顺序执行。
+
+（2）指定”/r/r1”URL，拥有p1权限标识符能够访问
+
+（3）指定”/r/r2”URL，拥有p2权限标识符能够访问
+
+（4）指定了”/r/r3”URL，同时拥有p1和p2权限标识符才能够访问
+
+（5）指定了除了r1、r2、r3之外”/r/**“资源，同时通过身份认证就能够访问，这里使用SpEL（Spring Expression Language）表达式。。
+
+（6）剩余的尚未匹配的资源，不做保护。
+*/
+```
+
+- **注意：规则的顺序是重要的,更具体的规则应该先写**。现在以/ admin开始的所有内容都需要具有ADMIN角色的身份验证用户,即使是/ admin / login路径(因为/ admin / login已经被/ admin / **规则匹配,因此第二个规则被忽略).
+
+```java
+.antMatchers("/admin/**").hasRole("ADMIN")
+.antMatchers("/admin/login").permitAll()
+```
+
+- 因此,登录页面的规则应该在/ admin / **规则之前.例如.
+
+```java
+.antMatchers("/admin/login").permitAll()
+.antMatchers("/admin/**").hasRole("ADMIN")
+```
+
+- 保护URL常用的方法有：
+  - **authenticated()** 保护URL，需要用户登录
+  - **permitAll()** 指定URL无需保护，一般应用与静态资源文件
+  - **hasRole(String role)** 限制单个角色访问，角色将被增加 “ROLE_” .所以”ADMIN” 将和 “ROLE_ADMIN”进行比较
+  - **hasAuthority(String authority)** 限制单个权限访问
+  - **hasAnyRole(String… roles)**允许多个角色访问
+  - **hasAnyAuthority(String… authorities)** 允许多个权限访问
+  - **access(String attribute)** 该方法使用 SpEL表达式, 所以可以创建复杂的限制
+  - **hasIpAddress(String ipaddressExpression)** 限制IP地址或子网
+
+
+
+#### 方法授权
+
+- 从Spring Security2.0版本开始，它支持服务层方法的安全性的支持。本节学习@PreAuthorize,@PostAuthorize, @Secured三类注解。
+- 我们可以在任何`@Configuration`实例上使用`@EnableGlobalMethodSecurity`注释来启用基于注解的安全性。
+- 以下内容将启用Spring Security的`@Secured`注释。
+
+```java
+@EnableGlobalMethodSecurity(securedEnabled = true)
+@Configuration
+public class MethodSecurityConfig {// ...}
+```
+
+-  然后向方法（在类或接口上）添加注解就会限制对该方法的访问。 Spring Security的原生注释支持为该方法定义了一组属性。 这些将被传递给AccessDecisionManager以供它作出实际的决定：
+
+```java
+public interface BankService {
+
+@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+public Account readAccount(Long id);
+
+@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+public Account[] findAccounts();
+
+@Secured("ROLE_TELLER")
+public Account post(Account account, double amount);
+}
+
+/*
+以上配置标明readAccount、findAccounts方法可匿名访问，底层使用WebExpressionVoter投票器
+post方法需要有TELLER角色才能访问，底层使用RoleVoter投票器。
+*/
+```
+
+
+
+
+
+- 使用如下代码可启用prePost注解的支持
+
+```java
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+@Configuration
+public class MethodSecurityConfig {// ...}
+```
+
+```java
+public interface BankService {
+
+@PreAuthorize("isAnonymous()")
+public Account readAccount(Long id);
+
+@PreAuthorize("isAnonymous()")
+public Account[] findAccounts();
+
+@PreAuthorize("hasAuthority('p_transfer') and hasAuthority('p_read_account')")
+public Account post(Account account, double amount);
+}
+
+/*
+以上配置标明readAccount、findAccounts方法可匿名访问，post方法需要同时拥有p_transfer和p_read_account权限才能访问，底层使用WebExpressionVoter投票器
+*/
+```
+
