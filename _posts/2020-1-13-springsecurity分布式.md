@@ -568,7 +568,7 @@ feign.compression.response.enabled = true
 ##### EnableAuthorizationServer
 
 - 可以用 @EnableAuthorizationServer 注解并继承AuthorizationServerConfigurerAdapter来配置OAuth2.0 授权服务器。
-- 在order项目的Config包下创建AuthorizationServer：
+- 在uaa项目的Config包下创建AuthorizationServer：
 
 ```java
 @Configuration
@@ -791,6 +791,595 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         ;
 
     }
+}
+```
+
+
+
+#### 授权码模式
+
+![](https://i.postimg.cc/GtX2DJ9P/image.png)
+
+- **（1）资源拥有者打开客户端，客户端要求资源拥有者给予授权，它将浏览器被重定向到授权服务器，重定向时会附加客户端的身份信息。如：**
+
+  ```
+  /uaa/oauth/authorize?client_id=c1&response_type=code&scope=all&redirect_uri=http://www.baidu.com
+  ```
+
+  - 参数列表如下：
+
+  - client_id：客户端准入标识。
+  - response_type：授权码模式固定为code。
+  - scope：客户端权限。
+  - redirect_uri：跳转uri，当授权码申请成功后会跳转到此地址，并在后边带上code参数（授权码）。
+
+- **（2）浏览器出现向授权服务器授权页面，之后将用户同意授权。**
+
+- **（3）授权服务器将授权码（AuthorizationCode）转经浏览器发送给client(通过redirect_uri)。**
+
+- **（4）客户端拿着授权码向授权服务器索要访问access_token，请求如下：**
+
+  ```
+  /uaa/oauth/token?client_id=c1&client_secret=secret&grant_type=authorization_code&code=5PgfcD&redirect_uri=http://www.baidu.com
+  ```
+
+  - 参数列表如下
+
+  - client_id：客户端准入标识。
+  - client_secret：客户端秘钥。
+  - grant_type：授权类型，填写authorization_code，表示授权码模式
+  - code：授权码，就是刚刚获取的授权码，注意：授权码只使用一次就无效了，需要重新申请。
+  - redirect_uri：申请授权码时的跳转url，一定和申请授权码时用的redirect_uri一致。
+
+- **（5）授权服务器返回令牌(access_token)**
+
+-  这种模式是四种模式中最安全的一种模式。一般用于client是Web服务器端应用或第三方的原生App调用资源服务的时候。因为在这种模式中access_token不会经过浏览器或移动端的App，而是直接从服务端去交换，这样就最大限度的减小了令牌泄漏的风险。
+
+
+
+#### 简化模式
+
+![](https://i.postimg.cc/mZYxZN5J/image.png)
+
+- **（1）资源拥有者打开客户端，客户端要求资源拥有者给予授权，它将浏览器被重定向到授权服务器，重定向时会附加客户端的身份信息**
+
+  ```
+  /uaa/oauth/authorize?client_id=c1&response_type=token&scope=all&redirect_uri=http://www.baidu.com
+  ```
+
+  参数描述同**授权码模式** ，注意response_type=token，说明是简化模式。
+
+- **（2）浏览器出现向授权服务器授权页面，之后将用户同意授权。**
+
+- （**3）授权服务器将授权码将令牌（access_token）以Hash的形式存放在重定向uri的fargment中发送给浏览器。**
+
+- fragment 主要是用来标识 URI 所标识资源里的某个资源，在 URI 的末尾通过 （#）作为 fragment 的开头，其中 # 不属于 fragment 的值。如https://domain/index#L18这个 URI 中 `L18` 就是 fragment 的值。大家只需要知道js通过响应浏览器地址栏变化的方式能获取到fragment 就行了。
+
+- 一般来说，简化模式用于没有服务器端的第三方单页面应用，因为没有服务器端就无法接收授权码。
+
+
+
+#### 密码模式
+
+![](https://i.postimg.cc/SxRX6s0L/image.png)
+
+- **（1）资源拥有者将用户名、密码发送给客户端**
+
+- **（2）客户端拿着资源拥有者的用户名、密码向授权服务器请求令牌（access_token）**
+
+  ```
+  /uaa/oauth/token?client_id=c1&client_secret=secret&grant_type=password&username=shangsan&password=123
+  ```
+
+  参数列表如下：
+
+  - client_id：客户端准入标识。
+  - client_secret：客户端秘钥。
+  - grant_type：授权类型，填写password表示密码模式
+  - username：资源拥有者用户名。
+  - password：资源拥有者密码。
+
+- **（3）授权服务器将令牌（access_token）发送给client**
+
+-  这种模式十分简单，但是却意味着直接将用户敏感信息泄漏给了client，因此这就说明这种模式只能用于client是我们自己开发的情况下。因此密码模式一般用于我们自己开发的，第一方原生App或第一方单页面应用。
+
+
+
+#### 客户端模式
+
+![](https://i.postimg.cc/W3c9xxT3/image.png)
+
+- **（1）客户端向授权服务器发送自己的身份信息，并请求令牌（access_token）**
+
+- **（2）确认客户端身份无误后，将令牌（access_token）发送给client**
+
+  ```
+  /uaa/oauth/token?client_id=c1&client_secret=secret&grant_type=client_credentials
+  ```
+
+  参数列表如下：
+
+  - client_id：客户端准入标识。
+  - client_secret：客户端秘钥。
+  - grant_type：授权类型，填写client_credentials表示客户端模式
+
+- 这种模式是最方便但最不安全的模式。因此这就要求我们对client完全的信任，而client本身也是安全的。因此这种模式一般用来提供给我们完全信任的服务器端服务。比如，合作方系统对接，拉取一组用户信息。
+
+
+
+#### 资源服务器配置
+
+- 本项目中的order项目就是一个资源服务器
+
+- @EnableResourceServer 注解到一个 @Configuration 配置类上，并且必须使用 ResourceServerConfigurer 这个配置对象来进行配置（可以选择继承自 ResourceServerConfigurerAdapter 然后覆写其中的方法，参数就是这个对象的实例）
+- ResourceServerSecurityConfigurer中主要包括：
+  - tokenServices：ResourceServerTokenServices 类的实例，用来实现令牌服务。
+  - tokenStore：TokenStore类的实例，指定令牌如何访问，与tokenServices配置可选
+  - resourceId：这个资源服务的ID，这个属性是可选的，但是推荐设置并在授权服务中进行验证。
+  - 其他的拓展属性例如 tokenExtractor 令牌提取器用来提取请求中的令牌。
+
+- HttpSecurity配置这个与Spring Security类似：
+  - 请求匹配器，用来设置需要进行保护的资源路径，默认的情况下是保护资源服务的全部路径。
+  - 通过http.authorizeRequests()来设置受保护资源的访问规则
+  - 其他的自定义权限保护规则通过 HttpSecurity 来进行配置。
+- @EnableResourceServer 注解自动增加了一个类型为 OAuth2AuthenticationProcessingFilter 的过滤器链
+- 在order项目中编写ResouceServerConfig：
+
+```java
+@Configuration
+@EnableResourceServer
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class ResouceServerConfig extends
+        ResourceServerConfigurerAdapter {
+
+    public static final String RESOURCE_ID = "res1"; 
+
+   
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources) {
+        resources.resourceId(RESOURCE_ID) //资源id
+                .tokenServices(tokenService()) //验证令牌的服务
+                .stateless(true);
+    }
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+
+        http
+                .authorizeRequests()
+                .antMatchers("/**").access("#oauth2.hasScope('all')")
+                .and().csrf().disable()
+                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+}
+```
+
+
+
+##### 验证token
+
+-  ResourceServerTokenServices 是组成授权服务的另一半，如果你的授权服务和资源服务在同一个应用程序上的话，你可以使用 DefaultTokenServices ，这样的话，你就不用考虑关于实现所有必要的接口的一致性问题。如果你的资源服务器是分离开的，那么你就必须要确保能够有匹配授权服务提供的 ResourceServerTokenServices，它知道如何对令牌进行解码。
+- 令牌解析方法： 使用 DefaultTokenServices 在资源服务器本地配置令牌存储、解码、解析方式 使用 RemoteTokenServices 资源服务器通过 HTTP 请求来解码令牌，每次都请求授权服务器端点 /oauth/check_token
+- 使用**授权服务**的 /oauth/check_token 端点你需要在授权服务将这个端点暴露出去，以便资源服务可以进行访问，这在咱们授权服务配置中已经提到了，下面是一个例子,在这个例子中，我们在授权服务中配置了 /oauth/check_token 和 /oauth/token_key 这两个端点：
+
+```java
+@Override
+public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+    security
+				.tokenKeyAccess("permitAll()")// /oauth/token_key 安全配置
+				.checkTokenAccess("permitAll()") // /oauth/check_token 安全配置
+}
+```
+
+- 在**资源服务**配置RemoteTokenServices ，在ResouceServerConfig中配置：
+
+```java
+//资源服务令牌解析服务
+@Bean
+public ResourceServerTokenServices tokenService() {
+    //使用远程服务请求授权服务器校验token,必须指定校验token 的url、client_id，client_secret
+    RemoteTokenServices service=new RemoteTokenServices();
+    service.setCheckTokenEndpointUrl("http://localhost:53020/uaa/oauth/check_token");
+    service.setClientId("c1");
+    service.setClientSecret("secret");
+    return service;
+}
+@Override
+public void configure(ResourceServerSecurityConfigurer resources) {
+	resources.resourceId(RESOURCE_ID)
+		.tokenServices(tokenService())
+		.stateless(true);
+}
+```
+
+
+
+##### 编写资源
+
+- 在controller包下编写OrderController，此controller表示订单资源的访问类：
+
+```java
+@RestController
+public class OrderController {
+
+    @GetMapping(value = "/r1")
+    @PreAuthorize("hasAnyAuthority('p1')")
+    public String r1(){
+        return "访问资源1";
+    }
+
+}
+```
+
+
+
+##### 添加安全访问控制
+
+```java
+@Configuration
+@EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true)
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+
+    //安全拦截机制（最重要）
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+                .authorizeRequests()
+//                .antMatchers("/r/r1").hasAuthority("p2")
+//                .antMatchers("/r/r2").hasAuthority("p2")
+                .antMatchers("/r/**").authenticated()//所有/r/**的请求必须认证通过
+                .anyRequest().permitAll()//除了/r/**，其它的请求可以访问
+                ;
+
+
+    }
+}
+```
+
+
+
+#### 测试OAuth授权认证
+
+- 1、申请令牌
+
+  - 使用密码模式申请令牌，响应结果为
+
+  ```
+  {
+      "access_token": "e3360db3-2d85-41c9-ac5e-b9adba48e26c",
+      "token_type": "bearer",
+      "expires_in": 7199,
+      "scope": "all"
+  }
+  ```
+
+- 2、请求资源
+
+  - 按照oauth2.0协议要求，请求资源需要携带token，token的参数名称为：Authorization，值为：Bearer token值
+
+    ![](https://i.postimg.cc/QC6MjQ9P/image.png)
+
+  - 如果token错误，则授权失败，如下：
+
+  ```
+  {
+      "error": "invalid_token",
+      "error_description": "f3360db3-2d85-41c9-ac5e-b9adba48e26c"
+  }
+  ```
+
+  
+
+
+
+### JWT令牌
+
+#### 介绍
+
+- 当资源服务和授权服务不在一起时资源服务使用RemoteTokenServices 远程请求授权服务验证token，如果访问量较大将会影响系统的性能 。
+
+- 令牌采用JWT格式即可解决上边的问题，用户认证通过会得到一个JWT令牌，JWT令牌中已经包括了用户相关的信息，客户端只需要携带JWT访问资源服务，资源服务根据事先约定的算法自行完成令牌校验，无需每次都请求认证服务完成授权。
+
+- JSON Web Token（JWT）是一个开放的行业标准（RFC 7519），它定义了一种简介的、自包含的协议格式，用于在通信双方传递json对象，传递的信息经过数字签名可以被验证和信任。JWT可以使用HMAC算法或使用RSA的公钥/私钥对来签名，防止被篡改。
+
+- JWT令牌的优点：
+
+  1）jwt基于json，非常方便解析。
+
+  2）可以在令牌中自定义丰富的内容，易扩展。
+
+  3）通过非对称加密算法及数字签名技术，JWT防止篡改，安全性高。
+
+  4）资源服务使用JWT可不依赖认证服务即可完成授权。
+
+- 缺点：
+
+  １）JWT令牌较长，占存储空间比较大。
+
+- JWT令牌由三部分组成，每部分中间使用点（.）分隔，比如：xxxxx.yyyyy.zzzzz
+
+- Header：
+
+  头部包括令牌的类型（即JWT）及使用的哈希算法（如HMAC SHA256或RSA）
+
+  ```
+  {
+      "alg": "HS256",
+      "typ": "JWT"
+  }
+  ```
+
+  将上边的内容使用Base64Url编码，得到一个字符串就是JWT令牌的第一部分。
+
+- Payload:
+
+  第二部分是负载，内容也是一个json对象，它是存放有效信息的地方，它可以存放jwt提供的现成字段，比如：iss（签发者）,exp（过期时间戳）, sub（面向的用户）等，也可自定义字段。
+
+  此部分不建议存放敏感信息，因为此部分可以解码还原原始内容。
+
+  最后将第二部分负载使用Base64Url编码，得到一个字符串就是JWT令牌的第二部分。
+
+  ```
+  {
+      "sub": "1234567890",
+      "name": "456",
+      "admin": true
+  }
+  ```
+
+- Signature:
+
+  第三部分是签名，此部分用于防止jwt内容被篡改。
+
+  这个部分使用base64url将前两部分进行编码，编码后使用点（.）连接组成字符串，最后使用header中声明签名算法进行签名。
+
+  ```
+  HMACSHA256(
+      base64UrlEncode(header) + "." +
+      base64UrlEncode(payload),
+      secret)
+  ```
+
+  base64UrlEncode(header)：jwt令牌的第一部分。
+
+  base64UrlEncode(payload)：jwt令牌的第二部分。
+
+  secret：签名所使用的密钥。
+
+
+
+#### 配置令牌服务
+
+- 在uaa中配置jwt令牌服务，即可实现生成jwt格式的令牌。
+- 1、TokenConfig
+
+```java
+@Configuration
+public class TokenConfig {
+
+    private String SIGNING_KEY = "uaa123"; //对称加密字符串，在授权服务和资源服务中要保持一致
+
+    @Bean
+    public TokenStore tokenStore() {
+        //JWT令牌存储方案
+        return new JwtTokenStore(accessTokenConverter());
+    }
+
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey(SIGNING_KEY); //对称秘钥，资源服务器使用该秘钥来验证
+        return converter;
+    }
+
+}
+```
+
+- 2、定义JWT令牌服务：AuthorizationServer配置类
+
+```java
+@Autowired
+private JwtAccessTokenConverter accessTokenConverter;
+
+ @Bean
+ public AuthorizationServerTokenServices tokenService() {
+      DefaultTokenServices service=new DefaultTokenServices();
+      service.setClientDetailsService(clientDetailsService);
+      service.setSupportRefreshToken(true);
+      service.setTokenStore(tokenStore);
+
+     //令牌增强
+TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+tokenEnhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConverter));
+service.setTokenEnhancer(tokenEnhancerChain);
+
+      service.setAccessTokenValiditySeconds(7200); // 令牌默认有效期2小时
+      service.setRefreshTokenValiditySeconds(259200); // 刷新令牌默认有效期3天
+      return service;
+  }
+```
+
+
+
+#### 生成JWT令牌
+
+![](https://i.postimg.cc/hGPKMCCd/image.png)
+
+
+
+#### 校验JWT令牌
+
+- 资源服务需要和授权服务拥有一致的签字、令牌服务等：
+- 1、将授权服务中的TokenConfig类拷贝到资源 服务中
+- 2、屏蔽资源 服务原来的令牌服务类
+
+```java
+@Configuration
+@EnableResourceServer
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class ResouceServerConfig extends
+        ResourceServerConfigurerAdapter {
+
+    public static final String RESOURCE_ID = "res1";
+
+    @Autowired
+    TokenStore tokenStore;
+
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources) {
+        resources.resourceId(RESOURCE_ID)
+                .tokenStore(tokenStore) //采用JWT令牌模式
+                .stateless(true);
+    }
+```
+
+#### 测试
+
+- 1）申请jwt令牌
+- 2）使用令牌请求资源
+
+![](https://i.postimg.cc/SNNVSCtG/image.png)
+
+
+
+#### 完善环境配置
+
+- 截止目前**客户端信息**和**授权码**仍然存储在内存中，生产环境中通过会存储在数据库中，下边完善环境的配置：
+
+- 创建表
+
+  ```sql
+  DROP TABLE IF EXISTS `oauth_client_details`;
+  CREATE TABLE `oauth_client_details`  (
+    `client_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '客户端标识',
+    `resource_ids` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '接入资源列表',
+    `client_secret` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '客户端秘钥',
+    `scope` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `authorized_grant_types` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `web_server_redirect_uri` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `authorities` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `access_token_validity` int(11) NULL DEFAULT NULL,
+    `refresh_token_validity` int(11) NULL DEFAULT NULL,
+    `additional_information` longtext CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+    `create_time` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0),
+    `archived` tinyint(4) NULL DEFAULT NULL,
+    `trusted` tinyint(4) NULL DEFAULT NULL,
+    `autoapprove` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    PRIMARY KEY (`client_id`) USING BTREE
+  ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '接入客户端信息' ROW_FORMAT = Dynamic;
+  
+  INSERT INTO `oauth_client_details` VALUES ('c1', 'res1', '$2a$10$NlBC84MVb7F95EXYTXwLneXgCca6/GipyWR5NHm8K0203bSQMLpvm', 'ROLE_ADMIN,ROLE_USER,ROLE_API', 'client_credentials,password,authorization_code,implicit,refresh_token', 'http://www.baidu.com', NULL, 7200, 259200, NULL, '2019-09-09 16:04:28', 0, 0, 'false');
+  INSERT INTO `oauth_client_details` VALUES ('c2', 'res2', '$2a$10$NlBC84MVb7F95EXYTXwLneXgCca6/GipyWR5NHm8K0203bSQMLpvm', 'ROLE_API', 'client_credentials,password,authorization_code,implicit,refresh_token', 'http://www.baidu.com', NULL, 31536000, 2592000, NULL, '2019-09-09 21:48:51', 0, 0, 'false');
+  ```
+
+  ```sql
+  DROP TABLE IF EXISTS `oauth_code`;
+  CREATE TABLE `oauth_code`  (
+    `create_time` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+    `authentication` blob NULL,
+    INDEX `code_index`(`code`) USING BTREE
+  ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+  ```
+
+
+
+- 配置授权服务
+
+- **（1）修改AuthorizationServer：**ClientDetailsService和AuthorizationCodeServices从数据库读取数据。
+
+```java
+@Configuration
+@EnableAuthorizationServer
+public class AuthorizationServer extends
+		AuthorizationServerConfigurerAdapter {
+
+	@Autowired
+	private TokenStore tokenStore;
+
+	@Autowired
+	private JwtAccessTokenConverter accessTokenConverter;
+
+	@Autowired
+	private ClientDetailsService clientDetailsService;
+
+	@Autowired
+	private AuthorizationCodeServices authorizationCodeServices;
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	/**
+	 * 1.客户端详情相关配置
+	 */
+	@Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+  
+	@Bean
+	public ClientDetailsService clientDetailsService(DataSource dataSource) {
+		ClientDetailsService clientDetailsService = new JdbcClientDetailsService(dataSource);
+		((JdbcClientDetailsService) clientDetailsService).setPasswordEncoder(passwordEncoder());
+		return clientDetailsService;
+	}
+
+	@Override
+	public void configure(ClientDetailsServiceConfigurer clients)
+			throws Exception {
+		clients.withClientDetails(clientDetailsService);
+	}
+
+
+	/**
+	 * 2.配置令牌服务(token services)
+	 */
+	@Bean
+	public AuthorizationServerTokenServices tokenService() {
+		DefaultTokenServices service=new DefaultTokenServices();
+		service.setClientDetailsService(clientDetailsService);
+		service.setSupportRefreshToken(true);//支持刷新令牌
+		service.setTokenStore(tokenStore); //绑定tokenStore
+
+		TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConverter));
+		service.setTokenEnhancer(tokenEnhancerChain);
+
+		service.setAccessTokenValiditySeconds(7200); // 令牌默认有效期2小时
+		service.setRefreshTokenValiditySeconds(259200); // 刷新令牌默认有效期3天
+		return service;
+	}
+
+
+	/**
+	 * 3.配置令牌（token）的访问端点
+	 */
+
+	@Bean
+	public AuthorizationCodeServices authorizationCodeServices(DataSource dataSource) { 
+		return new JdbcAuthorizationCodeServices(dataSource);//设置授权码模式的授权码如何存取
+	}
+
+	@Override
+	public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
+		endpoints.authenticationManager(authenticationManager)
+				.authorizationCodeServices(authorizationCodeServices)
+				.tokenServices(tokenService())
+				.allowedTokenEndpointRequestMethods(HttpMethod.POST);
+	}
+
+	/**
+	 * 4.配置令牌端点(Token Endpoint)的安全约束
+	 */
+	@Override
+	public void configure(AuthorizationServerSecurityConfigurer security){
+		security
+				.tokenKeyAccess("permitAll()")
+				.checkTokenAccess("permitAll()")
+				.allowFormAuthenticationForClients()//允许表单认证
+		;
+	}
 }
 ```
 
