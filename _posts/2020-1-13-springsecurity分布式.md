@@ -608,8 +608,8 @@ public class AuthorizationServerConfigurerAdapter implements AuthorizationServer
   - scope：用来限制客户端的访问范围，如果为空（默认）的话，那么客户端拥有全部的访问范围。
   - authorizedGrantTypes：此客户端可以使用的授权类型，默认为空。
   - authorities：此客户端可以使用的权限（基于Spring Security authorities）。
-- 客户端详情（Client Details）能够在应用程序运行的时候进行更新，可以通过访问底层的存储服务（例如将客户端详情存储在一个关系数据库的表中，就可以使用 JdbcClientDetailsService）或者通过自己实现ClientRegistrationService接口（同时你也可以实现 ClientDetailsService 接口）来进行管理。
-- 我们暂时使用内存方式存储客户端详情信息，AuthorizationServer配置如下:
+-  客户端详情（Client Details）能够在应用程序运行的时候进行更新，可以通过访问底层的存储服务（例如将客户端详情存储在一个关系数据库的表中，就可以使用 JdbcClientDetailsService）或者通过自己实现ClientRegistrationService接口（同时你也可以实现 ClientDetailsService 接口）来进行管理。
+-  我们暂时使用内存方式存储客户端详情信息，AuthorizationServer配置如下:
 
 ```java
 //配置客户端详细信息
@@ -635,7 +635,7 @@ public void configure(ClientDetailsServiceConfigurer clients)
 ##### 管理令牌
 
 - AuthorizationServerTokenServices 接口定义了一些操作使得你可以对令牌进行一些必要的管理，令牌可以被用来加载身份信息，里面包含了这个令牌的相关权限。
--  自己可以创建 AuthorizationServerTokenServices 这个接口的实现，则需要继承 DefaultTokenServices 这个类，里面包含了一些有用实现，你可以使用它来修改令牌的格式和令牌的存储。默认的，当它尝试创建一个令牌的时候，是使用随机值来进行填充的，除了持久化令牌是委托一个 TokenStore 接口来实现以外，这个类几乎帮你做了所有的事情。并且 TokenStore 这个接口有一个默认的实现，它就是 InMemoryTokenStore ，如其命名，所有的令牌是被保存在了内存中。除了使用这个类以外，你还可以使用一些其他的预定义实现，下面有几个版本，它们都实现了TokenStore接口：
+- 自己可以创建 AuthorizationServerTokenServices 这个接口的实现，则需要继承 DefaultTokenServices 这个类，里面包含了一些有用实现，你可以使用它来修改令牌的格式和令牌的存储。默认的，当它尝试创建一个令牌的时候，是使用随机值来进行填充的，除了持久化令牌是委托一个 TokenStore 接口来实现以外，这个类几乎帮你做了所有的事情。并且 TokenStore 这个接口有一个默认的实现，它就是 InMemoryTokenStore ，如其命名，所有的令牌是被保存在了内存中。除了使用这个类以外，你还可以使用一些其他的预定义实现，下面有几个版本，它们都实现了TokenStore接口：
   - **InMemoryTokenStore**：这个版本的实现是被默认采用的，它可以完美的工作在单服务器上（即访问并发量压力不大的情况下，并且它在失败的时候不会进行备份），大多数的项目都可以使用这个版本的实现来进行尝试，你可以在开发的时候使用它来进行管理，因为不会被保存到磁盘中，所以更易于调试。
   - **JdbcTokenStore**：这是一个基于JDBC的实现版本，令牌会被保存进关系型数据库。使用这个版本的实现时，你可以在不同的服务器之间共享令牌信息，使用这个版本的时候请注意把”spring-jdbc”这个依赖加入到你的classpath当中。
   - **JwtTokenStore**：这个版本的全称是 JSON Web Token（JWT），它可以把令牌相关的数据进行编码（因此对于后端服务来说，它不需要进行存储，这将是一个重大优势），但是它有一个缺点，那就是撤销一个已经授权令牌将会非常困难，所以它通常用来处理一个生命周期较短的令牌以及撤销刷新令牌（refresh_token）。另外一个缺点就是这个令牌占用的空间会比较大，如果你加入了比较多用户凭证信息。JwtTokenStore 不会保存任何数据，但是它在转换令牌值以及授权信息方面与 DefaultTokenServices 所扮演的角色是一样的。
@@ -959,8 +959,8 @@ public class ResouceServerConfig extends
 ##### 验证token
 
 -  ResourceServerTokenServices 是组成授权服务的另一半，如果你的授权服务和资源服务在同一个应用程序上的话，你可以使用 DefaultTokenServices ，这样的话，你就不用考虑关于实现所有必要的接口的一致性问题。如果你的资源服务器是分离开的，那么你就必须要确保能够有匹配授权服务提供的 ResourceServerTokenServices，它知道如何对令牌进行解码。
-- 令牌解析方法： 使用 DefaultTokenServices 在资源服务器本地配置令牌存储、解码、解析方式 使用 RemoteTokenServices 资源服务器通过 HTTP 请求来解码令牌，每次都请求授权服务器端点 /oauth/check_token
-- 使用**授权服务**的 /oauth/check_token 端点你需要在授权服务将这个端点暴露出去，以便资源服务可以进行访问，这在咱们授权服务配置中已经提到了，下面是一个例子,在这个例子中，我们在授权服务中配置了 /oauth/check_token 和 /oauth/token_key 这两个端点：
+-  令牌解析方法： 使用 DefaultTokenServices 在资源服务器本地配置令牌存储、解码、解析方式 使用 RemoteTokenServices 资源服务器通过 HTTP 请求来解码令牌，每次都请求授权服务器端点 /oauth/check_token
+-  使用**授权服务**的 /oauth/check_token 端点你需要在授权服务将这个端点暴露出去，以便资源服务可以进行访问，这在咱们授权服务配置中已经提到了，下面是一个例子,在这个例子中，我们在授权服务中配置了 /oauth/check_token 和 /oauth/token_key 这两个端点：
 
 ```java
 @Override
@@ -1069,7 +1069,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   }
   ```
 
-  
 
 
 
@@ -1268,7 +1267,7 @@ public class ResouceServerConfig extends
     `autoapprove` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
     PRIMARY KEY (`client_id`) USING BTREE
   ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '接入客户端信息' ROW_FORMAT = Dynamic;
-  
+
   INSERT INTO `oauth_client_details` VALUES ('c1', 'res1', '$2a$10$NlBC84MVb7F95EXYTXwLneXgCca6/GipyWR5NHm8K0203bSQMLpvm', 'ROLE_ADMIN,ROLE_USER,ROLE_API', 'client_credentials,password,authorization_code,implicit,refresh_token', 'http://www.baidu.com', NULL, 7200, 259200, NULL, '2019-09-09 16:04:28', 0, 0, 'false');
   INSERT INTO `oauth_client_details` VALUES ('c2', 'res2', '$2a$10$NlBC84MVb7F95EXYTXwLneXgCca6/GipyWR5NHm8K0203bSQMLpvm', 'ROLE_API', 'client_credentials,password,authorization_code,implicit,refresh_token', 'http://www.baidu.com', NULL, 31536000, 2592000, NULL, '2019-09-09 21:48:51', 0, 0, 'false');
   ```
@@ -1383,3 +1382,679 @@ public class AuthorizationServer extends
 }
 ```
 
+
+
+### Spring Security实现分布式系统授权
+
+#### 需求分析
+
+![](https://i.postimg.cc/KvFDCjw8/image.png)
+
+- 1、UAA认证服务负责认证授权。
+- 2、所有请求经过 网关到达微服务
+- 3、网关负责鉴权客户端以及请求转发
+- 4、网关将token解析后传给微服务，微服务进行授权。
+
+#### 注册中心
+
+- 所有微服务的请求都经过网关，网关从注册中心读取微服务的地址，将请求转发至微服务。
+- 本节完成注册中心的搭建，注册中心采用Eureka。
+- 1、创建maven工程
+
+![image.png](https://i.postimg.cc/hvhCQYDm/image.png)
+
+
+
+- 2、pom.xml依赖如下
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>distributed-security</artifactId>
+        <groupId>com.pbteach.security</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>distributed-security-discovery</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>
+```
+
+- 3、配置文件:在resources中配置application.yml
+
+```yaml
+spring:
+    application:
+        name: distributed-discovery
+
+server:
+    port: 53000 #启动端口
+
+eureka:
+  server:
+    enable-self-preservation: false    #关闭服务器自我保护，客户端心跳检测15分钟内错误达到80%服务会保护，导致别人还认为是好用的服务
+    eviction-interval-timer-in-ms: 10000 #清理间隔（单位毫秒，默认是60*1000）5秒将客户端剔除的服务在服务注册列表中剔除# 
+    shouldUseReadOnlyResponseCache: true #eureka是CAP理论种基于AP策略，为了保证强一致性关闭此切换CP 默认不关闭 false关闭
+  client: 
+    register-with-eureka: false  #false:不作为一个客户端注册到注册中心
+    fetch-registry: false      #为true时，可以启动，但报异常：Cannot execute request on any known server
+    instance-info-replication-interval-seconds: 10 
+    serviceUrl: 
+      defaultZone: http://localhost:${server.port}/eureka/
+  instance:
+    hostname: ${spring.cloud.client.ip-address}
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance_id:${server.port}}
+
+    
+```
+
+- 启动类：
+
+```java
+package com.pbteach.security.distributed.discovery;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
+
+@SpringBootApplication
+@EnableEurekaServer
+public class DiscoveryServer {
+
+   public static void main(String[] args) {
+      SpringApplication.run(DiscoveryServer.class, args);
+
+   }
+}
+```
+
+#### 网关
+
+- 网关整合 OAuth2.0 有**两种思路**，一种是认证服务器生成jwt令牌, 所有请求统一在网关层验证，判断权限等操作；另一种是由各资源服务处理，网关只做请求转发。
+- 我们选用第一种。我们把API网关作为OAuth2.0的资源服务器角色，实现接入客户端权限拦截、令牌解析并转发当前登录用户信息(jsonToken)给微服务，这样下游微服务就不需要关心令牌格式解析以及OAuth2.0相关机制了。
+- API网关在认证授权体系里主要负责两件事：
+  - （1）作为OAuth2.0的**资源服务器**角色，实现接入方权限拦截。
+  - （2）令牌解析并转发当前登录用户信息（明文token）给微服务
+- 微服务拿到明文token(明文token中包含登录用户的身份和权限信息)后也需要做两件事：
+  - （1）用户授权拦截（看当前用户是否有权访问该资源）
+  - （2）将用户信息存储进当前线程上下文（有利于后续业务逻辑随时获取当前用户信息）
+- 创建工程
+
+![image.png](https://i.postimg.cc/52mkGLR6/image.png)
+
+- 1、pom.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>distributed-security</artifactId>
+        <groupId>com.pbteach.security</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>distributed-security-gateway</artifactId>
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.netflix.hystrix</groupId>
+            <artifactId>hystrix-javanica</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-oauth2</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-jwt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.interceptor</groupId>
+            <artifactId>javax.interceptor-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>
+
+```
+
+- 2、配置文件:配置application.properties
+
+```properties
+spring.application.name=gateway-server
+server.port=53010
+spring.main.allow-bean-definition-overriding = true
+
+logging.level.root = info
+logging.level.org.springframework = info
+
+zuul.retryable = true
+zuul.ignoredServices = *
+zuul.add-host-header = true
+zuul.sensitiveHeaders = *
+
+zuul.routes.uaa-service.stripPrefix = false
+zuul.routes.uaa-service.path = /uaa/**
+
+zuul.routes.order-service.stripPrefix = false
+zuul.routes.order-service.path = /order/**
+
+eureka.client.serviceUrl.defaultZone = http://localhost:53000/eureka/
+eureka.instance.preferIpAddress = true
+eureka.instance.instance-id = ${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance_id:${server.port}}
+management.endpoints.web.exposure.include = refresh,health,info,env
+
+feign.hystrix.enabled = true
+feign.compression.request.enabled = true
+feign.compression.request.mime-types[0] = text/xml
+feign.compression.request.mime-types[1] = application/xml
+feign.compression.request.mime-types[2] = application/json
+feign.compression.request.min-request-size = 2048
+feign.compression.response.enabled = true
+```
+
+- 统一认证服务（UAA）与统一用户服务都是网关下微服务，需要在网关上新增路由配置：
+
+```properties
+zuul.routes.uaa-service.stripPrefix = false
+zuul.routes.uaa-service.path = /uaa/**
+
+zuul.routes.user-service.stripPrefix = false
+zuul.routes.user-service.path = /order/**
+```
+
+- 上面配置了网关接收的请求url若符合/order/**表达式，将被被转发至order-service(统一用户服务)。
+- 启动类：
+
+```java
+@SpringBootApplication
+@EnableZuulProxy
+@EnableDiscoveryClient
+public class GatewayServer {
+
+    public static void main(String[] args) {
+        SpringApplication.run(GatewayServer.class, args);
+    }
+}
+```
+
+- token配置：**资源服务器**由于需要验证并解析令牌，往往可以通过在授权服务器暴露check_token的Endpoint来完成，而我们在授权服务器使用的是对称加密的jwt，因此知道密钥即可，资源服务与授权服务本就是对称设计，那我们把授权服务的TokenConfig两个类拷贝过来就行 。
+
+```java
+package com.pbteach.security.distributed.gateway.config;
+
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+@Configuration
+public class TokenConfig {
+
+
+  private String SIGNING_KEY = "uaa123";
+
+    @Bean
+    public TokenStore tokenStore() {
+        return new JwtTokenStore(accessTokenConverter());
+    }
+
+   @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey(SIGNING_KEY); //对称秘钥，资源服务器使用该秘钥来解密
+        return converter;
+    }
+
+}
+```
+
+- 配置资源服务：在ResouceServerConfig中定义资源服务配置，主要配置的内容就是定义一些匹配规则，描述某个接入客户端需要什么样的权限才能访问某个微服务，如：
+
+```java
+@Configuration
+public class ResouceServerConfig {
+
+    public static final String RESOURCE_ID = "res1";
+
+    /**
+     * 统一认证服务(UAA) 资源拦截
+     */
+    @Configuration
+    @EnableResourceServer
+    public class UAAServerConfig extends
+            ResourceServerConfigurerAdapter {
+
+        @Autowired
+        private TokenStore tokenStore;
+
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources){
+            resources.tokenStore(tokenStore).resourceId(RESOURCE_ID)
+                    .stateless(true);
+        }
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests()
+                    .antMatchers("/uaa/**").permitAll();
+        }
+
+    }
+
+    /**
+     *  订单服务
+     */
+    @Configuration
+    @EnableResourceServer
+    public class OrderServerConfig extends
+        ResourceServerConfigurerAdapter {
+            @Autowired
+            private TokenStore tokenStore;
+
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) {
+            resources.tokenStore(tokenStore).resourceId(RESOURCE_ID)
+                    .stateless(true);
+        }
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+
+            http
+                    .authorizeRequests()
+                    .antMatchers("/order/**").access("#oauth2.hasScope('ROLE_API')");
+
+        }
+
+    }
+}
+```
+
+- 上面定义了两个微服务的资源，其中：UAAServerConfig指定了若请求匹配/uaa/**网关不进行拦截。OrderServerConfig指定了若请求匹配/order/**，也就是访问统一用户服务，接入客户端需要有scope中包含read，并且authorities(权限)中需要包含ROLE_USER。由于res1这个接入客户端，read包括ROLE_ADMIN,ROLE_USER,ROLE_API三个权限。
+- 安全配置：
+
+```java
+@Configuration
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http
+                .authorizeRequests()
+                .antMatchers("/**").permitAll()
+                .and().csrf().disable();
+    }
+}
+```
+
+#### 转发明文token
+
+- 转发明文token给微服务：通过Zuul过滤器的方式实现，目的是让下游微服务能够很方便的获取到当前的登录用户信息（明文token）
+- **（1）实现Zuul前置过滤器，完成当前登录用户信息提取，并放入转发微服务的request中**
+
+```java
+/**
+ * token传递拦截
+ */
+public class AuthFilter extends ZuulFilter {
+    @Override
+    public boolean shouldFilter() {
+        return true;
+    }
+
+    @Override
+    public String filterType() {
+        return "pre";
+    }
+
+    @Override
+    public int filterOrder() {
+        return 0;
+    }
+
+    @Override
+    public Object run() {
+        /**
+         * 1.获取令牌内容
+         */
+        RequestContext ctx = RequestContext.getCurrentContext();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(!(authentication instanceof OAuth2Authentication)){ // 无token访问网关内资源的情况，目前仅有uua服务直接暴露
+            return null;
+        }
+        OAuth2Authentication oauth2Authentication  = (OAuth2Authentication)authentication;
+        Authentication userAuthentication = oauth2Authentication.getUserAuthentication();
+        Object principal = userAuthentication.getPrincipal();
+        /**
+         * 2.组装明文token，转发给微服务，放入header，名称为json-token
+         */
+        List<String> authorities = new ArrayList();
+        userAuthentication.getAuthorities().stream().forEach(s ->authorities.add(((GrantedAuthority) s).getAuthority()));
+
+        OAuth2Request oAuth2Request = oauth2Authentication.getOAuth2Request();
+        Map<String, String> requestParameters = oAuth2Request.getRequestParameters();
+        Map<String,Object> jsonToken = new HashMap<>(requestParameters);
+        if(userAuthentication != null){
+
+            jsonToken.put("principal",userAuthentication.getName());
+            jsonToken.put("authorities",authorities);
+        }
+        ctx.addZuulRequestHeader("json-token", EncryptUtil.encodeUTF8StringBase64(JSON.toJSONString(jsonToken)));
+        return null;
+    }
+}
+```
+
+- **（2）将filter纳入spring 容器：**配置AuthFilter
+
+```java
+package com.pbteach.security.distributed.gateway.config;
+
+
+import com.pbteach.security.distributed.gateway.filter.AuthFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+
+@Configuration
+public class ZuulConfig {
+
+    @Bean
+    public AuthFilter preFileter() {
+        return new AuthFilter();
+    }
+
+
+    @Bean
+    public FilterRegistrationBean corsFilter() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        final CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("*");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        config.setMaxAge(18000L);
+        source.registerCorsConfiguration("/**", config);
+        CorsFilter corsFilter = new CorsFilter(source);
+        FilterRegistrationBean bean = new FilterRegistrationBean(corsFilter);
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return bean;
+    }
+
+}
+```
+
+#### 微服务用户鉴权拦截
+
+- 当微服务收到明文token时，应该怎么鉴权拦截呢？自己实现一个filter？自己解析明文token，自己定义一套资源访问策略？
+- 能不能适配Spring Security呢，是不是突然想起了前面我们实现的Spring Security基于token认证例子。咱们还拿统一用户服务作为网关下游微服务，对它进行改造，增加**微服务用户鉴权拦截**功能。
+- **（1）增加测试资源**：OrderController增加以下endpoint
+
+```java
+	@PreAuthorize("hasAuthority('p1')")
+    @GetMapping(value = "/r1")
+    public String r1(){
+        UserDTO user = (UserDTO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+         return user.getUsername() + "访问资源1";
+    }
+
+    @PreAuthorize("hasAuthority('p2')")
+    @GetMapping(value = "/r2")
+    public String r2(){//通过Spring Security API获取当前登录用户
+        UserDTO user = (UserDTO)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return user.getUsername() + "访问资源2";
+    }
+```
+
+- **（2）Spring Security配置**:开启方法保护，并增加Spring配置策略，除了/login方法不受保护(统一认证要调用)，其他资源全部需要认证才能访问。
+
+```java
+@Override
+public void configure(HttpSecurity http) throws Exception {
+
+  http
+    .authorizeRequests()
+    .antMatchers("/**").access("#oauth2.hasScope('ROLE_ADMIN')")
+    .and().csrf().disable()
+    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+}
+```
+
+- 综合上面的配置，咱们共定义了三个资源了，拥有p1权限可以访问r1资源，拥有p2权限可以访问r2资源，只要认证通过就能访问r3资源。
+- （3）定义filter拦截token，并形成Spring Security的Authentication对象
+
+```java
+@Component
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+
+        String token = httpServletRequest.getHeader("json-token");
+
+
+        if (token != null){
+            //1.解析token
+            String json = EncryptUtil.decodeUTF8StringBase64(token);
+            JSONObject userJson = JSON.parseObject(json);
+            UserDTO user = new UserDTO();
+            user.setUsername(userJson.getString("principal"));
+            JSONArray authoritiesArray = userJson.getJSONArray("authorities");
+
+            String  [] authorities = authoritiesArray.toArray( new String[authoritiesArray.size()]);
+
+
+            //2.新建并填充authentication
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    user, null, AuthorityUtils.createAuthorityList(authorities));
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(
+                    httpServletRequest));
+            //3.将authentication保存进安全上下文
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
+    }
+}
+```
+
+- 经过上边的过虑 器，资源 服务中就可以方便到的获取用户的身份信息：
+
+`UserDTO user = (UserDTO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();`
+
+- 还是三个步骤：
+
+  1.解析token
+
+  2.新建并填充authentication
+
+  3.将authentication保存进安全上下文
+
+  剩下的事儿就交给Spring Security好了
+
+
+
+#### 集成测试
+
+- 本案例测试过程描述：
+
+  1、采用OAuth2.0的密码模式从UAA获取token
+
+  2、使用该token通过网关访问订单服务的测试资源
+
+- （1）**过网关**访问uaa的授权及获取令牌，获取token。注意端口是53010，网关的端口。
+
+  如授权endpoint：`http://localhost:53010/uaa/oauth/authorize?response_type=code&client_id=c1`
+
+  令牌endpoint:`http://localhost:53010/uaa/oauth/token`
+
+- （2）使用Token过网关访问订单服务中的r1-r2测试资源进行测试。
+
+- 结果：
+
+  使用张三token访问p1，访问成功
+
+  使用张三token访问p2，访问失败
+
+  使用李四token访问p1，访问失败
+
+  使用李四token访问p2，访问成功
+
+  符合预期结果。
+
+- （3）破坏token测试
+
+  无token测试返回内容：
+
+  ```
+  {
+      "error": "unauthorized",
+      "error_description": "Full authentication is required to access this resource"
+  }
+  ```
+
+  破坏token测试返回内容：
+
+  ```
+  {
+      "error": "invalid_token",
+      "error_description": "Cannot convert access token to JSON"
+  }
+  ```
+
+
+
+#### 扩展用户信息
+
+- 需求分析：目前jwt令牌存储了用户的身份信息、权限信息，网关将token明文化转发给微服务使用，目前用户身份信息仅包括了用户的账号，微服务还需要用户的ID、手机号等重要信息。所以，本案例将提供扩展用户信息的思路和方法，满足微服务使用用户信息的需求。
+
+- 下边分析JWT令牌中扩展用户信息的方案：
+
+  在认证阶段DaoAuthenticationProvider会调用UserDetailService查询用户的信息，这里是可以获取到齐全的用户信息的。由于JWT令牌中用户身份信息来源于UserDetails，UserDetails中仅定义了username为用户的身份信息，这里有两个思路：第一是可以扩展UserDetails，使之包括更多的自定义属性，第二也可以扩展username的内容 ，比如存入json数据内容作为username的内容。相比较而言，方案二比较简单还不用破坏UserDetails的结构，我们采用方案二。
+
+- 修改UserDetailService：从数据库查询到user，将整体user转成json存入userDetails对象。
+
+```java
+@Override
+public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    //登录账号
+    System.out.println("username="+username);
+    //根据账号去数据库查询...
+    UserDto user = userDao.getUserByUsername(username);
+    if(user == null){
+        return null;
+    }
+    //查询用户权限
+    List<String> permissions = userDao.findPermissionsByUserId(user.getId());
+    String[] perarray = new String[permissions.size()];
+    permissions.toArray(perarray);
+    //创建userDetails
+    //这里将user转为json，将整体user存入userDetails
+    String principal = JSON.toJSONString(user);
+    UserDetails userDetails = User.withUsername(principal).password(user.getPassword()).authorities(perarray).build();
+    return userDetails;
+}
+```
+
+- 修改资源服务过滤器：资源服务中的过虑 器负责 从header中解析json-token，从中即可拿网关放入的用户身份信息，部分关键代码如下：
+
+```java
+...
+if (token != null){
+    //1.解析token
+    String json = EncryptUtil.decodeUTF8StringBase64(token);
+    JSONObject userJson = JSON.parseObject(json);
+    //取出用户身份信息
+    String principal = userJson.getString("principal");
+    //将json转成对象
+    UserDTO userDTO = JSON.parseObject(principal, UserDTO.class);
+    JSONArray authoritiesArray = userJson.getJSONArray("authorities");
+    ...
+```
+
+- 以上过程就完成自定义用户身份信息的方案。
