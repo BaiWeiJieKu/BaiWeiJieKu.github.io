@@ -13,7 +13,7 @@ music-id: 2602106546
 
 - 创建maven工程 security-spring-boot
 
-![](https://i.postimg.cc/BQLq1ndR/security-spring-boot.png)
+![image.png](https://i.loli.net/2020/02/22/mDw8r6jTY4o3UFB.png)
 
 #### pom
 
@@ -244,12 +244,12 @@ public String r2(){
 - 可以通过Filter或AOP等技术来实现，Spring Security对Web资源的保护是靠Filter实现的
 - 当初始化Spring Security时，会创建一个名为`SpringSecurityFilterChain`的Servlet过滤器，类型为 org.springframework.security.web.FilterChainProxy，它实现了javax.servlet.Filter，因此外部的请求会经过此类
 
-![](https://i.postimg.cc/xdQLxcMp/Filter-Chain-Proxy.png)
+![image.png](https://i.loli.net/2020/02/22/UXrMlHCoE5iPnOg.png)
 
 - FilterChainProxy是一个代理，真正起作用的是FilterChainProxy中SecurityFilterChain所包含的各个Filter
 - 同时这些Filter作为Bean被Spring管理，它们是Spring Security核心，各有各的职责，但他们并不直接处理用户的**认证**，也不直接处理用户的**授权**，而是把它们交给了**认证管理器**（AuthenticationManager）和**决策管理器**（AccessDecisionManager）进行处理
 
-![](https://i.postimg.cc/gJs9XXqC/Authentication-Manager.png)
+![image.png](https://i.loli.net/2020/02/22/3JWCQYZ74KFfomy.png)
 
 - **SecurityContextPersistenceFilter** ：这个Filter是整个拦截过程的入口和出口（也就是第一个和最后一个拦截器），会在请求开始时从配置好的 SecurityContextRepository 中获取 SecurityContext，然后把它设置给 SecurityContextHolder。在请求完成后将 SecurityContextHolder 持有的 SecurityContext 再保存到配置好的 SecurityContextRepository，同时清除 securityContextHolder 所持有的 SecurityContext；
 - **UsernamePasswordAuthenticationFilter** 用于处理来自表单提交的认证。该表单必须提供对应的用户名和密码，其内部还有登录成功或失败后进行处理的 AuthenticationSuccessHandler 和 AuthenticationFailureHandler，这些都可以根据需求做相关改变；
@@ -258,7 +258,7 @@ public String r2(){
 
 #### 认证流程
 
-![](https://i.postimg.cc/NjQQMtc2/image.png)
+![image.png](https://i.loli.net/2020/02/22/rdeuIJ8gGq6DKom.png)
 
 - 仔细分析认证过程：
   - 用户提交用户名、密码被SecurityFilterChain中的`UsernamePasswordAuthenticationFilter`过滤器获取到，封装为请求Authentication，通常情况下是UsernamePasswordAuthenticationToken这个实现类
@@ -268,7 +268,7 @@ public String r2(){
 - 可以看出AuthenticationManager接口（认证管理器）是认证相关的核心接口，也是发起认证的出发点，它的实现类为ProviderManager。而Spring Security支持多种认证方式，因此ProviderManager维护着一个`List<AuthenticationProvider>`列表，存放多种认证方式，最终实际的认证工作是由AuthenticationProvider完成的。
 - web表单的对应的AuthenticationProvider实现类为DaoAuthenticationProvider，它的内部又维护着一个UserDetailsService负责UserDetails的获取。最终AuthenticationProvider将UserDetails填充至Authentication。
 
-![](https://i.postimg.cc/52W6SDMf/image.png)
+![image.png](https://i.loli.net/2020/02/22/FqVJ4PhoX3bAs5L.png)
 
 #### AuthenticationProvider
 
@@ -458,7 +458,6 @@ public PasswordEncoder passwordEncoder() {
   manager.createUser(User.withUsername("zhangsan").password("$2a$10$1b5mIkehqv5c4KRrX9bUj.A4Y2hug3IGCnMCL5i4RpQrYV12xNKye").authorities("p1").build());
   ```
 
-  
 
 ### 授权流程
 
@@ -467,7 +466,7 @@ public PasswordEncoder passwordEncoder() {
   - **拦截请求**，已认证用户访问受保护的web资源将被SecurityFilterChain中的`FilterSecurityInterceptor`的子类拦截。
   - **获取资源访问策略**，FilterSecurityInterceptor会从`SecurityMetadataSource`的子类`DefaultFilterInvocationSecurityMetadataSource`获取要访问当前资源所需要的权限`Collection<ConfigAttribute>`。
 
-![](https://i.postimg.cc/DyNzwZgj/image.png)
+![image.png](https://i.loli.net/2020/02/22/aTW3FGwodSMRsQ6.png)
 
 - SecurityMetadataSource其实就是读取访问策略的抽象，而读取的内容，其实就是我们配置的访问规则， 读取访问策略如：
 
@@ -521,19 +520,19 @@ public interface AccessDecisionVoter<S> {
 ```
 
 -  vote()方法的返回结果会是AccessDecisionVoter中定义的三个常量之一。ACCESS_GRANTED表示同意，ACCESS_DENIED表示拒绝，ACCESS_ABSTAIN表示弃权。
-- 如果一个AccessDecisionVoter不能判定当前Authentication是否拥有访问对应受保护对象的权限，则其vote()方法的返回值应当为弃权ACCESS_ABSTAIN。
-- Spring Security内置了三个基于投票的AccessDecisionManager实现类如下，它们分别是**AffirmativeBased**、**ConsensusBased**和**UnanimousBased**。Spring security默认使用的是AffirmativeBased。
-- **AffirmativeBased**的逻辑是：
+-  如果一个AccessDecisionVoter不能判定当前Authentication是否拥有访问对应受保护对象的权限，则其vote()方法的返回值应当为弃权ACCESS_ABSTAIN。
+-  Spring Security内置了三个基于投票的AccessDecisionManager实现类如下，它们分别是**AffirmativeBased**、**ConsensusBased**和**UnanimousBased**。Spring security默认使用的是AffirmativeBased。
+-  **AffirmativeBased**的逻辑是：
   - （1）只要有AccessDecisionVoter的投票为ACCESS_GRANTED则同意用户进行访问
   - （2）如果全部弃权也表示通过
   - （3）如果没有一个人投赞成票，但是有人投反对票，则将抛出AccessDeniedException
 
-- **ConsensusBased**的逻辑是：
+-  **ConsensusBased**的逻辑是：
   - （1）如果赞成票多于反对票则表示通过。
   - （2）反过来，如果反对票多于赞成票则将抛出AccessDeniedException。
   - （3）如果赞成票与反对票相同且不等于0，并且属性allowIfEqualGrantedDeniedDecisions的值为true，则表示通过，否则将抛出异常AccessDeniedException。参数allowIfEqualGrantedDeniedDecisions的值默认为true。
   - （4）如果所有的AccessDecisionVoter都弃权了，则将视参数allowIfAllAbstainDecisions的值而定，如果该值为true则表示通过，否则将抛出异常AccessDeniedException。参数allowIfAllAbstainDecisions的值默认为false。
-- **UnanimousBased**的逻辑：
+-  **UnanimousBased**的逻辑：
   - 与另外两种实现有点不一样，另外两种会一次性把受保护对象的配置属性全部传递给AccessDecisionVoter进行投票，而UnanimousBased会一次只传递一个ConfigAttribute给AccessDecisionVoter进行投票。
   - 这也就意味着如果我们的AccessDecisionVoter的逻辑是只要传递进来的ConfigAttribute中有一个能够匹配则投赞成票，但是放到UnanimousBased中其投票结果就不一定是赞成了
   - （1）如果受保护对象配置的某一个ConfigAttribute被任意的AccessDecisionVoter反对了，则将抛出AccessDeniedException。
@@ -776,12 +775,12 @@ public class LoginController {
 
 - 我们可以通过以下选项准确控制会话何时创建以及Spring Security如何与之交互：
 
-| 机制       | 描述                                                         |
-| ---------- | ------------------------------------------------------------ |
-| always     | 如果没有session存在就创建一个                                |
-| ifRequired | 如果需要就创建一个Session（默认）登录时                      |
+| 机制         | 描述                                       |
+| ---------- | ---------------------------------------- |
+| always     | 如果没有session存在就创建一个                       |
+| ifRequired | 如果需要就创建一个Session（默认）登录时                  |
 | never      | SpringSecurity 将不会创建Session，但是如果应用中其他地方创建了Session，那么Spring Security将会使用它。 |
-| stateless  | SpringSecurity将绝对不会创建Session，也不使用Session         |
+| stateless  | SpringSecurity将绝对不会创建Session，也不使用Session |
 
 - 通过以下配置方式对该选项进行配置：
 
@@ -794,8 +793,8 @@ protected void configure(HttpSecurity http) throws Exception {
 ```
 
 -  默认情况下，Spring Security会为每个登录成功的用户会新建一个Session，就是**ifRequired** 。
-- 若选用**never**，则指示Spring Security对登录成功的用户不创建Session了，但若你的应用程序在某地方新建了session，那么Spring Security会用它的。
-- 若使用**stateless**，则说明Spring Security对登录成功的用户不会创建Session了，你的应用程序也不会允许新建session。并且它会暗示不使用cookie，所以每个请求都需要重新进行身份验证。这种无状态架构适用于REST API及其无状态认证机制。
+-  若选用**never**，则指示Spring Security对登录成功的用户不创建Session了，但若你的应用程序在某地方新建了session，那么Spring Security会用它的。
+-  若使用**stateless**，则说明Spring Security对登录成功的用户不会创建Session了，你的应用程序也不会允许新建session。并且它会暗示不使用cookie，所以每个请求都需要重新进行身份验证。这种无状态架构适用于REST API及其无状态认证机制。
 
 #### 会话超时
 

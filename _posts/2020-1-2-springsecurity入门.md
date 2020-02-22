@@ -46,7 +46,7 @@ music-id: 2602106546
   - 主体（用户）和角色关系（用户id、角色id、…）
 - 主体（用户）、资源、权限关系如下图：
 
-![image.png](https://i.postimg.cc/28n1Mzks/image.png)
+![image.png](https://i.loli.net/2020/02/22/MpGdaUH2TENn5Rg.png)
 
 - 通常企业开发中将资源和权限表合并为一张权限表，如下：
 
@@ -58,7 +58,7 @@ music-id: 2602106546
 
   权限（权限id、权限标识、权限名称、资源名称、资源访问地址、…）
 
-![image.png](https://i.postimg.cc/fLRV3F9B/image.png)
+![image.png](https://i.loli.net/2020/02/22/4RCgeAc8fp7w5JO.png)
 
 ### RBAC
 
@@ -92,7 +92,7 @@ if(主体.hasPermission("查询工资权限标识")){
 - 本案例工程使用maven进行构建，使用SpringMVC、Servlet3.0实现。
 - 创建maven工程 security-springmvc
 
-![](https://i.postimg.cc/JndnwbQp/security-springmvc.png)
+![image.png](https://i.loli.net/2020/02/22/5bKpiBSJrOn2FMy.png)
 
 #### pom
 
@@ -600,7 +600,7 @@ public void addInterceptors(InterceptorRegistry registry) {
 
 - 创建maven工程 security-spring-security
 
-![](https://i.postimg.cc/dV4Hknn4/security-spring-security.png)
+![image.png](https://i.loli.net/2020/02/22/Pf6kyioVnOucqbs.png)
 
 #### pom
 
