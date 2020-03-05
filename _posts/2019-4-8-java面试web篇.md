@@ -485,6 +485,15 @@ MySQL中四种隔离级别分别是什么？
 可串行化（SERIALIZABLE）：可串行化就是保证读取的范围内没有新的数据插入，比如事务第一次查询得到某个范围的数据，第二次查询也同样得到了相同范围的数据，中间没有新的数据插入到该范围中。
 ```
 
+```
+mysql怎样优化分页查询？
+
+根据主键id，可以用到索引
+select * from table where id > ? order by id  limit  ? ,?
+```
+
+
+
 ### spring
 
 [Spring常见面试题总结](https://blog.csdn.net/a745233700/article/details/80959716)
