@@ -801,6 +801,109 @@ SpringMvc中函数的返回值是什么？
 
 
 
+### springBoot
+
+```
+springboot的优点有哪些？
+
+开发基于 Spring 的应用程序很容易。
+Spring Boot 项目所需的开发或工程时间明显减少，通常会提高整体生产力。
+Spring Boot不需要编写大量样板代码、XML配置和注释。
+Spring引导应用程序可以很容易地与Spring生态系统集成，如Spring JDBC、Spring ORM、Spring Data、Spring Security等。
+Spring Boot遵循“固执己见的默认配置”，以减少开发工作（默认配置可以修改）。
+Spring Boot 应用程序提供嵌入式HTTP服务器，如Tomcat和Jetty，可以轻松地开发和测试web应用程序。（这点很赞！普通运行Java程序的方式就能运行基于Spring Boot web 项目，省事很多）
+Spring Boot提供命令行接口(CLI)工具，用于开发和测试Spring Boot应用程序，如Java或Groovy。
+Spring Boot提供了多种插件，可以使用内置工具(如Maven和Gradle)开发和测试Spring Boot应用程序。
+```
+
+```
+什么是 Spring Boot Starters?
+
+Spring Boot Starters 是一系列依赖关系的集合，因为它的存在，项目的依赖之间的关系对我们来说变的更加简单了。举个例子：在没有Spring Boot Starters之前，我们开发REST服务或Web应用程序时; 我们需要使用像Spring MVC，Tomcat和Jackson这样的库，这些依赖我们需要手动一个一个添加。但是，有了 Spring Boot Starters 我们只需要一个只需添加一个spring-boot-starter-web一个依赖就可以了，这个依赖包含的字依赖中包含了我们开发REST 服务需要的所有依赖。
+```
+
+```
+如何在Spring Boot应用程序中使用Jetty而不是Tomcat?
+
+Spring Boot Web starter使用Tomcat作为默认的嵌入式servlet容器, 如果你想使用 Jetty 的话只需要修改pom.xml(Maven)或者build.gradle(Gradle)就可以了。
+
+<!--从Web启动器依赖中排除Tomcat-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+<!--添加Jetty依赖-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jetty</artifactId>
+</dependency>
+```
+
+```
+介绍一下@SpringBootApplication注解?
+
+package org.springframework.boot.autoconfigure;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(excludeFilters = {
+        @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
+        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
+public @interface SpringBootApplication {
+   ......
+}
+
+package org.springframework.boot;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Configuration
+public @interface SpringBootConfiguration {
+
+}
+
+可以看出大概可以把 @SpringBootApplication看作是 @Configuration(允许在上下文中注册额外的bean或导入其他配置类)、@EnableAutoConfiguration(启用 SpringBoot 的自动配置机制)、@ComponentScan(扫描被@Component (@Service,@Controller)注解的bean，注解默认会扫描该类所在的包下所有的类。) 注解的集合。
+
+```
+
+```
+Spring Boot 的自动配置是如何实现的?
+
+@EnableAutoConfiguration是启动自动配置的关键。注解通过Spring 提供的 @Import 注解导入了AutoConfigurationImportSelector类（@Import 注解可以导入配置类或者Bean到当前类中）。
+
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage
+@Import({AutoConfigurationImportSelector.class})
+public @interface EnableAutoConfiguration {
+    String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
+
+    Class<?>[] exclude() default {};
+
+    String[] excludeName() default {};
+}
+
+AutoConfigurationImportSelector类中getCandidateConfigurations方法会将所有自动配置类的信息以 List 的形式返回。这些配置信息会被 Spring 容器作 bean 来管理。
+@Conditional 注解。@ConditionalOnClass(指定的类必须存在于类路径下),@ConditionalOnBean(容器中是否有指定的Bean)等等都是对@Conditional注解的扩展。
+```
+
+
+
+
+
+
+
 ### mybatis
 
 ```
@@ -1149,5 +1252,124 @@ Redis 中的 set 类型是一种无序集合，集合中的元素没有先后顺
 Sorted Set
 常用命令： zadd,zrange,zrem,zcard 等
 和 set 相比，sorted set 增加了一个权重参数 score，使得集合中的元素能够按 score 进行有序排列。在直播系统中，实时排行信息包含直播间在线用户列表，各种礼物排行榜，弹幕消息（可以理解为按消息维度的消息排行榜）等信息，适合使用 Redis 中的 Sorted Set 结构进行存储。
+```
+
+```
+redis怎样设置过期时间？
+
+我们 set key 的时候，都可以给一个 expire time，就是过期时间，通过过期时间我们可以指定这个 key 可以存活的时间。
+
+如果假设你设置了一批 key 只能存活 1 个小时，那么接下来 1 小时后，redis 是怎么对这批 key 进行删除的？
+
+定期删除+惰性删除。
+定期删除：redis 默认是每隔 100ms 就随机抽取一些设置了过期时间的 key，检查其是否过期，如果过期就删除。注意这里是随机抽取的。为什么要随机呢？你想一想假如 redis 存了几十万个 key ，每隔 100ms 就遍历所有的设置过期时间的 key 的话，就会给 CPU 带来很大的负载！
+惰性删除 ：定期删除可能会导致很多过期 key 到了时间并没有被删除掉。所以就有了惰性删除。假如你的过期 key，靠定期删除没有被删除掉，还停留在内存里，除非你的系统去查一下那个 key，才会被 redis 给删除掉。这就是所谓的惰性删除，也是够懒的哈！
+```
+
+```
+redis 内存淘汰机制(MySQL 里有 2000w 数据，Redis 中只存 20w 的数据，如何保证 Redis 中的数据都是热点数据?)
+
+redis 提供 8 种数据淘汰策略：
+volatile-lru：从已设置过期时间的数据集（server.db[i].expires）中挑选最近最少使用的数据淘汰
+volatile-ttl：从已设置过期时间的数据集（server.db[i].expires）中挑选将要过期的数据淘汰
+volatile-random：从已设置过期时间的数据集（server.db[i].expires）中任意选择数据淘汰
+allkeys-lru：当内存不足以容纳新写入数据时，在键空间中，移除最近最少使用的 key（这个是最常用的）
+allkeys-random：从数据集（server.db[i].dict）中任意选择数据淘汰
+no-eviction：禁止驱逐数据，也就是说当内存不足以容纳新写入数据时，新写入操作会报错。这个应该没人使用吧！
+volatile-lfu：从已设置过期时间的数据集(server.db[i].expires)中挑选最不经常使用的数据淘汰
+allkeys-lfu：当内存不足以容纳新写入数据时，在键空间中，移除最不经常使用的 key
+```
+
+```
+redis 持久化机制(怎么保证 redis 挂掉之后再重启数据可以进行恢复)?
+
+很多时候我们需要持久化数据也就是将内存中的数据写入到硬盘里面，大部分原因是为了之后重用数据（比如重启机器、机器故障之后恢复数据），或者是为了防止系统故障而将数据备份到一个远程位置。
+Redis 不同于 Memcached 的很重一点就是，Redis 支持持久化，而且支持两种不同的持久化操作。Redis 的一种持久化方式叫快照（snapshotting，RDB），另一种方式是只追加文件（append-only file,AOF）。
+```
+
+```
+什么是快照持久化？
+
+Redis 可以通过创建快照来获得存储在内存里面的数据在某个时间点上的副本。Redis 创建快照之后，可以对快照进行备份，可以将快照复制到其他服务器从而创建具有相同数据的服务器副本（Redis 主从结构，主要用来提高 Redis 性能），还可以将快照留在原地以便重启服务器的时候使用。
+快照持久化是 Redis 默认采用的持久化方式，在 redis.conf 配置文件中默认有此下配置：
+save 900 1     #在900秒(15分钟)之后，如果至少有1个key发生变化，Redis就会自动触发BGSAVE命令创建快照。
+
+save 300 10    #在300秒(5分钟)之后，如果至少有10个key发生变化，Redis就会自动触发BGSAVE命令创建快照。
+
+save 60 10000 #在60秒(1分钟)之后，如果至少有10000个key发生变化，Redis就会自动触发BGSAVE命令创建快照。
+```
+
+```
+什么是追加文件持久化？
+
+与快照持久化相比，AOF 持久化 的实时性更好，因此已成为主流的持久化方案。默认情况下 Redis 没有开启 AOF（append only file）方式的持久化，可以通过 appendonly 参数开启：
+appendonly yes
+开启 AOF 持久化后每执行一条会更改 Redis 中的数据的命令，Redis 就会将该命令写入硬盘中的 AOF 文件。AOF 文件的保存位置和 RDB 文件的位置相同，都是通过 dir 参数设置的，默认的文件名是 appendonly.aof。
+在 Redis 的配置文件中存在三种不同的 AOF 持久化方式，它们分别是：
+appendfsync always    #每次有数据修改发生时都会写入AOF文件,这样会严重降低Redis的速度
+appendfsync everysec  #每秒钟同步一次，显示地将多个写命令同步到硬盘
+appendfsync no        #让操作系统决定何时进行同步
+
+为了兼顾数据和写入性能，用户可以考虑 appendfsync everysec 选项 ，让 Redis 每秒同步一次 AOF 文件，Redis 性能几乎没受到任何影响。而且这样即使出现系统崩溃，用户最多只会丢失一秒之内产生的数据。当硬盘忙于执行写入操作的时候，Redis 还会优雅的放慢自己的速度以便适应硬盘的最大写入速度。
+```
+
+```
+redis事务机制是怎样的？
+
+Redis 通过 MULTI、EXEC、WATCH 等命令来实现事务(transaction)功能。在 Redis 中，事务总是具有原子性（Atomicity）、一致性（Consistency）和隔离性（Isolation），并且当 Redis 运行在某种特定的持久化模式下时，事务也具有持久性（Durability）。
+
+redis 同一个事务中如果有一条命令执行失败，其后的命令仍然会被执行，没有回滚。
+1.若在事务队列中存在命令性错误（类似于java编译性错误），则执行EXEC命令时，所有命令都不会执行
+2.若在事务队列中存在语法性错误（类似于java的1/0的运行时异常），则执行EXEC命令时，其他正确命令会被执行，错误命令抛出异常。
+```
+
+```
+什么是缓存雪崩？怎样处理？
+
+简介：缓存同一时间大面积的失效，所以，后面的请求都会落到数据库上，造成数据库短时间内承受大量请求而崩掉。
+
+事前：尽量保证整个 redis 集群的高可用性，发现机器宕机尽快补上。选择合适的内存淘汰策略。
+事中：本地 ehcache 缓存 + hystrix 限流&降级，避免 MySQL 崩掉
+事后：利用 redis 持久化机制保存的数据尽快恢复缓存
+```
+
+![image.png](https://i.loli.net/2020/06/13/92TX8MtbcgaOxBU.png)
+
+
+
+```
+什么是缓存穿透？怎么解决？
+
+缓存穿透说简单点就是大量请求的 key 根本不存在于缓存中，导致请求直接到了数据库上，根本没有经过缓存这一层。
+一般 MySQL 默认的最大连接数在 150 左右，这个可以通过 show variables like '%max_connections%';命令来查看。一般 3000 个并发请求就能打死大部分数据库了。
+
+最基本的就是首先做好参数校验，一些不合法的参数请求直接抛出异常信息返回给客户端。比如查询的数据库 id 不能小于 0、传入的邮箱格式不对的时候直接返回错误消息给客户端等等。
+1）缓存无效 key : 如果缓存和数据库都查不到某个 key 的数据就写一个到 redis 中去并设置过期时间，如果黑客恶意攻击，每次构建不同的请求 key，会导致 redis 中缓存大量无效的 key 。很明显，这种方案并不能从根本上解决此问题。如果非要用这种方式来解决穿透问题的话，尽量将无效的 key 的过期时间设置短一点比如 1 分钟。
+一般情况下我们是这样设计 key 的： 表名:列名:主键名:主键值。
+2）布隆过滤器：通过它我们可以非常方便地判断一个给定数据是否存在与海量数据中。具体是这样做的：把所有可能存在的请求的值都存放在布隆过滤器中，当用户请求过来，我会先判断用户发来的请求的值是否存在于布隆过滤器中。不存在的话，直接返回请求参数错误信息给客户端，存在的话才会走下面的流程。
+```
+
+![image.png](https://i.loli.net/2020/06/13/4dvxDQFhoiyHjJA.png)
+
+
+
+
+
+```
+如何解决 Redis 的并发竞争 Key 问题？
+
+所谓 Redis 的并发竞争 Key 的问题也就是多个系统同时对一个 key 进行操作，但是最后执行的顺序和我们期望的顺序不同，这样也就导致了结果的不同！
+推荐一种方案：分布式锁（zookeeper 和 redis 都可以实现分布式锁）。（如果不存在 Redis 的并发竞争 Key 问题，不要使用分布式锁，这样会影响性能）
+基于 zookeeper 临时有序节点可以实现的分布式锁。大致思想为：每个客户端对某个方法加锁时，在 zookeeper 上的与该方法对应的指定节点的目录下，生成一个唯一的瞬时有序节点。 判断是否获取锁的方式很简单，只需要判断有序节点中序号最小的一个。 当释放锁的时候，只需将这个瞬时节点删除即可。同时，其可以避免服务宕机导致的锁无法释放，而产生的死锁问题。完成业务流程后，删除对应的子节点释放锁。
+
+在实践中，当然是从以可靠性为主。所以首推 Zookeeper。
+```
+
+```
+如何保证缓存与数据库双写时的数据一致性?
+
+一般情况下我们都是这样使用缓存的：先读缓存，缓存没有的话，就读数据库，然后取出数据后放入缓存，同时返回响应。这种方式很明显会存在缓存和数据库的数据不一致的情况。
+一般来说，就是如果你的系统不是严格要求缓存+数据库必须一致性的话，缓存可以稍微的跟数据库偶尔有不一致的情况，最好不要做这个方案，读请求和写请求串行化，串到一个内存队列里去，这样就可以保证一定不会出现不一致的情况
+串行化之后，就会导致系统的吞吐量会大幅度的降低，用比正常情况下多几倍的机器去支撑线上的一个请求。
 ```
 
