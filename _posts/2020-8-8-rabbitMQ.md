@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "rabbitMQ"
-categories: 中间件
+categories: rabbitMQ
 tags: rabbitMQ
 author: 百味皆苦
 music-id: 2602106546

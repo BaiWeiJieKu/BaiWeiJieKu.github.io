@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "Spring Security开发REST服务"
-categories: Spring-Security
-tags: Spring-Security
+title: "（MK）Spring Security开发REST服务"
+categories: springsecurity
+tags: springsecurity
 author: 百味皆苦
 music-id: 2602106546
 ---
@@ -326,7 +326,6 @@ public class BrowserProperties {
   </tr>
   ```
 
-  
 
 #### 记住我功能
 
@@ -894,9 +893,9 @@ imooc.security.browser.loginType = REDIRECT
   @PathVariable：映射URL片段到java方法的参数
 
   @JsonView：控制json输出内容
-  
+
   @RequestBody：映射请求体到java方法的参数
-  
+
   @Valid+BindingResult：验证请求参数的合法性并处理校验结果
 
 #### 测试用例

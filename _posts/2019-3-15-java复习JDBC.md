@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "java复习JDBC"
-categories: JDBC
-tags: 数据库连接 JDBC
+categories: JDBC+servlet+jsp+MVC
+tags: JDBC
 author: 百味皆苦
 music-id: 506520164
 ---

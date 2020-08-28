@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "java复习servlet"
-categories: servlet
+categories: JDBC+servlet+jsp+MVC
 tags: servlet
 author: 百味皆苦
 music-id: 2602106546
