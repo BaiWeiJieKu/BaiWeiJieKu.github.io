@@ -158,3 +158,142 @@ public class ArithUtil {
 }
 ```
 
+
+
+### 避坑指南
+
+#### 使用double很危险
+
+- 计算机是以二进制存储数值的，浮点数也不例外。对于计算机而言，0.1 无法精确表达，这是浮点数计算造成精度损失的根源。
+- 使用 BigDecimal 表示和计算浮点数，且务必使用字符串的构造方法来初始化BigDecimal
+- BigDecimal 有 scale 和 precision 的概念，scale 表示小数点右边的位数，而 precision 表示精度，也就是有效数字的长度
+- 不能调用 BigDecimal 传入 Double 的构造方法，但手头只有一个 Double，如何转换为精确表达的 BigDecimal 呢？
+- 如果一定要用 Double 来初始化 BigDecimal 的话，可以使用 BigDecimal.valueOf 方法，以确保其表现和字符串形式的构造方法一致
+- `System.out.println(new BigDecimal("4.015").multiply(BigDecimal.valueOf(100)));`
+- new BigDecimal(Double.toString(100)) 得到的 BigDecimal 的
+  scale=1、precision=4；而 new BigDecimal(“100”) 得到的 BigDecimal 的 scale=0、
+  precision=3。对于 BigDecimal 乘法操作，返回值的 scale 是两个数的 scale 相加。所
+  以，初始化 100 的两种不同方式，导致最后结果的 scale 分别是 4 和 3。
+
+
+
+#### 考虑浮点数舍入和格式化方式
+
+- 首先用 double 和 float 初始化两个 3.35 的浮点数，然后通过String.format 使用 %.1f 来格式化这 2 个数字
+
+```java
+double num1 = 3.35;
+float num2 = 3.35f;
+System.out.println(String.format("%.1f", num1));//四舍五入 3.4
+System.out.println(String.format("%.1f", num2));//3.3
+```
+
+- 这就是由精度问题和舍入方式共同导致的，double 和 float 的 3.35 其实相当于 3.350xxx和 3.349xxx
+- String.format 采用四舍五入的方式进行舍入，取 1 位小数，double 的 3.350 四舍五入为3.4，而 float 的 3.349 四舍五入为 3.3。
+- 如果我们希望使用其他舍入方式来格式化字符串的话，可以设置 DecimalFormat
+
+```java
+double num1 = 3.35;
+float num2 = 3.35f;
+DecimalFormat format = new DecimalFormat("#.##");
+format.setRoundingMode(RoundingMode.DOWN);
+System.out.println(format.format(num1));//3.35
+format.setRoundingMode(RoundingMode.DOWN);
+System.out.println(format.format(num2));//3.34
+```
+
+- 即使通过 DecimalFormat 来精确控制舍入方式，double 和 float 的问题也可能产
+  生意想不到的结果
+- 所以浮点数避坑第二原则：**浮点数的字符串格式化也要通过BigDecimal 进行**。
+- 使用 BigDecimal 来格式化数字 3.35，分别使用向下舍入和四舍五入方式取 1 位小数进行格式化
+
+```java
+BigDecimal num1 = new BigDecimal("3.35");
+BigDecimal num2 = num1.setScale(1, BigDecimal.ROUND_DOWN);
+System.out.println(num2);//3.3
+BigDecimal num3 = num1.setScale(1, BigDecimal.ROUND_HALF_UP);
+System.out.println(num3);//3.4
+```
+
+
+
+#### equals做判断
+
+- 包装类的比较要通过 equals 进行，而不能使用 ==。那么，使用 equals 方法对两个 BigDecimal 判等，一定能得到我们想要的结果吗？
+
+```java
+System.out.println(new BigDecimal("1.0").equals(new BigDecimal("1")));
+/*
+BigDecimal 的 equals 方法的注释中说
+明了原因，equals 比较的是 BigDecimal 的 value 和 scale，1.0 的 scale 是 1，1 的
+scale 是 0，所以结果一定是 false
+*/
+```
+
+- **如果我们希望只比较 BigDecimal 的 value，可以使用 compareTo 方法**
+
+```java
+System.out.println(new BigDecimal("1.0").compareTo(new BigDecimal("1"))==0);
+```
+
+-  BigDecimal 的 equals 和 hashCode 方法会同时考虑 value和 scale，如果结合 HashSet 或 HashMap 使用的话就可能会出现麻烦。比如，我们把值为 1.0 的 BigDecimal 加入 HashSet，然后判断其是否存在值为 1 的 BigDecimal，得到的结果是 false
+
+```java
+Set<BigDecimal> hashSet1 = new HashSet<>();
+hashSet1.add(new BigDecimal("1.0"));
+System.out.println(hashSet1.contains(new BigDecimal("1")));//返回false
+```
+
+- 第一个方法是，使用 TreeSet 替换 HashSet。TreeSet 不使用 hashCode 方法，也不使用 equals 比较元素，而是使用 compareTo 方法，所以不会有问题。
+
+```java
+Set<BigDecimal> treeSet = new TreeSet<>();
+treeSet.add(new BigDecimal("1.0"));
+System.out.println(treeSet.contains(new BigDecimal("1")));//返回true
+```
+
+- 第二个方法是，把 BigDecimal 存入 HashSet 或 HashMap 前，先使用stripTrailingZeros 方法去掉尾部的零，比较的时候也去掉尾部的 0，确保 value 相同的BigDecimal，scale 也是一致的
+
+```java
+Set<BigDecimal> hashSet2 = new HashSet<>();
+hashSet2.add(new BigDecimal("1.0").stripTrailingZeros());
+System.out.println(hashSet2.contains(new BigDecimal("1.000").stripTrailingZeros()));//返回true
+```
+
+
+
+#### 小心数值溢出
+
+- 不管是 int 还是 long，所有的基本数值类型都有超出表达范围的可能性。
+- 显然这是发生了溢出，而且是默默的溢出，并没有任何异常。这类问题非常容易被忽略，改进方式有下面 2 种
+- 方法一是，考虑使用 Math 类的 addExact、subtractExact 等 xxExact 方法进行数值运算，这些方法可以在数值溢出时主动抛出异常。
+
+```java
+try {
+  long l = Long.MAX_VALUE;
+  System.out.println(Math.addExact(l, 1));
+} catch (Exception ex) {
+	ex.printStackTrace();//java.lang.ArithmeticException: long overflow
+}
+```
+
+- 方法二是，使用大数类 BigInteger。BigDecimal 是处理浮点数的专家，而 BigInteger 则是对大数进行科学计算的专家。
+- 使用 BigInteger 对 Long 最大值进行 +1 操作；如果希望把计算结果转换一个Long 变量的话，可以使用 BigInteger 的 longValueExact 方法，在转换出现溢出时，同样会抛出 ArithmeticException
+
+```java
+BigInteger i = new BigInteger(String.valueOf(Long.MAX_VALUE));
+System.out.println(i.add(BigInteger.ONE).toString());
+try {
+long l = i.add(BigInteger.ONE).longValueExact();
+} catch (Exception ex) {
+ex.printStackTrace();
+}
+
+/*
+9223372036854775808
+java.lang.ArithmeticException: BigInteger out of long range
+可以看到，通过 BigInteger 对 Long 的最大值加 1 一点问题都没有，当尝试把结果转换为
+Long 类型时，则会提示 BigInteger out of long range
+*/
+```
+
