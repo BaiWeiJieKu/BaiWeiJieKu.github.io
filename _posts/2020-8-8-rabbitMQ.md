@@ -11,7 +11,7 @@ music-id: 2602106546
 {:toc}
 ### 简介
 
-[github](https://github.com/BaiWeiJieKu/rabbitmq)
+[github](https://github.com/BaiWeiJieKu/MK-rabbitmq)
 
 #### 为什么选择？
 
