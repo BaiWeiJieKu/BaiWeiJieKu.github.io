@@ -34,3 +34,663 @@ music-id: 2602106546
 
 
 
+#### 需求背景
+
+- 微服务架构后链式调用是我们在写程序时候的一般流程,为了完成一个整体功能会将其拆分成多个函数(或子模块)，比如模块A调用模块B,模块B调用模块C,模块C调用模块D。但在大型分布式应用中，系统间的RPC交互繁杂
+- 每新增一个下游功能，都要对上游的相关接口进行改造；每个接口模块的吞吐能力是有限的，这个上限能力如果是堤坝，当大流量（洪水）来临时，容易被冲垮。RPC接口上基本都是同步调用，整体的服务性能遵循“木桶理论”，即整体系统的耗时取决于链路中最慢的那个接口。
+- 根据上述的几个问题，在设计系统时可以明确要达到的目标：
+  - 1，要做到系统解耦，当新的模块接进来时，可以做到代码改动最小；能够解耦
+  - 2，设置流量缓冲池，可以让后端系统按照自身吞吐能力进行消费，不被冲垮；能削峰
+  - 3，强弱依赖梳理能将非关键调用链路的操作异步化并提升整体系统的吞吐能力；能够异步
+
+
+
+#### 什么是MQ
+
+- 面向消息的中间件（message-oriented middleware）MOM能够很好的解决以上问题，是指利用高效可靠的消息传递机制与平台无关的数据交流，并基于数据通信来进行分布式系统的集成。
+- 通过提供消息传递和消息排队模型在分布式环境下提供应用解耦，弹性伸缩，冗余存储、流量削峰，异步通信，数据同步等功能。
+- 发送者把消息发送给消息服务器，消息服务器将消息存放在若干队列/主题topic中，在合适的时候，消息服务器回将消息转发给接受者。在这个过程中，发送和接收是异步的，也就是发送无需等待，而且发送者和接受者的生命周期也没有必然的关系；尤其在发布pub/订阅sub模式下，也可以完成一对多的通信，即让一个消息有多个接受者。
+- **特点：解耦，削锋，异步**
+
+#### 安装
+
+- ActiveMQ官网：`http://activemq.apache.org/`
+- 解压
+
+```
+[root@i activemq]# tar -xzvf apache-activemq-5.14.3-bin.tar.gz
+```
+
+- 在/etc/init.d/目录增加增加activemq文件
+
+```
+cd /etc/init.d/
+vi activemq
+
+#!/bin/sh
+#
+# /etc/init.d/activemq
+# chkconfig: 345 63 37
+# description: activemq servlet container.
+# processname: activemq 5.14.3
+
+# Source function library.
+#. /etc/init.d/functions
+# source networking configuration.
+#. /etc/sysconfig/network
+
+export JAVA_HOME=/usr/local/jdk1.8.0_131
+export CATALINA_HOME=/usr/local/activemq/apache-activemq-5.14.3
+
+case $1 in
+    start)
+        sh $CATALINA_HOME/bin/activemq start
+    ;;
+    stop)
+        sh $CATALINA_HOME/bin/activemq stop
+    ;;
+    restart)
+        sh $CATALINA_HOME/bin/activemq stop
+        sleep 1
+        sh $CATALINA_HOME/bin/activemq start
+    ;;
+
+esac
+exit 0
+
+```
+
+- 设置权限
+
+```
+[root@ init.d]# chmod 777 activemq
+
+设置开机启动
+[root@ init.d]# chkconfig activemq on
+
+启动ActiveMQ
+[root@ init.d]# service activemq start
+
+以记录日志方式启动
+service activemq start  >  /usr/local/raohao/activemq.log
+
+访问activemq管理页面地址：http://IP地址:8161/
+账户admin  密码admin
+
+查看activemq状态
+service activemq status
+
+关闭activemq服务
+service activemq stop
+```
+
+
+
+### API编码实现
+
+- pom
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-all -->
+<dependency>
+  <groupId>org.apache.activemq</groupId>
+  <artifactId>activemq-all</artifactId>
+  <version>5.15.11</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.xbean/xbean-spring -->
+<dependency>
+  <groupId>org.apache.xbean</groupId>
+  <artifactId>xbean-spring</artifactId>
+  <version>4.15</version>
+</dependency>
+```
+
+- JMS开发步骤：
+  - 创建一个connection factory
+  - 通过connection factory来创建JMS connection
+  - 启动JMS connection
+  - 通过connection创建JMS session
+  - 创建JMS destination
+  - 创建JMS producer或者创建JMS message并设置destination
+  - 创建JMS consumer或者注册一个JMS message listener
+  - 发送或者接收JMS message（s）
+  - 关闭所有的JMS资源（connection，session，producer，consumer等）
+- destination简介：Destination是目的地。目的地，我们可以理解为是数据存储的地方。
+- Destination分为两种：队列和主题。
+- 在点对点的消息传递域中,目的地被称为队列(queue)
+  - 每个消息只能有一个消费者，类似于1对1的关系。好比个人快递自己领自己的。
+  - 消息的生产者和消费者之间没有时间上的相关性。无论消费者在生产者发送消息的时候是否处于运行状态，消费者都可以提取消息。好比我们的发送短信，发送者发送后不见得接收者会即收即看。
+  - 消息被消费后队列中不会再存储，所以消费者不会消费到已经被消费掉的消息。
+- 在发布订阅消息传递域中,目的地被称为主题(topic)
+  - 生产者将消息发布到topic中，每个消息可以有多个消费者，属于1：N的关系；
+  - 生产者和消费者之间有时间上的相关性。订阅某一个主题的消费者只能消费自它订阅之后发布的消息。
+  - 生产者生产时，topic不保存消息它是无状态的不落地，假如无人订阅就去生产，那就是一条废消息，所以，一般先启动消费者再启动生产者。
+- JMS规范允许客户创建持久订阅，这在一定程度上放松了时间上的相关性要求。持久订阅允许消费者消费它在未处于激活状态时发送的消息。一句话，好比我们的微信公众号订阅
+- 对比队列和主题
+
+|       | topic模式队列                                | queue模式队列                                |
+| ----- | ---------------------------------------- | ---------------------------------------- |
+| 工作模式  | 订阅-发布模式，如果当前没有订阅者，消息将会被丢弃。如果有多个订阅者，那么这些订阅者都会收到消息 | 负载均衡模式，如果当前没有消费者，消息也不会被丢弃，如果有多个消费者，那么一条消息也只能发送给一个消费者，并且要求消费者ack信息 |
+| 有无状态  | 无状态                                      | queue数据默认会在mq服务器上以文件形式保存，比如ActiveMQ一般保存在$AMQ_HOME\data\kr-store\data下面。也可以配置成DB存储。 |
+| 传递完整性 | 如果没有订阅者，消息将会被丢弃                          | 消息不会丢弃                                   |
+| 处理效率  | 由于消息要按照订阅者的数量进行复制，所以处理性能会随着订阅者的增加而明显降低，而且还要结合不同消息协议自身的性能差异 | 由于一条消息只发送给一个消费者，就算消费者再多，性能也不会有明显下降。不同消息协议的具体性能也是有差异的。 |
+
+
+
+#### 队列-生产者
+
+- 队列消息生产者
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsProduce {
+    //  linux 上部署的activemq 的 IP 地址 + activemq 的端口号
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+    // 目的地的名称
+    public static final String QUEUE_NAME = "jdbc01";
+
+
+    public static void main(String[] args) throws  Exception{
+        // 1 按照给定的url创建连接工厂，这个构造器采用默认的用户名密码。该类的其他构造方法可以指定用户名和密码。
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        // 2 通过连接工厂，获得连接 connection 并启动访问。
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        // 3 创建会话session 。第一参数是是否开启事务， 第二参数是消息签收的方式
+        Session session = connection.createSession(false,Session.AUTO_ACKNOWLEDGE);
+        // 4 创建目的地（两种 ：队列/主题）。Destination是Queue和Topic的父类
+        Queue queue = session.createQueue(QUEUE_NAME);
+        // 5 创建消息的生产者
+        MessageProducer messageProducer = session.createProducer(queue);
+        // 6 通过messageProducer 生产 3 条 消息发送到消息队列中
+        for (int i = 1; i < 4 ; i++) {
+            // 7  创建消息
+            TextMessage textMessage = session.createTextMessage("msg--" + i);
+            // 8  通过messageProducer发送给mq
+            messageProducer.send(textMessage);
+        }
+        // 9 关闭资源
+        messageProducer.close();
+        session.close();
+        connection.close();
+        System.out.println("  **** 消息发送到MQ完成 ****");
+    }
+}
+
+```
+
+- 控制台消息
+  - Number Of Pending Messages：等待消费的消息，这个是未出队列的数量，公式=总接收数-总出队列数
+  - Number Of Consumers：消费者数量，消费者端的消费者数量
+  - Messages Enqueued：进队消息数，进队列的总消息量，包括出队列的。这个数只增不减。
+  - Messages Dequeued：出队消息数，可以理解为是消费者消费掉的数量。
+  - 当有一个消息进入这个队列时，等待消费的消息是1，进入队列的消息是1。
+  - 当消息消费后，等待消费的消息是0，进入队列的消息是1，出队列的消息是1。
+  - 当再来一条消息时，等待消费的消息是1，进入队列的消息就是2。
+
+
+
+#### 队列-同步阻塞消费者
+
+- 队列消息消费者
+- 订阅者或接收者抵用MessageConsumer的receive()方法来接收消息，receive方法在能接收到消息之前（或超时之前）将一直阻塞。
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+// 消息的消费者
+public class JmsConsumer {
+
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+    public static final String QUEUE_NAME = "jdbc01";
+
+    public static void main(String[] args) throws Exception{
+      	//1.创建连接工厂，按照给定的URL，采用默认的用户名密码
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+      	//2.通过连接工厂,获得connection并启动访问
+        javax.jms.Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+      	 //3.创建会话session。两个参数transacted=事务,acknowledgeMode=确认模式(签收)
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      	 //4.创建目的地(具体是队列queue还是主题topic)
+        Queue queue = session.createQueue(QUEUE_NAME);
+        //5.创建消息的消费者,指定消费哪一个队列里面的消息
+        MessageConsumer messageConsumer = session.createConsumer(queue);
+      	 //循环获取
+        while(true){
+            // reveive() 一直等待接收消息，在能够接收到消息之前将一直阻塞。 是同步阻塞方式 。和socket的accept方法类似的。
+// reveive(Long time) : 等待n毫秒之后还没有收到消息，就是结束阻塞。
+            // 因为消息发送者是 TextMessage，所以消息接受者也要是TextMessage
+          	//6.通过消费者调用方法获取队列里面的消息(发送的消息是什么类型,接收的时候就强转成什么类型)
+            TextMessage message = (TextMessage)messageConsumer.receive(); 
+            if (null != message){
+                System.out.println("****消费者的消息："+message.getText());
+            }else {
+                break;
+            }
+        }
+      	 //7.关闭资源
+        messageConsumer.close();
+        session.close();
+        connection.close();
+    }
+}
+
+```
+
+
+
+#### 队列-异步监听消费者
+
+- 异步
+- 订阅者或接收者通过MessageConsumer的setMessageListener(MessageListener listener)注册一个消息监听器，当消息到达之后，系统会自动调用监听器MessageListener的onMessage(Message message)方法。
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+// 消息的消费者  也就是回答消息的系统
+public class JmsConsumer {
+
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+
+    public static final String QUEUE_NAME = "jdbc01";
+
+    public static void main(String[] args) throws Exception{
+      	 //1.创建连接工厂，按照给定的URL，采用默认的用户名密码
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+      	//2.通过连接工厂,获得connection并启动访问
+        javax.jms.Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+      	//3.创建会话session
+        //两个参数transacted=事务,acknowledgeMode=确认模式(签收)
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      	//4.创建目的地(具体是队列queue还是主题topic)
+        Queue queue = session.createQueue(QUEUE_NAME);
+      	//5.创建消息的消费者,指定消费哪一个队列里面的消息
+        MessageConsumer messageConsumer = session.createConsumer(queue);
+		//6.通过监听的方式消费消息
+        /* 通过监听的方式来消费消息，是异步非阻塞的方式消费消息。
+           通过messageConsumer 的setMessageListener 注册一个监听器，当有消息发送来时，系统自动调用MessageListener 的 onMessage 方法处理消息
+         */
+      	/*
+        异步非阻塞式方式监听器(onMessage)
+        订阅者或消费者通过创建的消费者对象,给消费者注册消息监听器setMessageListener,
+        当消息有消息的时候,系统会自动调用MessageListener类的onMessage方法
+        我们只需要在onMessage方法内判断消息类型即可获取消息
+         */
+        messageConsumer.setMessageListener(new MessageListener() {
+            public void onMessage(Message message)  {
+//  instanceof 判断是否A对象是否是B类的子类
+                    if (null != message  && message instanceof TextMessage){
+                      	 //7.把message转换成消息发送前的类型并获取消息内容
+                        TextMessage textMessage = (TextMessage)message;
+                        try {
+                            System.out.println("****消费者的消息："+textMessage.getText());
+                        }catch (JMSException e) {
+                            e.printStackTrace();
+                        }
+                }
+            }
+        });
+        // 让主线程不要结束。因为一旦主线程结束了，其他的线程（如此处的监听消息的线程）也都会被迫结束。
+        // 实际开发中，我们的程序会一直运行，这句代码都会省略。
+      	 //保证控制台不关闭,阻止程序关闭
+        System.in.read();
+      	 //8.关闭资源
+        messageConsumer.close();
+        session.close();
+        connection.close();
+    }
+}
+
+```
+
+
+
+#### 主题-生产者
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsProduce_topic {
+
+    public static final String ACTIVEMQ_URL = "tcp://192.168.17.3:61616";
+    public static final String TOPIC_NAME = "topic01";
+
+    public static void main(String[] args) throws  Exception{
+             ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		
+      	//创建目的地(具体是队列queue还是主题topic)
+        Topic topic = session.createTopic(TOPIC_NAME);
+        MessageProducer messageProducer = session.createProducer(topic);
+        for (int i = 1; i < 4 ; i++) {
+            TextMessage textMessage = session.createTextMessage("topic_name--" + i);
+            messageProducer.send(textMessage);
+            MapMessage mapMessage = session.createMapMessage();
+        }
+        messageProducer.close();
+        session.close();
+        connection.close();
+        System.out.println("  **** TOPIC_NAME消息发送到MQ完成 ****");
+    }
+}
+
+```
+
+
+
+#### 主题-消费者
+
+- **先启动订阅者再启动生产者,不然发送的消息是废消息**
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsConsummer_topic {
+    public static final String ACTIVEMQ_URL = "tcp://192.168.17.3:61616";
+    public static final String TOPIC_NAME = "topic01";
+
+    public static void main(String[] args) throws Exception{
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+        // 4 创建目的地 （两种 ： 队列/主题   这里用主题）
+        Topic topic = session.createTopic(TOPIC_NAME);
+
+        MessageConsumer messageConsumer = session.createConsumer(topic);
+// MessageListener接口只有一个方法，可以使用lambda表达式
+        messageConsumer.setMessageListener( (message) -> {
+            if (null != message  && message instanceof TextMessage){
+                     TextMessage textMessage = (TextMessage)message;
+                    try {
+                      System.out.println("****消费者text的消息："+textMessage.getText());
+                    }catch (JMSException e) {
+                    }
+                }
+        });
+
+        System.in.read();
+        messageConsumer.close();
+        session.close();
+        connection.close();
+    }
+}
+
+```
+
+
+
+#### activeMQ控制台
+
+- topic有多个消费者时，消费消息的数量≈ 在线消费者数量*生产消息的数量。
+
+
+
+### JMS规范
+
+- 什么是java消息服务：Java消息服务指的是两个应用程序之间进行异步通信的API，它为标准协议和消息服务提供了一组通用接口，包括创建、发送、读取消息等，用于支持Java应用程序开发。在JavaEE中，当两个应用程序使用JMS进行通信时，它们之间不是直接相连的，而是通过一个共同的消息收发服务组件关联起来以达到解耦/异步削峰的效果。
+- JMS组成结构及特点
+  - JMS Provider：实现JMS接口和规范的消息中间件，也就是我们说的MQ服务器
+  - JMS Producer：消息生产者，创建和发送JMS消息的客户端应用
+  - JMS Consumer：消息消费者，接收和处理JMS消息的客户端应用
+  - JMS Message：包括消息头，消息属性，消息体
+
+
+
+#### 消息头
+
+- JMS的消息头有哪些属性：
+  - JMSDestination：消息目的地，主要是指Queue和Topic
+  - JMSDeliveryMode：消息持久化模式；一条持久性的消息：应该被传送“一次仅仅一次”，这就意味着如果JMS提供者出现故障，该消息并不会丢失，它会在服务器恢复之后再次传递；一条非持久的消息：最多会传递一次，这意味着服务器出现故障，该消息将会永远丢失。
+  - JMSExpiration：消息过期时间；可以设置消息在一定时间后过期，默认是永不过期；消息过期时间，等于Destination的send方法中的timeToLive值加上发送时刻的GMT时间值；如果timeToLive值等于0，则JMSExpiration被设为0，表示该消息永不过期；如果发送后，在消息过期时间之后还没有被发送到目的地，则该消息被清除。
+  - JMSPriority：消息的优先级；消息优先级，从0-9十个级别，0-4是普通消息5-9是加急消息；JMS不要求MQ严格按照这十个优先级发送消息但必须保证加急消息要先于普通消息到达。默认是4级。
+  - JMSMessageID：消息的唯一标识符。后面我们会介绍如何解决幂等性。
+  - 消息的生产者可以set这些属性，消息的消费者可以get这些属性。这些属性在send方法里面也可以设置
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsProduce_topic {
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+    public static final String TOPIC_NAME = "topic01";
+
+    public static void main(String[] args) throws  Exception{
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Topic topic = session.createTopic(TOPIC_NAME);
+        MessageProducer messageProducer = session.createProducer(topic);
+
+        for (int i = 1; i < 4 ; i++) {
+            TextMessage textMessage = session.createTextMessage("topic_name--" + i);
+            // 这里可以指定每个消息的目的地
+            textMessage.setJMSDestination(topic);
+            /*
+            持久模式和非持久模式。
+            一条持久性的消息：应该被传送“一次仅仅一次”，这就意味着如果JMS提供者出现故障，该消息并不会丢失，它会在服务器恢复之后再次传递。
+            一条非持久的消息：最多会传递一次，这意味着服务器出现故障，该消息将会永远丢失。
+             */
+            textMessage.setJMSDeliveryMode(0);
+            /*
+            可以设置消息在一定时间后过期，默认是永不过期。
+            消息过期时间，等于Destination的send方法中的timeToLive值加上发送时刻的GMT时间值。
+            如果timeToLive值等于0，则JMSExpiration被设为0，表示该消息永不过期。
+            如果发送后，在消息过期时间之后还没有被发送到目的地，则该消息被清除。
+             */
+            textMessage.setJMSExpiration(1000);
+            /*  消息优先级，从0-9十个级别，0-4是普通消息5-9是加急消息。
+            JMS不要求MQ严格按照这十个优先级发送消息但必须保证加急消息要先于普通消息到达。默认是4级。
+             */
+            textMessage.setJMSPriority(10);
+            // 唯一标识每个消息的标识。MQ会给我们默认生成一个，我们也可以自己指定。
+            textMessage.setJMSMessageID("ABCD");
+            // 上面有些属性在send方法里也能设置
+            messageProducer.send(textMessage);
+        }
+        messageProducer.close();
+        session.close();
+        connection.close();
+        System.out.println("  **** TOPIC_NAME消息发送到MQ完成 ****");
+    }
+}
+
+```
+
+
+
+#### 消息体
+
+- 封装具体的消息数据
+- 发送和接收的消息体类型必须一致对应
+- 5种消息格式：
+  - TxtMessage：普通字符串消息，包含一个String
+  - MapMessage：一个Map类型的消息，key为Strng类型，而值为Java基本类型
+  - BytesMessage：二进制数组消息，包含一个byte[]
+  - StreamMessage：Java数据流消息，用标准流操作来顺序填充和读取
+  - ObjectMessage：对象消息，包含一个可序列化的Java对象
+- 演示TextMessage和MapMessage的用法
+- 消息生产者
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsProduce_topic {
+
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+    public static final String TOPIC_NAME = "topic01";
+
+    public static void main(String[] args) throws  Exception{
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+         javax.jms.Connection connection = activeMQConnectionFactory.createConnection();
+         connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Topic topic = session.createTopic(TOPIC_NAME);
+        MessageProducer messageProducer = session.createProducer(topic);
+
+        for (int i = 1; i < 4 ; i++) {
+			// 发送TextMessage消息体
+            TextMessage textMessage = session.createTextMessage("topic_name--" + i);
+            messageProducer.send(textMessage);
+            // 发送MapMessage  消息体。set方法: 添加，get方式：获取
+            MapMessage  mapMessage = session.createMapMessage();
+            mapMessage.setString("name", "张三"+i);
+            mapMessage.setInt("age", 18+i);
+            messageProducer.send(mapMessage);
+        }
+        messageProducer.close();
+        session.close();
+        connection.close();
+        System.out.println("  **** TOPIC_NAME消息发送到MQ完成 ****");
+    }
+}
+
+```
+
+
+
+- 消息消费者
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsConsummer_topic {
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+    public static final String TOPIC_NAME = "topic01";
+
+    public static void main(String[] args) throws Exception{
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        javax.jms.Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Topic topic = session.createTopic(TOPIC_NAME);
+        MessageConsumer messageConsumer = session.createConsumer(topic);
+
+        messageConsumer.setMessageListener( (message) -> {
+ // 判断消息是哪种类型之后，再强转。
+            if (null != message  && message instanceof TextMessage){
+                   TextMessage textMessage = (TextMessage)message;
+                    try {
+                      System.out.println("****消费者text的消息："+textMessage.getText());
+                    }catch (JMSException e) {
+                    }
+                }
+            if (null != message  && message instanceof MapMessage){
+                MapMessage mapMessage = (MapMessage)message;
+                try {
+                    System.out.println("****消费者的map消息："+mapMessage.getString("name"));
+                    System.out.println("****消费者的map消息："+mapMessage.getInt("age"));
+                }catch (JMSException e) {
+                }
+            }
+
+        });
+        System.in.read();
+        messageConsumer.close();
+        session.close();
+        connection.close();
+    }
+}
+
+```
+
+
+
+#### 消息属性
+
+- 如果需要除消息头字段之外的值，那么可以使用消息属性。他是识别/去重/重点标注等操作，非常有用的方法。
+- 他们是以属性名和属性值对的形式制定的。可以将属性视为消息头的扩展，属性指定一些消息头没有包括的附加信息，比如可以在属性里指定消息选择器。消息的属性就像可以分配给一条消息的附加消息头一样。它们允许开发者添加有关消息的不透明附加信息。它们还用于暴露消息选择器在消息过滤时使用的数据。
+- 消息生产者
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsProduce_topic {
+
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+    public static final String TOPIC_NAME = "topic01";
+
+    public static void main(String[] args) throws  Exception{
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Topic topic = session.createTopic(TOPIC_NAME);
+        MessageProducer messageProducer = session.createProducer(topic);
+
+        for (int i = 1; i < 4 ; i++) {
+            TextMessage textMessage = session.createTextMessage("topic_name--" + i);
+            // 调用Message的set*Property()方法，就能设置消息属性。根据value的数据类型的不同，有相应的API。
+            textMessage.setStringProperty("From","ZhangSan@qq.com");
+            textMessage.setByteProperty("Spec", (byte) 1);
+            textMessage.setBooleanProperty("Invalide",true);
+            messageProducer.send(textMessage);
+        }
+        messageProducer.close();
+        session.close();
+        connection.close();
+        System.out.println("  **** TOPIC_NAME消息发送到MQ完成 ****");
+    }
+}
+
+```
+
+- 消息消费者
+
+```java
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class JmsConsummer_topic {
+    public static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+    public static final String TOPIC_NAME = "topic01";
+
+    public static void main(String[] args) throws Exception{
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        javax.jms.Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Topic topic = session.createTopic(TOPIC_NAME);
+        MessageConsumer messageConsumer = session.createConsumer(topic);
+
+        messageConsumer.setMessageListener( (message) -> {
+            if (null != message  && message instanceof TextMessage){
+                    TextMessage textMessage = (TextMessage)message;
+                    try {
+                      System.out.println("消息体："+textMessage.getText());
+                      System.out.println("消息属性："+textMessage.getStringProperty("From"));
+                      System.out.println("消息属性："+textMessage.getByteProperty("Spec"));
+                      System.out.println("消息属性："+textMessage.getBooleanProperty("Invalide"));
+                    }catch (JMSException e) {
+                    }
+                }
+        });
+        System.in.read();
+        messageConsumer.close();
+        session.close();
+        connection.close();
+    }
+}
+
+```
+
+
+
+#### 消息持久化
+
+- 什么是持久化消息：在消息生产者将消息成功发送给MQ消息中间件之后。无论是出现任何问题，如：MQ服务器宕机、消费者掉线等。都保证（topic要之前注册过，queue不用）消息消费者，能够成功消费消息。如果消息生产者发送消息就失败了，那么消费者也不会消费到该消息。
