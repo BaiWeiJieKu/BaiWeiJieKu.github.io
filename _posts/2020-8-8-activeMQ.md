@@ -844,9 +844,9 @@ public class JmsConsummer_persistence {
 #### 消息事务性
 
 -  生产者开启事务后，执行commit方法，这批消息才真正的被提交。不执行commit方法，这批消息不会提交。执行rollback方法，之前的消息会回滚掉。生产者的事务机制，要高于签收机制，当生产者开启事务，签收机制不再重要。
-- 消费者开启事务后，执行commit方法，这批消息才算真正的被消费。不执行commit方法，这些消息不会标记已消费，下次还会被消费。执行rollback方法，是不能回滚之前执行过的业务逻辑，但是能够回滚之前的消息，回滚后的消息，下次还会被消费。消费者利用commit和rollback方法，甚至能够违反一个消费者只能消费一次消息的原理。
-- 消费者和生产者的事务，完全没有关联，各自是各自的事务。
-- 生产者
+-  消费者开启事务后，执行commit方法，这批消息才算真正的被消费。不执行commit方法，这些消息不会标记已消费，下次还会被消费。执行rollback方法，是不能回滚之前执行过的业务逻辑，但是能够回滚之前的消息，回滚后的消息，下次还会被消费。消费者利用commit和rollback方法，甚至能够违反一个消费者只能消费一次消息的原理。
+-  消费者和生产者的事务，完全没有关联，各自是各自的事务。
+-  生产者
 
 ```java
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -1683,3 +1683,413 @@ public class Topic_Consummer {
 
 ### activeMQ的传输协议
 
+- ActiveMQ支持的client-broker通讯协议有：TVP、NIO、UDP、SSL、Http(s)、VM。其中配置Transport Connector的文件在ActiveMQ安装目录的conf/activemq.xml中的`<transportConnectors>`标签之内。
+
+```xml
+<transportConnectors>
+	<transportConnector name="openwire" uri="tcp://0.0.0.0:61616?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+	<transportConnector name="amqp" uri="amqp://0.0.0.0:5672?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+	<transportConnector name="stomp" uri="stomp://0.0.0.0:61613?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+	<transportConnector name="mqtt" uri="mqtt://0.0.0.0:1884?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+	<transportConnector name="ws" uri="ws://0.0.0.0:61614?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+</transportConnectors>
+
+```
+
+- ActiveMQ中默认的消息协议就是openwire
+
+| 协议      | 描述                                       |
+| ------- | ---------------------------------------- |
+| TCP     | 默认的协议，性能相对可以                             |
+| NIO     | 基于TCP协议，进行了扩展优化，性能更好                     |
+| UDP     | 性能比TCP好，但是不具有可靠性                         |
+| SSL     | 安全链接                                     |
+| HTTP(S) | 基于HTTP或HTTPS                             |
+| VM      | 本身不是一种协议，当客户端和代理在同一个JVM中时，他们之间需要通信，但不想占用网络通道，而是直接通信，可以采用该方式。 |
+
+
+
+#### TCP协议
+
+- Transmission Control Protocol(TCP)是默认的。TCP的Client监听端口61616
+- 在网络传输数据前，必须要先序列化数据，消息是通过一个叫wire protocol的来序列化成字节流
+- TCP连接的URI后面的参数是可选的
+- TCP传输的优点：
+  - TCP协议传输可靠性高，稳定性强
+  - 高效率：字节流方式传递，效率很高
+  - 有效性、可用性：应用广泛，支持任何平台
+
+
+
+#### AMQP协议
+
+- Advanced Message Queuing Protocol，一个提供统一消息服务的应用层标准高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计。基于此协议的客户端与消息中间件可传递消息，并不受客户端/中间件不同产品，不同开发语言等条件限制。
+
+
+
+#### STOMP协议
+
+- STOP，Streaming Text Orientation Message Protocol，是流文本定向消息协议，是一种为MOM(Message Oriented Middleware，面向消息中间件)设计的简单文本协议。
+
+
+
+#### MQTT协议
+
+- MQTT(Message Queuing Telemetry Transport，消息队列遥测传输)是IBM开发的一个即时通讯协议，有可能成为物联网的重要组成部分。该协议支持所有平台，几乎可以把所有联网物品和外部连接起来，被用来当作传感器和致动器(比如通过Twitter让房屋联网)的通信协议。
+
+
+
+#### NIO协议
+
+- NIO协议和TCP协议类似，但NIO更侧重于底层的访问操作。它允许开发人员对同一资源可有更多的client调用和服务器端有更多的负载。
+- 适合使用NIO协议的场景：
+  - 可能有大量的Client去连接到Broker上，一般情况下，大量的Client去连接Broker是被操作系统的线程所限制的。因此，NIO的实现比TCP需要更少的线程去运行，所以建议使用NIO协议。
+  - 可能对于Broker有一个很迟钝的网络传输，NIO比TCP提供更好的性能。
+- NIO连接的URI形式：nio://hostname:port?key=value&key=value
+
+
+
+### 消息存储和持久化
+
+- MQ高可用：事务、可持久、签收，是属于MQ自身特性，自带的。**这里的持久化是外力，是外部插件**。之前讲的持久化是MQ的外在表现，现在讲的的持久是是底层实现。
+- 为了避免意外宕机以后丢失信息，需要做到重启后可以恢复消息队列，消息系统一半都会采用持久化机制。ActiveMQ的消息持久化机制有JDBC，AMQ，KahaDB和LevelDB，无论使用哪种持久化方式，消息的存储逻辑都是一致的。就是在发送者将消息发送出去后，消息中心首先将消息存储到本地数据文件、内存数据库或者远程数据库等。再试图将消息发给接收者，成功则将消息从存储中删除，失败则继续尝试尝试发送。消息中心启动以后，要先检查指定的存储位置是否有未成功发送的消息，如果有，则会先把存储位置中的消息发出去。
+
+
+
+#### kahaDB消息存储
+
+- 基于日志文件，从ActiveMQ5.4（含）开始默认的持久化插件。
+- 日志文件的存储目录在：%activemq安装目录%/data/kahadb
+- KahaDB是目前默认的存储方式，可用于任何场景，提高了性能和恢复能力。
+- 消息存储使用一个事务日志和仅仅用一个索引文件来存储它所有的地址。
+- KahaDB是一个专门针对消息持久化的解决方案，它对典型的消息使用模型进行了优化。
+- 数据被追加到data logs中。当不再需要log文件中的数据的时候，log文件会被丢弃。
+- KahaDB在消息保存的目录中有4类文件和一个lock
+  - **db-number.log**：KahaDB存储消息到预定大小的数据纪录文件中，文件名为db-number.log。当数据文件已满时，一个新的文件会随之创建，number数值也会随之递增，当不再有引用到数据文件中的任何消息时，文件会被删除或者归档。
+  - **db.data**：该文件包含了持久化的BTree索引，索引了消息数据记录中的消息，它是消息的索引文件，本质上是B-Tree（B树），使用B-Tree作为索引指向db-number。log里面存储消息。
+  - **db.free**：当问当前db.data文件里面哪些页面是空闲的，文件具体内容是所有空闲页的ID
+  - **db.redo**：用来进行消息恢复，如果KahaDB消息存储再强制退出后启动，用于恢复BTree索引。
+  - **lock**：文件锁，表示当前kahadb独写权限的broker。
+
+
+
+#### JDBC消息存储
+
+- 添加mysql数据库的驱动包到activeMQ的lib文件夹
+- 修改activemq.xml
+
+```xml
+<persistenceAdapter>  
+      <jdbcPersistenceAdapter dataSource="#mysql-ds" createTableOnStartup="true"/> 
+</persistenceAdapter>
+<!--
+dataSource是指定将要引用的持久化数据库的bean名称。
+createTableOnStartup是否在启动的时候创建数据库表，默认是true，这样每次启动都会去创建表了，一般是第一次启动的时候设置为true，然后再去改成false。
+-->
+```
+
+- 数据库连接池配置:之后需要建一个数据库，名为activemq。新建的数据库要采用latin1 或者ASCII编码。
+
+```xml
+    </broker>
+
+    <bean id="mysql-ds" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://mysql数据库URL/activemq?relaxAutoCommit=true"/>
+        <property name="username" value="mysql数据库用户名"/>
+        <property name="password" value="mysql数据库密码"/>
+        <property name="poolPreparedStatements" value="true"/>
+    </bean>
+
+    <import resource="jetty.xml"/>
+
+```
+
+- 重启activemq。会自动生成如下3张表。如果没有自动生成，需要我们手动执行SQL。ACTIVEMQ_ACKS，ACTIVEMQ_MSGS，ACTIVEMQ_LOCK
+- queue模式，非持久化不会将消息持久化到数据库。
+- queue模式，持久化会将消息持久化数据库。
+- 我们使用queue模式持久化，发布3条消息后，发现ACTIVEMQ_MSGS数据表多了3条数据。
+- 启动消费者，消费了所有的消息后，发现数据表的数据消失了。
+
+
+
+- 我们先启动一下持久化topic的消费者。看到ACTIVEMQ_ACKS数据表多了一条消息。多了一个消费者的身份信息。一条记录代表：一个持久化topic消费者
+- 持久化topic的消息不管是否被消费，是否有消费者，产生的数据永远都存在，且只存储一条。这个是要注意的，持久化的topic大量数据后可能导致性能下降。这里就像公众号一样，消费者消费完后，消息还会保留。
+
+
+
+- 总结：
+  - 如果是queue，在没有消费者消费的情况下会将消息保存到activemq_msgs表中，只要有任意一个消费者消费了，就会**删除消费过的消息**
+  - 如果是topic，一般是先启动消费订阅者然后再生产的情况下**会将持久订阅者永久保存到qctivemq_acks**，而**消息则永久保存在activemq_msgs**，在acks表中的订阅者有一个last_ack_id对应了activemq_msgs中的id字段，这样就知道订阅者最后收到的消息是哪一条。
+- 采坑
+  - 数据库jar包，注意把对应版本的数据库jar或者你自己使用的非自带的数据库连接池jar包
+  - createTablesOnStartup属性：默认为true，每次启动activemq都会自动创建表，在第一次启动后，应改为false，避免不必要的损失。
+  - java.lang.IllegalStateException: LifecycleProcessor not initialized：确认计算机主机名名称没有下划线
+
+
+
+#### JDBC Message store with ActiveMQ Journal
+
+- 这种方式克服了JDBC Store的不足，JDBC每次消息过来，都需要去写库读库。ActiveMQ Journal，使用高速缓存写入技术，大大提高了性能。当消费者的速度能够及时跟上生产者消息的生产速度时，journal文件能够大大减少需要写入到DB中的消息。
+- 举个例子：生产者生产了1000条消息，这1000条消息会保存到journal文件，如果消费者的消费速度很快的情况下，在journal文件还没有同步到DB之前，消费者已经消费了90%的以上消息，那么这个时候只需要同步剩余的10%的消息到DB。如果消费者的速度很慢，这个时候journal文件可以使消息以批量方式写到DB。
+- 为了高性能，这种方式使用日志文件存储+数据库存储。**先将消息持久到日志文件，等待一段时间再将未消费的消息持久到数据库**。该方式要比JDBC性能要高。
+- 配置
+
+```xml
+<persistenceFactory>        
+              <journalPersistenceAdapterFactory 
+                                   journalLogFiles="5" 
+                                   journalLogFileSize="32768" 
+                                   useJournal="true" 
+                                   useQuickJournal="true" 
+                                   dataSource="#mysql-ds" 
+                                   dataDirectory="../activemq-data" /> 
+</persistenceFactory>
+```
+
+
+
+#### 总结
+
+- jdbc效率低，kahaDB效率高，jdbc+Journal效率较高。
+- 持久化消息主要指的是：MQ所在服务器宕机了消息不会丢试的机制
+- ActiveMQ消息持久化机制有：
+  - AMQ：基于日志文件
+  - KahaDB：基于日志文件，从ActiveMQ5.4开始默认使用
+  - JDBC：基于第三方数据库
+  - Replicated LevelDB Store ：从5.9开始提供了LevelDB和Zookeeper的数据复制方法，用于Master-slave方式的首选数据复制方案。
+
+
+
+### 多节点集群
+
+- 基于zookeeper和LevelDB搭建ActiveMQ集群。集群仅提供主备方式的高可用集群功能，避免单点故障。
+- zookeeper+replicated-leveldb-store的主从集群
+
+
+
+### 异步投递
+
+- ActiveMQ支持同步，异步两种发送的模式将消息发送到broker，模式的选择对发送延时有巨大的影响。producer能达到怎么样的产出率（产出率=发送数据总量/时间）主要受发送延时的影响，使用异步发送可以显著提高发送的性能。
+- ActiveMQ默认使用异步发送的模式：除非明确指定使用同步发送的方式或者在未使用事务的前提下发送持久化的消息，这两种情况都是同步发送的。
+- 如果你没有使用事务且发送的是持久化的消息，每一次发送都是同步发送的且会阻塞
+- producer知道broker返回一个确认，表示消息已经被安全的持久化到磁盘。确认机制提供了消息安全的保障，但同时会阻塞客户端带来了很大的延时。
+- 很多高性能的应用，允许在失败的情况下有少量的数据丢失。如果你的应用满足这个特点，你可以使用异步发送来提高生产率，即使发送的是持久化的消息。
+- 异步发送它可以最大化producer端的发送效率。我们通常在发送消息量比较密集的情况下使用异步发送，它可以很大的提升Producer性能；不过这也带来了额外的问题，
+  就是需要消耗更多的Client端内存同时也会导致broker端性能消耗增加；
+  此外它不能有效的确保消息的发送成功。在userAsyncSend=true的情况下客户端需要容忍消息丢失的可能。
+
+```java
+import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+
+public class Jms_TX_Producer {
+
+    // 方式1。3种方式任选一种
+    private static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626?jms.useAsyncSend=true";
+    private static final String ACTIVEMQ_QUEUE_NAME = "Async";
+
+    public static void main(String[] args) throws JMSException {
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        // 方式2
+        activeMQConnectionFactory.setUseAsyncSend(true);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        // 方式3
+        ((ActiveMQConnection)connection).setUseAsyncSend(true);
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Queue queue = session.createQueue(ACTIVEMQ_QUEUE_NAME);
+        MessageProducer producer = session.createProducer(queue);
+        try {
+            for (int i = 0; i < 3; i++) {
+                TextMessage textMessage = session.createTextMessage("tx msg--" + i);
+                producer.send(textMessage);
+            }
+            System.out.println("消息发送完成");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            producer.close();
+            session.close();
+            connection.close();
+        }
+    }
+}
+```
+
+- 异步发送如何确保消息发送成功？
+  - 异步发送丢失消息的场景是：生产者设置userAsyncSend=true，使用producer.send(msg)持续发送消息。
+  - 如果消息不阻塞，生产者会认为所有send的消息均被成功发送至MQ。
+  - 如果MQ突然宕机，此时生产者端内存中尚未被发送至MQ的消息都会丢失。
+  - 正确的异步发送方法是需要接收回调的。同步发送和异步发送的区别就在此，同步发送等send不阻塞了就表示一定发送成功了，异步发送需要客户端回执并由客户端再判断一次是否发送成功
+- 异步发送回调
+
+```java
+public class Jms_TX_Producer {
+
+    private static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+
+    private static final String ACTIVEMQ_QUEUE_NAME = "Async";
+
+    public static void main(String[] args) throws JMSException {
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        activeMQConnectionFactory.setUseAsyncSend(true);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Queue queue = session.createQueue(ACTIVEMQ_QUEUE_NAME);
+        ActiveMQMessageProducer activeMQMessageProducer = (ActiveMQMessageProducer)session.createProducer(queue);
+        try {
+            for (int i = 0; i < 3; i++) {
+                TextMessage textMessage = session.createTextMessage("tx msg--" + i);
+                textMessage.setJMSMessageID(UUID.randomUUID().toString()+"orderAtguigu");
+                final String  msgId = textMessage.getJMSMessageID();
+                activeMQMessageProducer.send(textMessage, new AsyncCallback() {
+                    public void onSuccess() {
+                        System.out.println("成功发送消息Id:"+msgId);
+                    }
+
+                    public void onException(JMSException e) {
+                        System.out.println("失败发送消息Id:"+msgId);
+                    }
+                });
+            }
+            System.out.println("消息发送完成");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            activeMQMessageProducer.close();
+            session.close();
+            connection.close();
+        }
+    }
+}
+
+```
+
+
+
+### 延迟投递和定时投递
+
+- 要在activemq.xml中配置schedulerSupport属性为true。之后重启activemq
+
+```xml
+<broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}"  schedulerSupport="true" >
+```
+
+- java代码里面封装的辅助消息类型：ScheduleMessage
+
+```java
+public class Jms_TX_Producer {
+
+    private static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+
+    private static final String ACTIVEMQ_QUEUE_NAME = "Schedule01";
+
+    public static void main(String[] args) throws JMSException {
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Queue queue = session.createQueue(ACTIVEMQ_QUEUE_NAME);
+        MessageProducer messageProducer = session.createProducer(queue);
+        long delay =  10*1000;
+        long period = 5*1000;
+        int repeat = 3 ;
+        try {
+            for (int i = 0; i < 3; i++) {
+                TextMessage textMessage = session.createTextMessage("tx msg--" + i);
+                // 延迟的时间
+                textMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
+                // 重复投递的时间间隔
+                textMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, period);
+                // 重复投递的次数
+                textMessage.setIntProperty(ScheduledMessage.AMQ_SCHEDULED_REPEAT, repeat);
+                // 此处的意思：该条消息，等待10秒，之后每5秒发送一次，重复发送3次。
+                messageProducer.send(textMessage);
+            }
+            System.out.println("消息发送完成");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            messageProducer.close();
+            session.close();
+            connection.close();
+        }
+    }
+}
+
+```
+
+- 消费
+
+```java
+public class Jms_TX_Consumer {
+
+    private static final String ACTIVEMQ_URL = "tcp://118.24.20.3:61626";
+
+    private static final String ACTIVEMQ_QUEUE_NAME = "Schedule01";
+
+    public static void main(String[] args) throws JMSException, IOException {
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(ACTIVEMQ_URL);
+        Connection connection = activeMQConnectionFactory.createConnection();
+        connection.start();
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Queue queue = session.createQueue(ACTIVEMQ_QUEUE_NAME);
+        MessageConsumer messageConsumer = session.createConsumer(queue);
+        messageConsumer.setMessageListener(new MessageListener() {
+
+            public void onMessage(Message message) {
+                if (message instanceof TextMessage) {
+                    try {
+                        TextMessage textMessage = (TextMessage) message;
+                        System.out.println("***消费者接收到的消息:   " + textMessage.getText());
+                        textMessage.acknowledge();
+                    } catch (Exception e) {
+                        System.out.println("出现异常，消费失败，放弃消费");
+                    }
+                }
+            }
+        });
+        System.in.read();
+        messageConsumer.close();
+        session.close();
+        connection.close();
+    }
+}
+
+```
+
+
+
+### 消息消费的重试机制
+
+- 消费者收到消息，之后出现异常了，没有告诉broker确认收到该消息，broker会尝试再将该消息发送给消费者。尝试n次，如果消费者还是没有确认收到该消息，那么该消息将被放到死信队列重，之后broker不会再将该消息发送给消费者。
+- 哪些情况会发送消息重发
+  - Client用了transactions且再session中调用了rollback
+  - Client用了transactions且再调用commit之前关闭或者没有commit
+  - Client再CLIENT_ACKNOWLEDGE的传递模式下，session中调用了recover
+- 请说说消息重发时间间隔和重发次数
+  间隔：1
+  次数：6
+   每秒发6次
+- 有毒消息Poison ACK
+  一个消息被redelivedred超过默认的最大重发次数（默认6次）时，消费的回个MQ发一个“poison ack”表示这个消息有毒，告诉broker不要再发了。这个时候broker会把这个消息放到DLQ（私信队列）。
+
+
+
+### 死信队列
+
+- 死信队列：异常消息规避处理的集合，主要处理失败的消息。即一条消息在被重发了多次后（默认为重发6次，rediliveryCounter=6）将会被移入“死信队列”。
+- 一般生产环境中会设计两个队列，一个核心业务队列，一个死信队列
+- 不管是queue还是topic，失败的消息都放到这个队列中。下面修改activemq.xml的配置，可以达到修改队列的名字。
+- 可以为queue和topic单独指定两个死信队列。还可以为某个话题，单独指定一个死信队列。
+
+
+
+### 消息不被重复消费，幂等性
+
+- 网络延迟传输中，会造成进行MQ重试，在重试过程中，可能会造成重复消费。
+- 如果消息是做数据库的插入操作，给这个消息做一个唯一主键，那么就算出现重复消费，就会导致主键冲突，避免数据库出现脏数据。
+- 还可以采用第三方服务来做消费记录，比如用redis给消息分配一个全局id，只要消费过该消息，将id和message以键值对的形式写入redis，那消费者在消费前，先去redis中查询有无消费记录即可。
