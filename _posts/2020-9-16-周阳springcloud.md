@@ -1052,3 +1052,726 @@ public Object discovery(){
 ##### 自我保护
 
 - 一句话：某时刻某一个微服务不可用了，Eureka不会立刻清理，依旧会对该微服务的信息进行保存
+
+
+
+### 3：Zookeeper服务注册与发现
+
+- zookeeper是一个分布式协调工具，可以实现注册中心功能
+- 关闭Linux服务器防火墙后启动zookeeper服务器
+- zookeeper服务器取代Eureka服务器，zk作为服务注册中心
+
+
+
+#### 3.1服务提供者
+
+- 新建cloud-provider-payment8004
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-provider-payment8004</artifactId>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- springboot整合zookeeper客户端h -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+          	<!--排除zk3.5.3-->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+      	<!--添加自己安装的zookeeper版本，我这里是zk 3.5.6版本-->
+        <!-- https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper -->
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.5.6</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+    </dependencies>
+
+</project>
+ 
+```
+
+- yml
+
+```yaml
+# 8004表示注册到zookeeper服务器的支付服务提供者端口号
+server:
+  port: 8004
+ 
+# 服务别名---注册zookeeper到注册中心名称
+spring:
+  application:
+    name: cloud-provider-payment
+  cloud:
+    zookeeper:
+      connect-string: 192.168.136.140:2181 #zookeeper所在服务器的IP和端口号
+```
+
+- 启动类
+
+```java
+@SpringBootApplication
+@EnableDiscoveryClient  //该注解用于向使用consul或者zookeeper作为注册中心时注册服务
+public class PaymentMain8004 {
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentMain8004.class,args);
+    }
+}
+```
+
+- controller
+
+```java
+@RestController
+@Slf4j
+public class PaymentController {
+
+    @Value("${server.port}")
+    private String serverPort;
+
+    @GetMapping(value = "/payment/zk")
+    public String paymentzk(){
+        return "springcloud with zookeeper:"+serverPort+"\t"+ UUID.randomUUID().toString();
+    }
+
+}
+```
+
+- 测试：`http://localhost:8004/payment/zk`
+
+
+
+- 服务节点是临时节点还是持久节点？是临时节点
+
+
+
+#### 3.2服务消费者
+
+- 新建cloud-consumerzk-order80
+- pom
+
+```xml
+<dependencies>
+
+    <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>cloud-api-commons</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <!-- springboot整合zookeeper客户端h -->
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-zookeeper-discovery -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+        <!--排除zk3.5.3-->
+        <exclusions>
+            <exclusion>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <!--添加自己安装的zookeeper版本，我这里是zk 3.5.6版本-->
+    <!-- https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper -->
+    <dependency>
+        <groupId>org.apache.zookeeper</groupId>
+        <artifactId>zookeeper</artifactId>
+        <version>3.5.6</version>
+    </dependency>
+
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+        <scope>runtime</scope>
+        <optional>true</optional>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+
+</dependencies>
+ 
+```
+
+- yml
+
+```yaml
+server:
+  port: 80
+
+spring:
+  application:
+    name: cloud-consumer-order
+  cloud:
+    zookeeper:
+      connect-string: 192.168.136.140:2181
+```
+
+- 启动类
+
+```java
+@SpringBootApplication
+@EnableDiscoveryClient
+public class OrderZKMain80 {
+    public static void main(String[] args) {
+        SpringApplication.run(OrderZKMain80.class,args);
+    }
+}
+
+```
+
+- 配置类
+
+```java
+@Configuration
+public class ApplicationContextConfig {
+
+    @LoadBalanced
+    @Bean
+    public RestTemplate getRestTemplate(){
+        return new RestTemplate();
+    }
+
+}
+```
+
+- controller
+
+```java
+@RestController
+@Slf4j
+public class OrderZKController {
+
+    public static final String INVOME_URL = "http://cloud-provider-payment";
+
+    @Resource
+    private RestTemplate restTemplate;
+
+    @GetMapping("/consumer/payment/zk")
+    public String payment (){
+      String result = restTemplate.getForObject(INVOME_URL+"/payment/zk",String.class);
+      return result;
+    }
+}
+```
+
+- 测试：`http://localhost/consumer/payment/zk`
+
+
+
+### 4:Consul服务注册与发现
+
+- consul是一套开源的分布式服务发现和配置管理系统，用go语言开发。
+- [官网](https://www.consul.io/intro/index.html)
+- 提供了微服务系统中的服务治理，配置中心，控制总线等功能。这些功能中的每一个都可以根据需要单独使用，也可以一起使用构建全方位的微服务。
+- 基于raft协议，比较简洁；key , Value的存储方式；Consul支持多数据中心；支持健康检查，同时支持HTTP和DNS协议，支持跨数据中心的WAN集群，提供图形界面，跨平台
+
+
+
+#### 4.1安装与运行
+
+- 下载完成后只有一个consul.exe文件，硬盘路径下双击运行，查看版本信息
+- 使用开发模式启动`consul agent -dev`
+- 通过以下地址可以访问Consul的首页：http;//localhost:8500
+
+
+
+#### 4.2服务提供者
+
+- 新建cloud-providerconsul-payment8006
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-providerconsul-payment8006</artifactId>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-consul-discovery -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+
+    </dependencies>
+
+</project>
+ 
+```
+
+- yml
+
+```yaml
+### consul 服务端口号
+server:
+  port: 8006
+
+
+spring:
+  application:
+    name: consul-provider-payment
+# consul注册中心地址
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+```
+
+- 主启动类
+
+```java
+@SpringBootApplication
+@EnableDiscoveryClient
+public class PaymentMain8006 {
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentMain8006.class,args);
+    }
+}
+```
+
+- controller
+
+```java
+@RestController
+@Slf4j
+public class PaymentController {
+
+    @Value("${server.port}")
+    private String serverPort;
+
+    @GetMapping(value = "/payment/consul")
+    public String paymentConsul(){
+        return "springcloud with consul: "+serverPort+"\t"+ UUID.randomUUID().toString();
+    }
+}
+```
+
+- 测试：`http://localhost:8006/payment/consul`
+
+
+
+#### 4.3服务消费者
+
+- 新建cloud-consumerconsul-order80
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-consumerconsul-order80</artifactId>
+
+
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-consul-discovery -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+
+    </dependencies>
+
+
+</project>
+```
+
+- yml
+
+```yaml
+server:
+  port: 80
+
+
+spring:
+  application:
+    name: consul-consumer-order
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+```
+
+- 启动类
+
+```java
+@SpringBootApplication
+@EnableDiscoveryClient
+public class OrderConsulMain80 {
+    public static void main(String[] args) {
+        SpringApplication.run(OrderConsulMain80.class,args);
+    }
+}
+
+```
+
+- 配置类
+
+```java
+@Configuration
+public class ApplicationContextConfig {
+
+    @LoadBalanced
+    @Bean
+    public RestTemplate getRestTemplate(){
+        return new RestTemplate();
+    }
+
+}
+```
+
+- controller
+
+```java
+@RestController
+@Slf4j
+public class OrderConsulController {
+
+    public static final String INVOME_URL = "http://consul-provider-payment";
+
+    @Resource 
+    private RestTemplate restTemplate;
+
+    @GetMapping("/consumer/payment/consul")
+    public String payment (){
+      String result = restTemplate.getForObject(INVOME_URL+"/payment/consul",String.class);
+      return result;
+    }
+
+
+}
+```
+
+- 测试：`http://localhost/consumer/payment/consul`
+
+
+
+### 5：注册中心比较
+
+- 比较
+
+| 组件名       | 语言   | CAP  | 健康检查 | 对外暴露接口   | cloud集成 |
+| --------- | ---- | ---- | ---- | -------- | ------- |
+| Eureka    | Java | AP   | 可配支持 | HTTP     | 已集成     |
+| Zookeeper | GO   | CP   | 支持   | http/DNS | 已集成     |
+| Consul    | Java | CP   | 支持   | 客户端      | 已集成     |
+
+- CAP详解
+  - C:Consistency(强一致性)
+  - A:Availability(可用性)
+  - P:Partition tolerance(分区容错)
+- CAP理论关注粒度是数据，而不是整体系统设计的策略
+- 最多只能同时满足两个
+- CAP理论的核心是：一个分布式系统不可能同时满足一致性，可用性和分区容错性这三个需求。因此根据CAP原则将NoSql数据库分为满足CA原则，CP原则和AP原则三大类。
+- CA：单点集群，满足一致性，可用性的系统，通常在可扩展性上不强大
+- CP：满足一致性，分区容错的系统，通常性能不高（Consul，Zookeeper）
+- AP：满足可用性，分区容错的系统，对一致性要求比较低（Eureka）
+
+
+
+
+
+### 6：Ribbon负载均衡服务调用
+
+- springCloud Ribbon是基于Netflix实现的一套客户端负载均衡的工具；
+- 主要功能是提供客户端的软件负载均衡算法和服务调用。提供了一系列完善的配置项，如连接超时，重试等。
+- 负载均衡：将用户的请求平摊的分配到多个服务上，从而达到系统的HA（高可用）
+- 对比Ribbon和Nginx
+  - Nginx是服务器负载均衡，客户端所有请求都会交给Nginx，然后由Nginx实现转发请求。即负载均衡是由服务端实现的
+  - Ribbon本地负载均衡，在调用微服务接口的时候，会在注册中心上获取注册信息服务列表之后缓存到JVM本地，从而在本地实现RPC远程服务调用。
+- 集中式LB：在服务的消费方和提供方之间使用独立的LB设施（可以是硬件，如F5，可以是软件，如Nginx），由该设施负责把访问请求通过某种策略转发到服务的提供方。
+- 进程内LB：将LB逻辑集成到消费方，消费方从服务注册中心获知有哪些地址可用，然后自己再从这些地址中选择出合适的服务器。Ribbon就属于这种，它只是一个类库，集成在消费方进程中，消费方通过它来获取到服务提供方的地址。
+- Ribbon在工作时分为两步
+  - 先选择EurekaServer，它优先选择在同一区域内负载较少的server
+  - 再根据用户指定的策略，从server取到的服务注册列表中选择一个地址。
+- Ribbon提供了多种策略：轮询，随机，根据响应时间加权
+
+
+
+#### RestTemplate
+
+- getForObject方法：返回对象为响应体中数据转化成的对象，基本上可以理解为json
+- getForEntity方法：返回对象为ResponseEntity对象，包含了响应中的一些重要数据，比如响应头，响应状态码，响应体等。
+- API
+
+
+
+#### 核心组件IRule
+
+- IRule:根据特定算法从服务列表中选取一个要访问的服务
+  - com.netflix.loadbalancer.RoundRobinRule：轮询
+  - com.netflix.loadbalancer.RandomRule：随机
+  - com.netflix.loadbalancer.RetryRule：先按照RoundRobinRule的策略获取服务，如果获取服务失败则在指定时间内会进行重试
+  - WeightedResponseTimeRule ：对RoundRobinRule的扩展，响应速度越快的实例选择权重越大，越容易被选择
+  - BestAvailableRule ：会先过滤掉由于多次访问故障而处于断路器跳闸状态的服务，然后选择一个并发量最小的服务
+  - AvailabilityFilteringRule ：先过滤掉故障实例，再选择并发较小的实例
+  - ZoneAvoidanceRule：默认规则，复合判断server所在区域的性能和server的可用性选择服务器
+- 修改cloud-consumer-order80
+- 自定义配置类不能放在@ComponentScan所扫描的当前包下以及子包下。否则自定义配置类就会被所有Ribbon客户端共享，达不到特殊定制的目的
+- 新建MySelfRule规则类
+
+```java
+@Configuration
+public class MySelfRule {
+
+    /**
+     * @return ribbon负载均衡规则
+     */
+    @Bean
+    public IRule myRule(){
+        return new RandomRule();//定义为随机规则
+    }
+}
+
+```
+
+- 修改启动类
+
+```java
+@EnableEurekaClient
+@SpringBootApplication
+//注意修改name为自己的微服务名称
+@RibbonClient(name = "CLOUD-PAYMENT-SERVICE",configuration = MySelfRule.class)
+public class OrderMain80 {
+    public static void main(String[] args) {
+        SpringApplication.run(OrderMain80.class,args);
+    }
+
+}
+```
+
+- 测试：`http://localhost/consumer/payment/get/31`
+
+
+
+#### 负载均衡算法
+
+- 负载均衡算法：rest接口第几次请求数 % 服务器集群总数量 = 实际调用服务器位置下标，每次服务重启后rest接口计数从1开始
+- 自实现负载均衡
+
+```java
+/**
+*使用CAS和自旋锁实现轮询算法
+/
+@Component
+public class MyLB implements LoadBalancer {
+
+    private AtomicInteger atomicInteger = new AtomicInteger(0);
+
+    //坐标
+    private final int getAndIncrement(){
+        int current;
+        int next;
+        do {
+            current = this.atomicInteger.get();
+            next = current >= 2147483647 ? 0 : current + 1;
+        }while (!this.atomicInteger.compareAndSet(current,next));  //第一个参数是期望值，第二个参数是修改值是
+        System.out.println("*******第几次访问，次数next: "+next);
+        return next;
+    }
+ 
+   //负载均衡算法：rest接口第几次请求数 % 服务器集群总数量 = 实际调用服务器位置下标，每次服务重启后rest接口计数从1开始
+    @Override
+    public ServiceInstance instances(List<ServiceInstance> serviceInstances) {  //得到机器的列表
+       int index = getAndIncrement() % serviceInstances.size(); //得到服务器的下标位置
+        return serviceInstances.get(index);
+    }
+}
+```
+
