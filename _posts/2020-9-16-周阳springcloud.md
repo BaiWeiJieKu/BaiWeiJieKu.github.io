@@ -2362,3 +2362,382 @@ public class OrderHystrixController {
 - 对方服务（8001）超时了，调用者（80）不能一直卡死等待，必须有服务降级
 - 对方服务（8001）down机了，调用者（80）不能一直卡死等待，必须有服务降级
 - 对方服务（8001）OK，调用者（80）自己出故障或有自我要求（自己的等待时间小于服务提供者），自己处理降级
+
+
+
+#### 8.3服务降级
+
+- 8001先从自身找问题：设置自身调用超时时间的峰值，峰值内可以正常运行，超过了需要有兜底的方法处理，作服务降级fallback。
+- @HystrixCommand报异常后如何处理
+- 一旦调用服务方法失败并抛出了错误信息后，会自动调用@HystrixCommand标注好的fallbackMethod调用类中的指定方法
+
+```java
+@Service
+public class PaymentService {
+
+    //成功
+    public String paymentInfo_OK(Integer id){
+        return "线程池："+Thread.currentThread().getName()+"   paymentInfo_OK,id：  "+id+"\t"+"哈哈哈"  ;
+    }
+
+    //失败
+//fallbackMethod:指定兜底方法
+    @HystrixCommand(fallbackMethod = "paymentInfo_TimeOutHandler",commandProperties = {
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "3000")  //3秒钟以内就是正常的业务逻辑
+    })
+    public String paymentInfo_TimeOut(Integer id){
+       // int timeNumber = 5;
+        int age = 10/0;
+       // try { TimeUnit.SECONDS.sleep(timeNumber); }catch (Exception e) {e.printStackTrace();}
+        //return "线程池："+Thread.currentThread().getName()+"   paymentInfo_TimeOut,id：  "+id+"\t"+"呜呜呜"+" 耗时(秒)"+timeNumber;
+        return "线程池："+Thread.currentThread().getName()+"   paymentInfo_TimeOut,id：  "+id+"\t"+"呜呜呜"+" 耗时(秒)";
+    }
+
+    //兜底方法
+    public String paymentInfo_TimeOutHandler(Integer id){
+        return "线程池："+Thread.currentThread().getName()+"   系统繁忙, 请稍候再试  ,id：  "+id+"\t"+"哭了哇呜";
+    }
+
+}
+```
+
+- 主启动类添加新注解@EnableCircuitBreaker
+
+
+
+
+
+- 80订单微服务，也可以更好的保护自己，自己也依样画葫芦进行客户端降级保护
+- 我们自己配置过的热部署方式对java代码的改动明显，但对@HystrixCommand内属性的修改建议重启微服务
+- yml
+
+```yaml
+feign:
+  hystrix:
+    enabled: true #如果处理自身的容错就开启。开启方式与生产端不一样。
+```
+
+- 主启动类：@EnableHystrix
+- 业务类
+
+```java
+@GetMapping("/consumer/payment/hystrix/timeout/{id}")
+@HystrixCommand(fallbackMethod = "paymentTimeOutFallbackMethod",commandProperties = {
+        @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "1500")  //3秒钟以内就是正常的业务逻辑
+})
+public String paymentInfo_TimeOut(@PathVariable("id") Integer id){
+    String result = paymentHystrixService.paymentInfo_TimeOut(id);
+    return result;
+}
+
+//兜底方法
+public String paymentTimeOutFallbackMethod(@PathVariable("id") Integer id){
+    return "我是消费者80，对付支付系统繁忙请10秒钟后再试或者自己运行出错请检查自己,(┬＿┬)";
+}
+```
+
+- 问题：每个业务方法对应一个兜底的方法，代码膨胀，统一和自定义的分开
+- 使用@DefaultProperties设置全局fullback
+- 修改80controller
+
+```java
+@RestController
+@Slf4j
+@DefaultProperties(defaultFallback = "payment_Global_FallbackMethod")  //全局的
+public class OrderHystrixController {
+
+    @Resource
+    private PaymentHystrixService paymentHystrixService;
+
+    @GetMapping("/consumer/payment/hystrix/ok/{id}")
+    public String paymentInfo_OK(@PathVariable("id") Integer id){
+        String result = paymentHystrixService.paymentInfo_OK(id);
+        return result;
+    }
+
+
+    @GetMapping("/consumer/payment/hystrix/timeout/{id}")
+    @HystrixCommand
+    public String paymentInfo_TimeOut(@PathVariable("id") Integer id){
+        int age = 10/0;
+        String result = paymentHystrixService.paymentInfo_TimeOut(id);
+        return result;
+    }
+
+    //下面是全局fallback方法
+    public String payment_Global_FallbackMethod(){
+        return "Global异常处理信息，请稍后再试,(┬＿┬)";
+    }
+}
+```
+
+
+
+
+
+- 服务降级，客户端去调用服务端，碰上服务端宕机或关闭
+- 本次案例服务降级处理是在客户端80实现完成的，与服务端8001没有关系，只需要为Feign客户端定义的接口添加一个服务降级处理的实现类即可实现解耦
+- 修改cloud-consumer-feign-hystrix-order80
+- 根据cloud-consumer-feign-hystrix-order80已经有的PaymentHystrixService接口，重新新建一个类（PaymentFallbackService）实现该接口，统一为接口里面的方法进行异常处理
+
+```java
+@Component
+public class PaymentFallbackService implements PaymentHystrixService {
+    @Override
+    public String paymentInfo_OK(Integer id) {
+        return "-----PaymentFallbackService fall back-paymentInfo_OK , (┬＿┬)";
+    }
+
+    @Override
+    public String paymentInfo_TimeOut(Integer id) {
+        return "-----PaymentFallbackService fall back-paymentInfo_TimeOut , (┬＿┬)";
+    }
+}
+```
+
+- yml
+
+```yaml
+feign:
+  hystrix:
+    enabled: true #在feign中开启hystrix，如果处理自身的容错就开启。开启方式与生产端不一样。
+```
+
+- PaymentFeignClientService接口，指定fullback处理类
+
+```java
+@Component
+@FeignClient(value = "CLOUD-PROVIDER-HYSTRIX-PAYMENT",fallback = PaymentFallbackService.class)
+public interface PaymentHystrixService {
+
+    @GetMapping("/payment/hystrix/ok/{id}")
+    public String paymentInfo_OK(@PathVariable("id") Integer id);
+
+    @GetMapping("/payment/hystrix/timeout/{id}")
+    public String paymentInfo_TimeOut(@PathVariable("id") Integer id);
+
+
+}
+```
+
+- 测试
+
+  单个eureka先启动7001
+
+  PaymentHystrixMain8001启动
+
+  正常访问测试：http://localhost/consumer/payment/hystrix/ok/31
+
+  故意关闭微服务8001
+
+  此时服务端provider已经down了，但是我们做了服务降级处理，让客户端在服务端不可用时也会获得提示信息而不会挂起耗死服务器
+
+
+
+#### 8.4服务熔断
+
+- 熔断机制是应对雪崩效应的一种微服务链路的保护机制。当扇出链路的某个微服务出错不可用或响应时间太长时，会进行服务的降级，进而熔断该节点的微服务调用，快速返回错误的响应信息。当检测到该节点微服务调用的响应正常后，恢复调用链路。
+- 熔断机制通过Hystrix实现，通过检测微服务间的调用情况，当失败的调用达到一定阈值，缺省是5秒内20次失败，就会启动熔断机制，注解是@HystrixCommand。
+- 修改cloud-provider-hystrix-payment8001
+- PaymentService
+
+```java
+//服务熔断
+@HystrixCommand(fallbackMethod = "paymentCircuitBreaker_fallback",commandProperties = {
+        @HystrixProperty(name = "circuitBreaker.enabled",value = "true"),  //是否开启断路器
+        @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold",value = "10"),   //请求次数
+        @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds",value = "10000"),  //时间范围
+        @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value = "60"), //失败率达到多少后跳闸
+})
+public String paymentCircuitBreaker(@PathVariable("id") Integer id){
+    if (id < 0){
+        throw new RuntimeException("*****id 不能负数");
+    }
+    String serialNumber = IdUtil.simpleUUID();
+
+    return Thread.currentThread().getName()+"\t"+"调用成功,流水号："+serialNumber;
+}
+public String paymentCircuitBreaker_fallback(@PathVariable("id") Integer id){
+    return "id 不能负数，请稍候再试,(┬＿┬)/~~     id: " +id;
+}
+```
+
+- PaymentController
+
+```java
+//===服务熔断
+@GetMapping("/payment/circuit/{id}")
+public String paymentCircuitBreaker(@PathVariable("id") Integer id){
+    String result = paymentService.paymentCircuitBreaker(id);
+    log.info("*******result:"+result);
+    return result;
+}
+```
+
+- 测试
+
+  自测cloud-provider-hystrix-payment8001
+
+  正确：http://localhost:8001/payment/circuit/31
+
+  错误：http://localhost:8001/payment/circuit/-31
+
+  多次错误,然后慢慢正确，发现刚开始不满足条件，就算是正确的访问地址也不能进行访问，需要慢慢的恢复链路
+
+
+
+
+
+- 熔断类型
+  - 熔断打开：请求不再进行调用当前服务，内部设置时钟一般为MTTR(平均故障处理时间)，当打开时长达到所设时钟则进入熔断状态
+  - 熔断关闭：熔断关闭不会对服务进行熔断
+  - 熔断半开：部分请求根据规则调用当前服务，如果请求成功且符合规则则认为当前服务恢复正常，关闭熔断
+- 断路器在什么情况下起作用？
+  - 快照时间窗：断路器确定是否打开需要统计一些请求和错误数据，而统计的时间范围就是快照时间窗，默认为最近的10秒
+  - 请求总数阈值：在快照时间窗内，必须满足请求总数阈值才能熔断，默认为20，也就是10秒内该命令调用不足20次，即使所有的请求都超时或失败，断路器都不会打开
+  - 错误百分比阈值：当请求总数在快照时间窗内超过阈值，比如调用了30次，15次为超时，也就是达到了50%的错误，当默认设定50%阈值情况下，断路器打开。
+- 当开启的时候，所有请求都不会进行转发。一段时间之后（默认是5秒），这个时候断路器是半开状态，会让其中一个请求进行转发。如果成功，断路器会关闭，若失败，继续开启。重复
+- 断路器打开之后，再有请求调用的时候，将不会调用主逻辑，而是直接调用降级fullback，通过断路器，实现了自动的发现错误并将降级逻辑切换为主逻辑，减少响应延迟的效果。
+- 原来的主逻辑如何恢复？实现了自动恢复功能，断路器打开对主逻辑进行熔断后，hystrix会启动一个休眠时间窗，在时间窗内，降级逻辑是暂时的主逻辑，当休眠时间窗到期后，断路器进入半开状态，释放一次请求到原来主逻辑上，如果请求正常返回，断路器闭合，主逻辑恢复，若这次请求依然有问题，继续保持熔断状态，休眠时间窗重新计时。
+
+
+
+
+
+#### 8.5服务监控
+
+- 新建cloud-consumer-hystrix-dashboard9001
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-consumer-hystrix-dashboard9001</artifactId>
+
+
+    <dependencies>
+        <!--新增hystrix dashboard-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix-dashboard</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
+```
+
+- yml
+
+```yaml
+server:
+  port: 9001
+```
+
+- 主启动类HystrixDashboardMain9001+新注解@EnableHystrixDashboard
+
+```java
+@SpringBootApplication
+@EnableHystrixDashboard
+public class HystrixDashboardMain9001 {
+    public static void main(String[] args) {
+        SpringApplication.run(HystrixDashboardMain9001.class,args);
+    }
+}
+```
+
+- 所有Provider微服务提供类（8001/8002/8003）都需要监控依赖配置
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+- 启动cloud-consumer-hystrix-dashboard9001该微服务后续将监控微服务8001
+
+  http://localhost:9001/hystrix
+
+- 修改cloud-provider-hystrix-payment8001
+
+- 注意：新版本Hystrix需要在主启动类MainAppHystrix8001中指定监控路径
+
+```java
+/**
+* 此配置是为了服务监控而配置，与服务容错本身无关，springcloud升级后的坑
+* ServletRegistrationBean因为springboot的默认路径不是“/hystrix.stream”
+* 只要在自己的项目里配置上下面的servlet就可以了
+*/ 
+@Bean
+public ServletRegistrationBean getServlet(){
+    HystrixMetricsStreamServlet streamServlet = new HystrixMetricsStreamServlet();
+    ServletRegistrationBean registrationBean = new ServletRegistrationBean(streamServlet);
+    registrationBean.setLoadOnStartup(1);
+    registrationBean.addUrlMappings("/hystrix.stream");
+    registrationBean.setName("HystrixMetricsStreamServlet");
+    return registrationBean;
+}
+ 
+
+```
+
+- 启动1个eureka或者3个eureka集群均可
+
+- 9001监控8001
+
+  填写监控地址http://localhost:8001/hystrix.stream
+
+- 测试地址
+
+  http://localhost:8001/payment/circuit/31
+
+  http://localhost:8001/payment/circuit/-31
+
+  上述测试通过
+
+  先访问正确地址，再访问错误地址，再正确地址，会发现图示断路器都是慢慢放开的
+
+- 如何看
+
+  - 实心圆：通过颜色代表实例的健康程度，绿色<黄色<橙色<红色。大小反应请求流量，流量越大实心圆越大。
+  - 曲线：用来记录两分钟内流量的相对变化
+
+
+
+![image.png](https://i.loli.net/2020/09/19/wK8JgMpbCcSItrn.png)
+
+
+
+![image.png](https://i.loli.net/2020/09/19/Abm7qZYNDsLVR6E.png)
+
