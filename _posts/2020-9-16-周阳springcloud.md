@@ -246,7 +246,7 @@ public class CommonResult <T>{
 
 
 
-##### 1.2.3微服务提供者支付模块
+##### 1.2.3微服务提供者支付模块8001
 
 - 在父工程下建cloud-provider-payment8001项目
 - pom
@@ -457,7 +457,7 @@ public class PaymentController {
 
 
 
-##### 1.2.4微服务消费者订单模块
+##### 1.2.4微服务消费者订单模块80
 
 - 在父工程下建cloud-consumer-order80
 - pom
@@ -598,7 +598,7 @@ public class OrderController {
 
 #### 2.2单机构建
 
-##### 2.2.1eurekaServer
+##### 2.2.1eurekaServer7001
 
 - 创建eurekaServer端服务注册中心模块：cloud-eureka-server7001
 - pom
@@ -707,7 +707,7 @@ public class EurekaMain7001 {
 
 ##### 2.2.2eurekaClient
 
-###### 注册服务提供者
+###### 注册服务提供者8001
 
 - EurekaClient端cloud-provider-payment8001（1.2.3）将注册进EurekaServer成为服务提供者provider
 - 改pom
@@ -749,7 +749,7 @@ public class PaymentMain8001 {
 
 
 
-###### 注册服务消费者
+###### 注册服务消费者80
 
 - EurekaClient端cloud-consumer-order80（1.2.4）将注册进EurekaServer成为服务消费者consumer
 - 改pom
@@ -1063,7 +1063,7 @@ public Object discovery(){
 
 
 
-#### 3.1服务提供者
+#### 3.1服务提供者8004
 
 - 新建cloud-provider-payment8004
 - pom
@@ -1206,7 +1206,7 @@ public class PaymentController {
 
 
 
-#### 3.2服务消费者
+#### 3.2服务消费者80
 
 - 新建cloud-consumerzk-order80
 - pom
@@ -1365,7 +1365,7 @@ public class OrderZKController {
 
 
 
-#### 4.2服务提供者
+#### 4.2服务提供者8006
 
 - 新建cloud-providerconsul-payment8006
 - pom
@@ -1493,7 +1493,7 @@ public class PaymentController {
 
 
 
-#### 4.3服务消费者
+#### 4.3服务消费者80
 
 - 新建cloud-consumerconsul-order80
 - pom
@@ -2021,7 +2021,7 @@ logging:
 
 
 
-#### 8.1服务提供者
+#### 8.1服务提供者8001
 
 - 新建cloud-provider-hystrix-payment8001
 - pom
@@ -2188,7 +2188,7 @@ public class PaymentController {
 
   ​
 
-#### 8.2服务消费者
+#### 8.2服务消费者80
 
 - 新建cloud-consumer-feign-hystrix-order80
 - pom
@@ -2604,7 +2604,7 @@ public String paymentCircuitBreaker(@PathVariable("id") Integer id){
 
 
 
-#### 8.5服务监控
+#### 8.5服务监控9001
 
 - 新建cloud-consumer-hystrix-dashboard9001
 - pom
@@ -2740,4 +2740,1174 @@ public ServletRegistrationBean getServlet(){
 
 
 ![image.png](https://i.loli.net/2020/09/19/Abm7qZYNDsLVR6E.png)
+
+
+
+
+
+### 9.Gateway新一代网关
+
+- gateway是上一代网关zuul1.x的代替
+
+- gateway是springcloud的一个全新项目，基于springboot2.0+spring5.0和project reactor等技术，旨在为微服务架构提供一种简单有效的统一API路由管理方式。
+
+- gateway是基于WebFlux框架实现的，底层使用了高性能Reactor模式通信框架Netty
+
+- gateway目标是提供统一的路由方式且基于Filter链的方式提供了网关基本功能，例如安全，监控指标和限流
+
+- gateway特性
+
+  动态路由：能够匹配任何请求属性
+
+  可以对路由指定predict（断言）和filter（过滤器）
+
+  集成Hystrix的断路器功能
+
+  集成springcloud服务发现功能
+
+  请求限流功能
+
+  支持路径重写
+
+
+
+#### 9.1核心概念和工作流程
+
+- Route(路由)：路由是构建网关的基本模块，它由ID，目标URI，一系列的断言和过滤器组成，如果断言为true则匹配该路由
+- Predicate（断言）：参考的是java8的java.util.function.Predicate开发人员可以匹配HTTP请求中的所有内容（例如请求头或请求参数），如果请求与断言相匹配则进行路由
+- Filter(过滤)：指的是Spring框架中GatewayFilter的实例，使用过滤器，可以在请求被路由前或者之后对请求进行修改。
+
+
+
+- 工作流程
+  - 客户端向gateway发送请求，然后在gateway handler mapping中找到与请求相匹配的路由，将其发送到gateway web handler
+  - handler再通过指定的过滤器链来将请求发送到我们实际的服务执行业务逻辑，然后返回。过滤器可能会在发送代理请求之前或之后执行业务逻辑
+  - filter在“pre”类型的过滤器可以做参数校验，权限校验，流量监控，日志输出，协议转换等。在“post”类型的过滤器中可以做响应内容，响应头的修改，日志的输出，流量监控等。
+
+
+
+#### 9.2入门配置9527
+
+- 新建cloud-gateway-gateway9527
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-gateway-gateway9527</artifactId>
+
+
+    <dependencies>
+        <!--新增gateway-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>
+```
+
+- yml
+
+```yaml
+server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: payment_routh #路由的ID，没有固定规则但要求唯一，建议配合服务名
+          uri: http://localhost:8001   #匹配后提供服务的路由地址
+          predicates:
+            - Path=/payment/get/**   #断言,路径相匹配的进行路由
+
+        - id: payment_routh2
+          uri: http://localhost:8001
+          predicates:
+            - Path=/payment/lb/**   #断言,路径相匹配的进行路由
+
+
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://eureka7001.com:7001/eureka
+```
+
+- 主启动类
+
+```java
+@SpringBootApplication
+@EnableEurekaClient
+public class GateWayMain9527 {
+    public static void main(String[] args) {
+            SpringApplication.run( GateWayMain9527.class,args);
+        }
+}
+```
+
+- 9527网关如何做路由映射那？？？
+
+  cloud-provider-payment8001看看controller的访问地址
+
+  我们目前不想暴露8001端口，希望在8001外面套一层9527
+
+- YML新增网关配置
+
+```yaml
+server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      routes:
+    - id: payment_routh #路由的ID，没有固定规则但要求唯一，建议配合服务名
+      uri: http://localhost:8001   #匹配后提供服务的路由地址
+      predicates:
+        - Path=/payment/get/**   #断言,路径相匹配的进行路由
+
+    - id: payment_routh2
+      uri: http://localhost:8001
+      predicates:
+        - Path=/payment/lb/**   #断言,路径相匹配的进行路由
+
+
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://eureka7001.com:7001/eureka
+ 
+ 
+
+```
+
+- test
+
+  启动7001,cloud-provider-payment8001
+
+  启动9527网关
+
+  添加网关前:http://localhost:8001/payment/get/31
+
+  添加网关后:http://localhost:9527/payment/get/31
+
+  ​
+
+
+
+#### 9.3动态路由
+
+- 默认情况下Gateway会根据注册中心的服务列表，以注册中心上微服务名为路径创建动态路由进行转发，从而实现动态路由的功能
+
+- 启动一个eureka7001+两个服务提供者8001/8002
+
+- yml
+
+  需要注意的是uri的协议为lb，表示启用Gateway的负载均衡功能。
+
+  lb://serviceName是spring cloud gateway在微服务中自动为我们创建的负载均衡uri
+
+```yaml
+server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true  #开启从注册中心动态创建路由的功能，利用微服务名进行路由
+      routes:
+        - id: payment_routh #路由的ID，没有固定规则但要求唯一，建议配合服务名
+          #uri: http://localhost:8001   #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/payment/get/**   #断言,路径相匹配的进行路由
+
+        - id: payment_routh2
+          #uri: http://localhost:8001   #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/payment/lb/**   #断言,路径相匹配的进行路由
+
+
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://eureka7001.com:7001/eureka
+ 
+```
+
+
+
+- test
+
+  http://localhost:9527/payment/lb
+
+  8001/8002两个端口切换
+
+
+
+#### 9.4Predicate的使用
+
+- 说白了，Predicate就是为了实现一组匹配规则，让请求过来找到对应的Route进行处理
+
+- 常用的Route Predicate
+
+  After Route Predicate
+
+  ```yaml
+  - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+  ```
+
+  Before Route Predicate
+
+  ```yaml
+  - After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+  - Before=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+  ```
+
+  Between Route Predicate
+
+  ```yaml
+  - Between=2020-03-08T10:59:34.102+08:00[Asia/Shanghai] ,  2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+
+  ```
+
+  Cookie Route Predicate
+
+  ```yaml
+  - Cookie=username,atguigu    #并且Cookie是username=zhangshuai才能访问
+  ```
+
+  Header Route Predicate
+
+  ```yaml
+  - Header=X-Request-Id, \d+   #请求头中要有X-Request-Id属性并且值为整数的正则表达式
+  ```
+
+  Host Route Predicate
+
+  ```yaml
+  - Host=**.atguigu.com
+  ```
+
+  Method Route Predicate
+
+  ```yaml
+  - Method=GET
+  ```
+
+  Path Route Predicate
+
+  Query Route Predicate
+
+  ```yaml
+  - Query=username, \d+ #要有参数名称并且是正整数才能路由
+  ```
+
+  ​
+
+- 总结
+
+```yaml
+server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true  #开启从注册中心动态创建路由的功能，利用微服务名进行路由
+      routes:
+        - id: payment_routh #路由的ID，没有固定规则但要求唯一，建议配合服务名
+          #uri: http://localhost:8001   #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/payment/get/**   #断言,路径相匹配的进行路由
+ 
+        - id: payment_routh2
+          #uri: http://localhost:8001   #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/payment/lb/**   #断言,路径相匹配的进行路由
+            #- After=2020-03-08T10:59:34.102+08:00[Asia/Shanghai]
+            #- Cookie=username,zhangshuai #并且Cookie是username=zhangshuai才能访问
+            #- Header=X-Request-Id, \d+ #请求头中要有X-Request-Id属性并且值为整数的正则表达式
+            #- Host=**.atguigu.com
+            #- Method=GET
+            #- Query=username, \d+ #要有参数名称并且是正整数才能路由
+ 
+ 
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://eureka7001.com:7001/eureka
+
+```
+
+
+
+#### 9.5Filter的使用
+
+- 路由过滤器可以用于修改进入的HTTP请求和返回的HTTP响应，路由过滤器只能指定路由进行使用
+
+- 路由过滤器由GatewayFilter工厂类来产生
+
+- 生命周期
+
+  pre：在业务逻辑之前
+
+  post：在业务逻辑之后
+
+- 种类
+
+  GatewayFilter：单一
+
+  GlobalFilter：全局
+
+- 自定义全局GlobalFilter
+
+```java
+@Component
+@Slf4j
+public class MyLogGateWayFilter implements GlobalFilter,Ordered {
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+
+        log.info("*********come in MyLogGateWayFilter: "+new Date());
+        String uname = exchange.getRequest().getQueryParams().getFirst("username");
+        if(StringUtils.isEmpty(uname)){
+            log.info("*****用户名为Null 非法用户,(┬＿┬)");
+            exchange.getResponse().setStatusCode(HttpStatus.NOT_ACCEPTABLE);//给人家一个回应
+            return exchange.getResponse().setComplete();
+        }
+        return chain.filter(exchange);
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
+    }
+}
+
+```
+
+- 测试
+
+  启动eureka7001，payment8001，8002，gateway9527
+
+  http://localhost:9527/payment/lb?uname=z3
+
+
+
+### 10.Config分布式配置中心
+
+- 分布式系统面临的配置问题：每一个微服务项目都有一个application.yml配置文件，服务多了之后就不好管理了。
+
+- Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为各个不同微服务应用的所有环境提供了一个中心化的外部配置。
+
+- Config分为服务端和客户端两部分
+
+  服务端也称为分布式配置中心，它是一个独立的微服务应用。用来连接配置服务器并为客户端提供获取配置信息，加密解密等服务接口
+
+  客户端通过指定的配置中心来管理应用资源，以及与业务有关的配置内容，并在启动的时候从配置中心获取和加载配置信息，配置服务器默认采用git来存储配置信息，这样就有助于对环境配置进行版本管理，并且可以通过Git客户端来管理和访问配置内容。
+
+- Config运行期间动态调整配置，不再需要在每个服务部署的机器上编写配置文件，服务会向配置中心统一拉取配置自己的信息。当配置发生变动时，服务不需要重启即可感知到配置的变化并应用新的配置。将配置信息以REST接口的形式暴露
+
+
+
+#### 10.1服务端配置3344
+
+- 用你自己的账号在Github上新建一个名为sprincloud-config的新Repository
+
+- 本地硬盘上新建git仓库并clone，此时在本地D盘符下D:\44\SpringCloud2020\springcloud-config
+
+  创建三个yml文件，分别为dev，prod，test表示多个环境的配置文件
+
+  保存格式必须为UTF-8
+
+
+
+- 新建Module模块cloud-config-center-3344它既为Cloud的配置中心模块cloudConfig Center
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-config-center-3344</artifactId>
+
+    <dependencies>
+
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-config-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
+```
+
+- yml
+
+```yaml
+server:
+  port: 3344
+spring:
+  application:
+    name: cloud-config-center
+  cloud:
+    config:
+      server:
+        git:
+          uri:  填写你自己的github路径
+          # 搜索目录
+          search-paths:
+            - springcloud-config
+      # 读取分支
+      label: master
+eureka:
+  client:
+    service-url:
+      defaultZone:  http://localhost:7001/eureka
+```
+
+- 主启动类
+
+```java
+@SpringBootApplication
+@EnableConfigServer
+public class ConfigCenterMain3344 {
+    public static void main(String[] args) {
+            SpringApplication.run(ConfigCenterMain3344 .class,args);
+        }
+}
+```
+
+- windows下修改hosts文件，增加映射:`127.0.0.1 config-3344.com`
+
+- 测试通过Config微服务是否可以从Github上获取配置内容
+
+  启动微服务3344
+
+  http://config-3344.com:3344/master/config-dev.yml
+
+
+
+- 配置读取规则
+
+- /{label}/{application}-{profile}.yml（最推荐使用这种方式）
+
+  master分支
+
+  http://config-3344.com:3344/master/config-dev.yml
+
+  dev分支
+
+  http://config-3344.com:3344/dev/config-dev.yml
+
+- /{application}-{profile}.yml
+
+  http://config-3344.com:3344/config-dev.yml
+
+- /{application}-{profile}[/{label}]
+
+  http://config-3344.com:3344/config/dev/master
+
+- label：分支
+
+  name：服务名
+
+  profiles：环境（dev，test，prod）
+
+
+
+#### 10.2客户端配置3355
+
+- 新建cloud-config-client-3355
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-config-client-3355</artifactId>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
+```
+
+- bootstap.yml
+  - application.yml是用户级别的资源配置项
+  - bootstrap.yml是系统级别的资源配置项（优先级更高）
+- springcloud会创建一个“Bootstrap Context”，作为spring的“Application context”的父上下文。初始化的时候，“Bootstrap Context”负责从外部源加载配置属性并解析配置。这两个上下文共享一个从外部获取的“Environment”。“Bootstrap Context”和“Application context”有不同的约定，所以新增bootstrap.yml文件，保证“Bootstrap Context”和“Application context”配置的分离
+- 要将Client模块的application.yml改为bootstrap.yml。因为bootstrap.yml是先加载的，优先级高
+
+```yaml
+server:
+  port: 3355
+
+spring:
+  application:
+    name: config-client
+  cloud:
+   # config客户端设置
+    config:
+      label: master # 分支名称
+      name: config  # 配置文件名称
+      profile: dev  # 读取后缀名称
+      uri: http://localhost:3344  # 配置中心地址
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka
+```
+
+- 修改config-dev.yml配置并提交到GitHub中，比如加个变量age或者版本号version
+- 主启动类
+
+```java
+@SpringBootApplication
+public class ConfigClientMain3355 {
+    public static void main(String[] args) {
+            SpringApplication.run( ConfigClientMain3355.class,args);
+        }
+}
+
+```
+
+- 业务类
+
+```java
+@RestController
+public class ConfigClientController {
+
+    @Value("${config.info}")
+    private String configInfo;
+
+    @GetMapping("/configInfo")
+    public String getConfigInfo(){
+        return configInfo;
+    }
+}
+
+```
+
+- test
+
+  启动Config配置中心3344微服务并自测
+
+  http://config-3344.com:3344/master/config-dev.yml
+
+  http://config-3344.com:3344/master/config-test.yml
+
+  启动3355作为Client准备访问
+
+  http://localhost:3355/configInfo
+
+  成功实现了客户端3355访问SpringCloud Config3344通过GitHub获取配置信息
+
+- 问题随时而来，分布式配置的动态刷新
+
+  Linux运维修改GitHub上的配置文件内容做调整
+
+  刷新3344，发现ConfigServer配置中心立刻响应
+
+  刷新3355，发现ConfigServer客户端没有任何响应
+
+  3355没有变化除非自己重启或者重新加载
+
+  难道每次运维修改配置文件，客户端都需要重启？？噩梦
+
+
+
+#### 10.3客户端动态刷新
+
+- 避免每次更新配置都要重启客户端微服务3355
+- 修改3355模块
+- POM引入actuator监控
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+- 修改YML，暴露监控端口
+
+```yaml
+server:
+  port: 3355
+
+spring:
+  application:
+    name: config-client
+  cloud:
+    config:
+      label: master
+      name: config
+      profile: dev
+      uri: http://localhost:3344
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka
+ 
+# 暴露监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+```
+
+- 业务类添加注解
+
+```java
+@RefreshScope
+@RestController
+public class ConfigClientController {
+
+    @Value("${config.info}")
+    private String configInfo;
+
+    @GetMapping("/configInfo")
+    public String getConfigInfo(){
+        return configInfo;
+    }
+}
+```
+
+- 此时修改github
+
+- 需要运维人员发送Post请求刷新3355，必须是Post请求
+
+  curl -X POST "http://localhost:3355/actuator/refresh"
+
+  访问http://localhost:3355/configInfo
+
+  更改成功，成功实现了客户端3355刷新到最新配置内容，避免了服务的重启
+
+- 引出新的问题
+
+  假如有多个微服务客户端3355/3366/3377。。。。
+
+  每个微服务都要执行一次post请求，手动刷新？
+
+  可否广播，一次通知，处处生效？
+
+  我们想大范围的自动刷新，求方法
+
+
+
+### 11.Bus消息总线
+
+- 分布式自动刷新配置功能
+- Spring Cloud Bus配合Spring Cloud Config使用可以实现配置的动态刷新
+- Bus是用来将分布式系统的节点与轻量级消息系统链接起来的框架，它整合了Java的事件处理机制和消息中间件的功能。目前支持RabbitMQ和Kafka
+- Bus能管理和传播分布式系统间的消息，就像一个分布式执行器，可用于广播状态更改，事件推送等，也可以当做微服务间的通信通道。
+- 什么是总线：在微服务架构系统中，通常会使用轻量级的消息代理来构建一个共同的消息主题，并让系统中所有微服务实例都连接上来，由于该主题中产生的消息会被所有实例监听和消费，所以称为消息总线。
+- 基本原理：ConfigClient实例都监听MQ中同一个topic（默认是springCloudBus），当一个服务刷新数据的时候，它会把这个信息放入到topic中，这样其他监听同一个topic的服务就能得到通知，然后去更新自身的配置。
+
+
+
+#### 11.1RabbitMQ环境配置
+
+- 安装Erlang
+
+- 安装RabbitMQ
+
+- 进入RabbitMQ安装目录下的sbin目录
+
+  输入以下命令启动管理功能`rabbitmq-plugins enable rabbitmq_management`
+
+  访问地址查看是否安装成功
+
+  http://localhost:15672/
+
+  输入账号密码并登录: guest guest
+
+
+
+#### 11.2Bus动态刷新全局广播
+
+- 必须先具备良好的RabbitMQ环境先
+- 演示广播效果，增加复杂度，再以3355为模板再制作一个3366
+- 新建cloud-config-client-3366
+- pom
+
+```xml
+
+<dependencies>
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-config</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.atguigu.springcloud</groupId>
+        <artifactId>cloud-api-commons</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+        <scope>runtime</scope>
+        <optional>true</optional>
+    </dependency>
+
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+- yml
+
+```yaml
+server:
+  port: 3366
+
+spring:
+  application:
+    name: config-client
+  cloud:
+    config:
+      label: master
+      name: config
+      profile: dev
+      uri: http://localhost:3344
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+```
+
+- 主启动
+
+```java
+@EnableEurekaClient
+@SpringBootApplication
+public class ConfigClientMain3366 {
+    public static void main(String[] args) {
+            SpringApplication.run( ConfigClientMain3366.class,args);
+        }
+}
+```
+
+- controller
+
+```java
+@RestController
+@RefreshScope
+public class ConfigClientController {
+
+    @Value("${server.port}")
+    private String serverPort;
+
+    @Value("${config.info}")
+    private String configInfo;
+
+
+    @GetMapping("/configInfo")
+    public String getConfigInfo(){
+        return "serverPort:"+serverPort+"\t\n\n configInfo: "+configInfo;
+    }
+
+}
+```
+
+
+
+- 设计思想
+
+  1) 利用消息总线触发一个**客户端**/bus/refresh,而刷新所有客户端的配置
+
+  2) 利用消息总线触发一个**服务端**ConfigServer的/bus/refresh端点,而刷新所有客户端的配置（更加推荐）
+
+- 方式1不适合的原因
+
+  打破了微服务的职责单一性，因为微服务本身是业务模块，它本不应该承担配置刷新职责
+
+  破坏了微服务各节点的对等性
+
+  有一定的局限性。例如，微服务在迁移时，它的网络地址常常会发生变化，此时如果想要做到自动刷新，那就会增加更多的修改
+
+
+
+- 给cloud-config-center-3344配置中心服务端添加消息总线支持
+- pom
+
+```xml
+<!--添加支持消息总线rabbitmq-->
+<dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bus-amqp</artifactId>
+</dependency>
+```
+
+- yml
+
+```yaml
+server:
+  port: 3344
+spring:
+  application:
+    name: cloud-config-center
+  cloud:
+    config:
+      server:
+        git:
+          uri:  https://github.com/hhf19906/springcloud-config.git  #git@github.com:hhf19906/springcloud-config.git
+          search-paths:
+            - springcloud-config
+      label: master
+ 
+# rabbitmq相关配置
+rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+eureka:
+  client:
+    service-url:
+      defaultZone:  http://localhost:7001/eureka
+ 
+# rabbitmq相关配置，暴露bus刷新配置的端点
+management:
+  endpoints: 
+    web:
+      exposure:
+        include: 'bus-refresh'
+```
+
+- 给cloud-config-center-3355客户端添加消息总线支持
+- pom
+
+```xml
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-bus-amqp</artifactId>
+</dependency>
+```
+
+- yml
+
+```yaml
+server:
+  port: 3355
+
+spring:
+  application:
+    name: config-client
+  cloud:
+    config:
+      label: master
+      name: config
+      profile: dev
+      uri: http://localhost:3344
+
+rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+```
+
+- 给cloud-config-center-3366客户端添加消息总线支持
+- pom同上
+- yml同上
+
+
+
+- 测试
+
+- 运维工程师
+
+  修改Github上配置文件增加版本号
+
+  发送Post请求`curl -X POST "http://localhost:3344/actuator/bus-refresh"`
+
+  一次发送，处处生效
+
+- 配置中心
+
+  http://config-3344.com/config-dev.yml
+
+- 客户端
+
+  http://localhost:3355/configInfo
+
+  http://localhost:3366/configInfo
+
+  获取配置信息，发现都已经刷新了
+
+
+
+#### 11.3Bus动态刷新定点通知
+
+- 不想全部通知，只想定点通知。只通知3355，不通知3366
+
+- /bus/refresh请求不再发送到具体的服务实例上，而是发给config server并通过destination参数类指定需要更新配置的服务或实例
+
+- 公式：`http://localhost:配置中心的端口号/actuator/bus-refresh/{destination}`
+
+  `curl -X POST "http://localhost:3344/actuator/bus-refresh/config-client:3355"`
+
+
+
+### 12.Stream消息驱动
+
+- 什么是stream：stream是一个构建消息驱动微服务的框架，通过输入输出流来与stream中的binder交互。通过我们配置来binding（绑定），stream的binder负责与消息中间件交互。目前：一句话只支持RabbitMQ，Kafka。
+
+- 一句话：就像JDBC一样，**屏蔽底层消息中间件的差异，降低切换版本，统一消息的编程模型**（比如系统A用Rabbitmq，系统B用Kafka，两个系统进行交互，需要有一个统一规范）
+
+- 标准MQ：
+
+  生产者/消费者之间靠消息媒介传递信息内容
+
+  消息必须走特定的通道，消息通道MessageChannel
+
+  消息通道MessageChannel的子接口SubscribableChannel,由MessageHandler消息处理器订阅
+
+- 为什么使用stream
+
+  不同的消息中间件在架构上不同，像rabbitMQ有exchange，Kafka有topic和partitions分区，这些中间件的差异性导致我们在业务需求中想往另外一种消息队列进行迁移，这时一堆东西需要重做，因为它跟我们的系统耦合了，这时stream给我们提供了一种解耦方式。
+
+- stream怎样统一底层差异
+
+  在没有绑定器这个概念时，我们的boot应用直接与消息中间件进行信息交互的时候，由于各中间件构建初衷不同，实现细节上也有差异。通过定义绑定器作为中间层，完美实现了应用程序与中间件细节之间的隔离。通过向应用程序暴露统一的channel通道，使得应用程序不用考虑各中间件的实现。
+
+  INPUT对应消费者
+
+  OUTPUT对应生产者
+
+- Stream中的消息通信方式遵循了发布-订阅模式
+
+  Topic主题进行广播
+
+  在RabbitMQ就是Exchange
+
+  在kafka中就是Topic
+
+- Spring Cloud Stream标准流程套路
+
+  Binder：很方便的连接中间件，屏蔽差异
+
+  Channel：通道，是队列Queue的一种抽象，在消息通讯系统中就是实现存储和转发的媒介，通过对Channel对队列进行配置
+
+  Source和Sink：简单的可理解为参照对象是Spring Cloud Stream自身，从Stream发布消息就是输出，接受消息就是输入
+
+- 编码API和常用注解
+
+| 组成              | 说明                                     |
+| --------------- | -------------------------------------- |
+| Middleware      | 中间件，目前支持RabbitMQ，Kafka                 |
+| Binder          | Binder是应用于中间件之间的封装，可以动态改变消息类型,通过配置文件实现 |
+| @Input          | 注解标识输入通道，通过该输入通道接收到的消息进入应用程序           |
+| @Output         | 注解标识输出通道，发布的消息通过该通道离开应用程序              |
+| @StreamListener | 监听队列，用于消费者的消息接收                        |
+| @EnableBinding  | 指通道channel和exchange绑定在一起               |
 
