@@ -2745,7 +2745,7 @@ public ServletRegistrationBean getServlet(){
 
 
 
-### 9.Gateway新一代网关
+### 9：Gateway新一代网关
 
 - gateway是上一代网关zuul1.x的代替
 
@@ -3166,7 +3166,7 @@ public class MyLogGateWayFilter implements GlobalFilter,Ordered {
 
 
 
-### 10.Config分布式配置中心
+### 10：Config分布式配置中心
 
 - 分布式系统面临的配置问题：每一个微服务项目都有一个application.yml配置文件，服务多了之后就不好管理了。
 
@@ -3563,7 +3563,7 @@ public class ConfigClientController {
 
 
 
-### 11.Bus消息总线
+### 11：Bus消息总线
 
 - 分布式自动刷新配置功能
 - Spring Cloud Bus配合Spring Cloud Config使用可以实现配置的动态刷新
@@ -3858,7 +3858,7 @@ management:
 
 
 
-### 12.Stream消息驱动
+### 12：Stream消息驱动
 
 - 什么是stream：stream是一个构建消息驱动微服务的框架，通过输入输出流来与stream中的binder交互。通过我们配置来binding（绑定），stream的binder负责与消息中间件交互。目前：一句话只支持RabbitMQ，Kafka。
 
@@ -3911,3 +3911,531 @@ management:
 | @StreamListener | 监听队列，用于消费者的消息接收                        |
 | @EnableBinding  | 指通道channel和exchange绑定在一起               |
 
+
+
+#### 12.1消息驱动生产者8801
+
+- 新建cloud-stream-rabbitmq-provider8801
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-stream-rabbitmq-provider8801</artifactId>
+
+    <dependencies>
+
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-eureka-server -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+     
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+
+    </dependencies>
+
+</project>
+```
+
+- yml
+
+```yaml
+server:
+  port: 8801
+
+spring:
+  application:
+    name: cloud-stream-provider
+  cloud:
+    stream:
+      binders: # 在此处配置要绑定的rabbitmq的服务信息；
+        defaultRabbit: # 表示定义的名称，用于于binding整合
+          type: rabbit # 消息组件类型
+          environment: # 设置rabbitmq的相关的环境配置
+            spring:
+              rabbitmq:
+                host: localhost
+                port: 5672
+                username: guest
+                password: guest
+      bindings: # 服务的整合处理
+        output: # 这个名字是一个通道的名称
+          destination: studyExchange # 表示要使用的Exchange名称定义
+          content-type: application/json # 设置消息类型，本次为json，文本则设置“text/plain”
+          binder: defaultRabbit  # 设置要绑定的消息服务的具体设置
+
+eureka:
+  client: # 客户端进行Eureka注册的配置
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+  instance:
+    lease-renewal-interval-in-seconds: 2 # 设置心跳的时间间隔（默认是30秒）
+    lease-expiration-duration-in-seconds: 5 # 如果现在超过了5秒的间隔（默认是90秒）
+    instance-id: send-8801.com  # 在信息列表时显示主机名称
+    prefer-ip-address: true     # 访问的路径变为IP地址
+```
+
+- 主启动类
+
+```java
+@SpringBootApplication
+public class StreamMQMain8801 {
+    public static void main(String[] args) {
+        SpringApplication.run(StreamMQMain8801.class, args);
+    }
+}
+
+```
+
+- 发送消息接口
+
+```java
+public interface IMessageProvider
+{
+    public String send();
+}
+```
+
+- 发送消息接口实现类
+
+```java
+@EnableBinding(Source.class) //定义消息的推送管道
+public class MessageProviderImpl implements IMessageProvider
+{
+    @Resource
+    private MessageChannel output; // 消息发送管道
+
+    @Override
+    public String send()
+    {
+        String serial = UUID.randomUUID().toString();
+        output.send(MessageBuilder.withPayload(serial).build());
+        System.out.println("*****serial: "+serial);
+        return null;
+    }
+}
+
+```
+
+- controller
+
+```java
+@RestController
+public class SendMessageController
+{
+    @Resource
+    private IMessageProvider messageProvider;
+
+    @GetMapping(value = "/sendMessage")
+    public String sendMessage()
+    {
+        return messageProvider.send();
+    }
+
+}
+
+```
+
+- test
+
+  启动7001eureka
+
+  启动rabbitmq
+
+  `rabbitmq-plugins enable rabbitmq_management`
+
+  http://localhost:15672/
+
+  启动8801
+
+  http://localhost:8801/sendMessage
+
+
+
+#### 12.2消息驱动之消费者8802
+
+- 新建cloud-stream-rabbitmq-consumer8802
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloud-stream-rabbitmq-consumer8802</artifactId>
+
+    <dependencies>
+
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-eureka-server -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+
+</project>
+```
+
+- yml
+
+```yaml
+server:
+  port: 8802
+
+spring:
+  application:
+    name: cloud-stream-consumer
+  cloud:
+    stream:
+      binders: # 在此处配置要绑定的rabbitmq的服务信息；
+        defaultRabbit: # 表示定义的名称，用于于binding整合
+          type: rabbit # 消息组件类型
+          environment: # 设置rabbitmq的相关的环境配置
+            spring:
+              rabbitmq:
+                host: localhost
+                port: 5672
+                username: guest
+                password: guest
+      bindings: # 服务的整合处理
+        input: # 这个名字是一个通道的名称
+          destination: studyExchange # 表示要使用的Exchange名称定义
+          content-type: application/json # 设置消息类型，本次为json，文本则设置“text/plain”
+          binder: defaultRabbit  # 设置要绑定的消息服务的具体设置
+
+eureka:
+  client: # 客户端进行Eureka注册的配置
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+  instance:
+    lease-renewal-interval-in-seconds: 2 # 设置心跳的时间间隔（默认是30秒）
+    lease-expiration-duration-in-seconds: 5 # 如果现在超过了5秒的间隔（默认是90秒）
+    instance-id: receive-8802.com  # 在信息列表时显示主机名称
+    prefer-ip-address: true     # 访问的路径变为IP地址
+```
+
+- 主启动类
+
+```java
+@SpringBootApplication
+public class StreamMQMain8802 {
+
+    public static void main(String[] args) {
+        SpringApplication.run(StreamMQMain8802.class, args);
+    }
+
+}
+```
+
+- 业务类
+
+```java
+@Component
+@EnableBinding(Sink.class)
+public class ReceiveMessageListenerController {
+    @Value("${server.port}")
+    private String serverPort;
+
+    @StreamListener(Sink.INPUT)
+    public void input(Message<String> message) {
+        System.out.println("消费者1号，接受："+message.getPayload()+"\t port:"+serverPort);
+    }
+
+}
+```
+
+- 测试8801发送8802接收消息
+
+  http://localhost:8801/sendMessage
+
+
+
+#### 12.3分组消费与持久化
+
+- 依照8802，clone出来一份运行8803
+
+- 运行后两个问题
+
+  有重复消费问题，8802，8803都消费了消息
+
+  消息持久化问题，8803没有分组重启后没有消费消息
+
+- 微服务应用放置于同一个group中，就能够保证消息只会被其中一个应用消费一次。不同的组是可以消费的，同一个组内会发生竞争关系，只有其中一个可以消费。
+
+- 8802/8803实现了轮询分组，每次只有一个消费者 8801模块的发的消息只能被8802或8803其中一个接收到，这样避免了重复消费
+
+- 8802/8803都变成相同组，group两个相同，group: atguiguA
+
+- 8802修改YML,8803修改YML
+
+```yaml
+group:  atguiguA
+```
+
+- 同一个组的多个微服务实例，每次只会有一个拿到
+
+- 通过上述，解决了重复消费问题，再看看持久化
+
+  停止8802/8803并去除掉8802的分组group:atguiguA，8803的分组group:atguiguA没有去掉
+
+  8801先发送4条信息到rabbitmq
+
+  先启动8802，无分组属性配置，后台没有打出来消息
+
+  先启动8803，有分组属性配置，后台打出来了MQ上的消息
+
+
+
+### 13：Sleuth分布式请求链路追踪
+
+- 在微服务架构中，一个由客户端发起的请求在后端系统中会经过多个不同的服务节点，协同产生最后的结果，每一个前端请求都会形成一条复杂的分布式服务调用链路，链路的任何一环出现高延迟或错误都会引起请求的失败。
+
+- Spring Cloud Sleuth提供了一套完整的服务跟踪的解决方案，来监控整个链路
+
+- 在分布式系统中提供追踪解决方案并且兼容支持了zipkin
+
+- SpringCloud从F版起已不需要自己构建Zipkin server了，只需要调用jar包即可
+
+  https://dl.bintray.com/openzipkin/maven/io/zipkin/java/zipkin-server/
+
+  zipkin-server-2.12.9.exec.jar
+
+  java -jar zipkin-server-2.12.9-exec.jar
+
+  http://localhost:9411/zipkin/
+
+- 表示一条请求链路，一条链路通过Trace Id唯一标识，Span标识发起的请求信息，各span通过parent id关联起来
+
+  Trace:类似于树结构的Span集合，表示一条调用链路，存在唯一标识
+
+  span:表示调用链路来源，通俗的理解span就是一次请求信息
+
+- cloud-provider-payment8001
+
+- pom
+
+```xml
+<!--包含了sleuth+zipkin-->
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-zipkin</artifactId>
+</dependency>
+```
+
+- yml
+
+```yaml
+server:
+  port: 8001
+
+
+spring:
+  application:
+    name: cloud-payment-service
+    # 链路追踪begin
+  zipkin:
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+     # 采样率值介于0到1之间，1则代表全部采集
+    probability: 1
+    # 链路追踪end
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource   # 当前数据源操作类型
+    driver-class-name: org.gjt.mm.mysql.Driver     # MySQL驱动包
+    url: 
+    username: root
+    password: 
+
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+  type-aliases-package: com.atguigu.springcloud.entities
+
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: http://eureka7001.com:7001/eureka,http://eureka7002.com:7002/eureka  #集群版
+  instance:
+    instance-id: payment8001
+    prefer-ip-address: true
+ 
+```
+
+- 业务类PaymentController
+
+```java
+@GetMapping("/payment/zipkin")
+public String paymentZipkin()
+{
+  return "hi ,i'am paymentzipkin server fall back，welcome to atguigu，O(∩_∩)O哈哈~";
+}
+```
+
+- cloud-consumer-order80
+- pom同上
+- yml
+
+```yaml
+server:
+  port: 80
+ 
+spring:
+    application:
+        name: cloud-order-service
+    zipkin:
+      base-url: http://localhost:9411
+    sleuth:
+      sampler:
+        probability: 1
+ 
+eureka:
+  client:
+    #表示是否将自己注册进EurekaServer默认为true。
+    register-with-eureka: false
+    #是否从EurekaServer抓取已有的注册信息，默认为true。单节点无所谓，集群必须设置为true才能配合ribbon使用负载均衡
+    fetchRegistry: true
+    service-url:
+      #单机
+      #defaultZone: http://localhost:7001/eureka
+      # 集群
+      defaultZone: http://eureka7001.com:7001/eureka,http://eureka7002.com:7002/eureka  # 集群版
+
+```
+
+- 业务类OrderController
+
+```java
+ // ====================> zipkin+sleuth
+    @GetMapping("/consumer/payment/zipkin")
+    public String paymentZipkin()
+    {
+        String result = restTemplate.getForObject("http://localhost:8001"+"/payment/zipkin/", String.class);
+        return result;
+    }
+```
+
+- test
+
+  依次启动eureka7001/8001/80
+
+  80调用8001几次测试下
+
+  打开浏览器访问:http:localhost:9411
