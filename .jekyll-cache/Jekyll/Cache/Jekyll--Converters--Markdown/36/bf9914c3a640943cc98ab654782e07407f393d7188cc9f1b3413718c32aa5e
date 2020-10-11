@@ -1,0 +1,141 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#场景" id="markdown-toc-场景">场景</a></li>
+  <li><a href="#介绍" id="markdown-toc-介绍">介绍</a></li>
+  <li><a href="#核心" id="markdown-toc-核心">核心</a></li>
+  <li><a href="#方法回调" id="markdown-toc-方法回调">方法回调</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a>    <ul>
+      <li><a href="#模板抽象类" id="markdown-toc-模板抽象类">模板抽象类</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+    </ul>
+  </li>
+  <li><a href="#使用场景" id="markdown-toc-使用场景">使用场景</a></li>
+</ul>
+<h3 id="场景">场景</h3>
+
+<ul>
+  <li>客户到银行办理业务：①取号排队②<strong>办理具体现金业务</strong>③给银行工作人员评分</li>
+</ul>
+
+<h3 id="介绍">介绍</h3>
+
+<ul>
+  <li>模板方法模式是编程中经常用得到模式</li>
+  <li>它定义了一个操作中的算法骨架，将某些步骤延迟到子类中实现</li>
+  <li>新的子类可以在不改变一个算法结构的前提下重新定义该算法的某些特定步骤</li>
+</ul>
+
+<h3 id="核心">核心</h3>
+
+<ul>
+  <li>处理某个流程的代码已经都具备，但是其中某个节点的代码暂时不能确定</li>
+  <li>我们采用工厂方法模式，将这个节点的代码实现转移给子类完成</li>
+  <li><strong>即：处理步骤父类中定义好，具体实现延迟到子类中定义</strong></li>
+</ul>
+
+<h3 id="方法回调">方法回调</h3>
+
+<ul>
+  <li><strong>子类不能调用父类</strong>，而通过父类调用子类。这些调用步骤已经在父类中写好了，完全由父类控制整个过程。</li>
+</ul>
+
+<h3 id="案例">案例</h3>
+
+<h4 id="模板抽象类">模板抽象类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.templateMethod</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">BankTemplateMethod</span> <span class="o">{</span>
+	<span class="c1">//具体方法</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">takeNumber</span><span class="o">(){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"取号排队"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">transact</span><span class="o">();</span> <span class="c1">//办理具体的业务	//钩子方法</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">evaluate</span><span class="o">(){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"反馈评分"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+
+
+	<span class="kd">public</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">process</span><span class="o">(){</span>	<span class="c1">//模板方法！！！</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">takeNumber</span><span class="o">();</span>
+
+		<span class="k">this</span><span class="o">.</span><span class="na">transact</span><span class="o">();</span>
+
+		<span class="k">this</span><span class="o">.</span><span class="na">evaluate</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.templateMethod</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Client</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">BankTemplateMethod</span> <span class="n">btm</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DrawMoney</span><span class="o">();</span>
+		<span class="n">btm</span><span class="o">.</span><span class="na">process</span><span class="o">();</span>
+		
+		<span class="c1">//采用匿名内部类</span>
+		<span class="nc">BankTemplateMethod</span> <span class="n">btm2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BankTemplateMethod</span><span class="o">()</span> <span class="o">{</span>
+			
+			<span class="nd">@Override</span>
+			<span class="kd">public</span> <span class="kt">void</span> <span class="nf">transact</span><span class="o">()</span> <span class="o">{</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"我要存钱！"</span><span class="o">);</span>
+			<span class="o">}</span>
+		<span class="o">};</span>
+		<span class="n">btm2</span><span class="o">.</span><span class="na">process</span><span class="o">();</span>
+		
+		<span class="nc">BankTemplateMethod</span> <span class="n">btm3</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BankTemplateMethod</span><span class="o">()</span> <span class="o">{</span>
+			<span class="nd">@Override</span>
+			<span class="kd">public</span> <span class="kt">void</span> <span class="nf">transact</span><span class="o">()</span> <span class="o">{</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"我要理财！我这里有2000万韩币"</span><span class="o">);</span>
+			<span class="o">}</span>
+		<span class="o">};</span>
+		
+		<span class="n">btm3</span><span class="o">.</span><span class="na">process</span><span class="o">();</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+
+<span class="cm">/**
+ * 取款业务，继承模板并重写其中的抽象方法
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">class</span> <span class="nc">DrawMoney</span> <span class="kd">extends</span> <span class="nc">BankTemplateMethod</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">transact</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"我要取款！！！"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>我要取款！！！
+反馈评分
+取号排队
+我要存钱！
+反馈评分
+取号排队
+我要理财！我这里有2000万韩币
+反馈评分
+</code></pre></div></div>
+
+<h3 id="使用场景">使用场景</h3>
+
+<ul>
+  <li>实现一个算法时，整体步骤很固定。但是，某些部分易变。易变部分可以抽象成出来，供子类实现。</li>
+  <li>数据库访问的封装</li>
+  <li>Junit单元测试</li>
+  <li>servlet中关于doGet/doPost方法调用</li>
+  <li>Hibernate中模板程序</li>
+  <li>spring中JDBCTemplate、HibernateTemplate等</li>
+</ul>
+:ET

@@ -1,0 +1,121 @@
+I"� <ul id="markdown-toc">
+  <li><a href="#服务端" id="markdown-toc-服务端">服务端</a>    <ul>
+      <li><a href="#接口" id="markdown-toc-接口">接口</a></li>
+      <li><a href="#实现类" id="markdown-toc-实现类">实现类</a></li>
+      <li><a href="#配置类" id="markdown-toc-配置类">配置类</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="服务端">服务端</h3>
+
+<ul>
+  <li>maven</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 解析WebService JAR包 CXF --&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>org.apache.cxf<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>cxf-spring-boot-starter-jaxws<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>3.2.4<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+
+<span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>org.apache.cxf<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>cxf-rt-transports-http-jetty<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>3.2.4<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="c">&lt;!-- 解析WebService JAR包 CXF end--&gt;</span>
+
+<span class="c">&lt;!-- https://mvnrepository.com/artifact/org.jdom/jdom2 --&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>org.jdom<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>jdom2<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>2.0.6<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="c">&lt;!-- https://mvnrepository.com/artifact/dom4j/dom4j --&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>dom4j<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>dom4j<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>1.6.1<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<h4 id="接口">接口</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//命名空间一般为包名的倒序，最后一定要加斜杠</span>
+<span class="nd">@WebService</span><span class="o">(</span><span class="n">targetNamespace</span> <span class="o">=</span> <span class="s">"http://webservice.msunsoft.com/"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">PatientService</span> <span class="o">{</span>
+
+    <span class="c1">//生命对外接口方法和参数</span>
+    <span class="nd">@WebMethod</span>
+    <span class="nc">String</span> <span class="nf">sendPatientMsg</span><span class="o">(</span><span class="nd">@WebParam</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"name"</span><span class="o">)</span> <span class="nc">String</span> <span class="n">name</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="实现类">实现类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * webservice接口实现类
+ * qinfen
+ 命名空间要和接口的命名空间保持一致
+ endpointInterface指明实现类所实现的接口
+ */</span>
+<span class="nd">@WebService</span><span class="o">(</span><span class="n">serviceName</span> <span class="o">=</span> <span class="s">"PatientService"</span><span class="o">,</span>
+<span class="n">targetNamespace</span> <span class="o">=</span> <span class="s">"http://webservice.msunsoft.com/"</span><span class="o">,</span>
+<span class="n">endpointInterface</span> <span class="o">=</span> <span class="s">"com.msunsoft.webService.PatientService"</span><span class="o">)</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">PatientServiceImpl</span> <span class="kd">implements</span> <span class="nc">PatientService</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">sendPatientMsg</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"hello"</span><span class="o">+</span><span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="配置类">配置类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * cxf配置
+ * qinfen
+ */</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CxfConfig</span> <span class="o">{</span>
+
+    <span class="cm">/**
+     * 注入servlet  bean name不能dispatcherServlet 否则会覆盖dispatcherServlet
+     * @return
+     */</span>
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"cxfServlet"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ServletRegistrationBean</span> <span class="nf">cxfServlet</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">ServletRegistrationBean</span><span class="o">(</span><span class="k">new</span> <span class="nc">CXFServlet</span><span class="o">(),</span><span class="s">"/services/*"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="nc">Bus</span><span class="o">.</span><span class="na">DEFAULT_BUS_ID</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">SpringBus</span> <span class="nf">springBus</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">SpringBus</span><span class="o">();</span>
+    <span class="o">}</span>
+  	<span class="c1">//注入对外开放接口</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">PatientService</span> <span class="nf">patientService</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">PatientServiceImpl</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"WebServiceDemoEndpoint"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Endpoint</span> <span class="nf">endpoint</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">EndpointImpl</span> <span class="n">endpoint</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">EndpointImpl</span><span class="o">(</span><span class="n">springBus</span><span class="o">(),</span> <span class="n">patientService</span><span class="o">());</span>
+        <span class="n">endpoint</span><span class="o">.</span><span class="na">publish</span><span class="o">(</span><span class="s">"/patient"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">endpoint</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>生成的接口地址为：<code class="language-plaintext highlighter-rouge">http://localhost:82/services/patient?wsdl</code></p>
+  </li>
+  <li>
+    <p>因为springboot整合了shiro，这个webservice路径没有添加到可以过滤的路径上面去。</p>
+
+    <p><code class="language-plaintext highlighter-rouge">filterChainDefinitionMap.put("/services/**", "anon");</code></p>
+  </li>
+</ul>
+:ET

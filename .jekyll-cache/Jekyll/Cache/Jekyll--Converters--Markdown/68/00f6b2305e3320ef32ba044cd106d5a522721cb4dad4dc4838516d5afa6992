@@ -1,0 +1,377 @@
+I"=)<ul id="markdown-toc">
+  <li><a href="#持久化" id="markdown-toc-持久化">持久化</a>    <ul>
+      <li><a href="#rdb" id="markdown-toc-rdb">RDB</a></li>
+      <li><a href="#aof" id="markdown-toc-aof">AOF</a></li>
+      <li><a href="#比较" id="markdown-toc-比较">比较</a></li>
+    </ul>
+  </li>
+  <li><a href="#主从复制" id="markdown-toc-主从复制">主从复制</a>    <ul>
+      <li><a href="#实现方式" id="markdown-toc-实现方式">实现方式</a></li>
+      <li><a href="#主从结构故障转移" id="markdown-toc-主从结构故障转移">主从结构故障转移</a></li>
+      <li><a href="#读写分离" id="markdown-toc-读写分离">读写分离</a></li>
+    </ul>
+  </li>
+  <li><a href="#哨兵与高可用" id="markdown-toc-哨兵与高可用">哨兵与高可用</a>    <ul>
+      <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
+    </ul>
+  </li>
+  <li><a href="#集群" id="markdown-toc-集群">集群</a>    <ul>
+      <li><a href="#数据分区" id="markdown-toc-数据分区">数据分区</a></li>
+      <li><a href="#分布式架构" id="markdown-toc-分布式架构">分布式架构</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="持久化">持久化</h3>
+
+<ul>
+  <li>什么是持久化：redis所有的数据保持在内存中，对数据的更新将异步的保存在磁盘上</li>
+  <li>持久化方式：快照（MySQL Dump，Redis RDB），写日志（MySQL Binlog,Hbase HLog，Redis AOF）</li>
+</ul>
+
+<h4 id="rdb">RDB</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oYWY8.png" alt="3oYWY8.png" /></p>
+
+<ul>
+  <li>
+    <p>触发机制：</p>
+
+    <ul>
+      <li>
+        <p>save（同步）</p>
+
+        <p>文件策略：若存在旧RDB文件，新替换旧</p>
+
+        <p>复杂度：O(N)</p>
+      </li>
+      <li>
+        <p>bgsave（异步）</p>
+      </li>
+      <li>
+        <p>自动</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>save命令</p>
+  </li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3otM7t.png" alt="3otM7t.png" /></p>
+
+<ul>
+  <li>bgsave命令</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oNu2F.png" alt="3oNu2F.png" /></p>
+
+<ul>
+  <li>save比较bgsave</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oN0rd.png" alt="3oN0rd.png" /></p>
+
+<ul>
+  <li>
+    <p>触发机制：</p>
+
+    <p>全量复制</p>
+
+    <p>debug reload</p>
+
+    <p>shutdown</p>
+  </li>
+  <li>
+    <p>总结：</p>
+
+    <p>RDB是Redis内存到硬盘的快照，用于持久化</p>
+
+    <p>save通常会阻塞Redis</p>
+
+    <p>bgsave不会阻塞Redis，但是会fork新进程</p>
+
+    <p>save自动配置满足任一就会被执行</p>
+
+    <p>有些触发机制不容忽视</p>
+  </li>
+</ul>
+
+<h4 id="aof">AOF</h4>
+
+<ul>
+  <li>RDB存在哪些问题？
+    <ul>
+      <li>耗时，耗性能</li>
+      <li>不可控，丢失数据</li>
+    </ul>
+  </li>
+  <li>AOF运行原理</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oByIs.png" alt="3oByIs.png" /></p>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oBLz6.png" alt="3oBLz6.png" /></p>
+
+<ul>
+  <li>三种策略：
+    <ul>
+      <li>always</li>
+      <li>everysec</li>
+      <li>no</li>
+    </ul>
+  </li>
+  <li>always策略</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oDmwQ.png" alt="3oDmwQ.png" /></p>
+
+<ul>
+  <li>everysec策略（默认值）</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oD3lV.png" alt="3oD3lV.png" /></p>
+
+<ul>
+  <li>no策略</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oDr6K.png" alt="3oDr6K.png" /></p>
+
+<ul>
+  <li>比较</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oDsOO.png" alt="3oDsOO.png" /></p>
+
+<ul>
+  <li>AOF重写：减少硬盘占用量，加速恢复速度</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3orZ1x.png" alt="3orZ1x.png" /></p>
+
+<ul>
+  <li>
+    <p>AOF重写两种方式：</p>
+
+    <ul>
+      <li>bgrewriteaof命令</li>
+    </ul>
+
+    <p><img src="https://s2.ax1x.com/2020/03/04/3or2uT.png" alt="3or2uT.png" /></p>
+
+    <ul>
+      <li>重写配置</li>
+    </ul>
+
+    <p><img src="https://s2.ax1x.com/2020/03/04/3oroCR.png" alt="3oroCR.png" /></p>
+  </li>
+  <li>
+    <p>AOF重写流程</p>
+  </li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3orObD.png" alt="3orObD.png" /></p>
+
+<h4 id="比较">比较</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/04/3oshsf.png" alt="3oshsf.png" /></p>
+
+<h3 id="主从复制">主从复制</h3>
+
+<ul>
+  <li>
+    <p>主从复制的作用：作为数据副本（如果一个Redis节点宕机了，另一个Redis节点可以继续工作，相当于一个备份），扩展读性能</p>
+  </li>
+  <li>
+    <p>说明：</p>
+
+    <p>一个master可以有多个slave</p>
+
+    <p>一个slave只能有一个master</p>
+
+    <p>数据流向是单向的，master到slave</p>
+  </li>
+</ul>
+
+<h4 id="实现方式">实现方式</h4>
+
+<ul>
+  <li>命令方式</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/05/3H3H1g.png" alt="3H3H1g.png" /></p>
+
+<p><img src="https://s2.ax1x.com/2020/03/05/3H8ku9.png" alt="3H8ku9.png" /></p>
+
+<ul>
+  <li>取消复制后再次复制一个节点，这时从节点的数据会被清除</li>
+  <li>修改配置</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/05/3H8K3D.png" alt="3H8K3D.png" /></p>
+
+<ul>
+  <li>比较</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/05/3H81ud.png" alt="3H81ud.png" /></p>
+
+<ul>
+  <li>全量复制：从节点复制主节点已有的数据并且开始同步主节点的数据</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/05/3HaudJ.png" alt="3HaudJ.png" /></p>
+
+<ul>
+  <li>
+    <p>全量复制的开销：</p>
+
+    <p>bgsave的时间</p>
+
+    <p>RDB文件网络传输时间</p>
+
+    <p>从节点清空数据时间</p>
+
+    <p>从节点加载RDB的时间</p>
+
+    <p>可能的AOF重写时间</p>
+  </li>
+  <li>
+    <p>部分复制</p>
+  </li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/05/3H0eL8.png" alt="3H0eL8.png" /></p>
+
+<h4 id="主从结构故障转移">主从结构故障转移</h4>
+
+<ul>
+  <li>slave宕机：</li>
+  <li>master宕机：</li>
+</ul>
+
+<h4 id="读写分离">读写分离</h4>
+
+<ul>
+  <li>读流量分摊到从节点</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/05/3Hsi0f.png" alt="3Hsi0f.png" /></p>
+
+<ul>
+  <li>可能发生的问题：复制数据延迟，读到过期数据，从节点故障</li>
+</ul>
+
+<h3 id="哨兵与高可用">哨兵与高可用</h3>
+
+<ul>
+  <li>什么是主从复制高可用：主从复制，master挂掉后需要收工操作，写能力和存储能力受限（主从复制只是备份，单节点存储能力）</li>
+  <li>哨兵架构</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/07/3XuoM4.png" alt="3XuoM4.png" /></p>
+
+<ul>
+  <li>
+    <p>Redis sentinel故障转移：</p>
+
+    <p>多个sentinel发现并确认master有问题</p>
+
+    <p>选举出一个sentinel作为领导</p>
+
+    <p>选出一个slave作为master</p>
+
+    <p>通知其余slave成为新master的slave</p>
+
+    <p>通知客户端主从变化</p>
+
+    <p>等待老的master复活成为新的master的slave</p>
+  </li>
+  <li>
+    <p>在jedis中的使用</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">JedisSentinelPool</span> <span class="n">sentinelPool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisSentinelPool</span><span class="o">(</span><span class="n">masterName</span><span class="o">,</span><span class="n">sentinelSet</span><span class="o">,</span><span class="n">poolConfig</span><span class="o">,</span><span class="n">timeout</span><span class="o">);</span>
+
+<span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="k">try</span><span class="o">{</span>
+  <span class="n">jedis</span> <span class="o">=</span> <span class="n">sentinelPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+  <span class="c1">//jedis command</span>
+<span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">){</span>
+  <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span><span class="n">e</span><span class="o">);</span>
+<span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+  <span class="k">if</span><span class="o">(</span><span class="n">jedis</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+    <span class="n">jedis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>安装配置：
+    <ul>
+      <li>配置开启主从节点</li>
+      <li>配置开启sentinel监控主节点，sentinel是特殊的redis</li>
+      <li>实际应该多台机器</li>
+      <li>详细配置节点</li>
+    </ul>
+  </li>
+  <li>sentinel默认端口是26379，形成如下的安装配置（其实就是单机多实例）</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/07/3XKEJf.png" alt="3XKEJf.png" /></p>
+
+<ul>
+  <li>客户端连接
+    <ul>
+      <li>sentinel地址集合</li>
+      <li>masterName</li>
+      <li>不是代理模式</li>
+    </ul>
+  </li>
+  <li>实现原理</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/07/3XKNy4.png" alt="3XKNy4.png" /></p>
+
+<p><img src="https://s2.ax1x.com/2020/03/07/3XKdm9.png" alt="3XKdm9.png" /></p>
+
+<p><img src="https://s2.ax1x.com/2020/03/07/3XKf0A.png" alt="3XKf0A.png" /></p>
+
+<h4 id="总结">总结</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/07/3XKOmj.png" alt="3XKOmj.png" /></p>
+
+<h3 id="集群">集群</h3>
+
+<h4 id="数据分区">数据分区</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/09/89Cimn.png" alt="89Cimn.png" /></p>
+
+<ul>
+  <li>顺序分布</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/09/89Cu6J.png" alt="89Cu6J.png" /></p>
+
+<ul>
+  <li>哈希分布</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/09/89CJfO.png" alt="89CJfO.png" /></p>
+
+<ul>
+  <li>比较</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/09/89cu2d.png" alt="89cu2d.png" /></p>
+
+<h4 id="分布式架构">分布式架构</h4>
+
+<ul>
+  <li>分布式情况下，节点之间是可以互相通信的，每个节点都负责读写</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/09/89Iaz8.png" alt="89Iaz8.png" /></p>
+
+:ET

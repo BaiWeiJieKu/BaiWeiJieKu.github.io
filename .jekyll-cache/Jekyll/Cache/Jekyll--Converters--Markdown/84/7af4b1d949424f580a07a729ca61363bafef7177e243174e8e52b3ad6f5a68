@@ -1,0 +1,952 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+  <li><a href="#环境搭建" id="markdown-toc-环境搭建">环境搭建</a>    <ul>
+      <li><a href="#安装zookeeper" id="markdown-toc-安装zookeeper">安装zookeeper</a></li>
+      <li><a href="#安装dubbo-admin管理控制台" id="markdown-toc-安装dubbo-admin管理控制台">安装dubbo-admin管理控制台</a></li>
+    </ul>
+  </li>
+  <li><a href="#简单使用" id="markdown-toc-简单使用">简单使用</a>    <ul>
+      <li><a href="#公共接口层" id="markdown-toc-公共接口层">公共接口层</a></li>
+      <li><a href="#用户模块" id="markdown-toc-用户模块">用户模块</a></li>
+      <li><a href="#订单模块" id="markdown-toc-订单模块">订单模块</a></li>
+      <li><a href="#注解改造" id="markdown-toc-注解改造">注解改造</a></li>
+    </ul>
+  </li>
+  <li><a href="#整合boot" id="markdown-toc-整合boot">整合boot</a>    <ul>
+      <li><a href="#方式一" id="markdown-toc-方式一">方式一</a></li>
+      <li><a href="#方式二" id="markdown-toc-方式二">方式二</a></li>
+      <li><a href="#方式三" id="markdown-toc-方式三">方式三</a></li>
+    </ul>
+  </li>
+  <li><a href="#dubbo配置" id="markdown-toc-dubbo配置">dubbo配置</a>    <ul>
+      <li><a href="#配置原则" id="markdown-toc-配置原则">配置原则</a></li>
+      <li><a href="#重试次数" id="markdown-toc-重试次数">重试次数</a></li>
+      <li><a href="#超时时间" id="markdown-toc-超时时间">超时时间</a></li>
+      <li><a href="#版本号" id="markdown-toc-版本号">版本号</a></li>
+    </ul>
+  </li>
+  <li><a href="#高可用" id="markdown-toc-高可用">高可用</a>    <ul>
+      <li><a href="#dubbo直连" id="markdown-toc-dubbo直连">dubbo直连</a></li>
+      <li><a href="#dubbo负载均衡" id="markdown-toc-dubbo负载均衡">dubbo负载均衡</a></li>
+      <li><a href="#服务熔断与降级" id="markdown-toc-服务熔断与降级">服务熔断与降级</a></li>
+    </ul>
+  </li>
+  <li><a href="#dubbo原理" id="markdown-toc-dubbo原理">dubbo原理</a>    <ul>
+      <li><a href="#rpc原理" id="markdown-toc-rpc原理">RPC原理</a></li>
+      <li><a href="#netty基本原理" id="markdown-toc-netty基本原理">Netty基本原理</a></li>
+      <li><a href="#框架设计" id="markdown-toc-框架设计">框架设计</a></li>
+      <li><a href="#服务暴露" id="markdown-toc-服务暴露">服务暴露</a></li>
+      <li><a href="#服务引用" id="markdown-toc-服务引用">服务引用</a></li>
+      <li><a href="#服务调用" id="markdown-toc-服务调用">服务调用</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>单一应用架构：当网站流量很小时，只需一个应用，将所有功能都部署在一起，以减少部署节点和成本。此时，用于简化增删改查工作量的数据访问框架(ORM)是关键，比如mybatis。适用于小型网站，小型管理系统，将所有功能都部署到一个功能里，简单易用。</li>
+  <li>垂直应用架构：当访问量逐渐增大，单一应用增加机器带来的加速度越来越小，将应用拆成互不相干的几个应用，以提升效率。此时，用于加速前端页面开发的Web框架(MVC)是关键。通过切分业务来实现各个模块独立部署，降低了维护和部署的难度，团队各司其职更易管理，性能扩展也更方便，更有针对性。</li>
+  <li>分布式服务架构：当垂直应用越来越多，应用之间交互不可避免，将核心业务抽取出来，作为独立的服务，逐渐形成稳定的服务中心，使前端应用能更快速的响应多变的市场需求。此时，用于提高业务复用及整合的分布式服务框架(RPC)是关键。</li>
+  <li>流动计算架构：当服务越来越多，容量的评估，小服务资源的浪费等问题逐渐显现，此时需增加一个调度中心基于访问压力实时管理集群容量，提高集群利用率。此时，用于提高机器利用率的资源调度和治理中心(SOA)[ Service Oriented Architecture]是关键。比如zookeeper。</li>
+  <li>什么是RPC：RPC【Remote Procedure Call】是指远程过程调用，是一种进程间通信方式，他是一种技术的思想，而不是规范。它允许程序调用另一个地址空间（通常是共享网络的另一台机器上）的过程或函数，而不用程序员显式编码这个远程调用的细节。即程序员无论是调用本地的还是远程的函数，本质上编写的调用代码基本相同。RPC两个核心模块：通讯，序列化。</li>
+  <li>Apache Dubbo 一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。</li>
+  <li><a href="http://dubbo.apache.org/">官网</a></li>
+  <li><strong>服务提供者（Provider）</strong>：暴露服务的服务提供方，服务提供者在启动时，向注册中心注册自己提供的服务。</li>
+  <li><strong>服务消费者（Consumer）</strong>：调用远程服务的服务消费方，服务消费者在启动时，向注册中心订阅自己所需的服务，服务消费者，从提供者地址列表中，基于软负载均衡算法，选一台提供者进行调用，如果调用失败，再选另一台调用。</li>
+  <li><strong>注册中心（Registry）</strong>：注册中心返回服务提供者地址列表给消费者，如果有变更，注册中心将基于长连接推送变更数据给消费者</li>
+  <li><strong>监控中心（Monitor）</strong>：服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心</li>
+</ul>
+
+<h3 id="环境搭建">环境搭建</h3>
+
+<h4 id="安装zookeeper">安装zookeeper</h4>
+
+<ul>
+  <li>
+    <p>1、下载zookeeper</p>
+
+    <p>网址 <a href="https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/">https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/</a></p>
+  </li>
+  <li>
+    <p>2、解压zookeeper</p>
+
+    <p>解压运行zkServer.cmd ，初次运行会报错，没有zoo.cfg配置文件</p>
+  </li>
+  <li>
+    <p>3、修改zoo.cfg配置文件</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>将conf下的zoo_sample.cfg复制一份改名为zoo.cfg即可。
+注意几个重要位置：
+dataDir=./   临时数据存储的目录（可写相对路径）
+clientPort=2181   zookeeper的端口号
+修改完成后再次启动zookeeper
+
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>4、使用zkCli.cmd测试</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ls /：列出zookeeper根下保存的所有节点
+create –e /atguigu 123：创建一个atguigu节点，值为123
+get /atguigu：获取/atguigu节点的值
+
+</code></pre></div>    </div>
+
+    <p>​</p>
+  </li>
+</ul>
+
+<h4 id="安装dubbo-admin管理控制台">安装dubbo-admin管理控制台</h4>
+
+<ul>
+  <li>
+    <p>dubbo本身并不是一个服务软件。它其实就是一个jar包能够帮你的java程序连接到zookeeper，并利用zookeeper消费、提供服务。所以你不用在Linux上启动什么dubbo服务。</p>
+  </li>
+  <li>
+    <p>但是为了让用户更好的管理监控众多的dubbo服务，官方提供了一个可视化的监控程序，不过这个监控即使不装也不影响使用。</p>
+  </li>
+  <li>
+    <p>1.下载dubbo-admin</p>
+
+    <p><a href="https://github.com/apache/incubator-dubbo-ops">https://github.com/apache/incubator-dubbo-ops</a></p>
+  </li>
+  <li>
+    <p>2、进入目录，修改dubbo-admin配置</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>修改 src\main\resources\application.properties 指定zookeeper地址
+dubbo.registry.adress = zookeeper://127.0.0.1:2181
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>3、打包dubbo-admin</p>
+
+    <p>mvn clean package -Dmaven.test.skip=true</p>
+  </li>
+  <li>
+    <p>4、运行dubbo-admin</p>
+
+    <p>java -jar dubbo-admin-0.0.1-SNAPSHOT.jar</p>
+
+    <p>默认使用root/root 登陆</p>
+  </li>
+</ul>
+
+<h3 id="简单使用">简单使用</h3>
+
+<ul>
+  <li>某个电商系统，订单服务（服务消费者）需要调用用户服务（服务提供者）获取某个用户的所有地址</li>
+  <li>订单服务web模块在A服务器，用户服务模块在B服务器，A可以远程调用B的功能。</li>
+  <li>分包
+    <ul>
+      <li>建议将服务接口，服务模型，服务异常等均放在 API 包中，因为服务模型及异常也是 API 的一部分，同时，这样做也符合分包原则：重用发布等价原则(REP)，共同重用原则(CRP)。</li>
+      <li>如果需要，也可以考虑在 API 包中放置一份 spring 的引用配置，这样使用方，只需在 spring 加载过程中引用此配置即可，配置建议放在模块的包目录下，以免冲突</li>
+    </ul>
+  </li>
+  <li>粒度
+    <ul>
+      <li>服务接口尽可能大粒度，每个服务方法应代表一个功能，而不是某功能的一个步骤，否则将面临分布式事务问题，Dubbo 暂未提供分布式事务支持。</li>
+      <li>服务接口建议以业务场景为单位划分，并对相近业务做抽象，防止接口数量爆炸。</li>
+      <li>不建议使用过于抽象的通用接口，如：Map query(Map)，这样的接口没有明确语义，会给后期维护带来不便。</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="公共接口层">公共接口层</h4>
+
+<ul>
+  <li>
+    <p>gmall-interface</p>
+  </li>
+  <li>作用：定义公共接口，也可以导入公共依赖</li>
+  <li>1、Bean模型</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserAddress</span> <span class="kd">implements</span> <span class="nc">Serializable</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">userAddress</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">userId</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">consignee</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">phoneNum</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">isDefault</span><span class="o">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>2、Service接口</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 用户服务
+ * @author lfy
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">UserService</span> <span class="o">{</span>
+	
+	<span class="cm">/**
+	 * 按照用户id返回所有的收货地址
+	 * @param userId
+	 * @return
+	 */</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="nf">getUserAddressList</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">);</span>
+
+<span class="o">}</span>
+
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">OrderService</span> <span class="o">{</span>
+	
+	<span class="cm">/**
+	 * 初始化订单
+	 * @param userId
+	 */</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="nf">initOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">);</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="用户模块">用户模块</h4>
+
+<ul>
+  <li>
+    <p>gmall-user</p>
+  </li>
+  <li>
+    <p>pom</p>
+  </li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;dependencies&gt;</span>
+    <span class="c">&lt;!--引用公共接口模块--&gt;</span>
+  	<span class="nt">&lt;dependency&gt;</span>
+  		<span class="nt">&lt;groupId&gt;</span>com.atguigu.dubbo<span class="nt">&lt;/groupId&gt;</span>
+  		<span class="nt">&lt;artifactId&gt;</span>gmall-interface<span class="nt">&lt;/artifactId&gt;</span>
+  		<span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+  	<span class="nt">&lt;/dependency&gt;</span>
+    
+    		<span class="c">&lt;!-- 引入dubbo --&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.alibaba<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>dubbo<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>2.6.2<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="c">&lt;!-- 由于我们使用zookeeper作为注册中心，所以需要操作zookeeper
+dubbo 2.6以前的版本引入zkclient操作zookeeper 
+dubbo 2.6及以后的版本引入curator操作zookeeper
+下面两个zk客户端根据dubbo版本2选1即可
+--&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.101tec<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>zkclient<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>0.10<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="c">&lt;!-- curator-framework --&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.apache.curator<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>curator-framework<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>2.12.0<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+
+  <span class="nt">&lt;/dependencies&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>serviceImpl</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserServiceImpl</span> <span class="kd">implements</span> <span class="nc">UserService</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="nf">getUserAddressList</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"UserServiceImpl.....old..."</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">UserAddress</span> <span class="n">address1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UserAddress</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="s">"北京市昌平区宏福科技园综合楼3层"</span><span class="o">,</span> <span class="s">"1"</span><span class="o">,</span> <span class="s">"李老师"</span><span class="o">,</span> <span class="s">"010-56253825"</span><span class="o">,</span> <span class="s">"Y"</span><span class="o">);</span>
+		<span class="nc">UserAddress</span> <span class="n">address2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UserAddress</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="s">"深圳市宝安区西部硅谷大厦B座3层（深圳分校）"</span><span class="o">,</span> <span class="s">"1"</span><span class="o">,</span> <span class="s">"王老师"</span><span class="o">,</span> <span class="s">"010-56253825"</span><span class="o">,</span> <span class="s">"N"</span><span class="o">);</span>
+		<span class="cm">/*try {
+			Thread.sleep(4000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/</span>
+		<span class="k">return</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">address1</span><span class="o">,</span><span class="n">address2</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>provider.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;beans</span> <span class="na">xmlns=</span><span class="s">"http://www.springframework.org/schema/beans"</span>
+	<span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xmlns:dubbo=</span><span class="s">"http://code.alibabatech.com/schema/dubbo"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd"</span><span class="nt">&gt;</span>
+
+	<span class="c">&lt;!-- 1、指定当前服务/应用的名字（同样的服务名字相同，不要和别的服务同名） --&gt;</span>
+	<span class="nt">&lt;dubbo:application</span> <span class="na">name=</span><span class="s">"user-service-provider"</span><span class="nt">&gt;&lt;/dubbo:application&gt;</span>
+	
+	<span class="c">&lt;!-- 2、指定注册中心的位置 --&gt;</span>
+	<span class="c">&lt;!-- &lt;dubbo:registry address="zookeeper://127.0.0.1:2181"&gt;&lt;/dubbo:registry&gt; --&gt;</span>
+	<span class="nt">&lt;dubbo:registry</span> <span class="na">protocol=</span><span class="s">"zookeeper"</span> <span class="na">address=</span><span class="s">"127.0.0.1:2181"</span><span class="nt">&gt;&lt;/dubbo:registry&gt;</span>
+	
+	<span class="c">&lt;!-- 3、指定通信规则（通信协议？通信端口） --&gt;</span>
+	<span class="nt">&lt;dubbo:protocol</span> <span class="na">name=</span><span class="s">"dubbo"</span> <span class="na">port=</span><span class="s">"20882"</span><span class="nt">&gt;&lt;/dubbo:protocol&gt;</span>
+	
+	<span class="c">&lt;!-- 4、暴露服务   ref：指向服务的真正的实现对象 --&gt;</span>
+	<span class="nt">&lt;dubbo:service</span> <span class="na">interface=</span><span class="s">"com.atguigu.gmall.service.UserService"</span> 
+		<span class="na">ref=</span><span class="s">"userServiceImpl01"</span> <span class="na">timeout=</span><span class="s">"1000"</span> <span class="na">version=</span><span class="s">"1.0.0"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;dubbo:method</span> <span class="na">name=</span><span class="s">"getUserAddressList"</span> <span class="na">timeout=</span><span class="s">"1000"</span><span class="nt">&gt;&lt;/dubbo:method&gt;</span>
+	<span class="nt">&lt;/dubbo:service&gt;</span>
+	
+	<span class="c">&lt;!--统一设置服务提供方的规则  --&gt;</span>
+	<span class="nt">&lt;dubbo:provider</span> <span class="na">timeout=</span><span class="s">"1000"</span><span class="nt">&gt;&lt;/dubbo:provider&gt;</span>
+	
+	
+	<span class="c">&lt;!-- 服务的实现 --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"userServiceImpl01"</span> <span class="na">class=</span><span class="s">"com.atguigu.gmall.service.impl.UserServiceImpl"</span><span class="nt">&gt;&lt;/bean&gt;</span>
+	
+	
+	<span class="nt">&lt;dubbo:service</span> <span class="na">interface=</span><span class="s">"com.atguigu.gmall.service.UserService"</span> 
+		<span class="na">ref=</span><span class="s">"userServiceImpl02"</span> <span class="na">timeout=</span><span class="s">"1000"</span> <span class="na">version=</span><span class="s">"2.0.0"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;dubbo:method</span> <span class="na">name=</span><span class="s">"getUserAddressList"</span> <span class="na">timeout=</span><span class="s">"1000"</span><span class="nt">&gt;&lt;/dubbo:method&gt;</span>
+	<span class="nt">&lt;/dubbo:service&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"userServiceImpl02"</span> <span class="na">class=</span><span class="s">"com.atguigu.gmall.service.impl.UserServiceImpl2"</span><span class="nt">&gt;&lt;/bean&gt;</span>
+	
+	<span class="c">&lt;!-- 连接监控中心 --&gt;</span>
+	<span class="nt">&lt;dubbo:monitor</span> <span class="na">protocol=</span><span class="s">"registry"</span><span class="nt">&gt;&lt;/dubbo:monitor&gt;</span>
+	
+<span class="nt">&lt;/beans&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>启动服务</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+  <span class="nc">ClassPathXmlApplicationContext</span> <span class="n">context</span> <span class="o">=</span> 
+    <span class="k">new</span> <span class="nf">ClassPathXmlApplicationContext</span><span class="o">(</span><span class="s">"classpath:provider.xml"</span><span class="o">);</span>
+
+  <span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">.</span><span class="na">read</span><span class="o">();</span> 
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="订单模块">订单模块</h4>
+
+<ul>
+  <li>gmall-order-web</li>
+  <li>pom</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependencies&gt;</span>
+  <span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.atguigu.dubbo<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>gmall-interface<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+  <span class="nt">&lt;/dependency&gt;</span>
+  
+  		<span class="c">&lt;!-- 引入dubbo --&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.alibaba<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>dubbo<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>2.6.2<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="c">&lt;!-- 由于我们使用zookeeper作为注册中心，所以需要引入zkclient和curator操作zookeeper --&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.101tec<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>zkclient<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>0.10<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="c">&lt;!-- curator-framework --&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.apache.curator<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>curator-framework<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>2.12.0<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+
+<span class="nt">&lt;/dependencies&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>consumer.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;beans</span> <span class="na">xmlns=</span><span class="s">"http://www.springframework.org/schema/beans"</span>
+	<span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xmlns:dubbo=</span><span class="s">"http://dubbo.apache.org/schema/dubbo"</span>
+	<span class="na">xmlns:context=</span><span class="s">"http://www.springframework.org/schema/context"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;context:component-scan</span> <span class="na">base-package=</span><span class="s">"com.atguigu.gmall.service.impl"</span><span class="nt">&gt;&lt;/context:component-scan&gt;</span>
+
+
+	<span class="nt">&lt;dubbo:application</span> <span class="na">name=</span><span class="s">"order-service-consumer"</span><span class="nt">&gt;&lt;/dubbo:application&gt;</span>
+	
+	<span class="nt">&lt;dubbo:registry</span> <span class="na">address=</span><span class="s">"zookeeper://127.0.0.1:2181"</span><span class="nt">&gt;&lt;/dubbo:registry&gt;</span>
+	
+	<span class="c">&lt;!--  配置本地存根--&gt;</span>
+	
+	<span class="c">&lt;!--声明需要调用的远程服务的接口；生成远程服务代理  --&gt;</span>
+	<span class="c">&lt;!-- 
+		1）、精确优先 (方法级优先，接口级次之，全局配置再次之)
+		2）、消费者设置优先(如果级别一样，则消费方优先，提供方次之)
+	--&gt;</span>
+	<span class="c">&lt;!-- timeout="0" 默认是1000ms--&gt;</span>
+	<span class="c">&lt;!-- retries="":重试次数，不包含第一次调用，0代表不重试--&gt;</span>
+	<span class="c">&lt;!-- 幂等（设置重试次数）【查询、删除、修改】、非幂等（不能设置重试次数）【新增】 --&gt;</span>
+	<span class="nt">&lt;dubbo:reference</span> <span class="na">interface=</span><span class="s">"com.atguigu.gmall.service.UserService"</span> 
+		<span class="na">id=</span><span class="s">"userService"</span> <span class="na">timeout=</span><span class="s">"5000"</span> <span class="na">retries=</span><span class="s">"3"</span> <span class="na">version=</span><span class="s">"*"</span><span class="nt">&gt;</span>
+		<span class="c">&lt;!-- &lt;dubbo:method name="getUserAddressList" timeout="1000"&gt;&lt;/dubbo:method&gt; --&gt;</span>
+	<span class="nt">&lt;/dubbo:reference&gt;</span>
+		
+	<span class="c">&lt;!-- 配置当前消费者的统一规则：所有的服务都不检查 --&gt;</span>
+	<span class="nt">&lt;dubbo:consumer</span> <span class="na">check=</span><span class="s">"false"</span> <span class="na">timeout=</span><span class="s">"5000"</span><span class="nt">&gt;&lt;/dubbo:consumer&gt;</span>
+
+	<span class="nt">&lt;dubbo:monitor</span> <span class="na">protocol=</span><span class="s">"registry"</span><span class="nt">&gt;&lt;/dubbo:monitor&gt;</span>
+	<span class="c">&lt;!-- &lt;dubbo:monitor address="127.0.0.1:7070"&gt;&lt;/dubbo:monitor&gt; --&gt;</span>
+	
+<span class="nt">&lt;/beans&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>OrderServiceImpl</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 1、将服务提供者注册到注册中心（暴露服务）
+ * 		1）、导入dubbo依赖（2.6.2）\操作zookeeper的客户端(curator)
+ * 		2）、配置服务提供者
+ * 
+ * 2、让服务消费者去注册中心订阅服务提供者的服务地址
+ * @author lfy
+ *
+ */</span>
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OrderServiceImpl</span> <span class="kd">implements</span> <span class="nc">OrderService</span> <span class="o">{</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="nc">UserService</span> <span class="n">userService</span><span class="o">;</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="nf">initOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户id："</span><span class="o">+</span><span class="n">userId</span><span class="o">);</span>
+		<span class="c1">//1、查询用户的收货地址</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="n">addressList</span> <span class="o">=</span> <span class="n">userService</span><span class="o">.</span><span class="na">getUserAddressList</span><span class="o">(</span><span class="n">userId</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">UserAddress</span> <span class="n">userAddress</span> <span class="o">:</span> <span class="n">addressList</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">userAddress</span><span class="o">.</span><span class="na">getUserAddress</span><span class="o">());</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">addressList</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>测试调用</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainApplication</span> <span class="o">{</span>
+	
+	<span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"resource"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="nc">ClassPathXmlApplicationContext</span> <span class="n">applicationContext</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathXmlApplicationContext</span><span class="o">(</span><span class="s">"consumer.xml"</span><span class="o">);</span>
+		
+		<span class="nc">OrderService</span> <span class="n">orderService</span> <span class="o">=</span> <span class="n">applicationContext</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">OrderService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+		
+		<span class="n">orderService</span><span class="o">.</span><span class="na">initOrder</span><span class="o">(</span><span class="s">"1"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"调用完成...."</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">.</span><span class="na">read</span><span class="o">();</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+<span class="c1">//调用成功。说明我们order已经可以调用远程的UserService了</span>
+</code></pre></div></div>
+
+<h4 id="注解改造">注解改造</h4>
+
+<h3 id="整合boot">整合boot</h3>
+
+<h4 id="方式一">方式一</h4>
+
+<ul>
+  <li>pom</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.alibaba.boot<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>dubbo-spring-boot-starter<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.2.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>application.properties</li>
+  <li>服务提供者</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 就是服务名，不能跟别的dubbo提供端重复
+</span><span class="py">dubbo.application.name</span><span class="p">=</span><span class="s">gmall-user</span>
+<span class="c"># 是指定注册中心协议
+</span><span class="py">dubbo.registry.protocol</span><span class="p">=</span><span class="s">zookeeper</span>
+<span class="c"># 是注册中心的地址加端口号
+</span><span class="py">dubbo.registry.address</span><span class="p">=</span><span class="s">zookeeper://127.0.0.1:2181</span>
+<span class="c"># 注解方式要扫描的包
+</span><span class="py">dubbo.scan.base-package</span><span class="p">=</span><span class="s">com.atguigu.gmall</span>
+<span class="c"># 是分布式固定是dubbo,不要改。
+</span><span class="py">dubbo.protocol.name</span><span class="p">=</span><span class="s">dubbo</span>
+<span class="py">dubbo.protocol.port</span><span class="p">=</span><span class="s">20880</span>
+
+<span class="py">dubbo.monitor.protocol</span><span class="p">=</span><span class="s">registry</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>服务消费者</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">dubbo.application.name</span><span class="p">=</span><span class="s">gmall-order-web</span>
+<span class="py">dubbo.registry.protocol</span><span class="p">=</span><span class="s">zookeeper</span>
+<span class="py">dubbo.registry.address</span><span class="p">=</span><span class="s">zookeeper://127.0.0.1:2181</span>
+<span class="py">dubbo.monitor.protocol</span><span class="p">=</span><span class="s">registry</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>dubbo注解：@Service、@Reference</p>
+
+    <p>【如果没有在配置中写dubbo.scan.base-package,还需要在主启动类使用@EnableDubbo注解】</p>
+  </li>
+  <li>
+    <p>service</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.alibaba.dubbo.config.annotation.Service</span><span class="o">;</span>
+<span class="nd">@Service</span><span class="c1">//暴露服务 </span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserServiceImpl</span> <span class="kd">implements</span> <span class="nc">UserService</span> <span class="o">{</span>
+
+	<span class="nd">@HystrixCommand</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="nf">getUserAddressList</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"UserServiceImpl..3....."</span><span class="o">);</span>
+		<span class="nc">UserAddress</span> <span class="n">address1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UserAddress</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="s">"北京市昌平区宏福科技园综合楼3层"</span><span class="o">,</span> <span class="s">"1"</span><span class="o">,</span> <span class="s">"李老师"</span><span class="o">,</span> <span class="s">"010-56253825"</span><span class="o">,</span> <span class="s">"Y"</span><span class="o">);</span>
+		<span class="nc">UserAddress</span> <span class="n">address2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UserAddress</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="s">"深圳市宝安区西部硅谷大厦B座3层（深圳分校）"</span><span class="o">,</span> <span class="s">"1"</span><span class="o">,</span> <span class="s">"王老师"</span><span class="o">,</span> <span class="s">"010-56253825"</span><span class="o">,</span> <span class="s">"N"</span><span class="o">);</span>
+<span class="c1">//		try {</span>
+<span class="c1">//			Thread.sleep(2000);</span>
+<span class="c1">//		} catch (InterruptedException e) {</span>
+<span class="c1">//			e.printStackTrace();</span>
+<span class="c1">//		}</span>
+		<span class="k">if</span><span class="o">(</span><span class="nc">Math</span><span class="o">.</span><span class="na">random</span><span class="o">()&gt;</span><span class="mf">0.5</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">address1</span><span class="o">,</span><span class="n">address2</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OrderServiceImpl</span> <span class="kd">implements</span> <span class="nc">OrderService</span> <span class="o">{</span>
+
+	<span class="nd">@Reference</span>  <span class="c1">//使用dubbo提供的reference注解引用远程服务</span>
+	<span class="nc">UserService</span> <span class="n">userService</span><span class="o">;</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="nf">initOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户id："</span><span class="o">+</span><span class="n">userId</span><span class="o">);</span>
+		<span class="c1">//1、查询用户的收货地址</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="n">addressList</span> <span class="o">=</span> <span class="n">userService</span><span class="o">.</span><span class="na">getUserAddressList</span><span class="o">(</span><span class="n">userId</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">UserAddress</span> <span class="n">userAddress</span> <span class="o">:</span> <span class="n">addressList</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">userAddress</span><span class="o">.</span><span class="na">getUserAddress</span><span class="o">());</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">addressList</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="方式二">方式二</h4>
+
+<ul>
+  <li>不使用properties，保留xml</li>
+  <li>取消@service注解</li>
+  <li>在主启动类添加注解引用xml：@ImportResource（locations=”classpath:provider.xml”）</li>
+</ul>
+
+<h4 id="方式三">方式三</h4>
+
+<ul>
+  <li>使用配置类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyDubboConfig</span> <span class="o">{</span>
+	
+	<span class="nd">@Bean</span>
+	<span class="kd">public</span> <span class="nc">ApplicationConfig</span> <span class="nf">applicationConfig</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">ApplicationConfig</span> <span class="n">applicationConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ApplicationConfig</span><span class="o">();</span>
+		<span class="n">applicationConfig</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">"boot-user-service-provider"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">applicationConfig</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="c1">//&lt;dubbo:registry protocol="zookeeper" address="127.0.0.1:2181"&gt;&lt;/dubbo:registry&gt;</span>
+	<span class="nd">@Bean</span>
+	<span class="kd">public</span> <span class="nc">RegistryConfig</span> <span class="nf">registryConfig</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">RegistryConfig</span> <span class="n">registryConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">RegistryConfig</span><span class="o">();</span>
+		<span class="n">registryConfig</span><span class="o">.</span><span class="na">setProtocol</span><span class="o">(</span><span class="s">"zookeeper"</span><span class="o">);</span>
+		<span class="n">registryConfig</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"127.0.0.1:2181"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">registryConfig</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="c1">//&lt;dubbo:protocol name="dubbo" port="20882"&gt;&lt;/dubbo:protocol&gt;</span>
+	<span class="nd">@Bean</span>
+	<span class="kd">public</span> <span class="nc">ProtocolConfig</span> <span class="nf">protocolConfig</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">ProtocolConfig</span> <span class="n">protocolConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ProtocolConfig</span><span class="o">();</span>
+		<span class="n">protocolConfig</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">"dubbo"</span><span class="o">);</span>
+		<span class="n">protocolConfig</span><span class="o">.</span><span class="na">setPort</span><span class="o">(</span><span class="mi">20882</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">protocolConfig</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="cm">/**
+	 *&lt;dubbo:service interface="com.atguigu.gmall.service.UserService" 
+		ref="userServiceImpl01" timeout="1000" version="1.0.0"&gt;
+		&lt;dubbo:method name="getUserAddressList" timeout="1000"&gt;&lt;/dubbo:method&gt;
+	&lt;/dubbo:service&gt;
+	 */</span>
+	<span class="nd">@Bean</span>
+	<span class="kd">public</span> <span class="nc">ServiceConfig</span><span class="o">&lt;</span><span class="nc">UserService</span><span class="o">&gt;</span> <span class="nf">userServiceConfig</span><span class="o">(</span><span class="nc">UserService</span> <span class="n">userService</span><span class="o">){</span>
+		<span class="nc">ServiceConfig</span><span class="o">&lt;</span><span class="nc">UserService</span><span class="o">&gt;</span> <span class="n">serviceConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ServiceConfig</span><span class="o">&lt;&gt;();</span>
+		<span class="n">serviceConfig</span><span class="o">.</span><span class="na">setInterface</span><span class="o">(</span><span class="nc">UserService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+		<span class="n">serviceConfig</span><span class="o">.</span><span class="na">setRef</span><span class="o">(</span><span class="n">userService</span><span class="o">);</span>
+		<span class="n">serviceConfig</span><span class="o">.</span><span class="na">setVersion</span><span class="o">(</span><span class="s">"1.0.0"</span><span class="o">);</span>
+		
+		<span class="c1">//配置每一个method的信息</span>
+		<span class="nc">MethodConfig</span> <span class="n">methodConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MethodConfig</span><span class="o">();</span>
+		<span class="n">methodConfig</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">"getUserAddressList"</span><span class="o">);</span>
+		<span class="n">methodConfig</span><span class="o">.</span><span class="na">setTimeout</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+		
+		<span class="c1">//将method的设置关联到service配置中</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">MethodConfig</span><span class="o">&gt;</span> <span class="n">methods</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+		<span class="n">methods</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">methodConfig</span><span class="o">);</span>
+		<span class="n">serviceConfig</span><span class="o">.</span><span class="na">setMethods</span><span class="o">(</span><span class="n">methods</span><span class="o">);</span>
+		
+		<span class="c1">//ProviderConfig</span>
+		<span class="c1">//MonitorConfig</span>
+		
+		<span class="k">return</span> <span class="n">serviceConfig</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>使用@service注解</li>
+</ul>
+
+<h3 id="dubbo配置">dubbo配置</h3>
+
+<h4 id="配置原则">配置原则</h4>
+
+<ul>
+  <li>
+    <p>JVM启动 -D 参数优先，这样可以使用户在部署和启动时进行参数重写，比如在启动时需改变协议的端口。</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-Ddubbo.protocol.port=20880
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>XML次之，如果在 XML 中有配置，则 dubbo.properties 中的相应配置项无效。</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dubbo:protocol port="30880" /&gt;
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Properties最后，相当于缺省值，只有 XML 没有配置时，dubbo.properties 的相应配置项才会生效，通常用于共享公共配置，比如应用名。</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dubbo.protocol.port=20880
+</code></pre></div>    </div>
+
+    <p>​</p>
+  </li>
+</ul>
+
+<h4 id="重试次数">重试次数</h4>
+
+<ul>
+  <li>失败自动切换，当出现失败，重试其它服务器，但重试会带来更长延迟。可通过 retries=”2” 来设置重试次数(不含第一次)。</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>重试次数配置如下：
+&lt;dubbo:service retries="2" /&gt;
+或
+&lt;dubbo:reference retries="2" /&gt;
+或
+&lt;dubbo:reference&gt;
+    &lt;dubbo:method name="findFoo" retries="2" /&gt;
+&lt;/dubbo:reference&gt;
+
+</code></pre></div></div>
+
+<h4 id="超时时间">超时时间</h4>
+
+<ul>
+  <li>由于网络或服务端不可靠，会导致调用出现一种不确定的中间状态（超时）。为了避免超时导致客户端资源（线程）挂起耗尽，必须设置超时时间。</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>消费端全局超时配置
+&lt;dubbo:consumer timeout="5000" /&gt;
+
+指定接口以及特定方法超时配置
+&lt;dubbo:reference interface="com.foo.BarService" timeout="2000"&gt;
+    &lt;dubbo:method name="sayHello" timeout="3000" /&gt;
+&lt;/dubbo:reference&gt;
+
+
+===========================================================================
+服务端全局超时配置
+&lt;dubbo:provider timeout="5000" /&gt;
+
+指定接口以及特定方法超时配置
+&lt;dubbo:provider interface="com.foo.BarService" timeout="2000"&gt;
+    &lt;dubbo:method name="sayHello" timeout="3000" /&gt;
+&lt;/dubbo:provider&gt;
+
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>dubbo推荐在Provider上尽量多配置Consumer端属性：</p>
+
+    <p>作服务的提供者，比服务使用方更清楚服务性能参数，如调用的超时时间，合理的重试次数，等等</p>
+
+    <p>在Provider配置后，Consumer不配置则会使用Provider的配置值，即Provider配置可以作为Consumer的缺省值。否则，Consumer会使用Consumer端的全局设置，这对于Provider不可控的，并且往往是不合理的</p>
+  </li>
+  <li>
+    <p>配置的覆盖规则：</p>
+
+    <p>方法级配置别优于接口级别，即小Scope优先</p>
+
+    <p>Consumer端配置 优于Provider配置 优于 全局配置</p>
+
+    <p>最后是Dubbo Hard Code的配置值（见配置文档）</p>
+  </li>
+</ul>
+
+<h4 id="版本号">版本号</h4>
+
+<ul>
+  <li>
+    <p>当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。</p>
+  </li>
+  <li>
+    <p>可以按照以下的步骤进行版本迁移：</p>
+
+    <p>在低压力时间段，先升级一半提供者为新版本</p>
+
+    <p>再将所有消费者升级为新版本</p>
+
+    <p>然后将剩下的一半提供者升级为新版本</p>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>老版本服务提供者配置：
+&lt;dubbo:service interface="com.foo.BarService" version="1.0.0" /&gt;
+
+新版本服务提供者配置：
+&lt;dubbo:service interface="com.foo.BarService" version="2.0.0" /&gt;
+
+老版本服务消费者配置：
+&lt;dubbo:reference id="barService" interface="com.foo.BarService" version="1.0.0" /&gt;
+
+新版本服务消费者配置：
+&lt;dubbo:reference id="barService" interface="com.foo.BarService" version="2.0.0" /&gt;
+
+如果不需要区分版本，可以按照以下的方式配置：
+&lt;dubbo:reference id="barService" interface="com.foo.BarService" version="*" /&gt;
+
+</code></pre></div></div>
+
+<h3 id="高可用">高可用</h3>
+
+<h4 id="dubbo直连">dubbo直连</h4>
+
+<ul>
+  <li>
+    <p>现象：zookeeper注册中心宕机，还可以消费dubbo暴露的服务。</p>
+
+    <p>监控中心宕掉不影响使用，只是丢失部分采样数据</p>
+
+    <p>数据库宕掉后，注册中心仍能通过缓存提供服务列表查询，但不能注册新服务</p>
+
+    <p>注册中心对等集群，任意一台宕掉后，将自动切换到另一台</p>
+
+    <p>注册中心全部宕掉后，服务提供者和服务消费者仍能通过本地缓存通讯</p>
+
+    <p>服务提供者无状态，任意一台宕掉后，不影响使用</p>
+
+    <p>服务提供者全部宕掉后，服务消费者应用将无法使用，并无限次重连等待服务提供者恢复</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OrderServiceImpl</span> <span class="kd">implements</span> <span class="nc">OrderService</span> <span class="o">{</span>
+
+	<span class="nd">@Reference</span><span class="o">(</span><span class="n">url</span><span class="o">=</span><span class="s">"127.0.0.1:20882"</span><span class="o">)</span> <span class="c1">//dubbo直连</span>
+	<span class="nc">UserService</span> <span class="n">userService</span><span class="o">;</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="nf">initOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户id："</span><span class="o">+</span><span class="n">userId</span><span class="o">);</span>
+		<span class="c1">//1、查询用户的收货地址</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">UserAddress</span><span class="o">&gt;</span> <span class="n">addressList</span> <span class="o">=</span> <span class="n">userService</span><span class="o">.</span><span class="na">getUserAddressList</span><span class="o">(</span><span class="n">userId</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">UserAddress</span> <span class="n">userAddress</span> <span class="o">:</span> <span class="n">addressList</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">userAddress</span><span class="o">.</span><span class="na">getUserAddress</span><span class="o">());</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">addressList</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="dubbo负载均衡">dubbo负载均衡</h4>
+
+<ul>
+  <li>在集群负载均衡时，Dubbo 提供了多种均衡策略，缺省为 random 随机调用</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Random LoadBalance
+随机，按权重设置随机概率。
+在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。
+
+RoundRobin LoadBalance
+轮循，按公约后的权重设置轮循比率。
+存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。
+
+LeastActive LoadBalance
+最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差。
+使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大。
+
+ConsistentHash LoadBalance
+一致性 Hash，相同参数的请求总是发到同一提供者。
+当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。算法参见：http://en.wikipedia.org/wiki/Consistent_hashing
+缺省只对第一个参数 Hash，如果要修改，请配置 &lt;dubbo:parameter key="hash.arguments" value="0,1" /&gt;
+缺省用 160 份虚拟节点，如果要修改，请配置 &lt;dubbo:parameter key="hash.nodes" value="320" /&gt;
+
+</code></pre></div></div>
+
+<h4 id="服务熔断与降级">服务熔断与降级</h4>
+
+<ul>
+  <li><strong>当服务器压力剧增的情况下，根据实际业务情况及流量，对一些服务和页面有策略的不处理或换种简单的方式处理，从而释放服务器资源以保证核心交易正常运作或高效运作。</strong></li>
+  <li>
+    <p>可以通过服务降级功能临时屏蔽某个出错的非关键服务，并定义降级后的返回策略</p>
+  </li>
+  <li>在集群调用失败时，Dubbo提供了多种容错方案，缺省为failover 重试</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Failover Cluster
+失败自动切换，当出现失败，重试其它服务器。通常用于读操作，但重试会带来更长延迟。可通过 retries="2" 来设置重试次数(不含第一次)。
+
+重试次数配置如下：
+&lt;dubbo:service retries="2" /&gt;
+或
+&lt;dubbo:reference retries="2" /&gt;
+或
+&lt;dubbo:reference&gt;
+    &lt;dubbo:method name="findFoo" retries="2" /&gt;
+&lt;/dubbo:reference&gt;
+
+Failfast Cluster
+快速失败，只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录。
+
+Failsafe Cluster
+失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。
+
+Failback Cluster
+失败自动恢复，后台记录失败请求，定时重发。通常用于消息通知操作。
+
+Forking Cluster
+并行调用多个服务器，只要一个成功即返回。通常用于实时性要求较高的读操作，但需要浪费更多服务资源。可通过 forks="2" 来设置最大并行数。
+
+Broadcast Cluster
+广播调用所有提供者，逐个调用，任意一台报错则报错 [2]。通常用于通知所有提供者更新缓存或日志等本地资源信息。
+
+集群模式配置
+按照以下示例在服务提供方和消费方配置集群模式
+&lt;dubbo:service cluster="failsafe" /&gt;
+或
+&lt;dubbo:reference cluster="failsafe" /&gt;
+
+</code></pre></div></div>
+
+<h3 id="dubbo原理">dubbo原理</h3>
+
+<h4 id="rpc原理">RPC原理</h4>
+
+<ul>
+  <li>一次完整的RPC调用流程（同步调用，异步另说）如下：
+    <ul>
+      <li>1）服务消费方（client）调用以本地调用方式调用服务；</li>
+      <li>2）client stub接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体；</li>
+      <li>3）client stub找到服务地址，并将消息发送到服务端；</li>
+      <li>4）server stub收到消息后进行解码；</li>
+      <li>5）server stub根据解码结果调用本地的服务；</li>
+      <li>6）本地服务执行并将结果返回给server stub；</li>
+      <li>7）server stub将返回结果打包成消息并发送至消费方；</li>
+      <li>8）client stub接收到消息，并进行解码；</li>
+      <li>9）服务消费方得到最终结果。</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="netty基本原理">Netty基本原理</h4>
+
+<ul>
+  <li>1初始化channel</li>
+  <li>2注册channel到selector</li>
+  <li>3轮询accept事件</li>
+  <li>4处理accept建立连接channel</li>
+  <li>5注册channel到selector</li>
+  <li>6轮询读写事件</li>
+  <li>7处理读写事件</li>
+</ul>
+
+<h4 id="框架设计">框架设计</h4>
+
+<ul>
+  <li>config配置层：对外配置接口，以 ServiceConfig, ReferenceConfig 为中心，可以直接初始化配置类，也可以通过 spring 解析配置生成配置类</li>
+  <li>proxy 服务代理层：服务接口透明代理，生成服务的客户端 Stub 和服务器端 Skeleton, 以 ServiceProxy 为中心，扩展接口为 ProxyFactory</li>
+  <li>registry注册中心层：封装服务地址的注册与发现，以服务 URL 为中心，扩展接口为 RegistryFactory, Registry, RegistryService</li>
+  <li>cluster路由层：封装多个提供者的路由及负载均衡，并桥接注册中心，以 Invoker 为中心，扩展接口为 Cluster, Directory, Router, LoadBalance</li>
+  <li>monitor监控层：RPC 调用次数和调用时间监控，以 Statistics 为中心，扩展接口为 MonitorFactory, Monitor, MonitorService</li>
+  <li>protocol远程调用层：封装 RPC 调用，以 Invocation, Result 为中心，扩展接口为 Protocol, Invoker, Exporter</li>
+  <li>exchange信息交换层：封装请求响应模式，同步转异步，以 Request, Response 为中心，扩展接口为 Exchanger, ExchangeChannel, ExchangeClient,ExchangeServer</li>
+  <li>transport网络传输层：抽象 mina 和netty 为统一接口，以 Message 为中心，扩展接口为 Channel, Transporter, Client, Server, Codec</li>
+  <li>serialize数据序列化层：可复用的一些工具，扩展接口为 Serialization, ObjectInput, ObjectOutput,
+ThreadPool</li>
+</ul>
+
+<h4 id="服务暴露">服务暴露</h4>
+
+<p><img src="https://i.loli.net/2020/09/22/CtpMKgJzTLbeOqy.png" alt="image.png" /></p>
+
+<h4 id="服务引用">服务引用</h4>
+
+<p><img src="https://i.loli.net/2020/09/22/WCIz3P4SrLEmUOv.png" alt="image.png" /></p>
+
+<h4 id="服务调用">服务调用</h4>
+
+<p><img src="https://i.loli.net/2020/09/22/UEKAF3vLm1SsfyC.png" alt="image.png" /></p>
+:ET

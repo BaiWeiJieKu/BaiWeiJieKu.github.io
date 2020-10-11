@@ -1,0 +1,369 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#获取类对象" id="markdown-toc-获取类对象">获取类对象</a>    <ul>
+      <li><a href="#类对象" id="markdown-toc-类对象">类对象</a></li>
+      <li><a href="#获取" id="markdown-toc-获取">获取</a></li>
+    </ul>
+  </li>
+  <li><a href="#创建对象" id="markdown-toc-创建对象">创建对象</a></li>
+  <li><a href="#访问属性" id="markdown-toc-访问属性">访问属性</a>    <ul>
+      <li><a href="#访问私有属性" id="markdown-toc-访问私有属性">访问私有属性</a></li>
+    </ul>
+  </li>
+  <li><a href="#调用方法" id="markdown-toc-调用方法">调用方法</a></li>
+  <li><a href="#详细文章" id="markdown-toc-详细文章">详细文章</a></li>
+  <li><a href="#面试题" id="markdown-toc-面试题">面试题</a>    <ul>
+      <li><a href="#实现过程和作用" id="markdown-toc-实现过程和作用">实现过程和作用</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="获取类对象">获取类对象</h3>
+
+<h4 id="类对象">类对象</h4>
+
+<ul>
+  <li>garen和teemo都是<strong>Hero对象</strong>，他们的区别在于，各自有<strong>不同的名称，血量，伤害值</strong></li>
+  <li>Hero和Item都是类，他们的区别在于有<strong>不同的方法，不同的属性</strong>。</li>
+  <li><strong>类对象</strong>，就是用于描述这种类，都有什么属性，什么方法的</li>
+</ul>
+
+<h4 id="获取">获取</h4>
+
+<ul>
+  <li>在一个JVM中，一种类，只会有一个类对象存在。</li>
+  <li>准确的讲是一个ClassLoader下，一种类，只会有一个类对象存在。通常一个JVM下，只会有一个ClassLoader。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">reflection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestReflection</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">className</span> <span class="o">=</span> <span class="s">"charactor.Hero"</span><span class="o">;</span>
+			<span class="k">try</span> <span class="o">{</span>
+                <span class="c1">//方式一</span>
+				<span class="nc">Class</span> <span class="n">pClass1</span><span class="o">=</span><span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+                <span class="c1">//方式二</span>
+				<span class="nc">Class</span> <span class="n">pClass2</span><span class="o">=</span><span class="nc">Hero</span><span class="o">.</span><span class="na">class</span><span class="o">;</span>
+                <span class="c1">//方式三</span>
+				<span class="nc">Class</span> <span class="n">pClass3</span><span class="o">=</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">().</span><span class="na">getClass</span><span class="o">();</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">pClass1</span><span class="o">==</span><span class="n">pClass2</span><span class="o">);</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">pClass1</span><span class="o">==</span><span class="n">pClass3</span><span class="o">);</span>
+			<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+				<span class="c1">// TODO Auto-generated catch block</span>
+				<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>无论什么途径获取类对象，都会导致静态属性被初始化，而且只会执行一次。（除了直接使用 Class c = Hero.class 这种方式，这种方式不会导致静态属性被初始化）</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
+
+	<span class="kd">static</span> <span class="nc">String</span> <span class="n">copyright</span><span class="o">;</span>
+
+	<span class="kd">static</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"初始化 copyright"</span><span class="o">);</span>
+		<span class="n">copyright</span> <span class="o">=</span> <span class="s">"版权由Riot Games公司所有"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="创建对象">创建对象</h3>
+
+<ul>
+  <li>与传统的通过new 来获取对象的方式不同</li>
+  <li>反射机制，会先拿到Hero的“类对象”,然后通过类对象获取“构造器对象”</li>
+  <li>再通过构造器对象创建一个对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">reflection</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Constructor</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestReflection</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="c1">//传统的使用new的方式创建对象</span>
+        <span class="nc">Hero</span> <span class="n">h1</span> <span class="o">=</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">h1</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"teemo"</span><span class="o">;</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h1</span><span class="o">);</span>
+         
+        <span class="k">try</span> <span class="o">{</span>
+        	<span class="c1">//使用反射的方式创建对象</span>
+            <span class="nc">String</span> <span class="n">className</span> <span class="o">=</span> <span class="s">"charactor.Hero"</span><span class="o">;</span>
+            <span class="c1">//类对象</span>
+            <span class="nc">Class</span> <span class="n">pClass</span><span class="o">=</span><span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+            <span class="c1">//构造器</span>
+            <span class="nc">Constructor</span> <span class="n">c</span><span class="o">=</span> <span class="n">pClass</span><span class="o">.</span><span class="na">getConstructor</span><span class="o">();</span>
+            <span class="c1">//通过构造器实例化</span>
+            <span class="nc">Hero</span> <span class="n">h2</span><span class="o">=</span> <span class="o">(</span><span class="nc">Hero</span><span class="o">)</span> <span class="n">c</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+            <span class="n">h2</span><span class="o">.</span><span class="na">name</span><span class="o">=</span><span class="s">"gareen"</span><span class="o">;</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h2</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// TODO Auto-generated catch block</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="访问属性">访问属性</h3>
+
+<ul>
+  <li>
+    <p>为了访问属性，把name修改为public。</p>
+  </li>
+  <li>
+    <p>对于private修饰的成员，需要使用setAccessible(true)才能访问和修改。</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setName</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nf">Hero</span><span class="o">(){</span>
+		
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nf">Hero</span><span class="o">(</span><span class="nc">String</span> <span class="n">string</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">name</span> <span class="o">=</span><span class="n">string</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="s">"Hero [name="</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">"]"</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isDead</span><span class="o">()</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">attackHero</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h2</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">name</span><span class="o">+</span> <span class="s">" 正在攻击 "</span> <span class="o">+</span> <span class="n">h2</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">reflection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Field</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestReflection</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+            <span class="c1">//使用传统方式修改name的值为garen</span>
+            <span class="n">h</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"garen"</span><span class="o">;</span>
+            <span class="k">try</span> <span class="o">{</span>
+            	<span class="c1">//获取类Hero的名字叫做name的字段</span>
+                <span class="nc">Field</span> <span class="n">f1</span><span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getDeclaredField</span><span class="o">(</span><span class="s">"name"</span><span class="o">);</span>
+                <span class="c1">//修改这个字段的值</span>
+                <span class="n">f1</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">h</span><span class="o">,</span> <span class="s">"teemo"</span><span class="o">);</span>
+                <span class="c1">//打印被修改后的值</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">);</span>
+                
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>getField <strong>只能获取</strong>public的，包括<strong>从父类继承</strong>来的字段。</li>
+  <li>getDeclaredField 可以获取本类所有的字段，<strong>包括private</strong>的，但是<strong>不能获取继承</strong>来的字段。 (<strong>注</strong>： 这里只能获取到private的<strong>字段</strong>，但并不能访问该private字段的<strong>值</strong>,除非加上<strong>setAccessible(true)</strong>)</li>
+</ul>
+
+<h4 id="访问私有属性">访问私有属性</h4>
+
+<ul>
+  <li>可以通过类对象的getDeclaredField()方法获取字段（Field）对象，然后再通过字段对象的setAccessible(true)将其设置为可以访问，接下来就可以通过get/set方法来获取/设置字段的值了。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">chimomo.learning.java.code.reflection</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Constructor</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Field</span><span class="o">;</span>
+ 
+<span class="cm">/**
+ * @author Created by Chimomo
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ReflectionUtil</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nf">ReflectionUtil</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">AssertionError</span><span class="o">();</span>
+    <span class="o">}</span>
+ 
+    <span class="cm">/**
+     * 通过反射取对象指定字段(属性)的值
+     *
+     * @param target    目标对象
+     * @param fieldName 字段的名字
+     * @return 字段的值
+     * @throws 如果取不到对象指定字段的值则抛出异常
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Object</span> <span class="nf">getValue</span><span class="o">(</span><span class="nc">Object</span> <span class="n">target</span><span class="o">,</span> <span class="nc">String</span> <span class="n">fieldName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+        <span class="nc">String</span><span class="o">[]</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">fieldName</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"\\."</span><span class="o">);</span>
+ 
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">fs</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">Field</span> <span class="n">f</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="na">getDeclaredField</span><span class="o">(</span><span class="n">fs</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+                <span class="n">f</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">target</span><span class="o">);</span>
+                <span class="n">clazz</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+            <span class="o">}</span>
+ 
+            <span class="nc">Field</span> <span class="n">f</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="na">getDeclaredField</span><span class="o">(</span><span class="n">fs</span><span class="o">[</span><span class="n">fs</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]);</span>
+            <span class="n">f</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">target</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="cm">/**
+     * 通过反射给对象的指定字段赋值
+     *
+     * @param target    目标对象
+     * @param fieldName 字段的名称
+     * @param value     值
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">setValue</span><span class="o">(</span><span class="nc">Object</span> <span class="n">target</span><span class="o">,</span> <span class="nc">String</span> <span class="n">fieldName</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+        <span class="nc">String</span><span class="o">[]</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">fieldName</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"\\."</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">fs</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">Field</span> <span class="n">f</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="na">getDeclaredField</span><span class="o">(</span><span class="n">fs</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+                <span class="n">f</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+                <span class="nc">Object</span> <span class="n">val</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">target</span><span class="o">);</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">val</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="nc">Constructor</span><span class="o">&lt;?&gt;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="na">getType</span><span class="o">().</span><span class="na">getDeclaredConstructor</span><span class="o">();</span>
+                    <span class="n">c</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+                    <span class="n">f</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">target</span><span class="o">,</span> <span class="n">val</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">val</span><span class="o">;</span>
+                <span class="n">clazz</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+            <span class="o">}</span>
+ 
+            <span class="nc">Field</span> <span class="n">f</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="na">getDeclaredField</span><span class="o">(</span><span class="n">fs</span><span class="o">[</span><span class="n">fs</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]);</span>
+            <span class="n">f</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+            <span class="n">f</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">target</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="调用方法">调用方法</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setName</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nf">Hero</span><span class="o">(){</span>
+		
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nf">Hero</span><span class="o">(</span><span class="nc">String</span> <span class="n">string</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">name</span> <span class="o">=</span><span class="n">string</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="s">"Hero [name="</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">"]"</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isDead</span><span class="o">()</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">attackHero</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h2</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">reflection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Method</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestReflection</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="c1">// 获取这个名字叫做setName，参数类型是String的方法</span>
+			<span class="nc">Method</span> <span class="n">m</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"setName"</span><span class="o">,</span> <span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+			<span class="c1">// 对h对象，调用这个方法</span>
+			<span class="n">m</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">h</span><span class="o">,</span> <span class="s">"盖伦"</span><span class="o">);</span>
+			<span class="c1">// 使用传统的方式，调用getName方法</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="详细文章">详细文章</h3>
+
+<p><a href="https://blog.csdn.net/lwl20140904/article/details/80163880">通俗易懂的讲反射</a></p>
+
+<h3 id="面试题">面试题</h3>
+
+<h4 id="实现过程和作用">实现过程和作用</h4>
+
+<ul>
+  <li>JAVA语言编译之后会生成一个.class文件，反射就是通过字节码文件找到某一个类、类中的方法以及属性等</li>
+  <li>反射的实现主要借助以下四个类：Class：类的对象，Constructor：类的构造方法，Field：类中的属性对象，Method：类中的方法对象。</li>
+  <li>作用：反射机制指的是程序在运行时能够获取自身的信息。在JAVA中，只要给定类的名字，那么就可以通过反射机制来获取类的所有信息。</li>
+</ul>
+:ET

@@ -1,0 +1,140 @@
+I"^<ul id="markdown-toc">
+  <li><a href="#java语言规范" id="markdown-toc-java语言规范">Java语言规范</a></li>
+  <li><a href="#注释" id="markdown-toc-注释">注释</a></li>
+  <li><a href="#数据类型" id="markdown-toc-数据类型">数据类型</a></li>
+  <li><a href="#运算符" id="markdown-toc-运算符">运算符</a></li>
+  <li><a href="#字符串" id="markdown-toc-字符串">字符串</a>    <ul>
+      <li><a href="#1equals" id="markdown-toc-1equals">1、equals()</a></li>
+      <li><a href="#2ignorecase-" id="markdown-toc-2ignorecase-">2、IgnoreCase( )</a></li>
+      <li><a href="#3tostring" id="markdown-toc-3tostring">3、toString()</a></li>
+      <li><a href="#4string" id="markdown-toc-4string">4、String</a></li>
+      <li><a href="#5valueof" id="markdown-toc-5valueof">5、valueOf()</a></li>
+      <li><a href="#6split" id="markdown-toc-6split">6、split()</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="java语言规范">Java语言规范</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span><span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">){</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"hello world"</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>类格式：修饰符（public）+class+类名（HelloWorld首字母大写，驼峰命名，必须以字母开头，后面可以跟字母和数字的任意组合，不得使用Java保留字）</p>
+
+<p>main方法必须声明为public</p>
+
+<h2 id="注释">注释</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//单行注释</span>
+
+<span class="cm">/**
+文档注释
+*/</span>
+
+<span class="cm">/*多行注释*/</span>
+</code></pre></div></div>
+
+<h2 id="数据类型">数据类型</h2>
+
+<p>int			4字节			-2147 483 648~2147 483 647</p>
+
+<p>short		2字节			-32 768~32767</p>
+
+<p>long		8字节			-9223 372 016 854 775 808~9223 372 036 854 775 807</p>
+
+<p>byte		1字节			-128~127</p>
+
+<p>float		4字节</p>
+
+<p>double		8字节</p>
+
+<p>char</p>
+
+<ul>
+  <li>boolean(整形值和布尔值之间不能进行相互转换)</li>
+  <li>变量：第二个单词开始首字母大写，声明一个变量后必须用赋值语句对变量进行显式初始化</li>
+  <li>常量：用final修饰，只能被赋值一次，常量名用全大写</li>
+  <li>类型强转：int x=(int)6.66=&gt;x=6</li>
+</ul>
+
+<h2 id="运算符">运算符</h2>
+
+<p>+(加)-（减）*（乘）/（除）%(取余)</p>
+
+<p>++(自增)–(自减)</p>
+
+<p>==检测是否相等！=不相等&gt;,&gt;=,&lt;,&lt;=</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">&amp;&amp;与||或！=非</span>
+<span class="err">&amp;（“与”），|（“或”），^（“异或”），~（“非”）</span>
+</code></pre></div></div>
+
+<p>？：三元操作符</p>
+
+<p>二进制位右移（»）左移（«）</p>
+
+<p>平方根Math.sqrt()</p>
+
+<h2 id="字符串">字符串</h2>
+
+<p>Java字符串就是Unicode字符序列。Java没有内置的字符串类型，String是一个预定义类</p>
+
+<h3 id="1equals">1、equals()</h3>
+
+<ul>
+  <li>它具有如下的一般形式：boolean equals(Object str)</li>
+  <li>str是一个用来与调用字符串（String）对象做比较的字符串（String）对象。</li>
+  <li>如果两个字符串具有相同的字符和长度，它返回true，否则返回false。这种比较是区分大小写的。</li>
+</ul>
+
+<h3 id="2ignorecase-">2、IgnoreCase( )</h3>
+
+<ul>
+  <li>当比较两个字符串时，它会认为A-Z和a-z是一样的。</li>
+  <li>其一般形式如下：boolean equalsIgnoreCase(String str)</li>
+  <li>str是一个用来与调用字符串（String）对象做比较的字符串（String）对象。如果两个字符串具有相同的字符和长度，它也返回true，否则返回false。</li>
+</ul>
+
+<h3 id="3tostring">3、toString()</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Object</span> <span class="n">object</span> <span class="o">=</span> <span class="n">getObject</span><span class="o">();</span> 
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">object</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span> 
+
+</code></pre></div></div>
+
+<ul>
+  <li>注意：必须保证object不是null值，否则将抛出NullPointerException异常。</li>
+  <li>采用这种方法时，通常派生类会覆盖Object里的toString（）方法。</li>
+</ul>
+
+<h3 id="4string">4、String</h3>
+
+<ul>
+  <li>（String）object：这是标准的类型转换，将object转成String类型的值。</li>
+  <li>注意：类型必须能转成String类型。因此最好用instanceof做个类型检查，以判断是否可以转换。否则容易抛出CalssCastException异常。</li>
+  <li>因定义为Object 类型的对象在转成String时语法检查并不会报错，这将可能导致潜在的错误存在。</li>
+  <li>如： Object obj = new Integer(100); String strVal = (String)obj; 在运行时将会出错，因为将Integer类型强制转换为String类型，无法通过。</li>
+  <li>但是， Integer obj = new Integer(100); String strVal = (String)obj;</li>
+  <li>如是格式代码，将会报语法错误。此外，因null值可以强制转换为任何java类类型，(String)null也是合法的。</li>
+</ul>
+
+<h3 id="5valueof">5、valueOf()</h3>
+
+<ul>
+  <li>注意：当object为null 时，String.valueOf（object）的值是字符串”null”，而不是null。</li>
+</ul>
+
+<h3 id="6split">6、split()</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1、如果用“.”作为分隔的话,必须是如下写法,String.split("\\.")</span>
+
+<span class="err">2、如果用“|”作为分隔的话,必须是如下写法,String.split("\\|"),</span>
+<span class="err">“.”、“|”、"*"</span> <span class="err">和"+"都是转义字符,必须得加"\\";</span>
+
+<span class="err">3、如果在一个字符串中有多个分隔符,可以用“|”作为连字符,比如,“</span><span class="py">acount</span><span class="p">=</span><span class="s">? and uu =? or n=?”,把三个都分隔出来,可以用String.split("and|or");</span>
+</code></pre></div></div>
+:ET

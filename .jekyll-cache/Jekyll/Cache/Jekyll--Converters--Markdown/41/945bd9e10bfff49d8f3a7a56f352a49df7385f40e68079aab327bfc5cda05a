@@ -1,0 +1,522 @@
+I"w�<ul id="markdown-toc">
+  <li><a href="#文件上传" id="markdown-toc-文件上传">文件上传</a>    <ul>
+      <li><a href="#文件过滤" id="markdown-toc-文件过滤">文件过滤</a></li>
+      <li><a href="#常量配置" id="markdown-toc-常量配置">常量配置</a></li>
+    </ul>
+  </li>
+  <li><a href="#文件下载" id="markdown-toc-文件下载">文件下载</a></li>
+  <li><a href="#文件下载次数" id="markdown-toc-文件下载次数">文件下载次数</a></li>
+</ul>
+<h3 id="文件上传">文件上传</h3>
+
+<ul>
+  <li>select.jsp</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;%@ taglib </span><span class="na">prefix=</span><span class="s">"s"</span><span class="na"> uri=</span><span class="s">"/struts-tags"</span> <span class="nt">%&gt;</span>
+<span class="nt">&lt;%@ page </span><span class="na">contentType=</span><span class="s">"text/html;charset=UTF-8"</span><span class="na"> import=</span><span class="s">"java.util.*"</span><span class="na"> language=</span><span class="s">"java"</span><span class="na"> pageEncoding=</span><span class="s">"UTF-8"</span> <span class="nt">%&gt;</span>
+
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>upload_test<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+
+<span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;s:form </span><span class="na">action=</span><span class="s">"upload"</span><span class="na"> method=</span><span class="s">"post"</span><span class="na"> theme=</span><span class="s">"simple"</span><span class="na"> enctype=</span><span class="s">"multipart/form-data"</span><span class="nt">&gt;</span>
+        输入帐号：<span class="nt">&lt;s:textfield </span><span class="na">name=</span><span class="s">"uid"</span><span class="nt">/&gt;&lt;br&gt;</span>
+        选择头像：<span class="nt">&lt;s:file </span><span class="na">name=</span><span class="s">"headImage"</span><span class="nt">/&gt;&lt;br&gt;</span>
+        <span class="nt">&lt;s:submit </span><span class="na">value=</span><span class="s">"提交"</span><span class="nt">/&gt;</span>
+　　　　
+　　　　  <span class="c">&lt;!--显示上传错误提示信息--&gt;</span>
+　　　　　<span class="nt">&lt;s:fielderror/&gt;</span>
+　　　　
+    <span class="nt">&lt;/s:form&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>action</li>
+  <li>类型为java.io.File的xxx属性来封装<strong><em>文件域的信息</em></strong></li>
+  <li>类型为String的xxxFileName属性封装了该文件域对应的<strong><em>文本内容</em></strong></li>
+  <li>类型为String的xxxContentType属性封装了该文件域对应的<strong><em>文件类型</em></strong></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">action</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.commons.io.FileUtils</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.struts2.ServletActionContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UploadAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">uid</span><span class="o">;</span>        <span class="err">　　　　　　　　　</span><span class="c1">// 封装帐号（uid）请求参数属性</span>
+    <span class="kd">private</span> <span class="nc">File</span> <span class="n">headImage</span><span class="o">;</span>     <span class="err">　　　　　　　　</span><span class="c1">// 封装上传文件域属性</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">headImageContentType</span><span class="o">;</span>     <span class="c1">// 封装上传文件类型的属性</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">headImageFileName</span><span class="o">;</span><span class="err">　　　</span> <span class="err">　</span><span class="c1">// 封装上传文件属性</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getUid</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">uid</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUid</span><span class="o">(</span><span class="nc">String</span> <span class="n">uid</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">uid</span> <span class="o">=</span> <span class="n">uid</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">File</span> <span class="nf">getHeadImage</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">headImage</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setHeadImage</span><span class="o">(</span><span class="nc">File</span> <span class="n">headImage</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">headImage</span> <span class="o">=</span> <span class="n">headImage</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getHeadImageContentType</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">headImageContentType</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setHeadImageContentType</span><span class="o">(</span><span class="nc">String</span> <span class="n">headImageContentType</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">headImageContentType</span> <span class="o">=</span> <span class="n">headImageContentType</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getHeadImageFileName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">headImageFileName</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setHeadImageFileName</span><span class="o">(</span><span class="nc">String</span> <span class="n">headImageFileName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">headImageFileName</span> <span class="o">=</span> <span class="n">headImageFileName</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="c1">// 上传文件的保存位置在“/image”,该位置在tomcat服务器的“webapps”之中</span>
+        <span class="nc">String</span>  <span class="n">realpath</span><span class="o">=</span> <span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getServletContext</span><span class="o">().</span><span class="na">getRealPath</span><span class="o">(</span><span class="s">"/image"</span><span class="o">);</span>
+
+        <span class="c1">// 声明文件目录image，如果文件名不存在就建一个呗～</span>
+        <span class="nc">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">realpath</span><span class="o">);</span>
+        <span class="k">if</span><span class="o">(!</span><span class="n">file</span><span class="o">.</span><span class="na">exists</span><span class="o">()){</span>
+            <span class="n">file</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">();</span>
+        <span class="o">}</span>
+
+        <span class="c1">// 实现文件上传，也就是做了一个方法调用～</span>
+        <span class="nc">FileUtils</span><span class="o">.</span><span class="na">copyFile</span><span class="o">(</span><span class="n">headImage</span><span class="o">,</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">file</span><span class="o">,</span><span class="n">headImageFileName</span><span class="o">));</span>
+        <span class="k">return</span> <span class="no">SUCCESS</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>struts.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+
+<span class="cp">&lt;!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd"&gt;</span>
+
+<span class="nt">&lt;struts&gt;</span>
+    <span class="c">&lt;!--指定国际化资源文件（下一章会讲到）--&gt;</span>
+    <span class="nt">&lt;constant</span> <span class="na">name=</span><span class="s">"struts.custom.i18n.resources"</span> <span class="na">value=</span><span class="s">"messageResource"</span><span class="nt">/&gt;</span>
+
+    <span class="c">&lt;!--设置Struts应用的解码集--&gt;</span>
+    <span class="nt">&lt;constant</span> <span class="na">name=</span><span class="s">"struts.i18n.encoding"</span> <span class="na">value=</span><span class="s">"utf-8"</span><span class="nt">/&gt;</span>
+　　 
+　　<span class="c">&lt;!-- ---  包配置  ---- --&gt;</span>
+    <span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"default"</span> <span class="na">namespace=</span><span class="s">"/"</span> <span class="na">extends=</span><span class="s">"struts-default"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"upload"</span> <span class="na">class=</span><span class="s">"action.UploadAction"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;result&gt;</span>/uploadSuccess.jsp<span class="nt">&lt;/result&gt;</span>
+        <span class="nt">&lt;/action&gt;</span>
+    <span class="nt">&lt;/package&gt;</span>
+<span class="nt">&lt;/struts&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>uploadSuccess.jsp</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;%@ page </span><span class="na">contentType=</span><span class="s">"text/html;charset=UTF-8"</span><span class="na"> language=</span><span class="s">"java"</span> <span class="nt">%&gt;</span>
+
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>上传初始页<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    上传成功!<span class="nt">&lt;br&gt;</span>
+
+    <span class="c">&lt;!--输入表单里的用户帐号属性--&gt;</span>
+    用户帐号：<span class="nt">&lt;s:property </span><span class="na">value=</span><span class="s">"uid"</span><span class="nt">/&gt;&lt;br&gt;</span>
+
+    <span class="c">&lt;!--根据上传文件名字,显示上传头像--&gt;</span>
+    您的头像：<span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"</span><span class="nt">&lt;s:property </span><span class="na">value=</span><span class="s">"'image/' + headImageFileName"</span><span class="nt">/&gt;</span><span class="s"> "</span> <span class="na">alt=</span><span class="s">"图像无法显示"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<h4 id="文件过滤">文件过滤</h4>
+
+<ul>
+  <li>Struts2提供了一个名为fileUpload拦截器，通过配置该拦截器可以轻松地实现文件过滤</li>
+  <li>allowTypes：该参数指定允许上传文件的类型，多个文件类型之间以英文逗号隔开</li>
+  <li>maximumSize：该参数指定允许上传文件的大小，单位是字节</li>
+  <li>当文件过滤失败后，系统自动转入input逻辑视图，因此必须为Action配置名为input的逻辑视图</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+
+<span class="cp">&lt;!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd"&gt;</span>
+
+<span class="nt">&lt;struts&gt;</span>
+    <span class="c">&lt;!--指定国际化资源文件（下一讲会讲到）--&gt;</span>
+    <span class="nt">&lt;constant</span> <span class="na">name=</span><span class="s">"struts.custom.i18n.resources"</span> <span class="na">value=</span><span class="s">"messageResource"</span><span class="nt">/&gt;</span>
+
+    <span class="c">&lt;!--设置Struts应用的解码集--&gt;</span>
+    <span class="nt">&lt;constant</span> <span class="na">name=</span><span class="s">"struts.i18n.encoding"</span> <span class="na">value=</span><span class="s">"utf-8"</span><span class="nt">/&gt;</span>
+
+    <span class="c">&lt;!--package中加入拦截器--&gt;</span>
+    <span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"default"</span> <span class="na">namespace=</span><span class="s">"/"</span> <span class="na">extends=</span><span class="s">"struts-default"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;interceptors&gt;</span>
+            <span class="c">&lt;!--配置拦截器栈(在拦截器章节有讲述)--&gt;</span>
+            <span class="nt">&lt;interceptor-stack</span> <span class="na">name=</span><span class="s">"myStack"</span><span class="nt">&gt;</span>
+                <span class="c">&lt;!--配置fileUpload拦截器--&gt;</span>
+                <span class="nt">&lt;interceptor-ref</span> <span class="na">name=</span><span class="s">"fileUpload"</span><span class="nt">&gt;</span>
+                    <span class="c">&lt;!--配置允许上传文件的类型（此处要注意的是png图片在ie浏览器中是image/x-png类型）--&gt;</span>
+                    <span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"allowedTypes"</span><span class="nt">&gt;</span>image/x-png,image/bmp,image/gif,image/jpeg,image/jpg<span class="nt">&lt;/param&gt;</span>
+                    <span class="c">&lt;!--配置允许上传文件大小拦截器，单位是字节（2的16次幂=65536（64k））--&gt;</span>
+                    <span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"maximumSize"</span><span class="nt">&gt;</span>65536<span class="nt">&lt;/param&gt;</span>
+                <span class="nt">&lt;/interceptor-ref&gt;</span>
+                <span class="nt">&lt;interceptor-ref</span> <span class="na">name=</span><span class="s">"defaultStack"</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;/interceptor-stack&gt;</span>
+        <span class="nt">&lt;/interceptors&gt;</span>
+
+        <span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"upload"</span> <span class="na">class=</span><span class="s">"action.UploadAction"</span><span class="nt">&gt;</span>
+            <span class="c">&lt;!--使用拦截器栈--&gt;</span>
+            <span class="nt">&lt;interceptor-ref</span> <span class="na">name=</span><span class="s">"myStack"</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;result&gt;</span>/uploadSuccess.jsp<span class="nt">&lt;/result&gt;</span>
+
+            <span class="c">&lt;!--过滤失败，系统会转入input逻辑视图，这里配置其返回选择界面--&gt;</span>
+            <span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"input"</span><span class="nt">&gt;</span>/select.jsp<span class="nt">&lt;/result&gt;</span>
+        <span class="nt">&lt;/action&gt;</span>
+    <span class="nt">&lt;/package&gt;</span>
+<span class="nt">&lt;/struts&gt;</span>
+</code></pre></div></div>
+
+<h4 id="常量配置">常量配置</h4>
+
+<ul>
+  <li>上传文件时，系统默认使用web服务器的工作路径作为临时路径。为了避免文件上传时候使用Web服务器的工作路径作为临时路径，则应该设置struts.multipart.saveDir常量。该常量指定上传文件的临时保存路径</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nt">&lt;constant</span> <span class="na">name=</span><span class="s">"struts.multipart.saveDir"</span> <span class="na">value=</span><span class="s">"HOME/....(写上路径)..."</span><span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>还有一个文件上传的常量struts.multipart.maxSize。该常量指定struts.mutipart.maxSize。该常量指定在struts2文件上传中整个请求内容所允许的最大字节数，默认为2097152（即2MB）</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;constant</span> <span class="na">name=</span><span class="s">"struts.multipart.maxSize"</span> <span class="na">value=</span><span class="s">"209971520"</span><span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<h3 id="文件下载">文件下载</h3>
+
+<ul>
+  <li>index.jsp</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;%@ page </span><span class="na">language=</span><span class="s">"java"</span><span class="na"> import=</span><span class="s">"java.util.*"</span><span class="na"> pageEncoding=</span><span class="s">"utf-8"</span><span class="nt">%&gt;</span>
+
+
+<span class="nt">&lt;html&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>test_download<span class="nt">&lt;/title&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+  <span class="nt">&lt;body&gt;</span>
+  　　请下载中文课件：<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"downLoad.action?downPath=第一章节.doc"</span><span class="nt">&gt;</span>中<span class="nt">&lt;/a&gt;&lt;br&gt;</span>
+  　　请下载英文课件：<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"downLoad.action?downPath=chapter01.doc"</span><span class="nt">&gt;</span>英<span class="nt">&lt;/a&gt;&lt;br&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>DownLoadAction.java</li>
+  <li>需要提供一个返回InputStream流方法，该输入流代表了被下载文件的入口</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">action</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.struts2.ServletActionContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">util.MyUtil</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.UnsupportedEncodingException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DownLoadAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span><span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">downPath</span><span class="o">;</span>        <span class="c1">// 下载时的文件名</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">contentType</span><span class="o">;</span>     <span class="c1">// 保存文件类型</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">filename</span><span class="o">;</span>        <span class="c1">// 保存时的文件名</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getContentType</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">contentType</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setContentType</span><span class="o">(</span><span class="nc">String</span> <span class="n">contentType</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">contentType</span> <span class="o">=</span> <span class="n">contentType</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getFilename</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">filename</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setFilename</span><span class="o">(</span><span class="nc">String</span> <span class="n">filename</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getDownPath</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">downPath</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setDownPath</span><span class="o">(</span><span class="nc">String</span> <span class="n">downPath</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 解决下载时候的中文文件乱码问题</span>
+            <span class="n">downPath</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">downPath</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"ISO-8859-1"</span><span class="o">),</span><span class="s">"UTF-8"</span><span class="o">);</span>
+        <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="nc">UnsupportedEncodingException</span> <span class="n">e</span><span class="o">){</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">downPath</span> <span class="o">=</span> <span class="n">downPath</span><span class="o">;</span>
+    <span class="o">}</span>
+
+   <span class="cm">/*
+    *下载用的Action返回一个InputString实例，该方法对应Action配置
+    *里面的result的inputName参数，值为inputString
+    *
+    */</span>
+
+   <span class="kd">public</span> <span class="nc">InputStream</span> <span class="nf">getInputString</span><span class="o">(){</span>
+       <span class="k">return</span> <span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getServletContext</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="n">downPath</span><span class="o">);</span>
+   <span class="o">}</span>
+
+   <span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">(){</span>
+       <span class="c1">// 下载保存时的文件名和被下载的文件名一样</span>
+       <span class="n">filename</span> <span class="o">=</span> <span class="n">downPath</span><span class="o">;</span>
+       <span class="c1">// 下载的文件路径，请在webapps目录下创建images</span>
+       <span class="n">downPath</span> <span class="o">=</span> <span class="s">"images/"</span> <span class="o">+</span> <span class="n">downPath</span><span class="o">;</span>
+       <span class="c1">// 保存文件的类型</span>
+
+       <span class="n">contentType</span> <span class="o">=</span> <span class="s">"application/x-msdownload"</span><span class="o">;</span>
+
+       <span class="cm">/*
+        *对下载的文件名按照UTF-8进行编码，解决下载窗口中的中文乱码问题
+        * 其中,MyUtil是自己定义的一个类
+        */</span>
+
+       <span class="n">filename</span> <span class="o">=</span> <span class="nc">MyUtil</span><span class="o">.</span><span class="na">toUTF8String</span><span class="o">(</span><span class="n">filename</span><span class="o">);</span>
+       <span class="k">return</span> <span class="no">SUCCESS</span><span class="o">;</span>
+   <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>MyUtil.java</li>
+  <li>该类中有一个静态方法toUTF8String实现对下载的文件名按照UTF-8进行编码，解决下载窗口中中文乱码的问题</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">util</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.UnsupportedEncodingException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyUtil</span> <span class="o">{</span>
+    <span class="c1">// 对下载文件按照 UTF-8 进行编码</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">toUTF8String</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">){</span>
+        <span class="nc">StringBuffer</span> <span class="n">sb</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuffer</span><span class="o">();</span>
+        <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>
+        <span class="o">{</span>
+            <span class="c1">// 取出字符中的每个字符</span>
+            <span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="c1">// Unicode码值在0～255之间，不做处理</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">c</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="o">){</span>
+                <span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+            <span class="o">}</span><span class="k">else</span> <span class="o">{</span>
+                <span class="c1">// 转换 UTF-8 编码</span>
+                <span class="kt">byte</span> <span class="n">b</span><span class="o">[];</span>
+                <span class="k">try</span><span class="o">{</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="nc">Character</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">c</span><span class="o">).</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+                <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="nc">UnsupportedEncodingException</span> <span class="n">e</span><span class="o">){</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="o">}</span>
+                <span class="c1">// 转换为%HH的字符串形式</span>
+                <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">b</span><span class="o">.</span><span class="na">length</span> <span class="o">;</span> <span class="n">j</span><span class="o">++){</span>
+                    <span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="n">b</span><span class="o">[</span><span class="n">j</span><span class="o">];</span>
+                    <span class="k">if</span><span class="o">(</span><span class="n">k</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">){</span>
+                        <span class="n">k</span> <span class="o">&amp;=</span> <span class="mi">255</span><span class="o">;</span>
+                    <span class="o">}</span>
+                    <span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"%"</span> <span class="o">+</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">toHexString</span><span class="o">(</span><span class="n">k</span><span class="o">).</span><span class="na">toUpperCase</span><span class="o">());</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">sb</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>struts.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+
+<span class="cp">&lt;!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd"&gt;</span>
+
+<span class="nt">&lt;struts&gt;</span>
+    <span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"default"</span> <span class="na">namespace=</span><span class="s">"/"</span> <span class="na">extends=</span><span class="s">"struts-default"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"downLoad"</span> <span class="na">class=</span><span class="s">"action.DownLoadAction"</span><span class="nt">&gt;</span>
+            <span class="c">&lt;!--结果类型为String--&gt;</span>
+            <span class="nt">&lt;result</span> <span class="na">type=</span><span class="s">"stream"</span><span class="nt">&gt;</span>
+				<span class="c">&lt;!--指定被下载文件的文件类型--&gt;</span>
+                <span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"contentType"</span><span class="nt">&gt;</span>${contentType}<span class="nt">&lt;/param&gt;</span>
+                
+                <span class="c">&lt;!--指定被下载文件的入口输入流,默认就是inputStream,它将会指示StreamResult通过
+                  inputName属性值的getter和setter方法，如这里就是
+                  getInputStream()来获取下载文件的内容,意味着Action
+                  要有这个方法
+                  --&gt;</span>
+                <span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"inputName"</span><span class="nt">&gt;</span>inputStream<span class="nt">&lt;/param&gt;</span>
+                
+                 <span class="c">&lt;!--指定下载的文件名,默认为inline（在线打开）,设置为attachment将会告诉浏览器下载
+                     该文件,filename指定下载文件时的文件名，若未指定将会以浏览器
+                     页面名作为文件名,如：以download.action作为文件名
+                   --&gt;</span>
+                <span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"contentDisposition"</span><span class="nt">&gt;</span>attachment;filename=${filename}<span class="nt">&lt;/param&gt;</span>
+                
+                <span class="c">&lt;!--指定下载文件的缓冲大小--&gt;</span>
+                <span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"bufferSize"</span><span class="nt">&gt;</span>4096<span class="nt">&lt;/param&gt;</span>
+
+            <span class="nt">&lt;/result&gt;</span>
+        <span class="nt">&lt;/action&gt;</span>
+    <span class="nt">&lt;/package&gt;</span>
+</code></pre></div></div>
+
+<h3 id="文件下载次数">文件下载次数</h3>
+
+<ul>
+  <li>struts.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="cp">&lt;!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;</span>
+
+<span class="nt">&lt;struts&gt;</span>
+    <span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"default"</span> <span class="na">extends=</span><span class="s">"struts-default"</span><span class="nt">&gt;</span>    	
+		<span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"downloadFileCount"</span> <span class="na">class=</span><span class="s">"example.struts2.DownloadFileCountAction"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"success"</span> <span class="na">type=</span><span class="s">"stream"</span><span class="nt">&gt;</span>
+				<span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"contentType"</span><span class="nt">&gt;</span>${contentType}<span class="nt">&lt;/param&gt;</span>
+				<span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"inputName"</span><span class="nt">&gt;</span>inputStream<span class="nt">&lt;/param&gt;</span>
+				<span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">"contentDisposition"</span><span class="nt">&gt;</span>
+					attachment;filename=${fileName}
+				<span class="nt">&lt;/param&gt;</span>
+			<span class="nt">&lt;/result&gt;</span>
+		<span class="nt">&lt;/action&gt;</span>
+    <span class="nt">&lt;/package&gt;</span>
+<span class="nt">&lt;/struts&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>DownloadFileCountAction</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">example.struts2</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.commons.io.FileUtils</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.struts2.ServletActionContext</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DownloadFileCountAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span><span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">downloadPath</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">contentType</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">fileName</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getDownloadPath</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">downloadPath</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setDownloadPath</span><span class="o">(</span><span class="nc">String</span> <span class="n">downloadPath</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">downloadPath</span> <span class="o">=</span> <span class="n">downloadPath</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getContentType</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">contentType</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setContentType</span><span class="o">(</span><span class="nc">String</span> <span class="n">contentType</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">contentType</span> <span class="o">=</span> <span class="n">contentType</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getFileName</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">fileName</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setFileNAme</span><span class="o">(</span><span class="nc">String</span> <span class="n">fileName</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">fileName</span> <span class="o">=</span> <span class="n">fileName</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="n">downloadPath</span><span class="o">=</span><span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getRequest</span><span class="o">().</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"download"</span><span class="o">);</span>
+		<span class="kt">int</span> <span class="n">position</span><span class="o">=</span><span class="n">downloadPath</span><span class="o">.</span><span class="na">lastIndexOf</span><span class="o">(</span><span class="s">"/"</span><span class="o">);</span>
+		<span class="nc">String</span> <span class="n">downloadFilePath</span><span class="o">;</span>
+		<span class="k">if</span> <span class="o">(</span><span class="n">position</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">fileName</span><span class="o">=</span><span class="n">downloadPath</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">position</span><span class="o">+</span><span class="mi">1</span><span class="o">);</span>
+			<span class="n">downloadFilePath</span><span class="o">=</span><span class="n">downloadPath</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="n">position</span><span class="o">+</span><span class="mi">1</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="k">else</span> <span class="o">{</span>
+			<span class="n">fileName</span><span class="o">=</span><span class="n">downloadPath</span><span class="o">;</span>
+			<span class="n">downloadFilePath</span><span class="o">=</span><span class="s">""</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="kt">int</span> <span class="n">extPos</span><span class="o">=</span> <span class="n">fileName</span><span class="o">.</span><span class="na">lastIndexOf</span><span class="o">(</span><span class="s">"."</span><span class="o">);</span>
+		<span class="nc">String</span> <span class="n">contentTypeKey</span><span class="o">;</span>
+		<span class="k">if</span> <span class="o">(</span><span class="n">extPos</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">contentTypeKey</span><span class="o">=</span><span class="s">"struts.contentType"</span><span class="o">+</span><span class="n">fileName</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">extPos</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="k">else</span> <span class="o">{</span>
+			<span class="n">contentTypeKey</span><span class="o">=</span><span class="s">"struts.contentType.txt"</span><span class="o">;</span>
+		<span class="o">}</span>
+		
+		<span class="n">contentType</span><span class="o">=</span><span class="n">getText</span><span class="o">(</span><span class="n">contentTypeKey</span><span class="o">);</span>
+		<span class="nc">String</span> <span class="n">counterFile</span><span class="o">=</span> <span class="n">genNewFileName</span><span class="o">(</span><span class="n">downloadFilePath</span><span class="o">,</span><span class="n">fileName</span><span class="o">);</span>
+		<span class="n">setDownloadCount</span><span class="o">(</span><span class="n">counterFile</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">SUCCESS</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nc">InputStream</span> <span class="nf">getInputStream</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="k">return</span> <span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getServletContext</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="n">downloadPath</span><span class="o">);</span>
+		
+	<span class="o">}</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="nf">genNewFileName</span><span class="o">(</span><span class="nc">String</span> <span class="n">filePath</span><span class="o">,</span> <span class="nc">String</span> <span class="n">fileName</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">String</span> <span class="n">serverRealPath</span><span class="o">=</span><span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getServletContext</span><span class="o">().</span><span class="na">getRealPath</span><span class="o">(</span><span class="n">filePath</span><span class="o">)+</span><span class="s">"/DownloadCounter"</span><span class="o">;</span>
+		<span class="nc">File</span>  <span class="n">dir</span><span class="o">=</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">serverRealPath</span><span class="o">);</span>
+		<span class="k">if</span> <span class="o">(!</span><span class="n">dir</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+			<span class="n">dir</span><span class="o">.</span><span class="na">mkdir</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="nc">String</span> <span class="n">downloadCountFile</span><span class="o">=</span><span class="n">serverRealPath</span><span class="o">+</span><span class="n">fileName</span><span class="o">+</span><span class="s">".txt"</span><span class="o">;</span>
+		<span class="k">return</span> <span class="n">downloadCountFile</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">private</span> <span class="kt">void</span> <span class="nf">setDownloadCount</span><span class="o">(</span><span class="nc">String</span> <span class="n">fullFileName</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="kt">int</span> <span class="n">curCount</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span>
+		<span class="nc">File</span> <span class="n">file</span><span class="o">=</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">fullFileName</span><span class="o">);</span>
+		<span class="k">if</span> <span class="o">(</span><span class="n">file</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+			<span class="n">curCount</span><span class="o">=</span><span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">FileUtils</span><span class="o">.</span><span class="na">readFileToString</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">fullFileName</span><span class="o">)))+</span><span class="mi">1</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="nc">FileUtils</span><span class="o">.</span><span class="na">writeStringToFile</span><span class="o">(</span><span class="n">file</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">curCount</span><span class="o">));</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>在webRoot目录下创建文件夹Upload，在文件夹里创建文件Readme.txt</li>
+  <li>启动项目访问<code class="language-plaintext highlighter-rouge">downloadFileCount?download=/Upload/Readme.txt</code></li>
+</ul>
+:ET

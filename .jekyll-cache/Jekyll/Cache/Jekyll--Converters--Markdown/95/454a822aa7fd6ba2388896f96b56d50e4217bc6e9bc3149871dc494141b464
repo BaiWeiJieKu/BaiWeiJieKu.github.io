@@ -1,0 +1,439 @@
+I"I�<ul id="markdown-toc">
+  <li><a href="#接口" id="markdown-toc-接口">接口</a>    <ul>
+      <li><a href="#接口的特性" id="markdown-toc-接口的特性">接口的特性</a></li>
+      <li><a href="#接口和抽象类" id="markdown-toc-接口和抽象类">接口和抽象类</a></li>
+    </ul>
+  </li>
+  <li><a href="#对象克隆" id="markdown-toc-对象克隆">对象克隆</a>    <ul>
+      <li><a href="#克隆含义" id="markdown-toc-克隆含义">克隆含义</a></li>
+      <li><a href="#clone方法" id="markdown-toc-clone方法">clone方法</a></li>
+      <li><a href="#深浅拷贝" id="markdown-toc-深浅拷贝">深浅拷贝</a></li>
+    </ul>
+  </li>
+  <li><a href="#接口回调" id="markdown-toc-接口回调">接口回调</a>    <ul>
+      <li><a href="#定义接口" id="markdown-toc-定义接口">定义接口</a></li>
+      <li><a href="#boss类" id="markdown-toc-boss类">Boss类</a></li>
+      <li><a href="#员工类" id="markdown-toc-员工类">员工类</a></li>
+      <li><a href="#测试类" id="markdown-toc-测试类">测试类</a></li>
+    </ul>
+  </li>
+  <li><a href="#内部类" id="markdown-toc-内部类">内部类</a>    <ul>
+      <li><a href="#非静态内部类" id="markdown-toc-非静态内部类">非静态内部类</a></li>
+      <li><a href="#静态内部类" id="markdown-toc-静态内部类">静态内部类</a></li>
+      <li><a href="#匿名类" id="markdown-toc-匿名类">匿名类</a></li>
+      <li><a href="#本地类" id="markdown-toc-本地类">本地类</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="接口">接口</h2>
+
+<ul>
+  <li>接口技术主要用来描述类具有什么功能，而并不给出每个功能的具体实现</li>
+  <li>一个类可以实现一个或多个接口</li>
+  <li>如果类遵从某个特定接口，那么就履行这项服务</li>
+  <li>接口中的方法自动的属于public，在接口声明方法时，不必提供关键字public</li>
+  <li>在接口中可以定义常量</li>
+  <li>接口绝不能含有实例域，也不能在接口中实现方法</li>
+  <li>提供实例域和方法实现的任务应该由实现接口的那个类来完成</li>
+  <li>为了让类实现一个接口，需要两个步骤：（1）将类声明为实现给定的接口。（2）对接口中的所有方法进行定义</li>
+  <li>要将类声明为实现某个接口，需要使用关键字implements</li>
+  <li>在实现接口时，必须把方法声明为public</li>
+  <li>要让一个类使用排序服务必须让他实现compareTo方法</li>
+</ul>
+
+<h3 id="接口的特性">接口的特性</h3>
+
+<ul>
+  <li>接口不是类，尤其不能使用new运算符实例化一个接口</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="o">=</span><span class="k">new</span> <span class="nc">Comparable</span><span class="o">()</span><span class="c1">//error</span>
+</code></pre></div></div>
+
+<ul>
+  <li>尽管不能构造接口的对象，却能声明接口的变量</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Comparable</span> <span class="n">x</span><span class="o">;</span><span class="c1">//ok</span>
+</code></pre></div></div>
+
+<ul>
+  <li>接口变量必须引用实现了接口的类对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span><span class="o">=</span><span class="k">new</span> <span class="nc">Employee</span><span class="o">();</span><span class="c1">//ok</span>
+</code></pre></div></div>
+
+<ul>
+  <li>接口中的域将被自动设为public static final</li>
+  <li>尽管每个类只能够拥有一个超类，但却可以实现多个接口，使用逗号分隔开</li>
+</ul>
+
+<h3 id="接口和抽象类">接口和抽象类</h3>
+
+<ul>
+  <li>Java不支持多继承的主要原因是多继承会让语言本身变得非常复杂，效率也会降低</li>
+  <li>接口可以提供多重继承的大多数好处，同时还能避免多重继承的复杂性和低效性</li>
+</ul>
+
+<h2 id="对象克隆">对象克隆</h2>
+
+<h3 id="克隆含义">克隆含义</h3>
+
+<ul>
+  <li>在实际编程过程中，我们常常要遇到这种情况：有一个对象A，在某一时刻A中已经包含了一些有效值，此时可能 会需要一个和A完全相同新对象B，并且此后对B任何改动都不会影响到A中的值，也就是说，A与B是两个独立的对象，但B的初始值是由A对象确定的。在 Java语言中，用简单的赋值语句是不能满足这种需求的。要满足这种需求虽然有很多途径，但实现clone（）方法是其中最简单，也是最高效的手段。</li>
+  <li>Java的所有类都默认继承java.lang.Object类，在java.lang.Object类中有一个方法clone()。JDK API的说明文档解释这个方法将返回Object对象的一个拷贝。要说明的有两点：一是拷贝对象返回的是一个新对象，而不是一个引用。二是拷贝对象与用 new操作符返回的新对象的区别就是这个拷贝已经包含了一些原来对象的信息，而不是对象的初始信息。</li>
+</ul>
+
+<h3 id="clone方法">clone方法</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">CloneClass</span> <span class="kd">implements</span> <span class="nc">Cloneable</span><span class="o">{</span> 
+<span class="err">　</span><span class="kd">public</span> <span class="kt">int</span> <span class="n">aInt</span><span class="o">;</span> 
+<span class="err">　</span><span class="kd">public</span> <span class="nc">Object</span> <span class="nf">clone</span><span class="o">(){</span> 
+<span class="err">　　</span><span class="nc">CloneClass</span> <span class="n">o</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span> 
+<span class="err">　　</span><span class="k">try</span><span class="o">{</span> 
+<span class="err">　　　</span><span class="n">o</span> <span class="o">=</span> <span class="o">(</span><span class="nc">CloneClass</span><span class="o">)</span><span class="kd">super</span><span class="o">.</span><span class="na">clone</span><span class="o">();</span> 
+<span class="err">　　</span><span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="nc">CloneNotSupportedException</span> <span class="n">e</span><span class="o">){</span> 
+<span class="err">　　　</span><span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span> 
+<span class="err">　　</span><span class="o">}</span> 
+<span class="err">　　</span><span class="k">return</span> <span class="n">o</span><span class="o">;</span> 
+<span class="err">　</span><span class="o">}</span> 
+<span class="err">｝</span>
+</code></pre></div></div>
+
+<ul>
+  <li>有三个值得注意的地方，一是希望能实现clone功能的CloneClass类实现了Cloneable接口，这个接口属于java.lang 包，java.lang包已经被缺省的导入类中，所以不需要写成java.lang.Cloneable。</li>
+  <li>另一个值得请注意的是重载了clone()方 法。最后在clone()方法中调用了super.clone()，这也意味着无论clone类的继承结构是什么样的，super.clone()直接或 间接调用了java.lang.Object类的clone()方法</li>
+  <li>Object类的clone()一个native方法，native方法的效率一般来说都是远高于java中的非native方法。这也解释了为 什么要用Object中clone()方法而不是先new一个类，然后把原始对象中的信息赋到新对象中，虽然这也实现了clone功能。对于第二点，也要 观察Object类中的clone()还是一个protected属性的方法。这也意味着如果要应用clone()方法，必须继承Object类，在 Java中所有的类是缺省继承Object类的，也就不用关心这点了。然后重写clone()方法。还有一点要考虑的是为了让其它类能调用这个clone 类的clone()方法，重写之后要把clone()方法的属性设置为public。</li>
+  <li>那么clone类为什么还要实现 Cloneable接口呢？稍微注意一下，Cloneable接口是不包含任何方法的！其实这个接口仅仅是一个标志，而且这个标志也仅仅是针对 Object类中clone()方法的，如果clone类没有实现Cloneable接口，并调用了Object的clone()方法（也就是调用了 super.Clone()方法），那么Object的clone()方法就会抛出CloneNotSupportedException异常。</li>
+</ul>
+
+<h3 id="深浅拷贝">深浅拷贝</h3>
+
+<p><a href="https://www.cnblogs.com/xuanxufeng/p/6558330.html">深浅拷贝</a></p>
+
+<h2 id="接口回调">接口回调</h2>
+
+<p><a href="https://www.cnblogs.com/wangming007/p/5122701.html">接口回调</a></p>
+
+<ul>
+  <li>在Java学习中有个比较重要的知识点，就是今天我们要讲的接口回调。接口回调的理解如果解释起来会比较抽象，我一般喜欢用一个或几个经典的例子来帮助加深理解。</li>
+  <li>举例：老板分派给员工做事，员工做完事情后需要给老板回复，老板对其做出反应。</li>
+  <li>上面是个比较经典的例子，下面用代码实现上述例子：</li>
+</ul>
+
+<h3 id="定义接口">定义接口</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">JieKouHuiDiao</span><span class="o">;</span>
+<span class="mi">2</span> <span class="c1">//定义一个接口</span>
+<span class="mi">3</span> <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">JieKou</span> <span class="o">{</span>
+<span class="mi">4</span> <span class="kd">public</span> <span class="kt">void</span> <span class="nf">show</span><span class="o">();</span>
+<span class="mi">5</span> <span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="boss类">Boss类</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">JieKouHuiDiao</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Boss</span> <span class="kd">implements</span> <span class="nc">JieKou</span><span class="o">{</span>
+<span class="c1">//定义一个老板实现接口</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">show</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"知道了"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="员工类">员工类</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">JieKouHuiDiao</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Employee</span> <span class="o">{</span>
+<span class="c1">//接口属性，方便后边注册</span>
+    <span class="nc">JieKou</span> <span class="n">jiekou</span><span class="o">;</span>
+<span class="c1">//注册一个接口属性，等需要调用的时候传入一个接口类型的参数，即本例中的Boss和Employee，</span>
+<span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">zhuce</span><span class="o">(</span><span class="nc">JieKou</span> <span class="n">jiekou</span><span class="o">,</span><span class="nc">Employee</span> <span class="n">e</span><span class="o">){</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">jiekou</span><span class="o">=</span><span class="n">jiekou</span><span class="o">;</span>
+    <span class="k">return</span> <span class="n">e</span><span class="o">;</span>
+<span class="o">}</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">dosomething</span><span class="o">(){</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"拼命做事，做完告诉老板"</span><span class="o">);</span>
+    <span class="c1">//接口回调，如果没有注册调用，接口中的抽象方法也不会影响dosomething</span>
+    <span class="n">jiekou</span><span class="o">.</span><span class="na">show</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="测试类">测试类</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">JieKouHuiDiao</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test</span> <span class="o">{</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">Employee</span> <span class="n">e</span><span class="o">=</span><span class="k">new</span> <span class="nc">Employee</span><span class="o">();</span>
+    <span class="c1">//需要调用的时候先注册,传入Boss类型对象和员工参数</span>
+    <span class="nc">Employee</span> <span class="n">e1</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="na">zhuce</span><span class="o">(</span><span class="k">new</span> <span class="nc">Boss</span><span class="o">(),</span><span class="n">e</span><span class="o">);</span>
+    <span class="n">e1</span><span class="o">.</span><span class="na">dosomething</span><span class="o">();</span>
+<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="内部类">内部类</h2>
+
+<p>http://how2j.cn/k/interface-inheritance/interface-inheritance-inner-class/322.html</p>
+
+<ul>
+  <li>内部类分为四种：非静态内部类 ，静态内部类，匿名类，本地类</li>
+</ul>
+
+<h3 id="非静态内部类">非静态内部类</h3>
+
+<ul>
+  <li>非静态内部类 BattleScore “战斗成绩”</li>
+  <li>非静态内部类可以直接在一个类里面定义</li>
+  <li>比如：
+战斗成绩只有在一个英雄对象存在的时候才有意义
+所以实例化BattleScore 的时候，必须建立在一个存在的英雄的基础上
+语法: new 外部类().new 内部类()
+作为Hero的非静态内部类，是可以直接访问外部类的private实例属性name的</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> <span class="c1">// 姓名</span>
+ 
+    <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span> <span class="c1">// 血量</span>
+ 
+    <span class="kt">float</span> <span class="n">armor</span><span class="o">;</span> <span class="c1">// 护甲</span>
+ 
+    <span class="kt">int</span> <span class="n">moveSpeed</span><span class="o">;</span> <span class="c1">// 移动速度</span>
+ 
+    <span class="c1">// 非静态内部类，只有一个外部类对象存在的时候，才有意义</span>
+    <span class="c1">// 战斗成绩只有在一个英雄对象存在的时候才有意义</span>
+    <span class="kd">class</span> <span class="nc">BattleScore</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">kill</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">die</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">assit</span><span class="o">;</span>
+ 
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">legendary</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">kill</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="o">)</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">"超神！"</span><span class="o">);</span>
+            <span class="k">else</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">"尚未超神！"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Hero</span> <span class="n">garen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">garen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="c1">// 实例化内部类</span>
+        <span class="c1">// BattleScore对象只有在一个英雄对象存在的时候才有意义</span>
+        <span class="c1">// 所以其实例化必须建立在一个外部类对象的基础之上</span>
+        <span class="nc">BattleScore</span> <span class="n">score</span> <span class="o">=</span> <span class="n">garen</span><span class="o">.</span><span class="na">new</span> <span class="nf">BattleScore</span><span class="o">();</span>
+        <span class="n">score</span><span class="o">.</span><span class="na">kill</span> <span class="o">=</span> <span class="mi">9</span><span class="o">;</span>
+        <span class="n">score</span><span class="o">.</span><span class="na">legendary</span><span class="o">();</span>
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="静态内部类">静态内部类</h3>
+
+<ul>
+  <li>在一个类里面声明一个静态内部类
+比如敌方水晶，当敌方水晶没有血的时候，己方所有英雄都取得胜利，而不只是某一个具体的英雄取得胜利。
+与非静态内部类不同，静态内部类水晶类的实例化 不需要一个外部类的实例为基础，可以直接实例化</li>
+  <li>语法：new 外部类.静态内部类();</li>
+  <li>因为没有一个外部类的实例，所以在静态内部类里面不可以访问外部类的实例属性和方法</li>
+  <li>除了可以访问外部类的私有静态成员外，静态内部类和普通类没什么大的区别</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+    <span class="kd">protected</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+  
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">battleWin</span><span class="o">(){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"battle win"</span><span class="o">);</span>
+    <span class="o">}</span>
+     
+    <span class="c1">//敌方的水晶</span>
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">EnemyCrystal</span><span class="o">{</span>
+        <span class="kt">int</span> <span class="n">hp</span><span class="o">=</span><span class="mi">5000</span><span class="o">;</span>
+         
+        <span class="c1">//如果水晶的血量为0，则宣布胜利</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">checkIfVictory</span><span class="o">(){</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">hp</span><span class="o">==</span><span class="mi">0</span><span class="o">){</span>
+                <span class="nc">Hero</span><span class="o">.</span><span class="na">battleWin</span><span class="o">();</span>
+                 
+                <span class="c1">//静态内部类不能直接访问外部类的对象属性</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">" win this game"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+     
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//实例化静态内部类</span>
+        <span class="nc">Hero</span><span class="o">.</span><span class="na">EnemyCrystal</span> <span class="n">crystal</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">.</span><span class="na">EnemyCrystal</span><span class="o">();</span>
+        <span class="n">crystal</span><span class="o">.</span><span class="na">checkIfVictory</span><span class="o">();</span>
+    <span class="o">}</span>
+  
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="匿名类">匿名类</h3>
+
+<ul>
+  <li>匿名类指的是在声明一个类的同时实例化它，使代码更加简洁精练</li>
+  <li>通常情况下，要使用一个接口或者抽象类，都必须创建一个子类</li>
+  <li>有的时候，为了快速使用，直接实例化一个抽象类，并“当场”实现其抽象方法。</li>
+  <li>既然实现了抽象方法，那么就是一个新的类，只是这个类，没有命名。</li>
+  <li>这样的类，叫做匿名类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+   
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+    <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> <span class="c1">//姓名</span>
+          
+    <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span> <span class="c1">//血量</span>
+          
+    <span class="kt">float</span> <span class="n">armor</span><span class="o">;</span> <span class="c1">//护甲</span>
+          
+    <span class="kt">int</span> <span class="n">moveSpeed</span><span class="o">;</span> <span class="c1">//移动速度</span>
+      
+    <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">();</span>
+      
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+          
+        <span class="nc">ADHero</span> <span class="n">adh</span><span class="o">=</span><span class="k">new</span> <span class="nc">ADHero</span><span class="o">();</span>
+        <span class="c1">//通过打印adh，可以看到adh这个对象属于ADHero类</span>
+        <span class="n">adh</span><span class="o">.</span><span class="na">attack</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">adh</span><span class="o">);</span>
+          
+        <span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(){</span>
+            <span class="c1">//当场实现attack方法</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"新的进攻手段"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">h</span><span class="o">.</span><span class="na">attack</span><span class="o">();</span>
+        <span class="c1">//通过打印h，可以看到h这个对象属于Hero$1这么一个系统自动分配的类名</span>
+          
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">);</span>
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><img src="http://how2j.cn/img/site/step/687.png" alt="" /></p>
+
+<ul>
+  <li>在匿名类中使用外部的局部变量</li>
+  <li>在匿名类中使用外部的局部变量，外部的局部变量必须修饰为final</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+   
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">();</span>
+      
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+ 
+        <span class="c1">//在匿名类中使用外部的局部变量，外部的局部变量必须修饰为final</span>
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">damage</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+         
+        <span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"新的进攻手段，造成%d点伤害"</span><span class="o">,</span><span class="n">damage</span> <span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+ 
+    <span class="o">}</span>
+      
+<span class="o">}</span>   
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+   
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">();</span>
+      
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+ 
+        <span class="c1">//在匿名类中使用外部的局部变量damage 必须修饰为final</span>
+        <span class="kt">int</span> <span class="n">damage</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+         
+        <span class="c1">//这里使用本地类AnonymousHero来模拟匿名类的隐藏属性机制</span>
+         
+        <span class="c1">//事实上的匿名类，会在匿名类里声明一个damage属性，并且使用构造方法初始化该属性的值</span>
+        <span class="c1">//在attack中使用的damage，真正使用的是这个内部damage，而非外部damage</span>
+         
+        <span class="c1">//假设外部属性不需要声明为final</span>
+        <span class="c1">//那么在attack中修改damage的值，就会被暗示为修改了外部变量damage的值</span>
+         
+        <span class="c1">//但是他们俩是不同的变量，是不可能修改外部变量damage的</span>
+        <span class="c1">//所以为了避免产生误导，外部的damage必须声明为final,"看上去"就不能修改了</span>
+        <span class="kd">class</span> <span class="nc">AnonymousHero</span> <span class="kd">extends</span> <span class="nc">Hero</span><span class="o">{</span>
+            <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+            <span class="kd">public</span> <span class="nf">AnonymousHero</span><span class="o">(</span><span class="kt">int</span> <span class="n">damage</span><span class="o">){</span>
+                <span class="k">this</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="n">damage</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">()</span> <span class="o">{</span>
+                <span class="n">damage</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"新的进攻手段，造成%d点伤害"</span><span class="o">,</span><span class="k">this</span><span class="o">.</span><span class="na">damage</span> <span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+         
+        <span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">AnonymousHero</span><span class="o">(</span><span class="n">damage</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="本地类">本地类</h3>
+
+<ul>
+  <li>本地类可以理解为有名字的匿名类</li>
+  <li>内部类与匿名类不一样的是，内部类必须声明在成员的位置，即与属性和方法平等的位置。</li>
+  <li>本地类和匿名类一样，直接声明在代码块里面，可以是主方法，for循环里等等地方</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+   
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+    <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> <span class="c1">//姓名</span>
+          
+    <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span> <span class="c1">//血量</span>
+          
+    <span class="kt">float</span> <span class="n">armor</span><span class="o">;</span> <span class="c1">//护甲</span>
+          
+    <span class="kt">int</span> <span class="n">moveSpeed</span><span class="o">;</span> <span class="c1">//移动速度</span>
+      
+    <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">();</span>
+      
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+          
+        <span class="c1">//与匿名类的区别在于，本地类有了自定义的类名</span>
+        <span class="kd">class</span> <span class="nc">SomeHero</span> <span class="kd">extends</span> <span class="nc">Hero</span><span class="o">{</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attack</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">name</span><span class="o">+</span> <span class="s">" 新的进攻手段"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+         
+        <span class="nc">SomeHero</span> <span class="n">h</span>  <span class="o">=</span><span class="k">new</span> <span class="nc">SomeHero</span><span class="o">();</span>
+        <span class="n">h</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span><span class="s">"地卜师"</span><span class="o">;</span>
+        <span class="n">h</span><span class="o">.</span><span class="na">attack</span><span class="o">();</span>
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+</code></pre></div></div>
+
+:ET

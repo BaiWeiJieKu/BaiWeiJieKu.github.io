@@ -1,0 +1,124 @@
+I"<ul id="markdown-toc">
+  <li><a href="#概述" id="markdown-toc-概述">概述</a>    <ul>
+      <li><a href="#mq比较" id="markdown-toc-mq比较">MQ比较</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="概述">概述</h3>
+
+<p><a href="https://github.com/BaiWeiJieKu/MK-rabbitmq">github</a></p>
+
+<h4 id="mq比较">MQ比较</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">特性</th>
+      <th style="text-align: center">activeMQ</th>
+      <th style="text-align: center">RabbitMQ</th>
+      <th style="text-align: center">Kafka</th>
+      <th style="text-align: center">RocketMQ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">PRODUCER-CUMSUMER</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center">支持</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">PUBLISH-SUBSCRIBE</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center">支持</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">REQUEST-REPLY</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center">支持</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center">支持</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">API完备性</td>
+      <td style="text-align: center">高</td>
+      <td style="text-align: center">高</td>
+      <td style="text-align: center">高</td>
+      <td style="text-align: center">低（静态配置）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">多语言支持</td>
+      <td style="text-align: center">支持java优先</td>
+      <td style="text-align: center">语言无关</td>
+      <td style="text-align: center">支持java优先</td>
+      <td style="text-align: center">支持</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">单机吞吐量</td>
+      <td style="text-align: center">万级</td>
+      <td style="text-align: center">万级</td>
+      <td style="text-align: center">十万级</td>
+      <td style="text-align: center">单机万级</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">消息延迟</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center">微秒级</td>
+      <td style="text-align: center">毫秒级</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">可用性</td>
+      <td style="text-align: center">高（主从）</td>
+      <td style="text-align: center">高（主从）</td>
+      <td style="text-align: center">非常高（分布式）</td>
+      <td style="text-align: center">高</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">消息丢失</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center">低</td>
+      <td style="text-align: center">理论上不会丢失</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">消息重复</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center">可控性</td>
+      <td style="text-align: center">理论上会有重复</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">文档完备性</td>
+      <td style="text-align: center">高</td>
+      <td style="text-align: center">高</td>
+      <td style="text-align: center">高</td>
+      <td style="text-align: center">中</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">快速入门</td>
+      <td style="text-align: center">有</td>
+      <td style="text-align: center">有</td>
+      <td style="text-align: center">有</td>
+      <td style="text-align: center">无</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">部署难度</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center">低</td>
+      <td style="text-align: center">中</td>
+      <td style="text-align: center">高</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center">java，中小型项目</td>
+      <td style="text-align: center">erlang语言，不好修改底层，不建议选用</td>
+      <td style="text-align: center">编程语言Scala，大数据领域主流MQ</td>
+      <td style="text-align: center">java，适用于大型集群项目</td>
+    </tr>
+  </tbody>
+</table>
+:ET

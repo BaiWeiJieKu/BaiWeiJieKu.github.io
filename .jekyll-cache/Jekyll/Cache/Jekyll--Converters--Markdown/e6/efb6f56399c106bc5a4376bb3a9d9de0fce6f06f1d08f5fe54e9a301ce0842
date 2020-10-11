@@ -1,0 +1,27 @@
+I"x<ul id="markdown-toc">
+  <li><a href="#创建工作簿" id="markdown-toc-创建工作簿">创建工作簿</a></li>
+</ul>
+<h3 id="创建工作簿">创建工作簿</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">poi-3.9-20121203.jar</code></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo1</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"e:\\新工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span><span class="c1">//输出</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span><span class="c1">//关闭</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET

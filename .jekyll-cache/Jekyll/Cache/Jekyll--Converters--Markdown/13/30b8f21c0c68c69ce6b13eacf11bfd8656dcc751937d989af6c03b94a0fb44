@@ -1,0 +1,688 @@
+I"n�<ul id="markdown-toc">
+  <li><a href="#事务管理" id="markdown-toc-事务管理">事务管理</a></li>
+  <li><a href="#声明事务" id="markdown-toc-声明事务">声明事务</a>    <ul>
+      <li><a href="#配置文件" id="markdown-toc-配置文件">配置文件</a></li>
+      <li><a href="#定义异常" id="markdown-toc-定义异常">定义异常</a></li>
+      <li><a href="#接口dao" id="markdown-toc-接口dao">接口Dao</a></li>
+      <li><a href="#service" id="markdown-toc-service">service</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+      <li><a href="#传播行为" id="markdown-toc-传播行为">传播行为</a></li>
+      <li><a href="#隔离事务" id="markdown-toc-隔离事务">隔离事务</a></li>
+      <li><a href="#回滚事务" id="markdown-toc-回滚事务">回滚事务</a></li>
+      <li><a href="#只读属性" id="markdown-toc-只读属性">只读属性</a></li>
+      <li><a href="#超时事务" id="markdown-toc-超时事务">超时事务</a></li>
+    </ul>
+  </li>
+  <li><a href="#xml事务" id="markdown-toc-xml事务">xml事务</a>    <ul>
+      <li><a href="#配置文件-1" id="markdown-toc-配置文件-1">配置文件</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="事务管理">事务管理</h3>
+
+<ul>
+  <li>用来确保数据的完整性和一致性</li>
+  <li>事务就是一系列的动作, 它们被当做一个单独的工作单元. 这些动作要么全部完成, 要么全部不起作用</li>
+  <li>事务的四个关键属性(<strong>ACID</strong>)</li>
+</ul>
+
+<h3 id="声明事务">声明事务</h3>
+
+<h4 id="配置文件">配置文件</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd"&gt;
+	
+	&lt;context:component-scan base-package="com.atguigu.spring"&gt;&lt;/context:component-scan&gt;
+	
+	&lt;!-- 导入资源文件 --&gt;
+	&lt;context:property-placeholder location="classpath:db.properties"/&gt;
+	
+	&lt;!-- 配置 C3P0 数据源 --&gt;
+	&lt;bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource"&gt;
+		&lt;property name="user" value="${jdbc.user}"&gt;&lt;/property&gt;
+		&lt;property name="password" value="${jdbc.password}"&gt;&lt;/property&gt;
+		&lt;property name="jdbcUrl" value="${jdbc.jdbcUrl}"&gt;&lt;/property&gt;
+		&lt;property name="driverClass" value="${jdbc.driverClass}"&gt;&lt;/property&gt;
+
+		&lt;property name="initialPoolSize" value="${jdbc.initPoolSize}"&gt;&lt;/property&gt;
+		&lt;property name="maxPoolSize" value="${jdbc.maxPoolSize}"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- 配置 Spirng 的 JdbcTemplate --&gt;
+	&lt;bean id="jdbcTemplate" 
+		class="org.springframework.jdbc.core.JdbcTemplate"&gt;
+		&lt;property name="dataSource" ref="dataSource"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- 配置 NamedParameterJdbcTemplate, 该对象可以使用具名参数, 其没有无参数的构造器, 所以必须为其构造器指定参数 --&gt;
+	&lt;bean id="namedParameterJdbcTemplate"
+		class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate"&gt;
+		&lt;constructor-arg ref="dataSource"&gt;&lt;/constructor-arg&gt;	
+	&lt;/bean&gt;
+	
+	&lt;!-- 配置事务管理器 --&gt;
+	&lt;bean id="transactionManager" 
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+		&lt;property name="dataSource" ref="dataSource"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- 启用事务注解 --&gt;
+	&lt;tx:annotation-driven transaction-manager="transactionManager"/&gt;
+	
+&lt;/beans&gt;
+
+</code></pre></div></div>
+
+<h4 id="定义异常">定义异常</h4>
+
+<ul>
+  <li>余额不足异常</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserAccountException</span> <span class="kd">extends</span> <span class="nc">RuntimeException</span><span class="o">{</span>
+
+	<span class="cm">/**
+	 * 
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">UserAccountException</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">UserAccountException</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">,</span> <span class="nc">Throwable</span> <span class="n">cause</span><span class="o">,</span>
+			<span class="kt">boolean</span> <span class="n">enableSuppression</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">writableStackTrace</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">message</span><span class="o">,</span> <span class="n">cause</span><span class="o">,</span> <span class="n">enableSuppression</span><span class="o">,</span> <span class="n">writableStackTrace</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">UserAccountException</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">,</span> <span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">message</span><span class="o">,</span> <span class="n">cause</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">UserAccountException</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">UserAccountException</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">cause</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>库存不足异常</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookStockException</span> <span class="kd">extends</span> <span class="nc">RuntimeException</span><span class="o">{</span>
+
+	<span class="cm">/**
+	 * 
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">BookStockException</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">BookStockException</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">,</span> <span class="nc">Throwable</span> <span class="n">cause</span><span class="o">,</span>
+			<span class="kt">boolean</span> <span class="n">enableSuppression</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">writableStackTrace</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">message</span><span class="o">,</span> <span class="n">cause</span><span class="o">,</span> <span class="n">enableSuppression</span><span class="o">,</span> <span class="n">writableStackTrace</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">BookStockException</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">,</span> <span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">message</span><span class="o">,</span> <span class="n">cause</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">BookStockException</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nf">BookStockException</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="n">cause</span><span class="o">);</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="接口dao">接口Dao</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+<span class="c1">//书店接口</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BookShopDao</span> <span class="o">{</span>
+
+	<span class="c1">//根据书号获取书的单价</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">findBookPriceByIsbn</span><span class="o">(</span><span class="nc">String</span> <span class="n">isbn</span><span class="o">);</span>
+	
+	<span class="c1">//更新数的库存. 使书号对应的库存 - 1</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateBookStock</span><span class="o">(</span><span class="nc">String</span> <span class="n">isbn</span><span class="o">);</span>
+	
+	<span class="c1">//更新用户的账户余额: 使 username 的 balance - price</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateUserAccount</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="kt">int</span> <span class="n">price</span><span class="o">);</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.jdbc.core.JdbcTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Repository</span><span class="o">;</span>
+
+<span class="nd">@Repository</span><span class="o">(</span><span class="s">"bookShopDao"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookShopDaoImpl</span> <span class="kd">implements</span> <span class="nc">BookShopDao</span> <span class="o">{</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">JdbcTemplate</span> <span class="n">jdbcTemplate</span><span class="o">;</span>
+	
+    <span class="c1">//根据书号获取书的单价</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">findBookPriceByIsbn</span><span class="o">(</span><span class="nc">String</span> <span class="n">isbn</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"SELECT price FROM book WHERE isbn = ?"</span><span class="o">;</span>
+		<span class="k">return</span> <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">queryForObject</span><span class="o">(</span><span class="n">sql</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+	<span class="o">}</span>
+
+    <span class="c1">//更新数的库存. 使书号对应的库存 - 1</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateBookStock</span><span class="o">(</span><span class="nc">String</span> <span class="n">isbn</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//检查书的库存是否足够, 若不够, 则抛出异常</span>
+		<span class="nc">String</span> <span class="n">sql2</span> <span class="o">=</span> <span class="s">"SELECT stock FROM book_stock WHERE isbn = ?"</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">stock</span> <span class="o">=</span> <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">queryForObject</span><span class="o">(</span><span class="n">sql2</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">stock</span> <span class="o">==</span> <span class="mi">0</span><span class="o">){</span>
+			<span class="k">throw</span> <span class="k">new</span> <span class="nf">BookStockException</span><span class="o">(</span><span class="s">"库存不足!"</span><span class="o">);</span>
+		<span class="o">}</span>
+		
+		<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"UPDATE book_stock SET stock = stock -1 WHERE isbn = ?"</span><span class="o">;</span>
+		<span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">sql</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+	<span class="o">}</span>
+
+    <span class="c1">//更新用户的账户余额: 使 username 的 balance - price</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateUserAccount</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="kt">int</span> <span class="n">price</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//验证余额是否足够, 若不足, 则抛出异常</span>
+		<span class="nc">String</span> <span class="n">sql2</span> <span class="o">=</span> <span class="s">"SELECT balance FROM account WHERE username = ?"</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">balance</span> <span class="o">=</span> <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">queryForObject</span><span class="o">(</span><span class="n">sql2</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">username</span><span class="o">);</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="n">price</span><span class="o">){</span>
+			<span class="k">throw</span> <span class="k">new</span> <span class="nf">UserAccountException</span><span class="o">(</span><span class="s">"余额不足!"</span><span class="o">);</span>
+		<span class="o">}</span>
+		
+		<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"UPDATE account SET balance = balance - ? WHERE username = ?"</span><span class="o">;</span>
+		<span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">sql</span><span class="o">,</span> <span class="n">price</span><span class="o">,</span> <span class="n">username</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="service">service</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BookShopService</span> <span class="o">{</span>
+	<span class="c1">//采购，传入用户名和书号</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">purchase</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">String</span> <span class="n">isbn</span><span class="o">);</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.transaction.annotation.Isolation</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.transaction.annotation.Propagation</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.transaction.annotation.Transactional</span><span class="o">;</span>
+
+<span class="nd">@Service</span><span class="o">(</span><span class="s">"bookShopService"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookShopServiceImpl</span> <span class="kd">implements</span> <span class="nc">BookShopService</span> <span class="o">{</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">BookShopDao</span> <span class="n">bookShopDao</span><span class="o">;</span>
+	
+	<span class="c1">//添加事务注解</span>
+	<span class="c1">//1.使用 propagation 指定事务的传播行为, 即当前的事务方法被另外一个事务方法调用时</span>
+	<span class="c1">//如何使用事务, 默认取值为 REQUIRED, 即使用调用方法的事务</span>
+	<span class="c1">//REQUIRES_NEW: 事务自己的事务, 调用的事务方法的事务被挂起. </span>
+	<span class="c1">//2.使用 isolation 指定事务的隔离级别, 最常用的取值为 READ_COMMITTED</span>
+	<span class="c1">//3.默认情况下 Spring 的声明式事务对所有的运行时异常进行回滚. 也可以通过对应的</span>
+	<span class="c1">//属性进行设置. 通常情况下去默认值即可. </span>
+	<span class="c1">//4.使用 readOnly 指定事务是否为只读. 表示这个事务只读取数据但不更新数据, </span>
+	<span class="c1">//这样可以帮助数据库引擎优化事务. 若真的事一个只读取数据库值的方法, 应设置 readOnly=true</span>
+	<span class="c1">//5.使用 timeout 指定强制回滚之前事务可以占用的时间.  </span>
+<span class="c1">//	@Transactional(propagation=Propagation.REQUIRES_NEW,</span>
+<span class="c1">//			isolation=Isolation.READ_COMMITTED,</span>
+<span class="c1">//			noRollbackFor={UserAccountException.class})</span>
+	<span class="nd">@Transactional</span><span class="o">(</span><span class="n">propagation</span><span class="o">=</span><span class="nc">Propagation</span><span class="o">.</span><span class="na">REQUIRES_NEW</span><span class="o">,</span>
+			<span class="n">isolation</span><span class="o">=</span><span class="nc">Isolation</span><span class="o">.</span><span class="na">READ_COMMITTED</span><span class="o">,</span>
+			<span class="n">readOnly</span><span class="o">=</span><span class="kc">false</span><span class="o">,</span>
+			<span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="o">)</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">purchase</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">String</span> <span class="n">isbn</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">5000</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{}</span>
+		
+		<span class="c1">//1. 获取书的单价</span>
+		<span class="kt">int</span> <span class="n">price</span> <span class="o">=</span> <span class="n">bookShopDao</span><span class="o">.</span><span class="na">findBookPriceByIsbn</span><span class="o">(</span><span class="n">isbn</span><span class="o">);</span>
+		
+		<span class="c1">//2. 更新数的库存</span>
+		<span class="n">bookShopDao</span><span class="o">.</span><span class="na">updateBookStock</span><span class="o">(</span><span class="n">isbn</span><span class="o">);</span>
+		
+		<span class="c1">//3. 更新用户余额</span>
+		<span class="n">bookShopDao</span><span class="o">.</span><span class="na">updateUserAccount</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">price</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>用户购买</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="c1">//用户购买书籍接口</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Cashier</span> <span class="o">{</span>
+	<span class="c1">//结账方法，传入用户名和购买图书的书号集合</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">checkout</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">isbns</span><span class="o">);</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.transaction.annotation.Transactional</span><span class="o">;</span>
+
+<span class="nd">@Service</span><span class="o">(</span><span class="s">"cashier"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CashierImpl</span> <span class="kd">implements</span> <span class="nc">Cashier</span> <span class="o">{</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">BookShopService</span> <span class="n">bookShopService</span><span class="o">;</span>
+	
+	<span class="nd">@Transactional</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">checkout</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">isbns</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//循环购买书籍</span>
+		<span class="k">for</span><span class="o">(</span><span class="nc">String</span> <span class="nl">isbn:</span> <span class="n">isbns</span><span class="o">){</span>
+			<span class="n">bookShopService</span><span class="o">.</span><span class="na">purchase</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.*;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.ApplicationContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.support.ClassPathXmlApplicationContext</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SpringTransactionTest</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">ApplicationContext</span> <span class="n">ctx</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">BookShopDao</span> <span class="n">bookShopDao</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">BookShopService</span> <span class="n">bookShopService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">Cashier</span> <span class="n">cashier</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	
+	<span class="o">{</span>
+		<span class="n">ctx</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathXmlApplicationContext</span><span class="o">(</span><span class="s">"applicationContext.xml"</span><span class="o">);</span>
+		<span class="n">bookShopDao</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">BookShopDao</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+		<span class="n">bookShopService</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">BookShopService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+		<span class="n">cashier</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">Cashier</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTransactionlPropagation</span><span class="o">(){</span>
+		<span class="n">cashier</span><span class="o">.</span><span class="na">checkout</span><span class="o">(</span><span class="s">"AA"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1001"</span><span class="o">,</span> <span class="s">"1002"</span><span class="o">));</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBookShopService</span><span class="o">(){</span>
+		<span class="n">bookShopService</span><span class="o">.</span><span class="na">purchase</span><span class="o">(</span><span class="s">"AA"</span><span class="o">,</span> <span class="s">"1001"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBookShopDaoUpdateUserAccount</span><span class="o">(){</span>
+		<span class="n">bookShopDao</span><span class="o">.</span><span class="na">updateUserAccount</span><span class="o">(</span><span class="s">"AA"</span><span class="o">,</span> <span class="mi">200</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBookShopDaoUpdateBookStock</span><span class="o">(){</span>
+		<span class="n">bookShopDao</span><span class="o">.</span><span class="na">updateBookStock</span><span class="o">(</span><span class="s">"1001"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBookShopDaoFindPriceByIsbn</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">bookShopDao</span><span class="o">.</span><span class="na">findBookPriceByIsbn</span><span class="o">(</span><span class="s">"1001"</span><span class="o">));</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="传播行为">传播行为</h4>
+
+<ul>
+  <li><strong>REQUIRED</strong>：如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是最常见的选择</li>
+  <li><strong>REQUIRES_NEW</strong>：新建事务，如果当前存在事务，把当前事务挂起。</li>
+  <li><strong>SUPPORTS</strong>：支持当前事务，如果当前没有事务，就以非事务方式执行。</li>
+  <li><strong>NOT_SUPPORTED</strong>：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。</li>
+  <li><strong>MANDATORY</strong>：使用当前的事务，如果当前没有事务，就抛出异常</li>
+  <li><strong>NEVER</strong>：以非事务方式执行，如果当前存在事务，则抛出异常。</li>
+  <li><strong>NESTED</strong>：如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与REQUIRED类似的操作</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>例1：
+如果买两本书A,B，当库存足够，但余额只够买A的时候
+
+1）传播行为是REQUIRED：A,B库存都不减少，余额也没有发生变化，说明只用了一个事务
+
+2）传播行为是REQUIRES_NEW：A库存减一，B库存没有发生变化，余额为减去A价格后的钱数。说明有三个事务，当执行    购买书A的时候，又开启了一个新的事务，把原先的事务挂起了，当A买完后到买B的时候又开启一个事务
+   【事务1（事务2）（事务3）】
+</code></pre></div></div>
+
+<h4 id="隔离事务">隔离事务</h4>
+
+<ul>
+  <li>从理论上来说, 事务应该彼此完全隔离, 以避免并发事务所导致的问题. 然而, 那样会对性能产生极大的影响, 因为事务必须按顺序运行</li>
+  <li>在实际开发中, 为了提升性能, 事务会以较低的隔离级别运行</li>
+  <li>事务的隔离级别可以通过隔离事务属性指定</li>
+  <li>事务的隔离级别要得到底层数据库引擎的支持, 而不是应用程序或者框架的支持</li>
+  <li>用 @Transactional注解声明式地管理事务时可以在 @Transactional 的 isolation 属性中设置隔离级别</li>
+</ul>
+
+<h4 id="回滚事务">回滚事务</h4>
+
+<ul>
+  <li>默认情况下只有未检查异常(RuntimeException和Error类型的异常)会导致事务回滚. 而受检查异常不会</li>
+  <li>事务的回滚规则可以通过 @Transactional 注解的 rollbackFor 和 noRollbackFor 属性来定义</li>
+  <li>rollbackFor:  遇到时必须进行回滚</li>
+  <li>noRollbackFor: 一组异常类，遇到时必须不回滚</li>
+</ul>
+
+<h4 id="只读属性">只读属性</h4>
+
+<ul>
+  <li>表示这个事务只读取数据但不更新数据, 这样可以帮助数据库引擎优化事务</li>
+</ul>
+
+<h4 id="超时事务">超时事务</h4>
+
+<ul>
+  <li>
+    <p>事务在强制回滚之前可以保持多久. 这样可以防止长期运行的事务占用资源</p>
+  </li>
+  <li>
+    <p>假如设置了超时时间是3秒，测试时让线程等待了5秒，即使能够购买成功，数据库数据也不会发生改变，因为事务超时了，并没有执行。</p>
+  </li>
+</ul>
+
+<h3 id="xml事务">xml事务</h3>
+
+<h4 id="配置文件-1">配置文件</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd"&gt;
+	
+	&lt;context:component-scan base-package="com.atguigu.spring"&gt;&lt;/context:component-scan&gt;
+	
+	&lt;!-- 导入资源文件 --&gt;
+	&lt;context:property-placeholder location="classpath:db.properties"/&gt;
+	
+	&lt;!-- 配置 C3P0 数据源 --&gt;
+	&lt;bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource"&gt;
+		&lt;property name="user" value="${jdbc.user}"&gt;&lt;/property&gt;
+		&lt;property name="password" value="${jdbc.password}"&gt;&lt;/property&gt;
+		&lt;property name="jdbcUrl" value="${jdbc.jdbcUrl}"&gt;&lt;/property&gt;
+		&lt;property name="driverClass" value="${jdbc.driverClass}"&gt;&lt;/property&gt;
+
+		&lt;property name="initialPoolSize" value="${jdbc.initPoolSize}"&gt;&lt;/property&gt;
+		&lt;property name="maxPoolSize" value="${jdbc.maxPoolSize}"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- 配置 Spirng 的 JdbcTemplate --&gt;
+	&lt;bean id="jdbcTemplate" 
+		class="org.springframework.jdbc.core.JdbcTemplate"&gt;
+		&lt;property name="dataSource" ref="dataSource"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- 配置 bean --&gt;
+	&lt;bean id="bookShopDao" class="com.atguigu.spring.tx.xml.BookShopDaoImpl"&gt;
+		&lt;property name="jdbcTemplate" ref="jdbcTemplate"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;bean id="bookShopService" class="com.atguigu.spring.tx.xml.service.impl.BookShopServiceImpl"&gt;
+		&lt;property name="bookShopDao" ref="bookShopDao"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;bean id="cashier" class="com.atguigu.spring.tx.xml.service.impl.CashierImpl"&gt;
+		&lt;property name="bookShopService" ref="bookShopService"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- 1. 配置事务管理器 --&gt;
+	&lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+		&lt;property name="dataSource" ref="dataSource"&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- 2. 配置事务属性 --&gt;
+	&lt;tx:advice id="txAdvice" transaction-manager="transactionManager"&gt;
+		&lt;tx:attributes&gt;
+			&lt;!-- 根据方法名指定事务的属性 --&gt;
+			&lt;tx:method name="purchase" propagation="REQUIRES_NEW"/&gt;
+			&lt;tx:method name="get*" read-only="true"/&gt;
+			&lt;tx:method name="find*" read-only="true"/&gt;
+			&lt;tx:method name="*"/&gt;
+		&lt;/tx:attributes&gt;
+	&lt;/tx:advice&gt;
+	
+	&lt;!-- 3. 配置事务切入点, 以及把事务切入点和事务属性关联起来 --&gt;
+	&lt;aop:config&gt;
+		&lt;aop:pointcut expression="execution(* com.atguigu.spring.tx.xml.service.*.*(..))" 
+			id="txPointCut"/&gt;
+		&lt;aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"/&gt;	
+	&lt;/aop:config&gt;
+	
+&lt;/beans&gt;
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx.xml</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.jdbc.core.JdbcTemplate</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookShopDaoImpl</span> <span class="kd">implements</span> <span class="nc">BookShopDao</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">JdbcTemplate</span> <span class="n">jdbcTemplate</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setJdbcTemplate</span><span class="o">(</span><span class="nc">JdbcTemplate</span> <span class="n">jdbcTemplate</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">jdbcTemplate</span> <span class="o">=</span> <span class="n">jdbcTemplate</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">findBookPriceByIsbn</span><span class="o">(</span><span class="nc">String</span> <span class="n">isbn</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"SELECT price FROM book WHERE isbn = ?"</span><span class="o">;</span>
+		<span class="k">return</span> <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">queryForObject</span><span class="o">(</span><span class="n">sql</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateBookStock</span><span class="o">(</span><span class="nc">String</span> <span class="n">isbn</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//检查书的库存是否足够, 若不够, 则抛出异常</span>
+		<span class="nc">String</span> <span class="n">sql2</span> <span class="o">=</span> <span class="s">"SELECT stock FROM book_stock WHERE isbn = ?"</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">stock</span> <span class="o">=</span> <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">queryForObject</span><span class="o">(</span><span class="n">sql2</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">stock</span> <span class="o">==</span> <span class="mi">0</span><span class="o">){</span>
+			<span class="k">throw</span> <span class="k">new</span> <span class="nf">BookStockException</span><span class="o">(</span><span class="s">"库存不足!"</span><span class="o">);</span>
+		<span class="o">}</span>
+		
+		<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"UPDATE book_stock SET stock = stock -1 WHERE isbn = ?"</span><span class="o">;</span>
+		<span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">sql</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateUserAccount</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="kt">int</span> <span class="n">price</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//验证余额是否足够, 若不足, 则抛出异常</span>
+		<span class="nc">String</span> <span class="n">sql2</span> <span class="o">=</span> <span class="s">"SELECT balance FROM account WHERE username = ?"</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">balance</span> <span class="o">=</span> <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">queryForObject</span><span class="o">(</span><span class="n">sql2</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">username</span><span class="o">);</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="n">price</span><span class="o">){</span>
+			<span class="k">throw</span> <span class="k">new</span> <span class="nf">UserAccountException</span><span class="o">(</span><span class="s">"余额不足!"</span><span class="o">);</span>
+		<span class="o">}</span>
+		
+		<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"UPDATE account SET balance = balance - ? WHERE username = ?"</span><span class="o">;</span>
+		<span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">sql</span><span class="o">,</span> <span class="n">price</span><span class="o">,</span> <span class="n">username</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx.xml.service.impl</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.spring.tx.xml.BookShopDao</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.atguigu.spring.tx.xml.service.BookShopService</span><span class="o">;</span>
+
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookShopServiceImpl</span> <span class="kd">implements</span> <span class="nc">BookShopService</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">BookShopDao</span> <span class="n">bookShopDao</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setBookShopDao</span><span class="o">(</span><span class="nc">BookShopDao</span> <span class="n">bookShopDao</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">bookShopDao</span> <span class="o">=</span> <span class="n">bookShopDao</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">purchase</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">String</span> <span class="n">isbn</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{}</span>
+		
+		<span class="c1">//1. 获取书的单价</span>
+		<span class="kt">int</span> <span class="n">price</span> <span class="o">=</span> <span class="n">bookShopDao</span><span class="o">.</span><span class="na">findBookPriceByIsbn</span><span class="o">(</span><span class="n">isbn</span><span class="o">);</span>
+		
+		<span class="c1">//2. 更新数的库存</span>
+		<span class="n">bookShopDao</span><span class="o">.</span><span class="na">updateBookStock</span><span class="o">(</span><span class="n">isbn</span><span class="o">);</span>
+		
+		<span class="c1">//3. 更新用户余额</span>
+		<span class="n">bookShopDao</span><span class="o">.</span><span class="na">updateUserAccount</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">price</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx.xml.service.impl</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.spring.tx.xml.service.BookShopService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.atguigu.spring.tx.xml.service.Cashier</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CashierImpl</span> <span class="kd">implements</span> <span class="nc">Cashier</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">BookShopService</span> <span class="n">bookShopService</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setBookShopService</span><span class="o">(</span><span class="nc">BookShopService</span> <span class="n">bookShopService</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">bookShopService</span> <span class="o">=</span> <span class="n">bookShopService</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">checkout</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">isbns</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">for</span><span class="o">(</span><span class="nc">String</span> <span class="nl">isbn:</span> <span class="n">isbns</span><span class="o">){</span>
+			<span class="n">bookShopService</span><span class="o">.</span><span class="na">purchase</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">isbn</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.spring.tx.xml</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.ApplicationContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.support.ClassPathXmlApplicationContext</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.spring.tx.xml.service.BookShopService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.atguigu.spring.tx.xml.service.Cashier</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SpringTransactionTest</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">ApplicationContext</span> <span class="n">ctx</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">BookShopDao</span> <span class="n">bookShopDao</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">BookShopService</span> <span class="n">bookShopService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">Cashier</span> <span class="n">cashier</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+	
+	<span class="o">{</span>
+		<span class="n">ctx</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathXmlApplicationContext</span><span class="o">(</span><span class="s">"applicationContext-tx-xml.xml"</span><span class="o">);</span>
+		<span class="n">bookShopDao</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">BookShopDao</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+		<span class="n">bookShopService</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">BookShopService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+		<span class="n">cashier</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="na">getBean</span><span class="o">(</span><span class="nc">Cashier</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTransactionlPropagation</span><span class="o">(){</span>
+		<span class="n">cashier</span><span class="o">.</span><span class="na">checkout</span><span class="o">(</span><span class="s">"AA"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1001"</span><span class="o">,</span> <span class="s">"1002"</span><span class="o">));</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBookShopService</span><span class="o">(){</span>
+		<span class="n">bookShopService</span><span class="o">.</span><span class="na">purchase</span><span class="o">(</span><span class="s">"AA"</span><span class="o">,</span> <span class="s">"1001"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+:ET

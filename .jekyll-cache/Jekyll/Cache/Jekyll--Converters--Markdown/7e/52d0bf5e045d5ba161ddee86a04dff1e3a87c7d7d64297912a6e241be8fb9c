@@ -1,0 +1,19 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#ddl" id="markdown-toc-ddl">DDL</a></li>
+</ul>
+<h2 id="ddl">DDL</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>数据定义语言
+
+库和表的管理
+
+一、库的管理
+创建、修改、删除
+二、表的管理
+创建、修改、删除
+
+创建： create
+修改： alter
+删除： drop
+</code></pre></div></div>
+:ET

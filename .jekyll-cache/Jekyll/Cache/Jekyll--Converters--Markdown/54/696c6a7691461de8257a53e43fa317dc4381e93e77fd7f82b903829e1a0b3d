@@ -1,0 +1,163 @@
+I"�Q<ul id="markdown-toc">
+  <li><a href="#base64" id="markdown-toc-base64">BASE64</a></li>
+</ul>
+<h3 id="base64">BASE64</h3>
+
+<ul>
+  <li>
+    <p>Base64是一种根据ASCII码来进行加密的可逆算法，这类算法简单来说，就等于将每个字符对应一个特定的字符（常常是根据进制进行匹配），一一对应，特别像电台密码本，因为每个字符都必须要加密，加密比较笨重。</p>
+  </li>
+  <li>
+    <p>加密</p>
+
+    <ul>
+      <li>获取字符串中每个字符的ASCII码</li>
+      <li>按照每3个8bit的字符为一组来分组，即每组24bit</li>
+      <li>将这24bit划分成4个6bit的4个单位，每个单位前面添加2个0，得到4个8bit的单位</li>
+      <li>将每个8bit的单位转换成十进制数字，对照Base64编码表找到对应的字符进行拼接，得到最终的加密后的字符串</li>
+    </ul>
+  </li>
+  <li>
+    <p>解密</p>
+
+    <ul>
+      <li>读入4个字符，对照Base64编码表找到字符对应的索引，生成4个6为的值</li>
+      <li>将这4个6为的值拼接起来，形成一个24为的值</li>
+      <li>将这个24位的值按照8位一组截断成3个8位的值</li>
+      <li>对照ASCII表找到这三个8位的值对应的字符，即解码后的字符</li>
+    </ul>
+  </li>
+  <li>
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** 工具类实现代码  **/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BASE64Util</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Character</span><span class="o">&gt;</span> <span class="n">base64CharMap</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">base64CharString</span> <span class="o">=</span> <span class="s">"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"</span><span class="o">;</span>
+   
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">BASE64Util</span> <span class="n">instance</span><span class="o">;</span>
+   
+    <span class="kd">private</span> <span class="nf">BASE64Util</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">base64CharString</span><span class="o">.</span><span class="na">length</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="n">base64CharString</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="n">base64CharMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="k">new</span> <span class="nc">Integer</span><span class="o">(</span><span class="n">i</span><span class="o">),</span> <span class="k">new</span> <span class="nc">Character</span><span class="o">(</span><span class="n">c</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+   
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">BASE64Util</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="nc">BASE64Util</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BASE64Util</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+    <span class="cm">/**
+     * This method is used to encode a normal string to base64 string @param
+     * origin The String to be encoded @return The String after encoded.
+     */</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">encode</span><span class="o">(</span><span class="nc">String</span> <span class="n">origin</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">origin</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">origin</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="s">""</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="kt">int</span> <span class="n">length</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+        <span class="nc">String</span> <span class="n">binaryString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="c1">// to binary String</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">ascii</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="nc">String</span> <span class="n">binaryCharString</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">toBinaryString</span><span class="o">(</span><span class="n">ascii</span><span class="o">);</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">binaryCharString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">binaryCharString</span> <span class="o">=</span> <span class="s">"0"</span> <span class="o">+</span> <span class="n">binaryCharString</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="n">binaryString</span> <span class="o">+=</span> <span class="n">binaryCharString</span><span class="o">;</span>
+        <span class="o">}</span>
+   
+        <span class="c1">// to base64 index</span>
+        <span class="kt">int</span> <span class="n">beginIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">endIndex</span> <span class="o">=</span> <span class="n">beginIndex</span> <span class="o">+</span> <span class="mi">6</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">base64BinaryString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">charString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">((</span><span class="n">base64BinaryString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">beginIndex</span><span class="o">,</span> <span class="n">endIndex</span><span class="o">)).</span><span class="na">length</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// if length is less than 6, add "0".</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">base64BinaryString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">base64BinaryString</span> <span class="o">+=</span> <span class="s">"0"</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">base64BinaryString</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+            <span class="kt">char</span> <span class="n">base64Char</span> <span class="o">=</span> <span class="n">base64CharMap</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+            <span class="n">charString</span> <span class="o">=</span> <span class="n">charString</span> <span class="o">+</span> <span class="n">base64Char</span><span class="o">;</span>
+            <span class="n">beginIndex</span> <span class="o">+=</span> <span class="mi">6</span><span class="o">;</span>
+            <span class="n">endIndex</span> <span class="o">+=</span> <span class="mi">6</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">endIndex</span> <span class="o">&gt;=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">endIndex</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+            <span class="o">}</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">endIndex</span> <span class="o">&lt;</span> <span class="n">beginIndex</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">length</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">charString</span> <span class="o">+=</span> <span class="s">"="</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">length</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">charString</span> <span class="o">+=</span> <span class="s">"=="</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">charString</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">decode</span><span class="o">(</span><span class="nc">String</span> <span class="n">encodedString</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">encodedString</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">encodedString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="s">""</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">// get origin base64 String</span>
+        <span class="nc">String</span> <span class="n">origin</span> <span class="o">=</span> <span class="n">encodedString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">encodedString</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"="</span><span class="o">));</span>
+        <span class="nc">String</span> <span class="n">equals</span> <span class="o">=</span> <span class="n">encodedString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">encodedString</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"="</span><span class="o">));</span>
+   
+        <span class="nc">String</span> <span class="n">binaryString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="c1">// convert base64 string to binary string</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">origin</span><span class="o">.</span><span class="na">length</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="kt">int</span> <span class="n">ascii</span> <span class="o">=</span> <span class="n">base64CharString</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+            <span class="nc">String</span> <span class="n">binaryCharString</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">toBinaryString</span><span class="o">(</span><span class="n">ascii</span><span class="o">);</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">binaryCharString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">binaryCharString</span> <span class="o">=</span> <span class="s">"0"</span> <span class="o">+</span> <span class="n">binaryCharString</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="n">binaryString</span> <span class="o">+=</span> <span class="n">binaryCharString</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">// the encoded string has 1 "=", means that the binary string has append</span>
+        <span class="c1">// 2 "0"</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">equals</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">binaryString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="c1">// the encoded string has 2 "=", means that the binary string has append</span>
+        <span class="c1">// 4 "0"</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">equals</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">binaryString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">4</span><span class="o">);</span>
+        <span class="o">}</span>
+   
+        <span class="c1">// convert to String</span>
+        <span class="nc">String</span> <span class="n">charString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">resultString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">beginIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">endIndex</span> <span class="o">=</span> <span class="n">beginIndex</span> <span class="o">+</span> <span class="mi">8</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">((</span><span class="n">charString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">beginIndex</span><span class="o">,</span> <span class="n">endIndex</span><span class="o">)).</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">8</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">ascii</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">charString</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+            <span class="n">resultString</span> <span class="o">+=</span> <span class="o">(</span><span class="kt">char</span><span class="o">)</span> <span class="n">ascii</span><span class="o">;</span>
+            <span class="n">beginIndex</span> <span class="o">+=</span> <span class="mi">8</span><span class="o">;</span>
+            <span class="n">endIndex</span> <span class="o">+=</span> <span class="mi">8</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">endIndex</span> <span class="o">&gt;</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">())</span> <span class="o">{</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">resultString</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+:ET

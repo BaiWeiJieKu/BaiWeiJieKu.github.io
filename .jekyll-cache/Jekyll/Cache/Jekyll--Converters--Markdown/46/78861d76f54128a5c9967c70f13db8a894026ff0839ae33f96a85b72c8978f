@@ -1,0 +1,36 @@
+I"G<ul id="markdown-toc">
+  <li><a href="#拉取git项目" id="markdown-toc-拉取git项目">拉取Git项目</a></li>
+  <li><a href="#提交本地项目" id="markdown-toc-提交本地项目">提交本地项目</a></li>
+  <li><a href="#拉取git分支" id="markdown-toc-拉取git分支">拉取Git分支</a></li>
+  <li><a href="#合并到主分支" id="markdown-toc-合并到主分支">合并到主分支</a></li>
+</ul>
+<h3 id="拉取git项目">拉取Git项目</h3>
+
+<ul>
+  <li>git clone 链接</li>
+</ul>
+
+<h3 id="提交本地项目">提交本地项目</h3>
+
+<ul>
+  <li>1）git add .</li>
+  <li>2)  git commit -m “mark”</li>
+  <li>3)  git push 分支名（git push origin）</li>
+</ul>
+
+<h3 id="拉取git分支">拉取Git分支</h3>
+
+<ul>
+  <li>git pull</li>
+  <li>切换本地分支：git checkout 分支名</li>
+  <li>查看本地当前分支：git status</li>
+</ul>
+
+<h3 id="合并到主分支">合并到主分支</h3>
+
+<ul>
+  <li>先切换到主分支：git checkout master</li>
+  <li>把分支合并到主分支：git merge origin/分支名</li>
+  <li>提交主分支：git push</li>
+</ul>
+:ET

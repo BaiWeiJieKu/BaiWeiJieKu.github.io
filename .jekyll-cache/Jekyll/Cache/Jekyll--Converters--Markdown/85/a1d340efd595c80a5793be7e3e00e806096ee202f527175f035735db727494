@@ -1,0 +1,43 @@
+I"o<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>
+    <p>Java NIO（New IO）是从Java 1.4版本开始引入的一个新的IO API，可以替代标准的Java IO API。 NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同，NIO支持<strong>面向缓冲区的、基于通道的IO操作</strong>。NIO将以更加高效的方式进行文件的读写操作。</p>
+  </li>
+  <li>
+    <p>NIO与IO的区别</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align: center">IO</th>
+          <th style="text-align: center">NIO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center">面向流（Stream Oriented）</td>
+          <td style="text-align: center">面向缓冲区（Buffer Oriented）</td>
+        </tr>
+        <tr>
+          <td style="text-align: center">阻塞IO（Blocking IO）</td>
+          <td style="text-align: center">非阻塞IO（Non Blocking IO）</td>
+        </tr>
+        <tr>
+          <td style="text-align: center">无</td>
+          <td style="text-align: center">选择器（Selectors）</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>传统的IO 流都是阻塞式的。也就是说，当一个线程调用read() 或write()时，该线程被阻塞，直到有一些数据被读取或写入，该线程在此期间不能执行其他任务。因此，在完成网络通信进行IO 操作时，由于线程会阻塞，所以服务器端必须为每个客户端都提供一个独立的线程进行处理，当服务器端需要处理大量客户端时，性能急剧下降。</p>
+  </li>
+  <li>
+    <p>Java NIO 是非阻塞模式的。当线程从某通道进行读写数据时，若没有数据可用时，该线程可以进行其他任务。线程通常将非阻塞IO 的空闲时间用于在其他通道上执行IO 操作，所以单独的线程可以管理多个输入和输出通道。因此，NIO 可以让服务器端使用一个或有限几个线程来同时处理连接到服务器端的所有客户端。</p>
+  </li>
+</ul>
+:ET

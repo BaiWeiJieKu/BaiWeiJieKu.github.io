@@ -1,0 +1,65 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#主模块pom" id="markdown-toc-主模块pom">主模块(pom)</a>    <ul>
+      <li><a href="#pom" id="markdown-toc-pom">pom</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="主模块pom">主模块(pom)</h3>
+
+<h4 id="pom">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>imooc-security<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;packaging&gt;</span>pom<span class="nt">&lt;/packaging&gt;</span>
+	
+	<span class="nt">&lt;properties&gt;</span>
+		<span class="nt">&lt;imooc.security.version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/imooc.security.version&gt;</span>
+	<span class="nt">&lt;/properties&gt;</span>
+
+	<span class="nt">&lt;dependencyManagement&gt;</span>
+		<span class="nt">&lt;dependencies&gt;</span>
+			<span class="nt">&lt;dependency&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>io.spring.platform<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>platform-bom<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>Brussels-SR4<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+				<span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;/dependency&gt;</span>
+			<span class="nt">&lt;dependency&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.cloud<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-cloud-dependencies<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>Dalston.SR2<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+				<span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;/dependencies&gt;</span>
+	<span class="nt">&lt;/dependencyManagement&gt;</span>
+	
+	<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>maven-compiler-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>2.3.2<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;configuration&gt;</span>
+					<span class="nt">&lt;source&gt;</span>1.8<span class="nt">&lt;/source&gt;</span>
+					<span class="nt">&lt;target&gt;</span>1.8<span class="nt">&lt;/target&gt;</span>
+					<span class="nt">&lt;encoding&gt;</span>UTF-8<span class="nt">&lt;/encoding&gt;</span>
+				<span class="nt">&lt;/configuration&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+	
+	<span class="nt">&lt;modules&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-app<span class="nt">&lt;/module&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-browser<span class="nt">&lt;/module&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-core<span class="nt">&lt;/module&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-demo<span class="nt">&lt;/module&gt;</span>
+	<span class="nt">&lt;/modules&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+:ET

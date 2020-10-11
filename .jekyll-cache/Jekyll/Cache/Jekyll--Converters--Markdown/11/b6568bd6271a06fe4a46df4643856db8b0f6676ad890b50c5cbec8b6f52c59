@@ -1,0 +1,60 @@
+I"!<ul id="markdown-toc">
+  <li><a href="#sqlsessionfactory" id="markdown-toc-sqlsessionfactory">sqlSessionFactory</a></li>
+  <li><a href="#sqlsession" id="markdown-toc-sqlsession">sqlSession</a></li>
+  <li><a href="#mapperproxy" id="markdown-toc-mapperproxy">MapperProxy</a></li>
+  <li><a href="#crud" id="markdown-toc-crud">CRUD</a></li>
+  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
+</ul>
+<h3 id="sqlsessionfactory">sqlSessionFactory</h3>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/mybatis01.png" alt="" /></p>
+
+<h3 id="sqlsession">sqlSession</h3>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/mybatis02.png" alt="" /></p>
+
+<h3 id="mapperproxy">MapperProxy</h3>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/mybatis03.png" alt="" /></p>
+
+<h3 id="crud">CRUD</h3>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/mybatis04.png" alt="" /></p>
+
+<h3 id="总结">总结</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+	  <span class="err">1、获取sqlSessionFactory对象:</span>
+	  		<span class="err">解析文件的每一个信息保存在Configuration中，返回包含Configuration的DefaultSqlSession；</span>
+	  		<span class="err">注意：【MappedStatement】：代表一个增删改查的详细信息</span>
+	  
+	  <span class="err">2、获取sqlSession对象</span>
+	  		<span class="err">返回一个DefaultSQlSession对象，包含Executor和Configuration;</span>
+	  		<span class="err">这一步会创建Executor对象；</span>
+	 
+	  <span class="err">3、获取接口的代理对象（MapperProxy）</span>
+	  		<span class="err">getMapper，使用MapperProxyFactory创建一个MapperProxy的代理对象</span>
+	  		<span class="err">代理对象里面包含了，DefaultSqlSession（Executor）</span>
+	  <span class="err">4、执行增删改查方法</span>
+	  
+	  <span class="err">总结：</span>
+	  	<span class="err">1、根据配置文件（全局，sql映射）初始化出Configuration对象</span>
+	  	<span class="err">2、创建一个DefaultSqlSession对象，</span>
+	 		<span class="err">他里面包含Configuration以及</span>
+	  		<span class="err">Executor（根据全局配置文件中的defaultExecutorType创建出对应的Executor）</span>
+	   <span class="err">3、DefaultSqlSession.getMapper（）：拿到Mapper接口对应的MapperProxy；</span>
+	   <span class="err">4、MapperProxy里面有（DefaultSqlSession）；</span>
+	   <span class="err">5、执行增删改查方法：</span>
+	   		<span class="err">1）、调用DefaultSqlSession的增删改查（Executor）；</span>
+	   		<span class="err">2）、会创建一个StatementHandler对象。</span>
+	   			<span class="err">（同时也会创建出ParameterHandler和ResultSetHandler）</span>
+	  		<span class="err">3）、调用StatementHandler预编译参数以及设置参数值;</span>
+	   			<span class="err">使用ParameterHandler来给sql设置参数</span>
+	   		<span class="err">4）、调用StatementHandler的增删改查方法；</span>
+	   		<span class="err">5）、ResultSetHandler封装结果</span>
+	   <span class="err">注意：</span>
+	   	<span class="err">四大对象每个创建的时候都有一个interceptorChain.pluginAll(parameterHandler);</span> 
+</code></pre></div></div>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/mybatis05.png" alt="" /></p>
+:ET

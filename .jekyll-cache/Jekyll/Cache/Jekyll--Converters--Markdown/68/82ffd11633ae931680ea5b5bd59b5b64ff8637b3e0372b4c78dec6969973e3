@@ -1,0 +1,198 @@
+I"�(<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a>    <ul>
+      <li><a href="#正向代理" id="markdown-toc-正向代理">正向代理</a></li>
+      <li><a href="#反向代理" id="markdown-toc-反向代理">反向代理</a></li>
+      <li><a href="#负载均衡" id="markdown-toc-负载均衡">负载均衡</a></li>
+      <li><a href="#动静分离" id="markdown-toc-动静分离">动静分离</a></li>
+    </ul>
+  </li>
+  <li><a href="#安装nginx" id="markdown-toc-安装nginx">安装Nginx</a></li>
+  <li><a href="#常用命令" id="markdown-toc-常用命令">常用命令</a></li>
+  <li><a href="#配置文件" id="markdown-toc-配置文件">配置文件</a></li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>Nginx是一个高性能的HTTP和反向代理服务器，特点是占用内存少，并发能力强，事实上Nginx的并发能力确实在同类型的网页服务器中表现良好</li>
+  <li>Nginx可以作为静态页面的web服务器，不支持java。java程序只能通过与tomcat配合完成。Nginx专为性能优化而开发，性能是最重要的考量，实现上非常注重效率，能经受高负载的考验，大概能支持高达50000个并发连接数。</li>
+</ul>
+
+<h4 id="正向代理">正向代理</h4>
+
+<ul>
+  <li>Nginx 不仅可以做反向代理，实现负载均衡。还能用作正向代理来进行上网等功能。</li>
+  <li>正向代理：如果把局域网外的 Internet 想象成一个巨大的资源库，则局域网中的客户端要访问Internet，则需要通过代理服务器来访问，这种代理服务就称为正向代理。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/06/30/Ac8OyCRXP4iMQ2W.png" alt="image.png" /></p>
+
+<h4 id="反向代理">反向代理</h4>
+
+<ul>
+  <li>反向代理，其实客户端对代理是无感知的，因为客户端不需要任何配置就可以访问，我们只需要将请求发送到反向代理服务器，由反向代理服务器去选择目标服务器获取数据后，在返回给客户端，此时反向代理服务器和目标服务器对外就是一个服务器，<strong>暴露的是代理服务器地址，隐藏了真实服务器IP地址</strong>。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/06/30/KGEzhQWx39LDujq.png" alt="image.png" /></p>
+
+<ul>
+  <li>实例1：打开浏览器，在浏览器地址栏输入地址<code class="language-plaintext highlighter-rouge"> www.123.com</code>，跳转到liunx 系统tomcat 主页面中
+    <ul>
+      <li>第一步 在windows 系统的host 文件进行域名和ip 对应关系的配置</li>
+      <li><img src="https://i.loli.net/2020/06/30/qQ8wl9fuSbpzTYM.png" alt="image.png" /></li>
+      <li>第二步 在nginx 进行请求转发的配置（反向代理配置）</li>
+      <li><img src="https://i.loli.net/2020/06/30/W3IqjEs7fDZipc5.png" alt="image.png" /></li>
+      <li>最终测试</li>
+      <li><img src="https://i.loli.net/2020/06/30/RG9ZfOWhXFbgKct.png" alt="image.png" /></li>
+    </ul>
+  </li>
+  <li>实例2：使用nginx 反向代理，根据访问的路径跳转到不同端口的服务中 。nginx 监听端口为9001， 访问<code class="language-plaintext highlighter-rouge"> http://192.168.17.129:9001/edu/</code> 直接跳转到127.0.0.1:8080 。访问 <code class="language-plaintext highlighter-rouge">http:// 192.168.17.129:9001/vod/ </code>直接跳转到127.0.0.1:8081 。
+    <ul>
+      <li>准备两个tomcat 服务器，一个8080 端口，一个8081 端口</li>
+      <li>开放对外访问的端口号 9001 8080 8081</li>
+      <li>找到nginx 配置文件，进行反向代理配置</li>
+      <li><img src="https://i.loli.net/2020/06/30/c2MLZ1Yv7RDmBAQ.png" alt="image.png" /></li>
+      <li>测试</li>
+      <li><img src="https://i.loli.net/2020/06/30/tYRivsoAaylSqUB.png" alt="image.png" /></li>
+    </ul>
+  </li>
+  <li>​</li>
+  <li>​</li>
+</ul>
+
+<h4 id="负载均衡">负载均衡</h4>
+
+<ul>
+  <li>增加服务器数量，然后将请求分发到各个服务器上，将原先请求集中到单个服务器上的情况改为将请求分发到多个服务器上，将负载分发到不同的服务器，就是负载均衡。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/06/30/rO3TbnPvYifcdZj.png" alt="image.png" /></p>
+
+<ul>
+  <li>实例1：（1）浏览器地址栏输入地址<code class="language-plaintext highlighter-rouge"> http://192.168.17.129/edu/a.html</code>，负载均衡效果，平均8080和8081 端口中
+    <ul>
+      <li>准备两台tomcat 服务器，一台8080，一台8081</li>
+      <li>在nginx 的配置文件中进行负载均衡的配置,在HTTP块中</li>
+      <li><img src="https://i.loli.net/2020/06/30/HViLYEmqUXdw5WD.png" alt="image.png" /></li>
+      <li>​</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="动静分离">动静分离</h4>
+
+<ul>
+  <li>为了加快网站的解析速度，可以把动态页面和静态页面由不同的服务器来解析，加快解析速度。降低原来单个服务器的压力。</li>
+  <li><img src="https://i.loli.net/2020/06/30/qwLDKh8oUSG3uOR.png" alt="image.png" /></li>
+  <li>通过 location 指定不同的后缀名实现不同的请求转发。通过 expires 参数设置，可以使浏览器缓存过期时间，减少与服务器之前的请求和流量。</li>
+  <li>实例
+    <ul>
+      <li>在liunx 系统中准备静态资源，用于进行访问</li>
+      <li>在nginx 配置文件中进行配置</li>
+      <li><img src="https://i.loli.net/2020/06/30/XzdZOC8VfS67Foq.png" alt="image.png" /></li>
+      <li>测试</li>
+      <li><img src="https://i.loli.net/2020/06/30/5MnkI1rtc6jPevx.png" alt="image.png" /></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="安装nginx">安装Nginx</h3>
+
+<ul>
+  <li>需要的素材：pcre，openssl，zlib，Nginx</li>
+  <li>安装pcre</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget http://downloads.sourceforge.net/project/pcre/pcre/8.37/pcre-8.37.tar.gz
+解压：tar -zxvf pcre-8.37.tar.gz
+./configure 完成后，回到 pcre 目录下执行make
+再执行make install
+</code></pre></div></div>
+
+<ul>
+  <li>安装OpenSSL</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum -y install make zlib zlib-devel gcc-c++ libtool  openssl openssl-devel
+</code></pre></div></div>
+
+<ul>
+  <li>安装Nginx</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>解压缩nginx-xx.tar.gz 包。
+进入解压缩目录，执行./configure
+make &amp;&amp; make install 
+进入目录 /usr/local/nginx/sbin/nginx 启动服务 
+
+
+在windows 系统中访问linux 中nginx，默认不能访问的，因为防火墙问题 
+查看开放的端口号
+firewall-cmd --list-all 
+
+设置开放的端口号
+firewall-cmd --add-service=http –permanent 
+firewall-cmd --add-port=80/tcp --permanent 
+
+重启防火墙
+firewall-cmd –reload 
+</code></pre></div></div>
+
+<h3 id="常用命令">常用命令</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>进入nginx 目录中 
+cd  /usr/local/nginx/sbin 
+
+1、查看nginx 版本号 
+./nginx -v
+
+2、启动nginx 
+./nginx
+
+3、停止nginx 
+./nginx  -s  stop
+
+4、重新加载nginx 
+./nginx -s reload
+</code></pre></div></div>
+
+<h3 id="配置文件">配置文件</h3>
+
+<ul>
+  <li>
+    <p>nginx 安装目录下，其默认的配置文件都放在这个目录的 conf 目录下，而主配置文件 nginx.conf 也在其中，后续对 nginx 的使用基本上都是对此配置文件进行相应的修改</p>
+  </li>
+  <li>
+    <p>我们可以很明显的将 nginx.conf 配置文件分为三部分：</p>
+
+    <ul>
+      <li>
+        <p>全局块：从配置文件开始到 events 块之间的内容，主要会设置一些影响 nginx 服务器整体运行的配置指令，主要包括配置运行 Nginx 服务器的用户（组）、允许生成的 worker process 数，进程 PID 存放路径、日志存放路径和类型以及配置文件的引入等。</p>
+
+        <ul>
+          <li>
+            <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>worker_processes  1;
+  这是 Nginx 服务器并发处理服务的关键配置，worker_processes 值越大，可以支持的并发处理量也越多，但是会受到硬件、软件等设备的制约
+</code></pre></div>            </div>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p>events块：影响Nginx服务器与用户的网络连接，比如worker_connections  1024;支持的最大连接数为1024</p>
+      </li>
+    </ul>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>events{
+  worker_connections  1024;
+}
+</code></pre></div>    </div>
+
+    <ul>
+      <li><strong>http块</strong>：  这算是 Nginx 服务器配置中最频繁的部分，代理、缓存和日志定义等绝大多数功能和第三方模块的配置都在这里。   需要注意的是：<strong>http 块也可以包括 http 全局块、server 块</strong>。</li>
+      <li><strong>HTTP全局块</strong>：  http 全局块配置的指令包括文件引入、MIME-TYPE 定义、日志自定义、连接超时时间、单链接请求数上限等。</li>
+      <li><strong>server块</strong>：这块和虚拟主机有密切关系，虚拟主机从用户角度看，和一台独立的硬件主机是完全一样的，该技术的产生是为了节省互联网服务器硬件成本。  每个 http 块可以包括多个 server 块，而每个 server 块就相当于一个虚拟主机。   而<strong>每个 server 块也分为全局 server 块，以及可以同时包含多个 locaton 块</strong>。</li>
+      <li><strong>全局server块</strong>：  最常见的配置是本虚拟机主机的监听配置和本虚拟主机的名称或 IP 配置。</li>
+      <li><strong>location块</strong>：这块的主要作用是基于 Nginx  服务器接收到的请求字符串（例如 server_name/uri-string），对虚拟主机名称（也可以是 IP 别名）之外的字符串（例如 前面的 /uri-string）进行匹配，对特定的请求进行处理。地址定向、数据缓存和应答控制等功能，还有许多第三方模块的配置也在这里进行。</li>
+    </ul>
+  </li>
+</ul>
+:ET

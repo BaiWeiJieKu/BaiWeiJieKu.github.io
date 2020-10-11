@@ -1,0 +1,113 @@
+I"",<ul id="markdown-toc">
+  <li><a href="#gson解析" id="markdown-toc-gson解析">gson解析</a></li>
+</ul>
+<h3 id="gson解析">gson解析</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.GsonBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.JsonArray</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.JsonElement</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.JsonParser</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.reflect.TypeToken</span><span class="o">;</span>
+
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GsonUtil</span> <span class="o">{</span>
+    <span class="c1">//不用创建对象,直接使用Gson.就可以调用方法</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Gson</span> <span class="n">gson</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="c1">//判断gson对象是否存在了,不存在则创建对象</span>
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">gson</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">//gson = new Gson();</span>
+            <span class="c1">//当使用GsonBuilder方式时属性为空的时候输出来的json字符串是有键值key的,显示形式是"key":null，而直接new出来的就没有"key":null的</span>
+            <span class="n">gson</span><span class="o">=</span> <span class="k">new</span> <span class="nc">GsonBuilder</span><span class="o">().</span><span class="na">setDateFormat</span><span class="o">(</span><span class="s">"yyyy-MM-dd HH:mm:ss"</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="c1">//无参的私有构造方法</span>
+    <span class="kd">private</span> <span class="nf">GsonUtil</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 将对象转成json格式
+     * 
+     * @param object
+     * @return String
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">GsonString</span><span class="o">(</span><span class="nc">Object</span> <span class="n">object</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">gsonString</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">gson</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">gsonString</span> <span class="o">=</span> <span class="n">gson</span><span class="o">.</span><span class="na">toJson</span><span class="o">(</span><span class="n">object</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">gsonString</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 将json转成特定的cls的对象
+     * 
+     * @param gsonString
+     * @param cls
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span> <span class="nf">GsonToBean</span><span class="o">(</span><span class="nc">String</span> <span class="n">gsonString</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">cls</span><span class="o">)</span> <span class="o">{</span>
+        <span class="no">T</span> <span class="n">t</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">gson</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">//传入json对象和对象类型,将json转成对象</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">gsonString</span><span class="o">,</span> <span class="n">cls</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">t</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * json字符串转成list
+     * 
+     * @param gsonString
+     * @param cls
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">GsonToList</span><span class="o">(</span><span class="nc">String</span> <span class="n">gsonString</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">cls</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">gson</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">//根据泛型返回解析指定的类型,TypeToken&lt;List&lt;T&gt;&gt;{}.getType()获取返回类型</span>
+            <span class="n">list</span> <span class="o">=</span> <span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">gsonString</span><span class="o">,</span> <span class="k">new</span> <span class="nc">TypeToken</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+            <span class="o">}.</span><span class="na">getType</span><span class="o">());</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">list</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * json字符串转成list中有map的
+     * 
+     * @param gsonString
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="no">T</span><span class="o">&gt;&gt;</span> <span class="nf">GsonToListMaps</span><span class="o">(</span><span class="nc">String</span> <span class="n">gsonString</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="no">T</span><span class="o">&gt;&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">gson</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">list</span> <span class="o">=</span> <span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">gsonString</span><span class="o">,</span>
+                    <span class="k">new</span> <span class="nc">TypeToken</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="no">T</span><span class="o">&gt;&gt;&gt;()</span> <span class="o">{</span>
+                    <span class="o">}.</span><span class="na">getType</span><span class="o">());</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">list</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * json字符串转成map的
+     * 
+     * @param gsonString
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="no">T</span><span class="o">&gt;</span> <span class="nf">GsonToMaps</span><span class="o">(</span><span class="nc">String</span> <span class="n">gsonString</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="no">T</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">gson</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">map</span> <span class="o">=</span> <span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">gsonString</span><span class="o">,</span> <span class="k">new</span> <span class="nc">TypeToken</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="no">T</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+            <span class="o">}.</span><span class="na">getType</span><span class="o">());</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">map</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+:ET

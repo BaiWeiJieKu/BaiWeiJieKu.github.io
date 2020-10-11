@@ -1,0 +1,97 @@
+I"4<ul id="markdown-toc">
+  <li><a href="#语法特点" id="markdown-toc-语法特点">语法特点</a></li>
+  <li><a href="#单字段" id="markdown-toc-单字段">单字段</a></li>
+  <li><a href="#筛选条件" id="markdown-toc-筛选条件">筛选条件</a></li>
+  <li><a href="#表达式" id="markdown-toc-表达式">表达式</a></li>
+  <li><a href="#别名排序" id="markdown-toc-别名排序">别名排序</a></li>
+  <li><a href="#函数排序" id="markdown-toc-函数排序">函数排序</a></li>
+  <li><a href="#多字段" id="markdown-toc-多字段">多字段</a></li>
+</ul>
+<h2 id="语法特点">语法特点</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>语法：
+select
+	要查询的东西
+from
+	表
+where 
+	条件
+
+order by 排序的字段|表达式|函数|别名 【asc|desc】
+
+特点：
+1、asc代表的是升序，可以省略
+desc代表的是降序
+
+2、order by子句可以支持 单个字段、别名、表达式、函数、多个字段
+
+3、order by子句在查询语句的最后面，除了limit子句
+</code></pre></div></div>
+
+<h2 id="单字段">单字段</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#1、按单个字段排序
+SELECT * FROM employees ORDER BY salary DESC;
+</code></pre></div></div>
+
+<h2 id="筛选条件">筛选条件</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#2、添加筛选条件再排序
+
+#案例：查询部门编号&gt;=90的员工信息，并按员工编号降序
+
+SELECT *
+FROM employees
+WHERE department_id&gt;=90
+ORDER BY employee_id DESC;
+</code></pre></div></div>
+
+<h2 id="表达式">表达式</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#3、按表达式排序
+#案例：查询员工信息 按年薪降序
+
+
+SELECT *,salary*12*(1+IFNULL(commission_pct,0))
+FROM employees
+ORDER BY salary*12*(1+IFNULL(commission_pct,0)) DESC;
+</code></pre></div></div>
+
+<h2 id="别名排序">别名排序</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#4、按别名排序
+#案例：查询员工信息 按年薪升序
+
+SELECT *,salary*12*(1+IFNULL(commission_pct,0)) 年薪
+FROM employees
+ORDER BY 年薪 ASC;
+</code></pre></div></div>
+
+<h2 id="函数排序">函数排序</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#5、按函数排序
+#案例：查询员工名，并且按名字的长度降序
+
+SELECT LENGTH(last_name),last_name 
+FROM employees
+ORDER BY LENGTH(last_name) DESC;
+</code></pre></div></div>
+
+<h2 id="多字段">多字段</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#6、按多个字段排序
+
+#案例：查询员工信息，要求先按工资降序，再按employee_id升序
+SELECT *
+FROM employees
+ORDER BY salary DESC,employee_id ASC;
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#3.	将员工的姓名按首字母排序，并写出姓名的长度（length）
+
+SELECT LENGTH(last_name) 长度,SUBSTR(last_name,1,1) 首字符,last_name
+FROM employees
+ORDER BY 首字符;
+</code></pre></div></div>
+
+:ET

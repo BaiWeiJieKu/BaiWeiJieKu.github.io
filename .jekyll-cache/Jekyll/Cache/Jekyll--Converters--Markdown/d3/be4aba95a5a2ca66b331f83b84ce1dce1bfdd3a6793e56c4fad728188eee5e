@@ -1,0 +1,12 @@
+I"
+<ul id="markdown-toc">
+  <li><a href="#核心作用" id="markdown-toc-核心作用">核心作用</a></li>
+</ul>
+<h3 id="核心作用">核心作用</h3>
+
+<ul>
+  <li>通过代理，控制对对象的访问！<strong>Proxy  pattern</strong></li>
+  <li>可以详细控制访问某个（某类）对象的方法，在调用这个方法前做前置处理，调用这个方法后做后置处理。（即：AOP的微观实现！）</li>
+  <li>AOP(Aspect Oriented  Programming面向切面编程)的核心实现机制！</li>
+</ul>
+:ET

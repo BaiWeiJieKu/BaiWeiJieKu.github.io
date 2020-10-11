@@ -1,0 +1,504 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#配置文件" id="markdown-toc-配置文件">配置文件</a>    <ul>
+      <li><a href="#pom" id="markdown-toc-pom">pom</a></li>
+      <li><a href="#spring" id="markdown-toc-spring">spring</a></li>
+      <li><a href="#springmvc" id="markdown-toc-springmvc">springMVC</a></li>
+      <li><a href="#mybatis" id="markdown-toc-mybatis">mybatis</a></li>
+      <li><a href="#webxml" id="markdown-toc-webxml">web.xml</a></li>
+    </ul>
+  </li>
+  <li><a href="#pojo" id="markdown-toc-pojo">pojo</a></li>
+  <li><a href="#mapper" id="markdown-toc-mapper">Mapper</a></li>
+  <li><a href="#mapperxml" id="markdown-toc-mapperxml">Mapper.xml</a></li>
+  <li><a href="#service" id="markdown-toc-service">service</a></li>
+  <li><a href="#controller" id="markdown-toc-controller">controller</a></li>
+</ul>
+<h3 id="配置文件">配置文件</h3>
+
+<h4 id="pom">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependencies&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>junit<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>junit<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.11<span class="nt">&lt;/version&gt;</span>
+      <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+
+      <span class="c">&lt;!--日志实现：log4j,logback,common-logging
+        使用：slf4j + logback
+      --&gt;</span>
+      <span class="nt">&lt;dependency&gt;</span>
+          <span class="nt">&lt;groupId&gt;</span>org.slf4j<span class="nt">&lt;/groupId&gt;</span>
+          <span class="nt">&lt;artifactId&gt;</span>slf4j-api<span class="nt">&lt;/artifactId&gt;</span>
+          <span class="nt">&lt;version&gt;</span>1.7.12<span class="nt">&lt;/version&gt;</span>
+      <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>ch.qos.logback<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>logback-core<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>1.1.1<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--实现slf4j接口并整合--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>ch.qos.logback<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>logback-classic<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>1.1.1<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--数据库依赖--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>mysql<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>mysql-connector-java<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>5.1.37<span class="nt">&lt;/version&gt;</span>
+      <span class="nt">&lt;scope&gt;</span>runtime<span class="nt">&lt;/scope&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>c3p0<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>c3p0<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>0.9.1.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--mybatis依赖--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.mybatis<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>mybatis-spring<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>1.2.3<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.mybatis<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>mybatis<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>3.3.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--servlet web依赖--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>taglibs<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>standard<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>1.1.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>jstl<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>jstl<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>1.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>com.fasterxml.jackson.core<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>jackson-databind<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>2.9.7<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>javax.servlet<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>javax.servlet-api<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>3.1.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--spring依赖--&gt;</span>
+    <span class="c">&lt;!--spring核心依赖--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-core<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-beans<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-context<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--spirng dao层依赖--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-jdbc<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-tx<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--spring web依赖--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-web<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-webmvc<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!--spring test--&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-test<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.1.7.RELEASE<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+  <span class="nt">&lt;/dependencies&gt;</span>
+</code></pre></div></div>
+
+<h4 id="spring">spring</h4>
+
+<ul>
+  <li>applicationContext.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;beans</span> <span class="na">xmlns=</span><span class="s">"http://www.springframework.org/schema/beans"</span>
+	<span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xmlns:context=</span><span class="s">"http://www.springframework.org/schema/context"</span>
+	<span class="na">xmlns:mybatis-spring=</span><span class="s">"http://mybatis.org/schema/mybatis-spring"</span>
+	<span class="na">xmlns:tx=</span><span class="s">"http://www.springframework.org/schema/tx"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd"</span><span class="nt">&gt;</span>
+
+	<span class="c">&lt;!-- Spring希望管理所有的业务逻辑组件，等。。。 --&gt;</span>
+	<span class="nt">&lt;context:component-scan</span> <span class="na">base-package=</span><span class="s">"com.atguigu.mybatis"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;context:exclude-filter</span> <span class="na">type=</span><span class="s">"annotation"</span>
+			<span class="na">expression=</span><span class="s">"org.springframework.stereotype.Controller"</span> <span class="nt">/&gt;</span>
+	<span class="nt">&lt;/context:component-scan&gt;</span>
+
+	<span class="c">&lt;!-- 引入数据库的配置文件 --&gt;</span>
+	<span class="nt">&lt;context:property-placeholder</span> <span class="na">location=</span><span class="s">"classpath:dbconfig.properties"</span> <span class="nt">/&gt;</span>
+	<span class="c">&lt;!-- Spring用来控制业务逻辑。数据源、事务控制、aop --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"dataSource"</span> <span class="na">class=</span><span class="s">"com.mchange.v2.c3p0.ComboPooledDataSource"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"jdbcUrl"</span> <span class="na">value=</span><span class="s">"${jdbc.url}"</span><span class="nt">&gt;&lt;/property&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"driverClass"</span> <span class="na">value=</span><span class="s">"${jdbc.driver}"</span><span class="nt">&gt;&lt;/property&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"user"</span> <span class="na">value=</span><span class="s">"${jdbc.username}"</span><span class="nt">&gt;&lt;/property&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">value=</span><span class="s">"${jdbc.password}"</span><span class="nt">&gt;&lt;/property&gt;</span>
+	<span class="nt">&lt;/bean&gt;</span>
+	<span class="c">&lt;!-- spring事务管理 --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"dataSourceTransactionManager"</span> <span class="na">class=</span><span class="s">"org.springframework.jdbc.datasource.DataSourceTransactionManager"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"dataSource"</span> <span class="na">ref=</span><span class="s">"dataSource"</span><span class="nt">&gt;&lt;/property&gt;</span>
+	<span class="nt">&lt;/bean&gt;</span>
+
+	<span class="c">&lt;!-- 开启基于注解的事务 --&gt;</span>
+	<span class="nt">&lt;tx:annotation-driven</span> <span class="na">transaction-manager=</span><span class="s">"dataSourceTransactionManager"</span><span class="nt">/&gt;</span>
+	
+	<span class="c">&lt;!-- 
+	整合mybatis 
+		目的：1、spring管理所有组件。mapper的实现类。
+				service==&gt;Dao   @Autowired:自动注入mapper；
+			2、spring用来管理事务，spring声明式事务
+	--&gt;</span>
+	<span class="c">&lt;!--创建出SqlSessionFactory对象  --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"sqlSessionFactoryBean"</span> <span class="na">class=</span><span class="s">"org.mybatis.spring.SqlSessionFactoryBean"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"dataSource"</span> <span class="na">ref=</span><span class="s">"dataSource"</span><span class="nt">&gt;&lt;/property&gt;</span>
+		<span class="c">&lt;!-- configLocation指定全局配置文件的位置 --&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"configLocation"</span> <span class="na">value=</span><span class="s">"classpath:mybatis-config.xml"</span><span class="nt">&gt;&lt;/property&gt;</span>
+		<span class="c">&lt;!--mapperLocations: 指定mapper文件的位置--&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"mapperLocations"</span> <span class="na">value=</span><span class="s">"classpath:mybatis/mapper/*.xml"</span><span class="nt">&gt;&lt;/property&gt;</span>
+	<span class="nt">&lt;/bean&gt;</span>
+	
+	<span class="c">&lt;!--配置一个可以进行批量执行的sqlSession  --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"sqlSession"</span> <span class="na">class=</span><span class="s">"org.mybatis.spring.SqlSessionTemplate"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;constructor-arg</span> <span class="na">name=</span><span class="s">"sqlSessionFactory"</span> <span class="na">ref=</span><span class="s">"sqlSessionFactoryBean"</span><span class="nt">&gt;&lt;/constructor-arg&gt;</span>
+		<span class="nt">&lt;constructor-arg</span> <span class="na">name=</span><span class="s">"executorType"</span> <span class="na">value=</span><span class="s">"BATCH"</span><span class="nt">&gt;&lt;/constructor-arg&gt;</span>
+	<span class="nt">&lt;/bean&gt;</span>
+	
+	<span class="c">&lt;!-- 扫描所有的mapper接口的实现，让这些mapper能够自动注入；
+	base-package：指定mapper接口的包名
+	 --&gt;</span>
+	<span class="nt">&lt;mybatis-spring:scan</span> <span class="na">base-package=</span><span class="s">"com.atguigu.mybatis.dao"</span><span class="nt">/&gt;</span>
+	<span class="c">&lt;!-- &lt;bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"&gt;
+		&lt;property name="basePackage" value="com.atguigu.mybatis.dao"&gt;&lt;/property&gt;
+	&lt;/bean&gt; --&gt;</span>
+	
+<span class="nt">&lt;/beans&gt;</span>
+
+</code></pre></div></div>
+
+<h4 id="springmvc">springMVC</h4>
+
+<ul>
+  <li>spring-servlet.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;beans</span> <span class="na">xmlns=</span><span class="s">"http://www.springframework.org/schema/beans"</span>
+	<span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xmlns:context=</span><span class="s">"http://www.springframework.org/schema/context"</span>
+	<span class="na">xmlns:mvc=</span><span class="s">"http://www.springframework.org/schema/mvc"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd"</span><span class="nt">&gt;</span>
+
+	<span class="c">&lt;!--SpringMVC只是控制网站跳转逻辑  --&gt;</span>
+	<span class="c">&lt;!-- 只扫描控制器 --&gt;</span>
+	<span class="nt">&lt;context:component-scan</span> <span class="na">base-package=</span><span class="s">"com.atguigu.mybatis"</span> <span class="na">use-default-filters=</span><span class="s">"false"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;context:include-filter</span> <span class="na">type=</span><span class="s">"annotation"</span> <span class="na">expression=</span><span class="s">"org.springframework.stereotype.Controller"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/context:component-scan&gt;</span>
+	
+	<span class="c">&lt;!-- 视图解析器 --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">class=</span><span class="s">"org.springframework.web.servlet.view.InternalResourceViewResolver"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"prefix"</span> <span class="na">value=</span><span class="s">"/WEB-INF/pages/"</span><span class="nt">&gt;&lt;/property&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"suffix"</span> <span class="na">value=</span><span class="s">".jsp"</span><span class="nt">&gt;&lt;/property&gt;</span>
+	<span class="nt">&lt;/bean&gt;</span>
+	
+	<span class="nt">&lt;mvc:annotation-driven&gt;&lt;/mvc:annotation-driven&gt;</span>
+	<span class="nt">&lt;mvc:default-servlet-handler/&gt;</span>
+<span class="nt">&lt;/beans&gt;</span>
+
+</code></pre></div></div>
+
+<h4 id="mybatis">mybatis</h4>
+
+<ul>
+  <li>mybatis-config.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="cp">&lt;!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd"&gt;</span>
+<span class="nt">&lt;configuration&gt;</span>
+	<span class="nt">&lt;settings&gt;</span>
+		<span class="nt">&lt;setting</span> <span class="na">name=</span><span class="s">"mapUnderscoreToCamelCase"</span> <span class="na">value=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;setting</span> <span class="na">name=</span><span class="s">"jdbcTypeForNull"</span> <span class="na">value=</span><span class="s">"NULL"</span><span class="nt">/&gt;</span>
+		
+		<span class="c">&lt;!--显式的指定每个我们需要更改的配置的值，即使他是默认的。防止版本更新带来的问题  --&gt;</span>
+		<span class="nt">&lt;setting</span> <span class="na">name=</span><span class="s">"cacheEnabled"</span> <span class="na">value=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;setting</span> <span class="na">name=</span><span class="s">"lazyLoadingEnabled"</span> <span class="na">value=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;setting</span> <span class="na">name=</span><span class="s">"aggressiveLazyLoading"</span> <span class="na">value=</span><span class="s">"false"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/settings&gt;</span>
+	
+	<span class="nt">&lt;databaseIdProvider</span> <span class="na">type=</span><span class="s">"DB_VENDOR"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"MySQL"</span> <span class="na">value=</span><span class="s">"mysql"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"Oracle"</span> <span class="na">value=</span><span class="s">"oracle"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"SQL Server"</span> <span class="na">value=</span><span class="s">"sqlserver"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/databaseIdProvider&gt;</span>
+	
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div></div>
+
+<h4 id="webxml">web.xml</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;web-app</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span> <span class="na">xmlns=</span><span class="s">"http://java.sun.com/xml/ns/javaee"</span> <span class="na">xsi:schemaLocation=</span><span class="s">"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"</span> <span class="na">id=</span><span class="s">"WebApp_ID"</span> <span class="na">version=</span><span class="s">"2.5"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;display-name&gt;</span>MyBatis_06_ssm<span class="nt">&lt;/display-name&gt;</span>
+  
+  <span class="c">&lt;!--Spring配置： needed for ContextLoaderListener --&gt;</span>
+	<span class="nt">&lt;context-param&gt;</span>
+		<span class="nt">&lt;param-name&gt;</span>contextConfigLocation<span class="nt">&lt;/param-name&gt;</span>
+		<span class="nt">&lt;param-value&gt;</span>classpath:applicationContext.xml<span class="nt">&lt;/param-value&gt;</span>
+	<span class="nt">&lt;/context-param&gt;</span>
+
+	<span class="c">&lt;!-- Bootstraps the root web application context before servlet initialization --&gt;</span>
+	<span class="nt">&lt;listener&gt;</span>
+		<span class="nt">&lt;listener-class&gt;</span>org.springframework.web.context.ContextLoaderListener<span class="nt">&lt;/listener-class&gt;</span>
+	<span class="nt">&lt;/listener&gt;</span>
+	
+	<span class="c">&lt;!-- SpringMVC配置 --&gt;</span>
+	<span class="c">&lt;!-- The front controller of this Spring Web application, responsible for handling all application requests --&gt;</span>
+	<span class="nt">&lt;servlet&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>spring<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;servlet-class&gt;</span>org.springframework.web.servlet.DispatcherServlet<span class="nt">&lt;/servlet-class&gt;</span>
+		<span class="nt">&lt;load-on-startup&gt;</span>1<span class="nt">&lt;/load-on-startup&gt;</span>
+	<span class="nt">&lt;/servlet&gt;</span>
+
+	<span class="c">&lt;!-- Map all requests to the DispatcherServlet for handling --&gt;</span>
+	<span class="nt">&lt;servlet-mapping&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>spring<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>/<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/servlet-mapping&gt;</span>
+  
+<span class="nt">&lt;/web-app&gt;</span>
+</code></pre></div></div>
+
+<h3 id="pojo">pojo</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.bean</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.type.Alias</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Employee</span> <span class="kd">implements</span> <span class="nc">Serializable</span><span class="o">{</span>
+	
+	<span class="cm">/**
+	 * 
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">lastName</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">email</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">gender</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">Department</span> <span class="n">dept</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="nf">Employee</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	
+	
+	<span class="kd">public</span> <span class="nf">Employee</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">,</span> <span class="nc">String</span> <span class="n">lastName</span><span class="o">,</span> <span class="nc">String</span> <span class="n">email</span><span class="o">,</span> <span class="nc">String</span> <span class="n">gender</span><span class="o">,</span>
+			<span class="nc">Department</span> <span class="n">dept</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">lastName</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">email</span> <span class="o">=</span> <span class="n">email</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">gender</span> <span class="o">=</span> <span class="n">gender</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">dept</span> <span class="o">=</span> <span class="n">dept</span><span class="o">;</span>
+	<span class="o">}</span>
+
+
+
+	<span class="kd">public</span> <span class="nf">Employee</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">,</span> <span class="nc">String</span> <span class="n">lastName</span><span class="o">,</span> <span class="nc">String</span> <span class="n">email</span><span class="o">,</span> <span class="nc">String</span> <span class="n">gender</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">lastName</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">email</span> <span class="o">=</span> <span class="n">email</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">gender</span> <span class="o">=</span> <span class="n">gender</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	
+	
+
+	<span class="kd">public</span> <span class="nc">Department</span> <span class="nf">getDept</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">dept</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setDept</span><span class="o">(</span><span class="nc">Department</span> <span class="n">dept</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">dept</span> <span class="o">=</span> <span class="n">dept</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">Integer</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setId</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getLastName</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">lastName</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setLastName</span><span class="o">(</span><span class="nc">String</span> <span class="n">lastName</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">lastName</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getEmail</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">email</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setEmail</span><span class="o">(</span><span class="nc">String</span> <span class="n">email</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">email</span> <span class="o">=</span> <span class="n">email</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getGender</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">gender</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setGender</span><span class="o">(</span><span class="nc">String</span> <span class="n">gender</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">gender</span> <span class="o">=</span> <span class="n">gender</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="s">"Employee [id="</span> <span class="o">+</span> <span class="n">id</span> <span class="o">+</span> <span class="s">", lastName="</span> <span class="o">+</span> <span class="n">lastName</span> <span class="o">+</span> <span class="s">", email="</span>
+				<span class="o">+</span> <span class="n">email</span> <span class="o">+</span> <span class="s">", gender="</span> <span class="o">+</span> <span class="n">gender</span> <span class="o">+</span> <span class="s">"]"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="mapper">Mapper</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.dao</span><span class="o">;</span>
+
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.bean.Employee</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">EmployeeMapper</span> <span class="o">{</span>
+	
+	<span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">getEmpById</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">);</span>
+	
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Employee</span><span class="o">&gt;</span> <span class="nf">getEmps</span><span class="o">();</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="mapperxml">Mapper.xml</h3>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="cp">&lt;!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd"&gt;</span>
+<span class="nt">&lt;mapper</span> <span class="na">namespace=</span><span class="s">"com.atguigu.mybatis.dao.EmployeeMapper"</span><span class="nt">&gt;</span>
+
+	<span class="c">&lt;!-- public Employee getEmpById(Integer id); --&gt;</span>
+	<span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmpById"</span> <span class="na">resultType=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span><span class="nt">&gt;</span>
+		select * from tbl_employee where id=#{id}
+	<span class="nt">&lt;/select&gt;</span>
+	
+	<span class="c">&lt;!--public List&lt;Employee&gt; getEmps();  --&gt;</span>
+	<span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmps"</span> <span class="na">resultType=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span><span class="nt">&gt;</span>
+		select * from tbl_employee
+	<span class="nt">&lt;/select&gt;</span>
+<span class="nt">&lt;/mapper&gt;</span>
+</code></pre></div></div>
+
+<h3 id="service">service</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.service</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.session.SqlSession</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.dao.EmployeeMapper</span><span class="o">;</span>
+
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EmployeeService</span> <span class="o">{</span>
+	
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">EmployeeMapper</span> <span class="n">employeeMapper</span><span class="o">;</span>
+	
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">SqlSession</span> <span class="n">sqlSession</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Employee</span><span class="o">&gt;</span> <span class="nf">getEmps</span><span class="o">(){</span>
+		<span class="c1">//</span>
+		<span class="c1">//EmployeeMapper mapper = sqlSession.getMapper(EmployeeMapper.class);</span>
+		<span class="k">return</span> <span class="n">employeeMapper</span><span class="o">.</span><span class="na">getEmps</span><span class="o">();</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="controller">controller</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.controller</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Controller</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.service.EmployeeService</span><span class="o">;</span>
+
+<span class="nd">@Controller</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EmployeeController</span> <span class="o">{</span>
+	
+	<span class="nd">@Autowired</span>
+	<span class="nc">EmployeeService</span> <span class="n">employeeService</span><span class="o">;</span>
+	
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/getemps"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">emps</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">){</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Employee</span><span class="o">&gt;</span> <span class="n">emps</span> <span class="o">=</span> <span class="n">employeeService</span><span class="o">.</span><span class="na">getEmps</span><span class="o">();</span>
+		<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"allEmps"</span><span class="o">,</span> <span class="n">emps</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"list"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+:ET

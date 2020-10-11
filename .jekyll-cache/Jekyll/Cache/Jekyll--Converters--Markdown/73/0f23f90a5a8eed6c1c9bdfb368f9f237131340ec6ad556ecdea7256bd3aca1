@@ -1,0 +1,52 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#是什么" id="markdown-toc-是什么">是什么</a></li>
+  <li><a href="#怎么用" id="markdown-toc-怎么用">怎么用</a>    <ul>
+      <li><a href="#说明" id="markdown-toc-说明">说明</a></li>
+      <li><a href="#是否开启" id="markdown-toc-是否开启">是否开启</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="是什么">是什么</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MySQL的慢查询日志是MySQL提供的一种日志记录，它用来记录在MySQL中响应时间超过阀值的语句，具体指运行时间超过long_query_time值的SQL，则会被记录到慢查询日志中。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>具体指运行时间超过long_query_time值的SQL，则会被记录到慢查询日志中。long_query_time的默认值为10，意思是运行10秒以上的语句。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>由他来查看哪些SQL超出了我们的最大忍耐时间值，比如一条sql执行超过5秒钟，我们就算慢SQL，希望能收集超过5秒的sql，结合之前explain进行全面分析。
+</code></pre></div></div>
+
+<h2 id="怎么用">怎么用</h2>
+
+<h3 id="说明">说明</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>默认情况下，MySQL数据库没有开启慢查询日志，需要我们手动来设置这个参数。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>当然，如果不是调优需要的话，一般不建议启动该参数，因为开启慢查询日志会或多或少带来一定的性能影响。慢查询日志支持将日志记录写入文件
+</code></pre></div></div>
+
+<h3 id="是否开启">是否开启</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>默认情况下slow_query_log的值为OFF，表示慢查询日志是禁用的，
+可以通过设置slow_query_log的值来开启
+
+SHOW VARIABLES LIKE '%slow_query_log%';
+
+使用set global slow_query_log=1开启了慢查询日志只对当前数据库生效，
+如果MySQL重启后则会失效。
+
+如果要永久生效，就必须修改配置文件my.cnf（其它系统变量也是如此）
+ 
+修改my.cnf文件，[mysqld]下增加或修改参数
+slow_query_log 和slow_query_log_file后，然后重启MySQL服务器。
+
+
+Linux也即将如下两行配置进my.cnf文件 
+slow_query_log =1
+slow_query_log_file=/var/lib/mysql/atguigu-slow.log
+ 
+关于慢查询的参数slow_query_log_file ，它指定慢查询日志文件的存放路径，系统默认会给一个缺省的文件host_name-slow.log（如果没有指定参数slow_query_log_file的话）
+</code></pre></div></div>
+:ET

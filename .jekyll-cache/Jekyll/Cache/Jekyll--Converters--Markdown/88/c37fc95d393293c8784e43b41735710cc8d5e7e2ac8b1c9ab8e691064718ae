@@ -1,0 +1,1933 @@
+I"p�<ul id="markdown-toc">
+  <li><a href="#arraylist" id="markdown-toc-arraylist">ArrayList</a>    <ul>
+      <li><a href="#区别数组" id="markdown-toc-区别数组">区别数组</a>        <ul>
+          <li><a href="#数组局限" id="markdown-toc-数组局限">数组局限</a></li>
+          <li><a href="#存放对象" id="markdown-toc-存放对象">存放对象</a></li>
+        </ul>
+      </li>
+      <li><a href="#常用方法" id="markdown-toc-常用方法">常用方法</a>        <ul>
+          <li><a href="#增加" id="markdown-toc-增加">增加</a></li>
+          <li><a href="#判断" id="markdown-toc-判断">判断</a></li>
+          <li><a href="#获取" id="markdown-toc-获取">获取</a></li>
+          <li><a href="#位置" id="markdown-toc-位置">位置</a></li>
+          <li><a href="#删除" id="markdown-toc-删除">删除</a></li>
+          <li><a href="#替换" id="markdown-toc-替换">替换</a></li>
+          <li><a href="#大小" id="markdown-toc-大小">大小</a></li>
+          <li><a href="#变数组" id="markdown-toc-变数组">变数组</a></li>
+          <li><a href="#加所有" id="markdown-toc-加所有">加所有</a></li>
+          <li><a href="#清空" id="markdown-toc-清空">清空</a></li>
+        </ul>
+      </li>
+      <li><a href="#list接口" id="markdown-toc-list接口">List接口</a>        <ul>
+          <li><a href="#api" id="markdown-toc-api">API</a></li>
+        </ul>
+      </li>
+      <li><a href="#泛型" id="markdown-toc-泛型">泛型</a></li>
+      <li><a href="#遍历" id="markdown-toc-遍历">遍历</a>        <ul>
+          <li><a href="#for" id="markdown-toc-for">for</a></li>
+          <li><a href="#迭代器" id="markdown-toc-迭代器">迭代器</a></li>
+          <li><a href="#for-each" id="markdown-toc-for-each">for-each</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#linkedlist" id="markdown-toc-linkedlist">LinkedList</a>    <ul>
+      <li><a href="#双向链表" id="markdown-toc-双向链表">双向链表</a></li>
+      <li><a href="#队列" id="markdown-toc-队列">队列</a></li>
+    </ul>
+  </li>
+  <li><a href="#二叉树" id="markdown-toc-二叉树">二叉树</a>    <ul>
+      <li><a href="#插入" id="markdown-toc-插入">插入</a></li>
+      <li><a href="#遍历-1" id="markdown-toc-遍历-1">遍历</a></li>
+    </ul>
+  </li>
+  <li><a href="#hashmap" id="markdown-toc-hashmap">HashMap</a></li>
+  <li><a href="#hashset" id="markdown-toc-hashset">HashSet</a></li>
+  <li><a href="#collection" id="markdown-toc-collection">Collection</a></li>
+  <li><a href="#collections" id="markdown-toc-collections">Collections</a>    <ul>
+      <li><a href="#反转" id="markdown-toc-反转">反转</a></li>
+      <li><a href="#混淆" id="markdown-toc-混淆">混淆</a></li>
+      <li><a href="#排序" id="markdown-toc-排序">排序</a></li>
+      <li><a href="#交换" id="markdown-toc-交换">交换</a></li>
+      <li><a href="#滚动" id="markdown-toc-滚动">滚动</a></li>
+      <li><a href="#查找替换" id="markdown-toc-查找替换">查找替换</a></li>
+      <li><a href="#只读" id="markdown-toc-只读">只读</a></li>
+      <li><a href="#线程安全" id="markdown-toc-线程安全">线程安全</a></li>
+    </ul>
+  </li>
+  <li><a href="#关系区别" id="markdown-toc-关系区别">关系区别</a>    <ul>
+      <li><a href="#顺序" id="markdown-toc-顺序">顺序</a></li>
+      <li><a href="#重复" id="markdown-toc-重复">重复</a></li>
+    </ul>
+  </li>
+  <li><a href="#hashcode" id="markdown-toc-hashcode">hashCode</a></li>
+  <li><a href="#比较器" id="markdown-toc-比较器">比较器</a></li>
+</ul>
+<h2 id="arraylist">ArrayList</h2>
+
+<h3 id="区别数组">区别数组</h3>
+
+<h4 id="数组局限">数组局限</h4>
+
+<ul>
+  <li>如果要存放多个对象，可以使用数组，但是数组有局限性</li>
+  <li>比如 声明长度是10的数组，不用的数组就浪费了，超过10的个数，又放不下</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//数组的局限性</span>
+		<span class="nc">Hero</span> <span class="n">heros</span><span class="o">[]</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">[</span><span class="mi">10</span><span class="o">];</span>
+		<span class="c1">//声明长度是10的数组</span>
+		<span class="c1">//不用的数组就浪费了</span>
+		<span class="c1">//超过10的个数，又放不下</span>
+		<span class="n">heros</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"盖伦"</span><span class="o">);</span>
+                <span class="c1">//放不下要报错</span>
+		<span class="n">heros</span><span class="o">[</span><span class="mi">20</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"提莫"</span><span class="o">);</span>
+		
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<h4 id="存放对象">存放对象</h4>
+
+<ul>
+  <li>为了解决数组的局限性，引入容器类的概念。 最常见的容器类就是 ArrayList</li>
+  <li><a href="http://how2j.cn/k/number-string/number-string-stringbuilder/328.html#step724">容器的容量</a>“capacity”会随着对象的增加，自动增长</li>
+  <li>只需要不断往容器里增加英雄即可，不用担心会出现数组的边界问题</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"rawtypes"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//容器类ArrayList，用于存放对象</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"盖伦"</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+		
+		<span class="c1">//容器的容量"capacity"会随着对象的增加，自动增长</span>
+		<span class="c1">//只需要不断往容器里增加英雄即可，不用担心会出现数组的边界问题。</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"提莫"</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+		
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="常用方法">常用方法</h3>
+
+<h4 id="增加">增加</h4>
+
+<ul>
+  <li>add 有两种用法</li>
+  <li>第一种是直接add对象，把对象加在最后面<code class="language-plaintext highlighter-rouge">heros.add(new Hero("hero " + i));</code></li>
+  <li>第二种是在指定位置加对象<code class="language-plaintext highlighter-rouge">heros.add(3, specialHero);</code></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 把5个对象加入到ArrayList中</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+
+		<span class="c1">// 在指定位置增加对象</span>
+		<span class="nc">Hero</span> <span class="n">specialHero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="n">specialHero</span><span class="o">);</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2453.png" alt="" /></p>
+
+<h4 id="判断">判断</h4>
+
+<ul>
+  <li>通过方法contains 判断一个对象是否在容器中</li>
+  <li>判断标准： 是否是同一个对象，而不是name是否相同</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="nc">Hero</span> <span class="n">specialHero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">specialHero</span><span class="o">);</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+		<span class="c1">// 判断一个对象是否在容器中</span>
+		<span class="c1">// 判断标准： 是否是同一个对象，比较的是内存地址，而不是name是否相同</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"虽然一个新的对象名字也叫 hero 1，但是contains的返回是:"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero 1"</span><span class="o">)));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"而对specialHero的判断，contains的返回是:"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">specialHero</span><span class="o">));</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2454.png" alt="" /></p>
+
+<h4 id="获取">获取</h4>
+
+<ul>
+  <li>通过get获取指定位置的对象（从0开始），如果输入的下标越界，一样会报错</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="nc">Hero</span> <span class="n">specialHero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">specialHero</span><span class="o">);</span>
+		
+		<span class="c1">//获取指定位置的对象</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">5</span><span class="o">));</span>
+		<span class="c1">//如果超出了范围，依然会报错</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">6</span><span class="o">));</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2455.png" alt="" /></p>
+
+<h4 id="位置">位置</h4>
+
+<ul>
+  <li>indexOf用于判断一个对象在ArrayList中所处的位置</li>
+  <li>与<a href="http://how2j.cn/k/collection/collection-arraylist-method/685.html#step2454">contains</a>一样，判断标准是对象是否相同，而非对象的name值是否相等</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="nc">Hero</span> <span class="n">specialHero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">specialHero</span><span class="o">);</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"specialHero所处的位置:"</span><span class="o">+</span><span class="n">heros</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="n">specialHero</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"新的英雄，但是名字是\"hero 1\"所处的位置:"</span><span class="o">+</span><span class="n">heros</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero 1"</span><span class="o">)));</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2456.png" alt="" /></p>
+
+<h4 id="删除">删除</h4>
+
+<ul>
+  <li>remove用于把对象从ArrayList中删除</li>
+  <li>remove可以根据下标删除ArrayList的元素<code class="language-plaintext highlighter-rouge">heros.remove(2);</code></li>
+  <li>也可以根据对象删除,<code class="language-plaintext highlighter-rouge">heros.remove(specialHero);</code></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="nc">Hero</span> <span class="n">specialHero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">specialHero</span><span class="o">);</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"删除下标是2的对象"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"删除special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">specialHero</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2457.png" alt="" /></p>
+
+<h4 id="替换">替换</h4>
+
+<ul>
+  <li>set用于替换指定位置的元素</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="nc">Hero</span> <span class="n">specialHero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">specialHero</span><span class="o">);</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"把下标是5的元素，替换为\"hero 5\""</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero 5"</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2458.png" alt="" /></p>
+
+<h4 id="大小">大小</h4>
+
+<ul>
+  <li>size 用于获取ArrayList的大小</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="nc">Hero</span> <span class="n">specialHero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"special hero"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">specialHero</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"获取ArrayList的大小："</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2459.png" alt="" /></p>
+
+<h4 id="变数组">变数组</h4>
+
+<ul>
+  <li>toArray可以把一个ArrayList对象转换为数组。</li>
+  <li>需要注意的是，该方法是一个泛型方法：<code class="language-plaintext highlighter-rouge">&lt;T&gt; T[] toArray(T[] a);</code> 如果<code class="language-plaintext highlighter-rouge">toArray</code>方法中没有传递任何参数的话返回的是<code class="language-plaintext highlighter-rouge">Object</code>类型数组。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="o">[]</span> <span class="n">s</span><span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">[]{</span>
+    <span class="s">"dog"</span><span class="o">,</span> <span class="s">"lazy"</span><span class="o">,</span> <span class="s">"a"</span><span class="o">,</span> <span class="s">"over"</span><span class="o">,</span> <span class="s">"jumps"</span><span class="o">,</span> <span class="s">"fox"</span><span class="o">,</span> <span class="s">"brown"</span><span class="o">,</span> <span class="s">"quick"</span><span class="o">,</span> <span class="s">"A"</span>
+<span class="o">};</span>
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>
+<span class="nc">Collections</span><span class="o">.</span><span class="na">reverse</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+<span class="n">s</span><span class="o">=</span><span class="n">list</span><span class="o">.</span><span class="na">toArray</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span><span class="c1">//没有指定类型的话会报错</span>
+
+<span class="cm">/*
+由于JVM优化，new String[0]作为Collection.toArray()方法的参数现在使用更好，new String[0]就是起一个模板的作用，指定了返回数组的类型，0是为了节省空间，因为它只是为了说明返回的类型。
+*/</span>
+</code></pre></div></div>
+
+<h4 id="加所有">加所有</h4>
+
+<ul>
+  <li>addAll 把另一个容器所有对象都加进来</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"ArrayList heros:\t"</span> <span class="o">+</span> <span class="n">heros</span><span class="o">);</span>
+		 
+		<span class="c1">//把另一个容器里所有的元素，都加入到该容器里来</span>
+		<span class="nc">ArrayList</span> <span class="n">anotherHeros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+		<span class="n">anotherHeros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero a"</span><span class="o">));</span>
+		<span class="n">anotherHeros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero b"</span><span class="o">));</span>
+		<span class="n">anotherHeros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero c"</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"anotherHeros heros:\t"</span> <span class="o">+</span> <span class="n">anotherHeros</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">anotherHeros</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"把另一个ArrayList的元素都加入到当前ArrayList:"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"ArrayList heros:\t"</span> <span class="o">+</span> <span class="n">heros</span><span class="o">);</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2461.png" alt="" /></p>
+
+<h4 id="清空">清空</h4>
+
+<ul>
+  <li>clear 清空一个ArrayList</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ArrayList</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+
+		<span class="c1">// 初始化5个对象</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"ArrayList heros:\t"</span> <span class="o">+</span> <span class="n">heros</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"使用clear清空"</span><span class="o">);</span>
+		<span class="n">heros</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"ArrayList heros:\t"</span> <span class="o">+</span> <span class="n">heros</span><span class="o">);</span>
+		 
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2462.png" alt="" /></p>
+
+<h3 id="list接口">List接口</h3>
+
+<ul>
+  <li>ArrayList实现了接口List</li>
+  <li>常见的写法会把引用声明为接口List类型</li>
+  <li>注意：是java.util.List,而不是java.awt.List</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="c1">//ArrayList实现了接口List</span>
+    	
+    	<span class="c1">//常见的写法会把引用声明为接口List类型</span>
+    	<span class="c1">//注意：是java.util.List,而不是java.awt.List</span>
+    	<span class="c1">//接口引用指向子类对象（多态）</span>
+    	
+        <span class="nc">List</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+        <span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"盖伦"</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+        
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="api">API</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">"方法摘要 "</span>
+ <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="nc">String</span> <span class="n">item</span><span class="o">)</span> 
+         <span class="s">" 向滚动列表的末尾添加指定的项。 "</span>
+ <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="nc">String</span> <span class="n">item</span><span class="o">,</span> <span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 向滚动列表中索引指示的位置添加指定的项。 "</span>
+ <span class="kt">void</span> <span class="nf">addActionListener</span><span class="o">(</span><span class="nc">ActionListener</span> <span class="n">l</span><span class="o">)</span> 
+          <span class="s">"添加指定的动作侦听器以从此列表接收动作事件。 "</span>
+ <span class="kt">void</span> <span class="nf">addItemListener</span><span class="o">(</span><span class="nc">ItemListener</span> <span class="n">l</span><span class="o">)</span> 
+          <span class="s">"添加指定的项侦听器以接收此列表的项事件。"</span> 
+ <span class="kt">void</span> <span class="nf">addNotify</span><span class="o">()</span> 
+          <span class="s">"创建列表的同位体。"</span>  
+ <span class="kt">void</span> <span class="nf">deselect</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 取消选择指定索引处的项。 "</span>
+ <span class="nc">AccessibleContext</span> <span class="nf">getAccessibleContext</span><span class="o">()</span> 
+         <span class="s">" 获取与此 List 关联的 AccessibleContext。"</span> 
+ <span class="nc">ActionListener</span><span class="o">[]</span> <span class="nf">getActionListeners</span><span class="o">()</span> 
+         <span class="s">" 返回已在此列表上注册的所有动作侦听器的数组。"</span> 
+ <span class="nc">String</span> <span class="nf">getItem</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 获取与指定索引关联的项。"</span> 
+ <span class="kt">int</span> <span class="nf">getItemCount</span><span class="o">()</span> 
+          <span class="s">"获取列表中的项数。 "</span>
+ <span class="nc">ItemListener</span><span class="o">[]</span> <span class="nf">getItemListeners</span><span class="o">()</span> 
+         <span class="s">" 返回已在此列表上注册的所有项侦听器的数组。"</span> 
+ <span class="nc">String</span><span class="o">[]</span> <span class="nf">getItems</span><span class="o">()</span> 
+          <span class="s">"获取列表中的项。"</span> 
+<span class="o">&lt;</span><span class="no">T</span> <span class="kd">extends</span> <span class="nc">EventListener</span><span class="o">&gt;</span> <span class="no">T</span><span class="o">[]</span> 
+ <span class="nf">getListeners</span><span class="o">(</span><span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">listenerType</span><span class="o">)</span> 
+          <span class="s">"返回目前已在此 List 上注册为 FooListener 的所有对象的数组。 "</span>
+ <span class="nc">Dimension</span> <span class="nf">getMinimumSize</span><span class="o">()</span> 
+          <span class="s">"确定此滚动列表的最小大小。"</span> 
+ <span class="nc">Dimension</span> <span class="nf">getMinimumSize</span><span class="o">(</span><span class="kt">int</span> <span class="n">rows</span><span class="o">)</span> 
+         <span class="s">" 获取具有指定行数的列表的最少维数。"</span> 
+ <span class="nc">Dimension</span> <span class="nf">getPreferredSize</span><span class="o">()</span> 
+          <span class="s">"获取此滚动列表的首选大小。"</span> 
+ <span class="nc">Dimension</span> <span class="nf">getPreferredSize</span><span class="o">(</span><span class="kt">int</span> <span class="n">rows</span><span class="o">)</span> 
+         <span class="s">" 获取具有指定行数的列表的首选维数。 "</span>
+ <span class="kt">int</span> <span class="nf">getRows</span><span class="o">()</span> 
+         <span class="s">" 获取此列表中的可视行数。 "</span>
+ <span class="kt">int</span> <span class="nf">getSelectedIndex</span><span class="o">()</span> 
+         <span class="s">" 获取列表中选中项的索引。"</span> 
+ <span class="kt">int</span><span class="o">[]</span> <span class="nf">getSelectedIndexes</span><span class="o">()</span> 
+         <span class="s">" 获取列表中选中的索引。"</span> 
+ <span class="nc">String</span> <span class="nf">getSelectedItem</span><span class="o">()</span> 
+         <span class="s">" 获取此滚动列表中选中的项。 "</span>
+ <span class="nc">String</span><span class="o">[]</span> <span class="nf">getSelectedItems</span><span class="o">()</span> 
+         <span class="s">" 获取此滚动列表中选中的项。"</span> 
+ <span class="nc">Object</span><span class="o">[]</span> <span class="nf">getSelectedObjects</span><span class="o">()</span> 
+        <span class="s">"  获取对象数组中此滚动列表的选中项。 "</span>
+ <span class="kt">int</span> <span class="nf">getVisibleIndex</span><span class="o">()</span> 
+         <span class="s">" 获取上次由 makeVisible 方法使其可视的项的索引。 "</span>
+ <span class="kt">boolean</span> <span class="nf">isIndexSelected</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 确定是否已选中此滚动列表中的指定项。"</span> 
+ <span class="kt">boolean</span> <span class="nf">isMultipleMode</span><span class="o">()</span> 
+          <span class="s">"确定此列表是否允许进行多项选择。"</span>  
+ <span class="kt">void</span> <span class="nf">makeVisible</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 使指定索引处的项可视。"</span> 
+<span class="kd">protected</span>  <span class="nc">String</span> <span class="nf">paramString</span><span class="o">()</span> 
+          <span class="s">"返回表示此滚动列表状态的参数字符串。"</span>  
+<span class="kd">protected</span>  <span class="kt">void</span> <span class="nf">processActionEvent</span><span class="o">(</span><span class="nc">ActionEvent</span> <span class="n">e</span><span class="o">)</span> 
+         <span class="s">" 处理发生在此列表上的动作事件，方法是将这些事件指派给所有已注册的 ActionListener 对象。"</span> 
+<span class="kd">protected</span>  <span class="kt">void</span> <span class="nf">processEvent</span><span class="o">(</span><span class="nc">AWTEvent</span> <span class="n">e</span><span class="o">)</span> 
+         <span class="s">" 此滚动列表的进程事件。"</span> 
+<span class="kd">protected</span>  <span class="kt">void</span> <span class="nf">processItemEvent</span><span class="o">(</span><span class="nc">ItemEvent</span> <span class="n">e</span><span class="o">)</span> 
+          <span class="s">"处理发生在此列表上的项事件，方法是将这些事件指派给所有已注册的 ItemListener 对象。"</span> 
+ <span class="kt">void</span> <span class="nf">remove</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">)</span> 
+          <span class="s">"从此滚动列表中移除指定位置处的项。"</span> 
+ <span class="kt">void</span> <span class="nf">remove</span><span class="o">(</span><span class="nc">String</span> <span class="n">item</span><span class="o">)</span> 
+          <span class="s">"从列表中移除项的第一次出现。"</span> 
+ <span class="kt">void</span> <span class="nf">removeActionListener</span><span class="o">(</span><span class="nc">ActionListener</span> <span class="n">l</span><span class="o">)</span> 
+          <span class="s">"移除指定的动作侦听器，以便不再从此列表接收动作事件。"</span> 
+ <span class="kt">void</span> <span class="nf">removeAll</span><span class="o">()</span> 
+         <span class="s">" 从此列表中移除所有项。 "</span>
+ <span class="kt">void</span> <span class="nf">removeItemListener</span><span class="o">(</span><span class="nc">ItemListener</span> <span class="n">l</span><span class="o">)</span> 
+         <span class="s">" 移除指定的项侦听器，以便不再从此列表接收项事件。 "</span>
+ <span class="kt">void</span> <span class="nf">removeNotify</span><span class="o">()</span> 
+          <span class="s">"移除此列表的同位体。"</span> 
+ <span class="kt">void</span> <span class="nf">replaceItem</span><span class="o">(</span><span class="nc">String</span> <span class="n">newValue</span><span class="o">,</span> <span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 使用新字符串替换滚动列表中指定索引处的项。 "</span>
+ <span class="kt">void</span> <span class="nf">select</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 选择滚动列表中指定索引处的项。"</span> 
+ <span class="kt">void</span> <span class="nf">setMultipleMode</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">b</span><span class="o">)</span> 
+         <span class="s">" 设置确定此列表是否允许进行多项选择的标志。"</span> 
+</code></pre></div></div>
+
+<h3 id="泛型">泛型</h3>
+
+<ul>
+  <li>不指定泛型的容器，可以存放任何类型的元素</li>
+  <li>指定了泛型的容器，只能存放指定类型的元素以及其子类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">property</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Item</span> <span class="o">{</span>
+	<span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+	<span class="kt">int</span> <span class="n">price</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="nf">Item</span><span class="o">(){</span>
+		
+	<span class="o">}</span>
+	
+	<span class="c1">//提供一个初始化name的构造方法</span>
+	<span class="kd">public</span> <span class="nf">Item</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">effect</span><span class="o">(){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"物品使用后，可以有效果"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">property.Item</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">charactor.APHero</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="c1">//对于不使用泛型的容器，可以往里面放英雄，也可以往里面放物品</span>
+        <span class="nc">List</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+         
+        <span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"盖伦"</span><span class="o">));</span>
+         
+        <span class="c1">//本来用于存放英雄的容器，现在也可以存放物品了</span>
+        <span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Item</span><span class="o">(</span><span class="s">"冰杖"</span><span class="o">));</span>
+         
+        <span class="c1">//对象转型会出现问题</span>
+        <span class="nc">Hero</span> <span class="n">h1</span><span class="o">=</span>  <span class="o">(</span><span class="nc">Hero</span><span class="o">)</span> <span class="n">heros</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+        <span class="c1">//尤其是在容器里放的对象太多的时候，就记不清楚哪个位置放的是哪种类型的对象了</span>
+        <span class="nc">Hero</span> <span class="n">h2</span><span class="o">=</span>  <span class="o">(</span><span class="nc">Hero</span><span class="o">)</span> <span class="n">heros</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+         
+        <span class="c1">//引入泛型Generic</span>
+        <span class="c1">//声明容器的时候，就指定了这种容器，只能放Hero，放其他的就会出错</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">genericheros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+        <span class="n">genericheros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"盖伦"</span><span class="o">));</span>
+        <span class="c1">//如果不是Hero类型，根本就放不进去</span>
+        <span class="c1">//genericheros.add(new Item("冰杖"));</span>
+         
+        <span class="c1">//除此之外，还能存放Hero的子类</span>
+        <span class="n">genericheros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">APHero</span><span class="o">());</span>
+        
+        <span class="c1">//并且在取出数据的时候，不需要再进行转型了，因为里面肯定是放的Hero或者其子类</span>
+        <span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="n">genericheros</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+        
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="遍历">遍历</h3>
+
+<h4 id="for">for</h4>
+
+<ul>
+  <li>通过前面的学习，知道了可以用size()和get()分别得到大小，和获取指定位置的元素，结合for循环就可以遍历出ArrayList的内容</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Iterator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+
+		<span class="c1">// 放5个Hero进入容器</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero name "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+
+		<span class="c1">// 第一种遍历 for循环</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"--------for 循环-------"</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">heros</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="n">heros</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">);</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2469.png" alt="" /></p>
+
+<h4 id="迭代器">迭代器</h4>
+
+<ul>
+  <li>使用迭代器Iterator遍历集合中的元素</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Iterator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+    	
+    	<span class="c1">//放5个Hero进入容器</span>
+    	<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero name "</span> <span class="o">+</span><span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+    	
+    	<span class="c1">//第二种遍历，使用迭代器</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"--------使用while的iterator-------"</span><span class="o">);</span>
+    	<span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">it</span><span class="o">=</span> <span class="n">heros</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span>
+    	<span class="c1">//从最开始的位置判断"下一个"位置是否有数据</span>
+    	<span class="c1">//如果有就通过next取出来，并且把指针向下移动</span>
+    	<span class="c1">//直到"下一个"位置没有数据</span>
+    	<span class="k">while</span><span class="o">(</span><span class="n">it</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+    		<span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+    		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">);</span>
+    	<span class="o">}</span>
+    	<span class="c1">//迭代器的for写法</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"--------使用for的iterator-------"</span><span class="o">);</span>
+    	<span class="k">for</span> <span class="o">(</span><span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">heros</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span> <span class="n">iterator</span><span class="o">.</span><span class="na">hasNext</span><span class="o">();)</span> <span class="o">{</span>
+			<span class="nc">Hero</span> <span class="n">hero</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Hero</span><span class="o">)</span> <span class="n">iterator</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">hero</span><span class="o">);</span>
+		<span class="o">}</span>
+    	
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/806.png" alt="" /></p>
+
+<ul>
+  <li><strong>迭代器的注意点</strong>：用for循环遍历集合，对集合中满足条件的元素进行remove操作报错：ConcurrentModificationException，所以，在遍历集合进行增、删操作时，要使用迭代器的方式</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">list</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">obj</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;();</span>
+        <span class="n">obj</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"a"</span><span class="o">);</span>
+        <span class="n">obj</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"b"</span><span class="o">);</span>
+        <span class="n">obj</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"c"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"移除前："</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+        <span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">it</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">obj</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++){</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="nc">Object</span> <span class="n">name</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+            <span class="k">if</span><span class="o">(</span><span class="s">"a"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">name</span><span class="o">)</span> <span class="o">||</span> <span class="s">"b"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">name</span><span class="o">)){</span>
+                <span class="n">it</span><span class="o">.</span><span class="na">remove</span><span class="o">();</span>
+                <span class="n">i</span><span class="o">--;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"移除后： "</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+         
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">set</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.util.HashSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Iterator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">obj</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;();</span>
+        <span class="n">obj</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"a"</span><span class="o">);</span>
+        <span class="n">obj</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"b"</span><span class="o">);</span>
+        <span class="n">obj</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"c"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"移除前："</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+        <span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">it</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">obj</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++){</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="nc">Object</span> <span class="n">name</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+            <span class="k">if</span><span class="o">(</span><span class="s">"a"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">name</span><span class="o">)</span> <span class="o">||</span> <span class="s">"b"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">name</span><span class="o">)){</span>
+                <span class="n">it</span><span class="o">.</span><span class="na">remove</span><span class="o">();</span>
+                <span class="n">i</span><span class="o">--;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"移除后： "</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+         
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="for-each">for-each</h4>
+
+<ul>
+  <li>使用增强型for循环可以非常方便的遍历ArrayList中的元素，这是很多开发人员的首选。</li>
+  <li>不过增强型for循环也有不足：
+无法用来进行ArrayList的初始化
+无法得知当前是第几个元素了，当需要只打印单数元素的时候，就做不到了。 必须再自定下标变量。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Iterator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+
+		<span class="c1">// 放5个Hero进入容器</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero name "</span> <span class="o">+</span> <span class="n">i</span><span class="o">));</span>
+		<span class="o">}</span>
+
+		<span class="c1">// 第三种，增强型for循环</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"--------增强型for循环-------"</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">Hero</span> <span class="n">h</span> <span class="o">:</span> <span class="n">heros</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">);</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2470.png" alt="" /></p>
+
+<h2 id="linkedlist">LinkedList</h2>
+
+<ul>
+  <li>序列分先进先出FIFO,先进后出FILO</li>
+  <li>FIFO在Java中又叫Queue 队列</li>
+  <li>FILO在Java中又叫Stack 栈</li>
+</ul>
+
+<h3 id="双向链表">双向链表</h3>
+
+<ul>
+  <li>除了实现了List接口外，LinkedList还实现了双向链表结构Deque，可以很方便的在头尾插入删除数据</li>
+  <li>什么是链表结构: 与数组结构相比较，数组结构，就好像是电影院，每个位置都有标示，每个位置之间的间隔都是一样的。 而链表就相当于佛珠，每个珠子，只连接前一个和后一个，不用关心除此之外的其他佛珠在哪里。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.LinkedList</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	
+    	<span class="c1">//LinkedList是一个双向链表结构的list</span>
+    	<span class="nc">LinkedList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">ll</span> <span class="o">=</span><span class="k">new</span> <span class="nc">LinkedList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+    	
+    	<span class="c1">//所以可以很方便的在头部和尾部插入数据</span>
+    	<span class="c1">//在最后插入新的英雄</span>
+    	<span class="n">ll</span><span class="o">.</span><span class="na">addLast</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero1"</span><span class="o">));</span>
+    	<span class="n">ll</span><span class="o">.</span><span class="na">addLast</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero2"</span><span class="o">));</span>
+    	<span class="n">ll</span><span class="o">.</span><span class="na">addLast</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero3"</span><span class="o">));</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">);</span>
+    	
+    	<span class="c1">//在最前面插入新的英雄</span>
+    	<span class="n">ll</span><span class="o">.</span><span class="na">addFirst</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"heroX"</span><span class="o">));</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">);</span>
+    	
+    	<span class="c1">//查看最前面的英雄</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">.</span><span class="na">getFirst</span><span class="o">());</span>
+    	<span class="c1">//查看最后面的英雄</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">.</span><span class="na">getLast</span><span class="o">());</span>
+    	
+    	<span class="c1">//查看不会导致英雄被删除</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">);</span>
+    	<span class="c1">//取出最前面的英雄</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">.</span><span class="na">removeFirst</span><span class="o">());</span>
+    	
+    	<span class="c1">//取出最后面的英雄</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">.</span><span class="na">removeLast</span><span class="o">());</span>
+    	
+    	<span class="c1">//取出会导致英雄被删除</span>
+    	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ll</span><span class="o">);</span>
+    	
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/809.png" alt="" /></p>
+
+<h3 id="队列">队列</h3>
+
+<ul>
+  <li>LinkedList 除了实现了List和Deque外，还实现了Queue接口(队列)。</li>
+  <li>Queue是先进先出队列 FIFO，常用方法：offer 在最后添加元素，poll 取出第一个元素，peek 查看第一个元素</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.util.LinkedList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Queue</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//和ArrayList一样，LinkedList也实现了List接口</span>
+        <span class="nc">List</span> <span class="n">ll</span> <span class="o">=</span><span class="k">new</span> <span class="nc">LinkedList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+         
+        <span class="c1">//所不同的是LinkedList还实现了Deque，进而又实现了Queue这个接口</span>
+        <span class="c1">//Queue代表FIFO 先进先出的队列</span>
+        <span class="nc">Queue</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">q</span><span class="o">=</span> <span class="k">new</span> <span class="nc">LinkedList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+         
+        <span class="c1">//加在队列的最后面</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"初始化队列：\t"</span><span class="o">);</span>
+        <span class="n">q</span><span class="o">.</span><span class="na">offer</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"Hero1"</span><span class="o">));</span>
+        <span class="n">q</span><span class="o">.</span><span class="na">offer</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"Hero2"</span><span class="o">));</span>
+        <span class="n">q</span><span class="o">.</span><span class="na">offer</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"Hero3"</span><span class="o">));</span>
+        <span class="n">q</span><span class="o">.</span><span class="na">offer</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"Hero4"</span><span class="o">));</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">q</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"把第一个元素取poll()出来:\t"</span><span class="o">);</span>
+        <span class="c1">//取出第一个Hero，FIFO 先进先出</span>
+        <span class="nc">Hero</span> <span class="n">h</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="na">poll</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"取出第一个元素之后的队列:\t"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">q</span><span class="o">);</span>
+         
+        <span class="c1">//把第一个拿出来看一看，但是不取出来</span>
+        <span class="n">h</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="na">peek</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"查看peek()第一个元素:\t"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"查看并不会导致第一个元素被取出来:\t"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">q</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/810.png" alt="" /></p>
+
+<h2 id="二叉树">二叉树</h2>
+
+<ul>
+  <li>二叉树由各种节点组成</li>
+  <li>二叉树特点：
+每个节点都可以有左子节点，右子节点
+每一个节点都有一个值</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Node</span> <span class="o">{</span>
+	<span class="c1">// 左子节点</span>
+	<span class="kd">public</span> <span class="nc">Node</span> <span class="n">leftNode</span><span class="o">;</span>
+	<span class="c1">// 右子节点</span>
+	<span class="kd">public</span> <span class="nc">Node</span> <span class="n">rightNode</span><span class="o">;</span>
+	<span class="c1">// 值</span>
+	<span class="kd">public</span> <span class="nc">Object</span> <span class="n">value</span><span class="o">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/1008.png" alt="" /></p>
+
+<h3 id="插入">插入</h3>
+
+<ul>
+  <li>假设通过二叉树对如下10个随机数进行排序</li>
+  <li>67,7,30,73,10,0,78,81,10,74</li>
+  <li>排序的第一个步骤是把数据插入到该二叉树中</li>
+  <li>插入基本逻辑是，小、相同的放左边，大的放右边</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Node</span> <span class="o">{</span>
+    <span class="c1">// 左子节点</span>
+    <span class="kd">public</span> <span class="nc">Node</span> <span class="n">leftNode</span><span class="o">;</span>
+    <span class="c1">// 右子节点</span>
+    <span class="kd">public</span> <span class="nc">Node</span> <span class="n">rightNode</span><span class="o">;</span>
+ 
+    <span class="c1">// 值</span>
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="n">value</span><span class="o">;</span>
+ 
+    <span class="c1">// 插入 数据</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="nc">Object</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 如果当前节点没有值，就把数据放在当前节点上</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">value</span><span class="o">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">v</span><span class="o">;</span>
+ 
+        <span class="c1">// 如果当前节点有值，就进行判断，新增的值与当前值的大小关系</span>
+        <span class="k">else</span> <span class="o">{</span>
+            <span class="c1">// 新增的值，比当前值小或者相同</span>
+        	
+            <span class="k">if</span> <span class="o">((</span><span class="nc">Integer</span><span class="o">)</span> <span class="n">v</span> <span class="o">-((</span><span class="nc">Integer</span><span class="o">)</span><span class="n">value</span><span class="o">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">leftNode</span><span class="o">)</span>
+                    <span class="n">leftNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Node</span><span class="o">();</span>
+                <span class="n">leftNode</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">v</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="c1">// 新增的值，比当前值大</span>
+            <span class="k">else</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">rightNode</span><span class="o">)</span>
+                    <span class="n">rightNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Node</span><span class="o">();</span>
+                <span class="n">rightNode</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">v</span><span class="o">);</span>
+            <span class="o">}</span>
+ 
+        <span class="o">}</span>
+ 
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+ 
+        <span class="kt">int</span> <span class="n">randoms</span><span class="o">[]</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[]</span> <span class="o">{</span> <span class="mi">67</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">30</span><span class="o">,</span> <span class="mi">73</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">78</span><span class="o">,</span> <span class="mi">81</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">74</span> <span class="o">};</span>
+ 
+        <span class="nc">Node</span> <span class="n">roots</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Node</span><span class="o">();</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">number</span> <span class="o">:</span> <span class="n">randoms</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">roots</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">number</span><span class="o">);</span>
+        <span class="o">}</span>
+ 
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/1009.png" alt="" /></p>
+
+<h3 id="遍历-1">遍历</h3>
+
+<ul>
+  <li>二叉树的遍历分左序，中序，右序</li>
+  <li>左序即： 中间的数遍历后放在左边</li>
+  <li>中序即： 中间的数遍历后放在中间</li>
+  <li>右序即： 中间的数遍历后放在右边</li>
+  <li>我们希望遍历后的结果是从小到大的，所以应该采用中序遍历</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Node</span> <span class="o">{</span>
+    <span class="c1">// 左子节点</span>
+    <span class="kd">public</span> <span class="nc">Node</span> <span class="n">leftNode</span><span class="o">;</span>
+    <span class="c1">// 右子节点</span>
+    <span class="kd">public</span> <span class="nc">Node</span> <span class="n">rightNode</span><span class="o">;</span>
+ 
+    <span class="c1">// 值</span>
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="n">value</span><span class="o">;</span>
+ 
+    <span class="c1">// 插入 数据</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="nc">Object</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 如果当前节点没有值，就把数据放在当前节点上</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">value</span><span class="o">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">v</span><span class="o">;</span>
+ 
+        <span class="c1">// 如果当前节点有值，就进行判断，新增的值与当前值的大小关系</span>
+        <span class="k">else</span> <span class="o">{</span>
+            <span class="c1">// 新增的值，比当前值小或者相同</span>
+        	
+            <span class="k">if</span> <span class="o">((</span><span class="nc">Integer</span><span class="o">)</span> <span class="n">v</span> <span class="o">-((</span><span class="nc">Integer</span><span class="o">)</span><span class="n">value</span><span class="o">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">leftNode</span><span class="o">)</span>
+                    <span class="n">leftNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Node</span><span class="o">();</span>
+                <span class="n">leftNode</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">v</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="c1">// 新增的值，比当前值大</span>
+            <span class="k">else</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">rightNode</span><span class="o">)</span>
+                    <span class="n">rightNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Node</span><span class="o">();</span>
+                <span class="n">rightNode</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">v</span><span class="o">);</span>
+            <span class="o">}</span>
+ 
+        <span class="o">}</span>
+ 
+    <span class="o">}</span>
+ 
+ <span class="c1">// 中序遍历所有的节点</span>
+    <span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="nf">values</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">values</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+ 
+        <span class="c1">// 左节点的遍历结果</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">leftNode</span><span class="o">)</span>
+            <span class="n">values</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">leftNode</span><span class="o">.</span><span class="na">values</span><span class="o">());</span>
+ 
+        <span class="c1">// 当前节点</span>
+        <span class="n">values</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+ 
+        <span class="c1">// 右节点的遍历结果</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">rightNode</span><span class="o">)</span>
+ 
+            <span class="n">values</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">rightNode</span><span class="o">.</span><span class="na">values</span><span class="o">());</span>
+ 
+        <span class="k">return</span> <span class="n">values</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+ 
+        <span class="kt">int</span> <span class="n">randoms</span><span class="o">[]</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[]</span> <span class="o">{</span> <span class="mi">67</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">30</span><span class="o">,</span> <span class="mi">73</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">78</span><span class="o">,</span> <span class="mi">81</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">74</span> <span class="o">};</span>
+ 
+        <span class="nc">Node</span> <span class="n">roots</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Node</span><span class="o">();</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">number</span> <span class="o">:</span> <span class="n">randoms</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">roots</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">number</span><span class="o">);</span>
+        <span class="o">}</span>
+ 
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">roots</span><span class="o">.</span><span class="na">values</span><span class="o">());</span>
+ 
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/1010.png" alt="" /></p>
+
+<h2 id="hashmap">HashMap</h2>
+
+<ul>
+  <li>HashMap储存数据的方式是—— 键值对</li>
+  <li>对于HashMap而言，key是唯一的，不可以重复的。</li>
+  <li>所以，以相同的key 把不同的value插入到 Map中会导致旧元素被覆盖，只留下最后插入的元素。</li>
+  <li>不过，同一个对象可以作为值插入到map中，只要对应的key不一样</li>
+</ul>
+
+<p><a href="https://baiweijieku.github.io/2019/03/10/java%E5%9F%BA%E7%A1%80%E5%A4%8D%E4%B9%A0%E5%85%AB-%E9%9B%86%E5%90%88%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">面试题</a></p>
+
+<h2 id="hashset">HashSet</h2>
+
+<ul>
+  <li>Set中的元素，不能重复</li>
+  <li>Set中的元素，没有顺序。严格的说，是没有按照元素的插入顺序排列</li>
+  <li>HashSet的具体顺序，既不是按照插入顺序，也不是按照hashcode的顺序。</li>
+  <li>换句话说，同样是插入0-9到HashSet中， 在JVM的不同版本中，看到的顺序都是不一样的。</li>
+  <li>Set不提供get()来获取指定位置的元素 ,所以遍历需要用到迭代器，或者增强型for循环</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.util.HashSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Iterator</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+    	
+    	<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+    	
+    	<span class="c1">//Set不提供get方法来获取指定位置的元素</span>
+    	<span class="c1">//numbers.get(0)</span>
+    	
+    	<span class="c1">//遍历Set可以采用迭代器iterator</span>
+    	<span class="k">for</span> <span class="o">(</span><span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">numbers</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span> <span class="n">iterator</span><span class="o">.</span><span class="na">hasNext</span><span class="o">();)</span> <span class="o">{</span>
+			<span class="nc">Integer</span> <span class="n">i</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Integer</span><span class="o">)</span> <span class="n">iterator</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+    	
+    	<span class="c1">//或者采用增强型for循环</span>
+    	<span class="k">for</span> <span class="o">(</span><span class="nc">Integer</span> <span class="n">i</span> <span class="o">:</span> <span class="n">numbers</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+    	
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>HashSet自身并没有独立的实现，而是在里面封装了一个Map</li>
+  <li>HashSet是作为Map的key而存在的</li>
+  <li>而value是一个命名为PRESENT的static的Object对象，因为是一个类属性，所以只会有一个。</li>
+  <li><code class="language-plaintext highlighter-rouge">private static final Object PRESENT = new Object();</code></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.AbstractSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Iterator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HashSet</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span>
+    <span class="kd">extends</span> <span class="nc">AbstractSet</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span>
+    <span class="kd">implements</span> <span class="nc">Set</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;,</span> <span class="nc">Cloneable</span><span class="o">,</span> <span class="n">java</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">Serializable</span>
+<span class="o">{</span>
+    <span class="c1">//HashSet里封装了一个HashMap</span>
+	<span class="kd">private</span>  <span class="nc">HashMap</span><span class="o">&lt;</span><span class="no">E</span><span class="o">,</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Object</span> <span class="no">PRESENT</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">();</span>
+
+    <span class="c1">//HashSet的构造方法初始化这个HashMap</span>
+    <span class="kd">public</span> <span class="nf">HashSet</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="no">E</span><span class="o">,</span><span class="nc">Object</span><span class="o">&gt;();</span>
+    <span class="o">}</span>
+
+    <span class="c1">//向HashSet中增加元素，其实就是把该元素作为key，增加到Map中</span>
+    <span class="c1">//value是PRESENT，静态，final的对象，所有的HashSet都使用这么同一个对象</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="no">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">e</span><span class="o">,</span> <span class="no">PRESENT</span><span class="o">)==</span><span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">//HashSet的size就是map的size</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">size</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="c1">//清空Set就是清空Map</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">clear</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="n">map</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//迭代Set,就是把Map的键拿出来迭代</span>
+    <span class="kd">public</span> <span class="nc">Iterator</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="nf">iterator</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">keySet</span><span class="o">().</span><span class="na">iterator</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="collection">Collection</h2>
+
+<ul>
+  <li>Collection是 Set List Queue和 Deque的接口</li>
+  <li>Collection和Map之间没有关系，Collection是放一个一个对象的，Map 是放键值对的</li>
+  <li>Deque 继承 Queue,间接得继承了 Collection</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/830.png" alt="" /></p>
+
+<h2 id="collections">Collections</h2>
+
+<h3 id="反转">反转</h3>
+
+<ul>
+  <li>reverse 使List中的数据发生翻转</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//初始化集合numbers</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">reverse</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"翻转后集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2498.png" alt="" /></p>
+
+<h3 id="混淆">混淆</h3>
+
+<ul>
+  <li>shuffle 混淆List中数据的顺序</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//初始化集合numbers</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">shuffle</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"混淆后集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2501.png" alt="" /></p>
+
+<h3 id="排序">排序</h3>
+
+<ul>
+  <li>sort 对List中的数据进行排序</li>
+  <li>不论是Collections.sort方法或者是Arrays.sort方法，底层实现都是TimSort实现的，这是jdk1.7新增的，以前是归并排序。TimSort算法就是找到已经排好序数据的子序列，然后对剩余部分排序，然后合并起来</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//初始化集合numbers</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">shuffle</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"混淆后集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"排序后集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2499.png" alt="" /></p>
+
+<h3 id="交换">交换</h3>
+
+<ul>
+  <li>swap 交换两个数据的位置</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//初始化集合numbers</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">swap</span><span class="o">(</span><span class="n">numbers</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="mi">5</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"交换0和5下标的数据后，集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2500.png" alt="" /></p>
+
+<h3 id="滚动">滚动</h3>
+
+<ul>
+  <li>rotate 把List中的数据，向右滚动指定单位的长度</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//初始化集合numbers</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">rotate</span><span class="o">(</span><span class="n">numbers</span><span class="o">,</span><span class="mi">2</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"把集合向右滚动2个单位，标的数据后，集合中的数据:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2497.png" alt="" /></p>
+
+<h3 id="查找替换">查找替换</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//对List进行二分查找，返回索引，注意List必须是有序的</span>
+<span class="kt">int</span> <span class="nf">binarySearch</span><span class="o">(</span><span class="nc">List</span> <span class="n">list</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">key</span><span class="o">)</span>
+    
+<span class="c1">//根据元素的自然顺序，返回最大的元素。 类比int min(Collection coll)</span>
+<span class="kt">int</span> <span class="nf">max</span><span class="o">(</span><span class="nc">Collection</span> <span class="n">coll</span><span class="o">)</span>
+    
+<span class="c1">//根据定制排序，返回最大元素，排序规则由Comparatator类控制。类比int min(Collection coll, Comparator c)</span>
+<span class="kt">int</span> <span class="nf">max</span><span class="o">(</span><span class="nc">Collection</span> <span class="n">coll</span><span class="o">,</span> <span class="nc">Comparator</span> <span class="n">c</span><span class="o">)</span>
+    
+<span class="c1">//用指定的元素代替指定list中的所有元素。</span>
+<span class="kt">void</span> <span class="nf">fill</span><span class="o">(</span><span class="nc">List</span> <span class="n">list</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">obj</span><span class="o">)</span>
+    
+<span class="c1">//统计元素出现次数</span>
+<span class="kt">int</span> <span class="nf">frequency</span><span class="o">(</span><span class="nc">Collection</span> <span class="n">c</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">o</span><span class="o">)</span>
+    
+<span class="c1">//统计target在list中第一次出现的索引，找不到则返回-1，类比int lastIndexOfSubList(List source, list target).</span>
+<span class="kt">int</span> <span class="nf">indexOfSubList</span><span class="o">(</span><span class="nc">List</span> <span class="n">list</span><span class="o">,</span> <span class="nc">List</span> <span class="n">target</span><span class="o">)</span>
+    
+<span class="c1">//用新元素替换旧元素</span>
+<span class="kt">boolean</span> <span class="nf">replaceAll</span><span class="o">(</span><span class="nc">List</span> <span class="n">list</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">oldVal</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">newVal</span><span class="o">)</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">arrayList</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">1</span><span class="o">);</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">5</span><span class="o">);</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">7</span><span class="o">);</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">9</span><span class="o">);</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">7</span><span class="o">);</span>
+
+<span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">arrayList2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+<span class="n">arrayList2</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">3</span><span class="o">);</span>
+<span class="n">arrayList2</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">5</span><span class="o">);</span>
+<span class="n">arrayList2</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">7</span><span class="o">);</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"原始数组:"</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">arrayList</span><span class="o">);</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Collections.max(arrayList):"</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">arrayList</span><span class="o">));</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Collections.min(arrayList):"</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">arrayList</span><span class="o">));</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Collections.replaceAll(arrayList, 3, -3):"</span><span class="o">);</span>
+<span class="nc">Collections</span><span class="o">.</span><span class="na">replaceAll</span><span class="o">(</span><span class="n">arrayList</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="o">-</span><span class="mi">3</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">arrayList</span><span class="o">);</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Collections.frequency(arrayList, -3):"</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">frequency</span><span class="o">(</span><span class="n">arrayList</span><span class="o">,</span> <span class="o">-</span><span class="mi">3</span><span class="o">));</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Collections.indexOfSubList(arrayList, arrayList2):"</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">indexOfSubList</span><span class="o">(</span><span class="n">arrayList</span><span class="o">,</span> <span class="n">arrayList2</span><span class="o">));</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Collections.binarySearch(arrayList, 7):"</span><span class="o">);</span>
+<span class="c1">// 对List进行二分查找，返回索引，List必须是有序的</span>
+<span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">arrayList</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">binarySearch</span><span class="o">(</span><span class="n">arrayList</span><span class="o">,</span> <span class="mi">7</span><span class="o">));</span>
+</code></pre></div></div>
+
+<h3 id="只读">只读</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//返回一个空的、不可变的集合对象，此处的集合既可以是List，也可以是Set，还可以是Map。</span>
+<span class="n">emptyXxx</span><span class="o">()</span>
+   
+<span class="c1">//返回一个只包含指定对象（只有一个或一个元素）的不可变的集合对象，此处的集合可以是：List，Set，Map。</span>
+<span class="n">singletonXxx</span><span class="o">()</span>
+    
+<span class="c1">//返回指定集合对象的不可变视图，此处的集合可以是：List，Set，Map。</span>
+<span class="n">unmodifiableXxx</span><span class="o">()</span>
+    
+<span class="c1">//上面三类方法的参数是原有的集合对象，返回值是该集合的”只读“版本。</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">arrayList</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">1</span><span class="o">);</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">5</span><span class="o">);</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">7</span><span class="o">);</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">9</span><span class="o">);</span>
+        <span class="n">arrayList</span><span class="o">.</span><span class="na">add</span><span class="o">(-</span><span class="mi">7</span><span class="o">);</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">integers1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;&gt;();</span>
+        <span class="n">integers1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        <span class="n">integers1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+        <span class="n">integers1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+        <span class="nc">Map</span> <span class="n">scores</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">();</span>
+        <span class="n">scores</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"语文"</span> <span class="o">,</span> <span class="mi">80</span><span class="o">);</span>
+        <span class="n">scores</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Java"</span> <span class="o">,</span> <span class="mi">82</span><span class="o">);</span>
+
+        <span class="c1">//Collections.emptyXXX();创建一个空的、不可改变的XXX对象</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">emptyList</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span><span class="c1">//[]</span>
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">objects</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">emptySet</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">objects</span><span class="o">);</span><span class="c1">//[]</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">objectObjectMap</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">emptyMap</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">objectObjectMap</span><span class="o">);</span><span class="c1">//{}</span>
+
+        <span class="c1">//Collections.singletonXXX();</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;&gt;</span> <span class="n">arrayLists</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">singletonList</span><span class="o">(</span><span class="n">arrayList</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">arrayLists</span><span class="o">);</span><span class="c1">//[[-1, 3, 3, -5, 7, 4, -9, -7]]</span>
+        <span class="c1">//创建一个只有一个元素，且不可改变的Set对象</span>
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;&gt;</span> <span class="n">singleton</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">singleton</span><span class="o">(</span><span class="n">arrayList</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">singleton</span><span class="o">);</span><span class="c1">//[[-1, 3, 3, -5, 7, 4, -9, -7]]</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">nihao</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">singletonMap</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"nihao"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">nihao</span><span class="o">);</span><span class="c1">//{1=nihao}</span>
+
+        <span class="c1">//unmodifiableXXX();创建普通XXX对象对应的不可变版本</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">integers</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">unmodifiableList</span><span class="o">(</span><span class="n">arrayList</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">integers</span><span class="o">);</span><span class="c1">//[-1, 3, 3, -5, 7, 4, -9, -7]</span>
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">integers2</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">unmodifiableSet</span><span class="o">(</span><span class="n">integers1</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">integers2</span><span class="o">);</span><span class="c1">//[1, 2, 3]</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">objectObjectMap2</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">unmodifiableMap</span><span class="o">(</span><span class="n">scores</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">objectObjectMap2</span><span class="o">);</span><span class="c1">//{Java=82, 语文=80}</span>
+
+        <span class="c1">//添加出现异常：java.lang.UnsupportedOperationException</span>
+<span class="c1">//        list.add(1);</span>
+<span class="c1">//        arrayLists.add(arrayList);</span>
+<span class="c1">//        integers.add(1);</span>
+</code></pre></div></div>
+
+<h3 id="线程安全">线程安全</h3>
+
+<ul>
+  <li>synchronizedList 把非线程安全的List转换为线程安全的List。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//返回指定 collection 支持的同步（线程安全的）collection。</span>
+<span class="n">synchronizedCollection</span><span class="o">(</span><span class="nc">Collection</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span>  <span class="n">c</span><span class="o">)</span> 
+<span class="n">synchronizedList</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">list</span><span class="o">)</span><span class="c1">//返回指定列表支持的同步（线程安全的）List。</span>
+<span class="n">synchronizedMap</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="n">m</span><span class="o">)</span> <span class="c1">//返回由指定映射支持的同步（线程安全的）Map。</span>
+<span class="n">synchronizedSet</span><span class="o">(</span><span class="nc">Set</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">s</span><span class="o">)</span> <span class="c1">//返回指定 set 支持的同步（线程安全的）set。</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"把非线程安全的List转换为线程安全的List"</span><span class="o">);</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">synchronizedNumbers</span> <span class="o">=</span> <span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;)</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">synchronizedList</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="关系区别">关系区别</h2>
+
+<h3 id="顺序">顺序</h3>
+
+<ul>
+  <li>ArrayList: 有顺序</li>
+  <li>HashSet: 无顺序</li>
+  <li>HashSet的具体顺序，既不是按照插入顺序，也不是按照hashcode的顺序。</li>
+  <li>不保证Set的迭代顺序; 确切的说，在不同条件下，元素的顺序都有可能不一样</li>
+</ul>
+
+<h3 id="重复">重复</h3>
+
+<ul>
+  <li>List中的数据可以重复</li>
+  <li>Set中的数据不能够重复</li>
+  <li>重复判断标准是:
+首先看hashcode是否相同
+如果hashcode不同，则认为是不同数据
+如果hashcode相同，再比较equals，如果equals相同，则是相同数据，否则是不同数据</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashSet</span><span class="o">;</span>
+   
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+          
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numberList</span> <span class="o">=</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+        <span class="c1">//List中的数据可以重复</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"----------List----------"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"向List 中插入 9 9"</span><span class="o">);</span>
+        <span class="n">numberList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">9</span><span class="o">);</span>
+        <span class="n">numberList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">9</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"List 中出现两个9:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numberList</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"----------Set----------"</span><span class="o">);</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numberSet</span> <span class="o">=</span><span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"向Set 中插入9 9"</span><span class="o">);</span>
+        <span class="c1">//Set中的数据不能重复</span>
+        <span class="n">numberSet</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">9</span><span class="o">);</span>
+        <span class="n">numberSet</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">9</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Set 中只会保留一个9:"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numberSet</span><span class="o">);</span>
+          
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2513.png" alt="" /></p>
+
+<ul>
+  <li>ArrayList 插入，删除数据慢</li>
+  <li>LinkedList， 插入，删除数据快</li>
+  <li>ArrayList是顺序结构，所以定位很快，指哪找哪。 就像电影院位置一样，有了电影票，一下就找到位置了。</li>
+  <li>LinkedList 是链表结构，就像手里的一串佛珠，要找出第99个佛珠，必须得一个一个的数过去，所以定位慢</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/799.png" alt="" /></p>
+
+<ul>
+  <li>HashMap和Hashtable都实现了Map接口，都是键值对保存数据的方式</li>
+  <li>区别1： 
+HashMap可以存放 null
+Hashtable不能存放null</li>
+  <li>区别2：
+HashMap不是<a href="http://how2j.cn/k/thread/thread-synchronized/355.html#step793">线程安全的类</a>
+Hashtable是线程安全的类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Hashtable</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="c1">//HashMap和Hashtable都实现了Map接口，都是键值对保存数据的方式</span>
+		
+		<span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">hashMap</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;();</span>
+		
+		<span class="c1">//HashMap可以用null作key,作value</span>
+		<span class="n">hashMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="s">"123"</span><span class="o">);</span>
+		<span class="n">hashMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"123"</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+		
+		<span class="nc">Hashtable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">hashtable</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hashtable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;();</span>
+		<span class="c1">//Hashtable不能用null作key，不能用null作value</span>
+		<span class="n">hashtable</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="s">"123"</span><span class="o">);</span>
+		<span class="n">hashtable</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"123"</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>HashSet： 无序</li>
+  <li>LinkedHashSet： 按照插入顺序</li>
+  <li>TreeSet： 从小到大排序</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.util.HashSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.LinkedHashSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.TreeSet</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numberSet1</span> <span class="o">=</span><span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+        <span class="c1">//HashSet中的数据不是按照插入顺序存放</span>
+        <span class="n">numberSet1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">88</span><span class="o">);</span>
+        <span class="n">numberSet1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">8</span><span class="o">);</span>
+        <span class="n">numberSet1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">888</span><span class="o">);</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numberSet1</span><span class="o">);</span>
+         
+        <span class="nc">LinkedHashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numberSet2</span> <span class="o">=</span><span class="k">new</span> <span class="nc">LinkedHashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+        <span class="c1">//LinkedHashSet中的数据是按照插入顺序存放</span>
+        <span class="n">numberSet2</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">88</span><span class="o">);</span>
+        <span class="n">numberSet2</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">8</span><span class="o">);</span>
+        <span class="n">numberSet2</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">888</span><span class="o">);</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numberSet2</span><span class="o">);</span>
+        <span class="nc">TreeSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">numberSet3</span> <span class="o">=</span><span class="k">new</span> <span class="nc">TreeSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+        <span class="c1">//TreeSet 中的数据是进行了排序的</span>
+        <span class="n">numberSet3</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">88</span><span class="o">);</span>
+        <span class="n">numberSet3</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">8</span><span class="o">);</span>
+        <span class="n">numberSet3</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">888</span><span class="o">);</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">numberSet3</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="hashcode">hashCode</h2>
+
+<ul>
+  <li>所有的对象，都有一个对应的hashcode（散列值）
+比如字符串“gareen”对应的是1001 (实际上不是，这里是方便理解，假设的值)
+比如字符串“temoo”对应的是1004
+比如字符串“db”对应的是1008
+比如字符串“annie”对应的也是1008</li>
+  <li>准备一个数组，其长度是2000，并且设定特殊的hashcode算法，使得所有字符串对应的hashcode，都会落在0-1999之间
+要存放名字是”gareen”的英雄，就把该英雄和名称组成一个键值对，存放在数组的1001这个位置上
+要存放名字是”temoo”的英雄，就把该英雄存放在数组的1004这个位置上
+要存放名字是”db”的英雄，就把该英雄存放在数组的1008这个位置上
+要存放名字是”annie”的英雄，然而 “annie”的hashcode 1008对应的位置已经有db英雄了，那么就在这里创建一个链表，接在db英雄后面存放annie</li>
+  <li>比如要查找gareen，首先计算”gareen”的hashcode是1001，根据1001这个下标，到数组中进行定位，（根据数组下标进行定位，是非常快速的） 发现1001这个位置就只有一个英雄，那么该英雄就是gareen.</li>
+  <li>比如要查找annie，首先计算”annie”的hashcode是1008，根据1008这个下标，到数组中进行定位，发现1008这个位置有两个英雄，那么就对两个英雄的名字进行逐一比较(equals)，因为此时需要比较的量就已经少很多了，很快也就可以找出目标英雄</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/819.png" alt="" /></p>
+
+<ul>
+  <li>HashSet的数据是不能重复的，相同数据不能保存在一起，到底如何判断是否是重复的呢？</li>
+  <li>根据<a href="http://how2j.cn/k/collection/collection-hashset/364.html#step825">HashSet和HashMap的关系</a>，我们了解到因为HashSet没有自身的实现，而是里面封装了一个HashMap，所以本质上就是判断HashMap的key是否重复。</li>
+  <li>key是否重复，是由两个步骤判断的：</li>
+  <li>hashcode是否一样
+如果hashcode不一样，就是在不同的坑里，一定是不重复的
+如果hashcode一样，就是在同一个坑里，还需要进行equals比较</li>
+  <li>如果equals一样，则是重复数据
+如果equals不一样，则是不同数据。</li>
+</ul>
+
+<h2 id="比较器">比较器</h2>
+
+<ul>
+  <li>假设Hero有三个属性 name,hp,damage</li>
+  <li>一个集合中放存放10个Hero,通过Collections.sort对这10个进行排序</li>
+  <li>那么到底是hp小的放前面？还是damage小的放前面？Collections.sort也无法确定</li>
+  <li>所以要指定到底按照哪种属性进行排序</li>
+  <li>这里就需要提供一个Comparator给定如何进行两个对象之间的大小比较</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+
+<span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+    
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Comparator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Random</span><span class="o">;</span>
+   
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+    
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Random</span> <span class="n">r</span> <span class="o">=</span><span class="k">new</span> <span class="nc">Random</span><span class="o">();</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+           
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="c1">//通过随机值实例化hero的hp和damage</span>
+            <span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span><span class="o">+</span> <span class="n">i</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">100</span><span class="o">),</span> <span class="n">r</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">100</span><span class="o">)));</span>
+        <span class="o">}</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"初始化后的集合："</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+           
+        <span class="c1">//直接调用sort会出现编译错误，因为Hero有各种属性</span>
+        <span class="c1">//到底按照哪种属性进行比较，Collections也不知道，不确定，所以没法排</span>
+        <span class="c1">//Collections.sort(heros);</span>
+           
+        <span class="c1">//引入Comparator，指定比较的算法</span>
+        <span class="nc">Comparator</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Comparator</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h1</span><span class="o">,</span> <span class="nc">Hero</span> <span class="n">h2</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">//按照hp进行排序</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">h1</span><span class="o">.</span><span class="na">hp</span><span class="o">&gt;=</span><span class="n">h2</span><span class="o">.</span><span class="na">hp</span><span class="o">)</span>
+                    <span class="k">return</span> <span class="mi">1</span><span class="o">;</span>  <span class="c1">//正数表示h1比h2要大</span>
+                <span class="k">else</span>
+                    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">heros</span><span class="o">,</span><span class="n">c</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"按照血量排序后的集合："</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/828.png" alt="" /></p>
+
+<ul>
+  <li>使Hero类实现Comparable接口</li>
+  <li>在类里面提供比较算法,Collections.sort就有足够的信息进行排序了，也无需额外提供比较器Comparator</li>
+  <li>如果返回-1, 就表示当前的更小，否则就是更大</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+   
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="kd">implements</span> <span class="nc">Comparable</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;{</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> 
+    <span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+      
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+      
+    <span class="kd">public</span> <span class="nf">Hero</span><span class="o">(){</span>
+         
+    <span class="o">}</span>
+     
+    <span class="kd">public</span> <span class="nf">Hero</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span><span class="n">name</span><span class="o">;</span>
+ 
+    <span class="o">}</span>
+     
+    <span class="c1">//初始化name,hp,damage的构造方法</span>
+    <span class="kd">public</span> <span class="nf">Hero</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">,</span><span class="kt">float</span> <span class="n">hp</span><span class="o">,</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span><span class="n">name</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="n">hp</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="n">damage</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">anotherHero</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">damage</span><span class="o">&lt;</span><span class="n">anotherHero</span><span class="o">.</span><span class="na">damage</span><span class="o">)</span>
+            <span class="k">return</span> <span class="mi">1</span><span class="o">;</span>  
+        <span class="k">else</span>
+        	<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"Hero [name="</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">", hp="</span> <span class="o">+</span> <span class="n">hp</span> <span class="o">+</span> <span class="s">", damage="</span> <span class="o">+</span> <span class="n">damage</span> <span class="o">+</span> <span class="s">"]\r\n"</span><span class="o">;</span>
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">collection</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Comparator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Random</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCollection</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Random</span> <span class="n">r</span> <span class="o">=</span><span class="k">new</span> <span class="nc">Random</span><span class="o">();</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="c1">//通过随机值实例化hero的hp和damage</span>
+            <span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">Hero</span><span class="o">(</span><span class="s">"hero "</span><span class="o">+</span> <span class="n">i</span><span class="o">,</span> <span class="n">r</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">100</span><span class="o">),</span> <span class="n">r</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">100</span><span class="o">)));</span>
+        <span class="o">}</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"初始化后的集合"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+         
+        <span class="c1">//Hero类实现了接口Comparable，即自带比较信息。</span>
+        <span class="c1">//Collections直接进行排序，无需额外的Comparator</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"按照伤害高低排序后的集合"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">heros</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/829.png" alt="" /></p>
+
+<p>本篇博客内容引用自：http://how2j.cn</p>
+:ET

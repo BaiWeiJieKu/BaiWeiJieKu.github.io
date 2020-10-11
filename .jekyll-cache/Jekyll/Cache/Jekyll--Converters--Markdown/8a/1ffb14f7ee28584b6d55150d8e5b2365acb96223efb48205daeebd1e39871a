@@ -1,0 +1,410 @@
+I"3l<ul id="markdown-toc">
+  <li><a href="#注意点" id="markdown-toc-注意点">注意点</a></li>
+  <li><a href="#入门" id="markdown-toc-入门">入门</a></li>
+  <li><a href="#原理" id="markdown-toc-原理">原理</a>    <ul>
+      <li><a href="#模拟项目" id="markdown-toc-模拟项目">模拟项目</a></li>
+      <li><a href="#新需求" id="markdown-toc-新需求">新需求</a></li>
+      <li><a href="#新需求2" id="markdown-toc-新需求2">新需求2</a></li>
+    </ul>
+  </li>
+  <li><a href="#用策略模式解决" id="markdown-toc-用策略模式解决">用策略模式解决</a>    <ul>
+      <li><a href="#接口" id="markdown-toc-接口">接口</a></li>
+      <li><a href="#实现" id="markdown-toc-实现">实现</a></li>
+    </ul>
+  </li>
+  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
+  <li><a href="#场景" id="markdown-toc-场景">场景</a></li>
+  <li><a href="#定义" id="markdown-toc-定义">定义</a></li>
+  <li><a href="#本质" id="markdown-toc-本质">本质</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a>    <ul>
+      <li><a href="#普通方式" id="markdown-toc-普通方式">普通方式</a></li>
+      <li><a href="#策略接口" id="markdown-toc-策略接口">策略接口</a></li>
+      <li><a href="#算法族" id="markdown-toc-算法族">算法族</a></li>
+      <li><a href="#交互类" id="markdown-toc-交互类">交互类</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+    </ul>
+  </li>
+  <li><a href="#使用场景" id="markdown-toc-使用场景">使用场景</a></li>
+</ul>
+<h3 id="注意点">注意点</h3>
+
+<ul>
+  <li>分析项目中变化部分与不变部分</li>
+  <li>多用组合少用继承，用行为类组合，而不是行为的继承，更有弹性</li>
+  <li>设计模式有没有相应的库直接使用？有些库或框架本身就是某种设计模式设计的</li>
+  <li>学习设计模式最好的方式：在你的设计和以往的工程里寻找何处可以使用它们</li>
+  <li>设计模式的本质目的是使软件工程在维护性、扩展性、变化性、复杂度方面成O(N)</li>
+</ul>
+
+<h3 id="入门">入门</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>在java里IO流的类设计，为什么把BufferedReader设计成：
+new BufferedReader(new FileReader("F:\test.java"))；
+而不是设计成：
+BufferedReader extends FileReader；
+然后 
+new BufferedReader("F:\test.java")；
+...!
+</code></pre></div></div>
+
+<h3 id="原理">原理</h3>
+
+<h4 id="模拟项目">模拟项目</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//从项目"模拟鸭子游戏"开始</span>
+<span class="c1">//从OO的角度设计这个项目,鸭子超类，扩展超类：</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Duck</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">Quack</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"~~gaga~~"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">display</span><span class="o">();</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">swim</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"~~im swim~~"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//1、GreenHeadDuck继承Duck ：</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GreenHeadDuck</span> <span class="kd">extends</span> <span class="nc">Duck</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">display</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"**GreenHead**"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="新需求">新需求</h4>
+
+<ul>
+  <li>添加会飞的鸭子</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//OO思维里的继承方式解决方案是：</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Duck</span> <span class="o">{</span>
+    <span class="o">...;</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">Fly</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"~~im fly~~"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>问题来了,这个Fly让所有子类都会飞了，这是不科学的。</li>
+  <li><strong>继承的问题：对类的局部改动，尤其超类的局部改动，会影响其他部分。影响会有溢出效应</strong></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//继续尝试用OO原理来解决，覆盖：</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GreenHeadDuck</span> <span class="kd">extends</span> <span class="nc">Duck</span> <span class="o">{</span>
+    <span class="o">...</span><span class="err">；</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">Fly</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"~~no fly~~"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="新需求2">新需求2</h4>
+
+<ul>
+  <li>又有新需求，石头鸭子</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//填坑：</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StoneDuck</span> <span class="kd">extends</span> <span class="nc">Duck</span> <span class="o">{</span>
+<span class="o">....</span>
+<span class="o">}</span><span class="err">；</span>
+</code></pre></div></div>
+
+<ul>
+  <li><strong>超类挖的一个坑，每个子类都要来填，增加工作量，复杂度O(N^2)。不是好的设计方式</strong></li>
+</ul>
+
+<h3 id="用策略模式解决">用策略模式解决</h3>
+
+<ul>
+  <li>需要新的设计方式，应对项目的扩展性，降低复杂度：
+1）分析项目变化与不变部分，提取变化部分，抽象成接口+实现；
+2）鸭子哪些功能是会根据新需求变化的？叫声、飞行…</li>
+</ul>
+
+<h4 id="接口">接口</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">FlyBehavior</span> <span class="o">{</span>
+	<span class="kt">void</span> <span class="nf">fly</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">QuackBehavior</span>
+<span class="o">{</span>
+	<span class="kt">void</span> <span class="nf">quack</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li><strong>好处：新增行为简单，行为类更好的复用，组合更方便。既有继承带来的复用好处，没有挖坑</strong></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">GoodFlyBehavior</span> <span class="kd">implements</span> <span class="nc">FlyBehavior</span>
+<span class="o">{</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">fly</span><span class="o">()</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"--GoodFly--"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span>	<span class="kd">class</span> <span class="nc">GaGaQuackBehavior</span> <span class="kd">implements</span> <span class="nc">QuackBehavior</span>
+<span class="o">{</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">quack</span><span class="o">()</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"__GaGa__"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="实现">实现</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//重新设计的鸭子项目：</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Duck</span> <span class="o">{</span>
+	<span class="c1">//飞行接口</span>
+    <span class="nc">FlyBehavior</span> <span class="n">mFlyBehavior</span><span class="o">;</span>
+    <span class="c1">//叫声接口</span>
+    <span class="nc">QuackBehavior</span> <span class="n">mQuackBehavior</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="nf">Duck</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">Fly</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="n">mFlyBehavior</span><span class="o">.</span><span class="na">fly</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">Quack</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="n">mQuackBehavior</span><span class="o">.</span><span class="na">quack</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">display</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//绿头鸭、石头鸭：</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GreenHeadDuck</span> <span class="kd">extends</span> <span class="nc">Duck</span> <span class="o">{</span>
+    <span class="c1">//构造方法调用超类的构造方法</span>
+    <span class="kd">public</span> <span class="nf">GreenHeadDuck</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//使用的时候只需要实例化想要的对象就可以了</span>
+        <span class="n">mFlyBehavior</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GoodFlyBehavior</span><span class="o">();</span>
+        <span class="n">mQuackBehavior</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GaGaQuackBehavior</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">display</span><span class="o">()</span> <span class="o">{...}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="总结">总结</h3>
+
+<ul>
+  <li><strong>策略模式：分别封装行为接口，实现算法族，超类里放行为接口对象，在子类里具体设</strong>
+<strong>定行为对象。原则就是：分离变化部分，封装接口，基于接口编程各种功能。此模式让行为</strong>
+<strong>算法的变化独立于算法的使用者。</strong></li>
+</ul>
+
+<h3 id="场景">场景</h3>
+
+<ul>
+  <li>–某个市场人员接到单后的报价策略(CRM系统中常见问题)。报价策略很复杂，可以简单作如下分类：</li>
+  <li>普通客户小批量报价</li>
+  <li>普通客户大批量报价</li>
+  <li>老客户小批量报价</li>
+  <li>
+    <p>老客户大批量报价</p>
+  </li>
+  <li>具体选用哪个报价策略，这需要根据实际情况来确定。这时候，我们采用策略模式即可</li>
+  <li>假如，类型特别多，算法比较复杂时，整个条件控制代码会变得很长，难于维护</li>
+</ul>
+
+<h3 id="定义">定义</h3>
+
+<ul>
+  <li>策略模式对应于解决某一个问题的一个算法族，允许用户从该算法族中任选一个算法解决某一问题，同时可以方便的更换算法或者增加新的算法。并且由客户端决定调用哪个算法</li>
+</ul>
+
+<h3 id="本质">本质</h3>
+
+<ul>
+  <li><strong>分离算法，选择实现</strong></li>
+</ul>
+
+<h3 id="案例">案例</h3>
+
+<h4 id="普通方式">普通方式</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 实现起来比较容易，符合一般开发人员的思路
+ * 假如，类型特别多，算法比较复杂时，整个条件语句的代码就变得很长，难于维护。
+ * 如果有新增类型，就需要频繁的修改此处的代码！
+ * 不符合开闭原则！
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestStrategy</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kt">double</span> <span class="nf">getPrice</span><span class="o">(</span><span class="nc">String</span> <span class="n">type</span><span class="o">,</span> <span class="kt">double</span> <span class="n">price</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="k">if</span> <span class="o">(</span><span class="n">type</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"普通客户小批量"</span><span class="o">))</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"不打折,原价"</span><span class="o">);</span>
+			<span class="k">return</span> <span class="n">price</span><span class="o">;</span>
+		<span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">type</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"普通客户大批量"</span><span class="o">))</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"打九折"</span><span class="o">);</span>
+			<span class="k">return</span> <span class="n">price</span> <span class="o">*</span> <span class="mf">0.9</span><span class="o">;</span>
+		<span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">type</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"老客户小批量"</span><span class="o">))</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"打八五折"</span><span class="o">);</span>
+			<span class="k">return</span> <span class="n">price</span> <span class="o">*</span> <span class="mf">0.85</span><span class="o">;</span>
+		<span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">type</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"老客户大批量"</span><span class="o">))</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"打八折"</span><span class="o">);</span>
+			<span class="k">return</span> <span class="n">price</span> <span class="o">*</span> <span class="mf">0.8</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">price</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="策略接口">策略接口</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+<span class="cm">/**
+ * 
+ * 策略接口
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Strategy</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 传入原价，获取价格
+	 * @param standardPrice
+	 * @return
+	 */</span>
+	<span class="kd">public</span> <span class="kt">double</span> <span class="nf">getPrice</span><span class="o">(</span><span class="kt">double</span>  <span class="n">standardPrice</span><span class="o">);</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="算法族">算法族</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">NewCustomerFewStrategy</span> <span class="kd">implements</span> <span class="nc">Strategy</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">double</span> <span class="nf">getPrice</span><span class="o">(</span><span class="kt">double</span> <span class="n">standardPrice</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"不打折，原价"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">standardPrice</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">NewCustomerManyStrategy</span> <span class="kd">implements</span> <span class="nc">Strategy</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">double</span> <span class="nf">getPrice</span><span class="o">(</span><span class="kt">double</span> <span class="n">standardPrice</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"打九折"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">standardPrice</span><span class="o">*</span><span class="mf">0.9</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OldCustomerFewStrategy</span> <span class="kd">implements</span> <span class="nc">Strategy</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">double</span> <span class="nf">getPrice</span><span class="o">(</span><span class="kt">double</span> <span class="n">standardPrice</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"打八五折"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">standardPrice</span><span class="o">*</span><span class="mf">0.85</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OldCustomerManyStrategy</span> <span class="kd">implements</span> <span class="nc">Strategy</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">double</span> <span class="nf">getPrice</span><span class="o">(</span><span class="kt">double</span> <span class="n">standardPrice</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"打八折"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">standardPrice</span><span class="o">*</span><span class="mf">0.8</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="交互类">交互类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 负责和具体的策略类交互
+ * 这样的话，具体的算法和直接的客户端调用分离了，使得算法可以独立于客户端独立的变化。
+ * 如果使用spring的依赖注入功能，还可以通过配置文件，动态的注入不同策略对象，动态的切换不同的算法.
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Context</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">Strategy</span> <span class="n">strategy</span><span class="o">;</span>	<span class="c1">//当前采用的算法对象</span>
+
+	<span class="c1">//可以通过构造器来注入</span>
+	<span class="kd">public</span> <span class="nf">Context</span><span class="o">(</span><span class="nc">Strategy</span> <span class="n">strategy</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">strategy</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="c1">//可以通过set方法来注入</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setStrategy</span><span class="o">(</span><span class="nc">Strategy</span> <span class="n">strategy</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">strategy</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">pringPrice</span><span class="o">(</span><span class="kt">double</span> <span class="n">s</span><span class="o">){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"您该报价："</span><span class="o">+</span><span class="n">strategy</span><span class="o">.</span><span class="na">getPrice</span><span class="o">(</span><span class="n">s</span><span class="o">));</span>
+	<span class="o">}</span>
+	
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.strategy</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Client</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="nc">Strategy</span> <span class="n">s1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">OldCustomerManyStrategy</span><span class="o">();</span>
+		<span class="nc">Context</span> <span class="n">ctx</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Context</span><span class="o">(</span><span class="n">s1</span><span class="o">);</span>
+		
+		<span class="n">ctx</span><span class="o">.</span><span class="na">pringPrice</span><span class="o">(</span><span class="mi">998</span><span class="o">);</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>打八折
+您该报价：798.4000000000001
+</code></pre></div></div>
+
+<h3 id="使用场景">使用场景</h3>
+
+<ul>
+  <li>JAVASE中GUI编程中，布局管理</li>
+  <li>Spring框架中，Resource接口，资源访问策略</li>
+  <li>javax.servlet.http.HttpServlet#service()</li>
+</ul>
+:ET

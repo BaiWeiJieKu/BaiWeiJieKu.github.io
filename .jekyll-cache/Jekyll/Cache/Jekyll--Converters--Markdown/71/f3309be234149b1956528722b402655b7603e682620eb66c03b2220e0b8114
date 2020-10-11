@@ -1,0 +1,485 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#base64" id="markdown-toc-base64">BASE64</a></li>
+  <li><a href="#md5" id="markdown-toc-md5">MD5</a></li>
+  <li><a href="#des" id="markdown-toc-des">DES</a></li>
+  <li><a href="#aes" id="markdown-toc-aes">AES</a></li>
+</ul>
+<h3 id="base64">BASE64</h3>
+
+<ul>
+  <li>
+    <p>Base64是一种根据ASCII码来进行加密的可逆算法，这类算法简单来说，就等于将每个字符对应一个特定的字符（常常是根据进制进行匹配），一一对应，特别像电台密码本，因为每个字符都必须要加密，加密比较笨重。</p>
+  </li>
+  <li>
+    <p>加密</p>
+
+    <ul>
+      <li>获取字符串中每个字符的ASCII码</li>
+      <li>按照每3个8bit的字符为一组来分组，即每组24bit</li>
+      <li>将这24bit划分成4个6bit的4个单位，每个单位前面添加2个0，得到4个8bit的单位</li>
+      <li>将每个8bit的单位转换成十进制数字，对照Base64编码表找到对应的字符进行拼接，得到最终的加密后的字符串</li>
+    </ul>
+  </li>
+  <li>
+    <p>解密</p>
+
+    <ul>
+      <li>读入4个字符，对照Base64编码表找到字符对应的索引，生成4个6为的值</li>
+      <li>将这4个6为的值拼接起来，形成一个24为的值</li>
+      <li>将这个24位的值按照8位一组截断成3个8位的值</li>
+      <li>对照ASCII表找到这三个8位的值对应的字符，即解码后的字符</li>
+    </ul>
+  </li>
+  <li>
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** 工具类实现代码  **/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BASE64Util</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Character</span><span class="o">&gt;</span> <span class="n">base64CharMap</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">base64CharString</span> <span class="o">=</span> <span class="s">"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"</span><span class="o">;</span>
+   
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">BASE64Util</span> <span class="n">instance</span><span class="o">;</span>
+   
+    <span class="kd">private</span> <span class="nf">BASE64Util</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">base64CharString</span><span class="o">.</span><span class="na">length</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="n">base64CharString</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="n">base64CharMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="k">new</span> <span class="nc">Integer</span><span class="o">(</span><span class="n">i</span><span class="o">),</span> <span class="k">new</span> <span class="nc">Character</span><span class="o">(</span><span class="n">c</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+   
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">BASE64Util</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="nc">BASE64Util</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BASE64Util</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+    <span class="cm">/**
+     * This method is used to encode a normal string to base64 string @param
+     * origin The String to be encoded @return The String after encoded.
+     */</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">encode</span><span class="o">(</span><span class="nc">String</span> <span class="n">origin</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">origin</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">origin</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="s">""</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="kt">int</span> <span class="n">length</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+        <span class="nc">String</span> <span class="n">binaryString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="c1">// to binary String</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">ascii</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="nc">String</span> <span class="n">binaryCharString</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">toBinaryString</span><span class="o">(</span><span class="n">ascii</span><span class="o">);</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">binaryCharString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">binaryCharString</span> <span class="o">=</span> <span class="s">"0"</span> <span class="o">+</span> <span class="n">binaryCharString</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="n">binaryString</span> <span class="o">+=</span> <span class="n">binaryCharString</span><span class="o">;</span>
+        <span class="o">}</span>
+   
+        <span class="c1">// to base64 index</span>
+        <span class="kt">int</span> <span class="n">beginIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">endIndex</span> <span class="o">=</span> <span class="n">beginIndex</span> <span class="o">+</span> <span class="mi">6</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">base64BinaryString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">charString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">((</span><span class="n">base64BinaryString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">beginIndex</span><span class="o">,</span> <span class="n">endIndex</span><span class="o">)).</span><span class="na">length</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// if length is less than 6, add "0".</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">base64BinaryString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">base64BinaryString</span> <span class="o">+=</span> <span class="s">"0"</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">base64BinaryString</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+            <span class="kt">char</span> <span class="n">base64Char</span> <span class="o">=</span> <span class="n">base64CharMap</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+            <span class="n">charString</span> <span class="o">=</span> <span class="n">charString</span> <span class="o">+</span> <span class="n">base64Char</span><span class="o">;</span>
+            <span class="n">beginIndex</span> <span class="o">+=</span> <span class="mi">6</span><span class="o">;</span>
+            <span class="n">endIndex</span> <span class="o">+=</span> <span class="mi">6</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">endIndex</span> <span class="o">&gt;=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">endIndex</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+            <span class="o">}</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">endIndex</span> <span class="o">&lt;</span> <span class="n">beginIndex</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">length</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">charString</span> <span class="o">+=</span> <span class="s">"="</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">length</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">charString</span> <span class="o">+=</span> <span class="s">"=="</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">charString</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">decode</span><span class="o">(</span><span class="nc">String</span> <span class="n">encodedString</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">encodedString</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">encodedString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="s">""</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">// get origin base64 String</span>
+        <span class="nc">String</span> <span class="n">origin</span> <span class="o">=</span> <span class="n">encodedString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">encodedString</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"="</span><span class="o">));</span>
+        <span class="nc">String</span> <span class="n">equals</span> <span class="o">=</span> <span class="n">encodedString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">encodedString</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"="</span><span class="o">));</span>
+   
+        <span class="nc">String</span> <span class="n">binaryString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="c1">// convert base64 string to binary string</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">origin</span><span class="o">.</span><span class="na">length</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+            <span class="kt">int</span> <span class="n">ascii</span> <span class="o">=</span> <span class="n">base64CharString</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+            <span class="nc">String</span> <span class="n">binaryCharString</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">toBinaryString</span><span class="o">(</span><span class="n">ascii</span><span class="o">);</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">binaryCharString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">binaryCharString</span> <span class="o">=</span> <span class="s">"0"</span> <span class="o">+</span> <span class="n">binaryCharString</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="n">binaryString</span> <span class="o">+=</span> <span class="n">binaryCharString</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">// the encoded string has 1 "=", means that the binary string has append</span>
+        <span class="c1">// 2 "0"</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">equals</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">binaryString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="c1">// the encoded string has 2 "=", means that the binary string has append</span>
+        <span class="c1">// 4 "0"</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">equals</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">binaryString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">4</span><span class="o">);</span>
+        <span class="o">}</span>
+   
+        <span class="c1">// convert to String</span>
+        <span class="nc">String</span> <span class="n">charString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">resultString</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">beginIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">endIndex</span> <span class="o">=</span> <span class="n">beginIndex</span> <span class="o">+</span> <span class="mi">8</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">((</span><span class="n">charString</span> <span class="o">=</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">beginIndex</span><span class="o">,</span> <span class="n">endIndex</span><span class="o">)).</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">8</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">ascii</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">charString</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+            <span class="n">resultString</span> <span class="o">+=</span> <span class="o">(</span><span class="kt">char</span><span class="o">)</span> <span class="n">ascii</span><span class="o">;</span>
+            <span class="n">beginIndex</span> <span class="o">+=</span> <span class="mi">8</span><span class="o">;</span>
+            <span class="n">endIndex</span> <span class="o">+=</span> <span class="mi">8</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">endIndex</span> <span class="o">&gt;</span> <span class="n">binaryString</span><span class="o">.</span><span class="na">length</span><span class="o">())</span> <span class="o">{</span>
+                <span class="k">break</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">resultString</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="md5">MD5</h3>
+
+<ul>
+  <li>
+    <p>MD5码加解密算法Message-Digest Algorithm 5（信息-摘要算法)，是一种不可逆的算法，具有很高的安全性。</p>
+  </li>
+  <li>
+    <p>它对应任何字符串都可以加密成一段唯一的固定长度的代码。（小贴士：为啥MD5加密算法不可逆呢~ 按道理来说有加密方式，就会有解密方式呀？因为MD5加密是有种有损的加密方式，比如一段数据为’123’，我在加密的时候，遇到1和3都直接当做是a，加密后变成了’a2a’，所以解密的时候就出现了4种组合’323’‘121’‘123’‘321’，数据一多，自然找不到原始的数据了，当然这种方式加密的密文也不需要解密）</p>
+  </li>
+  <li>
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// MD5码工具类代码  </span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MD5Util</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">MD5</span> <span class="o">=</span> <span class="s">"MD5"</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="nc">HmacMD5</span> <span class="o">=</span> <span class="s">"HmacMD5"</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">charset</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span> <span class="c1">// 编码格式；默认null为GBK</span>
+   
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">MD5Util</span> <span class="n">instance</span><span class="o">;</span>
+   
+    <span class="kd">private</span> <span class="nf">MD5Util</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+   
+    <span class="c1">// 单例</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">MD5Util</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="nc">MD5Util</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MD5Util</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+    <span class="cm">/**
+     * 使用 MD5 方法加密（无密码）
+     */</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">encode</span><span class="o">(</span><span class="nc">String</span> <span class="n">res</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">MessageDigest</span> <span class="n">md</span> <span class="o">=</span> <span class="nc">MessageDigest</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="no">MD5</span><span class="o">);</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">resBytes</span> <span class="o">=</span> <span class="n">charset</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">res</span><span class="o">.</span><span class="na">getBytes</span><span class="o">()</span> <span class="o">:</span> <span class="n">res</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="n">charset</span><span class="o">);</span>
+            <span class="k">return</span> <span class="nc">BASE64Util</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">encode</span><span class="o">(</span><span class="n">md</span><span class="o">.</span><span class="na">digest</span><span class="o">(</span><span class="n">resBytes</span><span class="o">).</span><span class="na">toString</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+    <span class="cm">/**
+     * 使用 MD5 方法加密（可以设密码）
+     */</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">encode</span><span class="o">(</span><span class="nc">String</span> <span class="n">res</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">SecretKey</span> <span class="n">sk</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">KeyGenerator</span> <span class="n">kg</span> <span class="o">=</span> <span class="nc">KeyGenerator</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="nc">HmacMD5</span><span class="o">);</span>
+                <span class="n">sk</span> <span class="o">=</span> <span class="n">kg</span><span class="o">.</span><span class="na">generateKey</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                <span class="kt">byte</span><span class="o">[]</span> <span class="n">keyBytes</span> <span class="o">=</span> <span class="n">charset</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">key</span><span class="o">.</span><span class="na">getBytes</span><span class="o">()</span> <span class="o">:</span> <span class="n">key</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="n">charset</span><span class="o">);</span>
+                <span class="n">sk</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SecretKeySpec</span><span class="o">(</span><span class="n">keyBytes</span><span class="o">,</span> <span class="nc">HmacMD5</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="nc">Mac</span> <span class="n">mac</span> <span class="o">=</span> <span class="nc">Mac</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="nc">HmacMD5</span><span class="o">);</span>
+            <span class="n">mac</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="n">sk</span><span class="o">);</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">result</span> <span class="o">=</span> <span class="n">mac</span><span class="o">.</span><span class="na">doFinal</span><span class="o">(</span><span class="n">res</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+            <span class="k">return</span> <span class="nc">BASE64Util</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">encode</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+  	<span class="c1">//解决有些md5前面是0无法显示的问题</span>
+   <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">getMD5</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+        <span class="c1">// 生成一个MD5加密计算摘要</span>
+        <span class="nc">MessageDigest</span> <span class="n">md</span> <span class="o">=</span> <span class="nc">MessageDigest</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="s">"MD5"</span><span class="o">);</span>
+        <span class="c1">// 计算md5函数</span>
+        <span class="n">md</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+        <span class="k">return</span> <span class="nf">toHexString</span><span class="o">(</span><span class="n">md</span><span class="o">.</span><span class="na">digest</span><span class="o">());</span>
+    <span class="o">}</span>
+	<span class="c1">//把数组中的每个字节转换为16进制</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">toHexString</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">)</span> <span class="o">{</span>       
+        <span class="nc">Formatter</span> <span class="n">formatter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Formatter</span><span class="o">();</span>              
+        <span class="k">for</span> <span class="o">(</span><span class="kt">byte</span> <span class="n">b</span> <span class="o">:</span> <span class="n">bytes</span><span class="o">)</span> <span class="o">{</span>          
+            <span class="n">formatter</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"%02x"</span><span class="o">,</span> <span class="n">b</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="nc">String</span> <span class="n">res</span> <span class="o">=</span> <span class="n">formatter</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+        <span class="k">return</span> <span class="n">res</span><span class="o">;</span>
+   <span class="o">}</span> 
+<span class="o">}</span>
+</code></pre></div>    </div>
+
+    <p>```</p>
+  </li>
+</ul>
+
+<h3 id="des">DES</h3>
+
+<p>​```java
+public class DESUtil {
+    public static final String DES = “DES”;
+    public static final String charset = null; // 编码格式；默认null为GBK
+    public static final int keysizeDES = 0;</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>private static DESUtil instance;
+ 
+private DESUtil() {
+}
+ 
+// 单例
+public static DESUtil getInstance() {
+    if (instance == null) {
+        synchronized (MD5Util.class) {
+            if (instance == null) {
+                instance = new DESUtil();
+            }
+        }
+    }
+    return instance;
+}
+ 
+/**
+ * 使用 DES 进行加密
+ */
+public String encode(String res, String key) {
+    return keyGeneratorES(res, DES, key, keysizeDES, true);
+}
+ 
+/**
+ * 使用 DES 进行解密
+ */
+public String decode(String res, String key) {
+    return keyGeneratorES(res, DES, key, keysizeDES, false);
+}
+ 
+// 使用KeyGenerator双向加密，DES/AES，注意这里转化为字符串的时候是将2进制转为16进制格式的字符串，不是直接转，因为会出错
+private String keyGeneratorES(String res, String algorithm, String key, int keysize, boolean isEncode) {
+    try {
+        KeyGenerator kg = KeyGenerator.getInstance(algorithm);
+        if (keysize == 0) {
+            byte[] keyBytes = charset == null ? key.getBytes() : key.getBytes(charset);
+            kg.init(new SecureRandom(keyBytes));
+        } else if (key == null) {
+            kg.init(keysize);
+        } else {
+            byte[] keyBytes = charset == null ? key.getBytes() : key.getBytes(charset);
+            kg.init(keysize, new SecureRandom(keyBytes));
+        }
+        SecretKey sk = kg.generateKey();
+        SecretKeySpec sks = new SecretKeySpec(sk.getEncoded(), algorithm);
+        Cipher cipher = Cipher.getInstance(algorithm);
+        if (isEncode) {
+            cipher.init(Cipher.ENCRYPT_MODE, sks);
+            byte[] resBytes = charset == null ? res.getBytes() : res.getBytes(charset);
+            return parseByte2HexStr(cipher.doFinal(resBytes));
+        } else {
+            cipher.init(Cipher.DECRYPT_MODE, sks);
+            return new String(cipher.doFinal(parseHexStr2Byte(res)));
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+ 
+// 将二进制转换成16进制
+private String parseByte2HexStr(byte buf[]) {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i &lt; buf.length; i++) {
+        String hex = Integer.toHexString(buf[i] &amp; 0xFF);
+        if (hex.length() == 1) {
+            hex = '0' + hex;
+        }
+        sb.append(hex.toUpperCase());
+    }
+    return sb.toString();
+}
+ 
+// 将16进制转换为二进制
+private byte[] parseHexStr2Byte(String hexStr) {
+    if (hexStr.length() &lt; 1)
+        return null;
+    byte[] result = new byte[hexStr.length() / 2];
+    for (int i = 0; i &lt; hexStr.length() / 2; i++) {
+        int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
+        int low = Integer.parseInt(hexStr.substring(i * 2 + 1, i * 2 + 2), 16);
+        result[i] = (byte) (high * 16 + low);
+    }
+    return result;
+} }   ```
+</code></pre></div></div>
+
+<h3 id="aes">AES</h3>
+
+<ul>
+  <li>
+    <p>AES也是，采用密钥，意思是传入一个需要加密的对象的同时，约定一个key（可以是字符串），然后解密端，通过这个key进行解密获取对象。AES的实现原理，是先确定密钥，确定方式：算法/模式/补码。</p>
+  </li>
+  <li>
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AESUtil</span> <span class="o">{</span>
+   
+    <span class="cm">/**
+     * 加密
+     * @return 加密后的字符串
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">Encrypt</span><span class="o">(</span><span class="nc">String</span> <span class="n">src</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="c1">// 判断密钥是否为空</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"密钥不能为空"</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+   
+        <span class="c1">// 密钥补位</span>
+        <span class="kt">int</span> <span class="n">plus</span><span class="o">=</span> <span class="mi">16</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"utf-8"</span><span class="o">);</span>
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">raw</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">16</span><span class="o">];</span>
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">plusbyte</span><span class="o">={</span> <span class="mh">0x00</span><span class="o">,</span> <span class="mh">0x01</span><span class="o">,</span> <span class="mh">0x02</span><span class="o">,</span> <span class="mh">0x03</span><span class="o">,</span> <span class="mh">0x04</span><span class="o">,</span> <span class="mh">0x05</span><span class="o">,</span> <span class="mh">0x06</span><span class="o">,</span> <span class="mh">0x07</span><span class="o">,</span> <span class="mh">0x08</span><span class="o">,</span> <span class="mh">0x09</span><span class="o">,</span> <span class="mh">0x0a</span><span class="o">,</span> <span class="mh">0x0b</span><span class="o">,</span> <span class="mh">0x0c</span><span class="o">,</span> <span class="mh">0x0d</span><span class="o">,</span> <span class="mh">0x0e</span><span class="o">,</span> <span class="mh">0x0f</span><span class="o">};</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">;</span><span class="n">i</span><span class="o">++)</span>
+        <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">data</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;</span> <span class="n">i</span><span class="o">)</span>
+                <span class="n">raw</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+            <span class="k">else</span>
+                <span class="n">raw</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">plusbyte</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+        <span class="o">}</span>
+   
+        <span class="nc">SecretKeySpec</span> <span class="n">skeySpec</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SecretKeySpec</span><span class="o">(</span><span class="n">raw</span><span class="o">,</span> <span class="s">"AES"</span><span class="o">);</span>
+        <span class="nc">Cipher</span> <span class="n">cipher</span> <span class="o">=</span> <span class="nc">Cipher</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="s">"AES/ECB/PKCS5Padding"</span><span class="o">);</span>    <span class="c1">// 算法/模式/补码方式</span>
+        <span class="n">cipher</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="nc">Cipher</span><span class="o">.</span><span class="na">ENCRYPT_MODE</span><span class="o">,</span> <span class="n">skeySpec</span><span class="o">);</span>
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">encrypted</span> <span class="o">=</span> <span class="n">cipher</span><span class="o">.</span><span class="na">doFinal</span><span class="o">(</span><span class="n">src</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"utf-8"</span><span class="o">));</span>
+   
+        <span class="c1">//return new Base64().encodeToString(encrypted);//base64</span>
+        <span class="k">return</span> <span class="nf">binary</span><span class="o">(</span><span class="n">encrypted</span><span class="o">,</span> <span class="mi">16</span><span class="o">);</span> <span class="c1">//十六进制</span>
+    <span class="o">}</span>
+   
+    <span class="cm">/**
+     * 解密
+     * @return 解密后的字符串
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">Decrypt</span><span class="o">(</span><span class="nc">String</span> <span class="n">src</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 判断Key是否正确</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"Key为空null"</span><span class="o">);</span>
+                <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="o">}</span>
+   
+            <span class="c1">// 密钥补位</span>
+            <span class="kt">int</span> <span class="n">plus</span><span class="o">=</span> <span class="mi">16</span><span class="o">-</span><span class="n">key</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"utf-8"</span><span class="o">);</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">raw</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">16</span><span class="o">];</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">plusbyte</span><span class="o">={</span> <span class="mh">0x00</span><span class="o">,</span> <span class="mh">0x01</span><span class="o">,</span> <span class="mh">0x02</span><span class="o">,</span> <span class="mh">0x03</span><span class="o">,</span> <span class="mh">0x04</span><span class="o">,</span> <span class="mh">0x05</span><span class="o">,</span> <span class="mh">0x06</span><span class="o">,</span> <span class="mh">0x07</span><span class="o">,</span> <span class="mh">0x08</span><span class="o">,</span> <span class="mh">0x09</span><span class="o">,</span> <span class="mh">0x0a</span><span class="o">,</span> <span class="mh">0x0b</span><span class="o">,</span> <span class="mh">0x0c</span><span class="o">,</span> <span class="mh">0x0d</span><span class="o">,</span> <span class="mh">0x0e</span><span class="o">,</span> <span class="mh">0x0f</span><span class="o">};</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">;</span><span class="n">i</span><span class="o">++)</span>
+            <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">data</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;</span> <span class="n">i</span><span class="o">)</span>
+                    <span class="n">raw</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+                <span class="k">else</span>
+                    <span class="n">raw</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">plusbyte</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+            <span class="o">}</span>
+   
+            <span class="nc">SecretKeySpec</span> <span class="n">skeySpec</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SecretKeySpec</span><span class="o">(</span><span class="n">raw</span><span class="o">,</span> <span class="s">"AES"</span><span class="o">);</span>
+            <span class="nc">Cipher</span> <span class="n">cipher</span> <span class="o">=</span> <span class="nc">Cipher</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="s">"AES/ECB/PKCS5Padding"</span><span class="o">);</span>
+            <span class="n">cipher</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="nc">Cipher</span><span class="o">.</span><span class="na">DECRYPT_MODE</span><span class="o">,</span> <span class="n">skeySpec</span><span class="o">);</span>
+   
+            <span class="c1">//byte[] encrypted1 = new Base64().decode(src);//base64</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">encrypted1</span> <span class="o">=</span> <span class="n">toByteArray</span><span class="o">(</span><span class="n">src</span><span class="o">);</span><span class="c1">//十六进制</span>
+   
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="kt">byte</span><span class="o">[]</span> <span class="n">original</span> <span class="o">=</span> <span class="n">cipher</span><span class="o">.</span><span class="na">doFinal</span><span class="o">(</span><span class="n">encrypted1</span><span class="o">);</span>
+                <span class="nc">String</span> <span class="n">originalString</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">original</span><span class="o">,</span><span class="s">"utf-8"</span><span class="o">);</span>
+                <span class="k">return</span> <span class="n">originalString</span><span class="o">;</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+                <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">ex</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+   
+    <span class="cm">/**
+     * 将byte[]转为各种进制的字符串
+     * @param bytes byte[]
+     * @param radix 可以转换进制的范围，从Character.MIN_RADIX到Character.MAX_RADIX，超出范围后变为10进制
+     * @return 转换后的字符串
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">binary</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">,</span> <span class="kt">int</span> <span class="n">radix</span><span class="o">){</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">BigInteger</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">bytes</span><span class="o">).</span><span class="na">toString</span><span class="o">(</span><span class="n">radix</span><span class="o">);</span>   <span class="c1">// 这里的1代表正数</span>
+    <span class="o">}</span>
+   
+    <span class="cm">/**
+     * 16进制的字符串表示转成字节数组
+     *
+     * @param hexString 16进制格式的字符串
+     * @return 转换后的字节数组
+     **/</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">toByteArray</span><span class="o">(</span><span class="nc">String</span> <span class="n">hexString</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">hexString</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s">"this hexString must not be empty"</span><span class="o">);</span>
+   
+        <span class="n">hexString</span> <span class="o">=</span> <span class="n">hexString</span><span class="o">.</span><span class="na">toLowerCase</span><span class="o">();</span>
+        <span class="kd">final</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">byteArray</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">hexString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">];</span>
+        <span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">byteArray</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span><span class="c1">//因为是16进制，最多只会占用4位，转换成字节需要两个16进制的字符，高位在先</span>
+            <span class="kt">byte</span> <span class="n">high</span> <span class="o">=</span> <span class="o">(</span><span class="kt">byte</span><span class="o">)</span> <span class="o">(</span><span class="nc">Character</span><span class="o">.</span><span class="na">digit</span><span class="o">(</span><span class="n">hexString</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">k</span><span class="o">),</span> <span class="mi">16</span><span class="o">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="o">);</span>
+            <span class="kt">byte</span> <span class="n">low</span> <span class="o">=</span> <span class="o">(</span><span class="kt">byte</span><span class="o">)</span> <span class="o">(</span><span class="nc">Character</span><span class="o">.</span><span class="na">digit</span><span class="o">(</span><span class="n">hexString</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="o">),</span> <span class="mi">16</span><span class="o">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="o">);</span>
+            <span class="n">byteArray</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="o">(</span><span class="kt">byte</span><span class="o">)</span> <span class="o">(</span><span class="n">high</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span> <span class="o">|</span> <span class="n">low</span><span class="o">);</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">2</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">byteArray</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>​</li>
+</ul>
+:ET

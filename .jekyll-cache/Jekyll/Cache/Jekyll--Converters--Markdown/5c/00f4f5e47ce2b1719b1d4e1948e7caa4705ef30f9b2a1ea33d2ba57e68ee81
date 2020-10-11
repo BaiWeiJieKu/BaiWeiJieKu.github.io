@@ -1,0 +1,242 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#语法特点" id="markdown-toc-语法特点">语法特点</a></li>
+  <li><a href="#标量子查询" id="markdown-toc-标量子查询">标量子查询</a></li>
+  <li><a href="#列子查询" id="markdown-toc-列子查询">列子查询</a></li>
+  <li><a href="#行子查询" id="markdown-toc-行子查询">行子查询</a></li>
+</ul>
+<h2 id="语法特点">语法特点</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>含义：
+出现在其他语句中的select语句，称为子查询或内查询
+外部的查询语句，称为主查询或外查询
+
+分类：
+按子查询出现的位置：
+	select后面：
+		仅仅支持标量子查询
+	
+	from后面：
+		支持表子查询
+	where或having后面：★
+		标量子查询（单行） √
+		列子查询  （多行） √
+		
+		行子查询
+		
+	exists后面（相关子查询）
+		表子查询
+按结果集的行列数不同：
+	标量子查询（结果集只有一行一列）
+	列子查询（结果集只有一列多行）
+	行子查询（结果集有一行多列）
+	表子查询（结果集一般为多行多列）
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#一、where或having后面
+/*
+1、标量子查询（单行子查询）
+2、列子查询（多行子查询）
+
+3、行子查询（多列多行）
+
+特点：
+①子查询放在小括号内
+②子查询一般放在条件的右侧
+③标量子查询，一般搭配着单行操作符使用
+&gt; &lt; &gt;= &lt;= = &lt;&gt;
+
+列子查询，一般搭配着多行操作符使用
+in、any/some、all
+
+④子查询的执行优先于主查询执行，主查询的条件用到了子查询的结果
+
+*/
+</code></pre></div></div>
+
+<h2 id="标量子查询">标量子查询</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#1.标量子查询★
+
+#案例1：谁的工资比 Abel 高?
+
+#①查询Abel的工资
+SELECT salary
+FROM employees
+WHERE last_name = 'Abel'
+
+#②查询员工的信息，满足 salary&gt;①结果
+SELECT *
+FROM employees
+WHERE salary&gt;(
+
+	SELECT salary
+	FROM employees
+	WHERE last_name = 'Abel'
+
+);
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#案例2：返回job_id与141号员工相同，salary比143号员工多的员工 姓名，job_id 和工资
+
+#①查询141号员工的job_id
+SELECT job_id
+FROM employees
+WHERE employee_id = 141
+
+#②查询143号员工的salary
+SELECT salary
+FROM employees
+WHERE employee_id = 143
+
+#③查询员工的姓名，job_id 和工资，要求job_id=①并且salary&gt;②
+
+SELECT last_name,job_id,salary
+FROM employees
+WHERE job_id = (
+	SELECT job_id
+	FROM employees
+	WHERE employee_id = 141
+) AND salary&gt;(
+	SELECT salary
+	FROM employees
+	WHERE employee_id = 143
+
+);
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#案例3：返回公司工资最少的员工的last_name,job_id和salary
+
+#①查询公司的 最低工资
+SELECT MIN(salary)
+FROM employees
+
+#②查询last_name,job_id和salary，要求salary=①
+SELECT last_name,job_id,salary
+FROM employees
+WHERE salary=(
+	SELECT MIN(salary)
+	FROM employees
+);
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#案例4：查询最低工资大于50号部门最低工资的部门id和其最低工资
+
+#①查询50号部门的最低工资
+SELECT  MIN(salary)
+FROM employees
+WHERE department_id = 50
+
+#②查询每个部门的最低工资
+
+SELECT MIN(salary),department_id
+FROM employees
+GROUP BY department_id
+
+#③ 在②基础上筛选，满足min(salary)&gt;①
+SELECT MIN(salary),department_id
+FROM employees
+GROUP BY department_id
+HAVING MIN(salary)&gt;(
+	SELECT  MIN(salary)
+	FROM employees
+	WHERE department_id = 50
+
+
+);
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#非法使用标量子查询
+
+SELECT MIN(salary),department_id
+FROM employees
+GROUP BY department_id
+HAVING MIN(salary)&gt;(
+	SELECT  salary
+	FROM employees
+	WHERE department_id = 250
+
+
+);
+</code></pre></div></div>
+
+<h2 id="列子查询">列子查询</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#2.列子查询（多行子查询）★
+#案例1：返回location_id是1400或1700的部门中的所有员工姓名
+
+#①查询location_id是1400或1700的部门编号
+SELECT DISTINCT department_id
+FROM departments
+WHERE location_id IN(1400,1700)
+
+#②查询员工姓名，要求部门号是①列表中的某一个
+
+SELECT last_name
+FROM employees
+WHERE department_id  &lt;&gt;ALL(
+	SELECT DISTINCT department_id
+	FROM departments
+	WHERE location_id IN(1400,1700)
+
+);
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#案例2：返回其它工种中比job_id为‘IT_PROG’工种任一工资低的员工的员工号、姓名、job_id 以及salary
+
+#①查询job_id为‘IT_PROG’部门任一工资
+
+SELECT DISTINCT salary
+FROM employees
+WHERE job_id = 'IT_PROG'
+
+#②查询员工号、姓名、job_id 以及salary，salary&lt;(①)的任意一个
+SELECT last_name,employee_id,job_id,salary
+FROM employees
+WHERE salary&lt;ANY(
+	SELECT DISTINCT salary
+	FROM employees
+	WHERE job_id = 'IT_PROG'
+
+) AND job_id&lt;&gt;'IT_PROG';
+
+#或
+SELECT last_name,employee_id,job_id,salary
+FROM employees
+WHERE salary&lt;(
+	SELECT MAX(salary)
+	FROM employees
+	WHERE job_id = 'IT_PROG'
+
+) AND job_id&lt;&gt;'IT_PROG';
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#案例3：返回其它部门中比job_id为‘IT_PROG’部门所有工资都低的员工   的员工号、姓名、job_id 以及salary
+
+SELECT last_name,employee_id,job_id,salary
+FROM employees
+WHERE salary&lt;ALL(
+	SELECT DISTINCT salary
+	FROM employees
+	WHERE job_id = 'IT_PROG'
+
+) AND job_id&lt;&gt;'IT_PROG';
+
+#或
+
+SELECT last_name,employee_id,job_id,salary
+FROM employees
+WHERE salary&lt;(
+	SELECT MIN( salary)
+	FROM employees
+	WHERE job_id = 'IT_PROG'
+
+) AND job_id&lt;&gt;'IT_PROG';
+</code></pre></div></div>
+
+<h2 id="行子查询">行子查询</h2>
+
+<p>```
+#3、行子查询（结果集一行多列或多行多列）</p>
+
+<p>#案例：查询员工编号最小并且工资最高的员工信息</p>
+:ET

@@ -1,0 +1,130 @@
+I"0<ul id="markdown-toc">
+  <li><a href="#文件对象" id="markdown-toc-文件对象">文件对象</a></li>
+</ul>
+<h2 id="文件对象">文件对象</h2>
+
+<ul>
+  <li>文件和文件夹都是用File代表</li>
+  <li>使用绝对路径或者相对路径创建File对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">file</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestFile</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 绝对路径</span>
+        <span class="nc">File</span> <span class="n">f1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOLFolder"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"f1的绝对路径："</span> <span class="o">+</span> <span class="n">f1</span><span class="o">.</span><span class="na">getAbsolutePath</span><span class="o">());</span>
+        <span class="c1">// 相对路径,相对于工作目录，如果在eclipse中，就是项目目录</span>
+        <span class="nc">File</span> <span class="n">f2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"LOL.exe"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"f2的绝对路径："</span> <span class="o">+</span> <span class="n">f2</span><span class="o">.</span><span class="na">getAbsolutePath</span><span class="o">());</span>
+ 
+        <span class="c1">// 把f1作为父目录创建文件对象</span>
+        <span class="nc">File</span> <span class="n">f3</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">f1</span><span class="o">,</span> <span class="s">"LOL.exe"</span><span class="o">);</span>
+ 
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"f3的绝对路径："</span> <span class="o">+</span> <span class="n">f3</span><span class="o">.</span><span class="na">getAbsolutePath</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/756.png" alt="" /></p>
+
+<ul>
+  <li>注意1： 需要在D:\LOLFolder确实存在一个LOL.exe,才可以看到对应的文件长度、修改时间等信息</li>
+  <li>注意2： renameTo方法用于对物理文件名称进行修改，但是并不会修改File对象的name属性。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">file</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestFile</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+ 
+        <span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOLFolder/LOL.exe"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"当前文件是："</span> <span class="o">+</span><span class="n">f</span><span class="o">);</span>
+        <span class="c1">//文件是否存在</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"判断是否存在："</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="na">exists</span><span class="o">());</span>
+        
+        <span class="c1">//是否是文件夹</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"判断是否是文件夹："</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="na">isDirectory</span><span class="o">());</span>
+         
+        <span class="c1">//是否是文件（非文件夹）</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"判断是否是文件："</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="na">isFile</span><span class="o">());</span>
+         
+        <span class="c1">//文件长度</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"获取文件的长度："</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="na">length</span><span class="o">());</span>
+         
+        <span class="c1">//文件最后修改时间</span>
+        <span class="kt">long</span> <span class="n">time</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="na">lastModified</span><span class="o">();</span>
+        <span class="nc">Date</span> <span class="n">d</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">(</span><span class="n">time</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"获取文件的最后修改时间："</span><span class="o">+</span><span class="n">d</span><span class="o">);</span>
+        <span class="c1">//设置文件修改时间为1970.1.1 08:00:00</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">setLastModified</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+         
+        <span class="c1">//文件重命名</span>
+        <span class="nc">File</span> <span class="n">f2</span> <span class="o">=</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOLFolder/DOTA.exe"</span><span class="o">);</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">renameTo</span><span class="o">(</span><span class="n">f2</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"把LOL.exe改名成了DOTA.exe"</span><span class="o">);</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"注意： 需要在D:\\LOLFolder确实存在一个LOL.exe,\r\n才可以看到对应的文件长度、修改时间等信息"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/757.png" alt="" /></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">file</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestFile</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+ 
+        <span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOLFolder/skin/garen.ski"</span><span class="o">);</span>
+ 
+        <span class="c1">// 以字符串数组的形式，返回当前文件夹下的所有文件（不包含子文件及子文件夹）</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">list</span><span class="o">();</span>
+ 
+        <span class="c1">// 以文件数组的形式，返回当前文件夹下的所有文件（不包含子文件及子文件夹）</span>
+        <span class="nc">File</span><span class="o">[]</span><span class="n">fs</span><span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="na">listFiles</span><span class="o">();</span>
+ 
+        <span class="c1">// 以字符串形式返回获取所在文件夹</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">getParent</span><span class="o">();</span>
+ 
+        <span class="c1">// 以文件形式返回获取所在文件夹</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">getParentFile</span><span class="o">();</span>
+        <span class="c1">// 创建文件夹，如果父文件夹skin不存在，创建就无效</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">mkdir</span><span class="o">();</span>
+ 
+        <span class="c1">// 创建文件夹，如果父文件夹skin不存在，就会创建父文件夹</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">();</span>
+ 
+        <span class="c1">// 创建一个空文件,如果父文件夹skin不存在，就会抛出异常</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">createNewFile</span><span class="o">();</span>
+        <span class="c1">// 所以创建一个空文件之前，通常都会创建父目录</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">getParentFile</span><span class="o">().</span><span class="na">mkdirs</span><span class="o">();</span>
+ 
+        <span class="c1">// 列出所有的盘符c: d: e: 等等</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">listRoots</span><span class="o">();</span>
+ 
+        <span class="c1">// 刪除文件</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+ 
+        <span class="c1">// JVM结束的时候，刪除文件，常用于临时文件的删除</span>
+        <span class="n">f</span><span class="o">.</span><span class="na">deleteOnExit</span><span class="o">();</span>
+ 
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+:ET

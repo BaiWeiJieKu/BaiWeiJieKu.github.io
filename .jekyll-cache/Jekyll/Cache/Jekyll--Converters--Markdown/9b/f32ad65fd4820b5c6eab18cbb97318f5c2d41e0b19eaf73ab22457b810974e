@@ -1,0 +1,9 @@
+I"$<ul id="markdown-toc">
+  <li><a href="#核心作用" id="markdown-toc-核心作用">核心作用</a></li>
+</ul>
+<h3 id="核心作用">核心作用</h3>
+
+<ul>
+  <li><strong>单例模式保证一个类只有一个实例，并且提供一个访问该实例的全局访问点</strong></li>
+</ul>
+:ET

@@ -1,0 +1,258 @@
+I"�@<ul id="markdown-toc">
+  <li><a href="#场景" id="markdown-toc-场景">场景</a></li>
+  <li><a href="#核心" id="markdown-toc-核心">核心</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a>    <ul>
+      <li><a href="#实现" id="markdown-toc-实现">实现</a></li>
+      <li><a href="#享元类" id="markdown-toc-享元类">享元类</a></li>
+      <li><a href="#享元工厂" id="markdown-toc-享元工厂">享元工厂</a></li>
+      <li><a href="#外部状态" id="markdown-toc-外部状态">外部状态</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+      <li><a href="#原理" id="markdown-toc-原理">原理</a></li>
+    </ul>
+  </li>
+  <li><a href="#应用场景" id="markdown-toc-应用场景">应用场景</a></li>
+  <li><a href="#优点" id="markdown-toc-优点">优点</a></li>
+  <li><a href="#缺点" id="markdown-toc-缺点">缺点</a></li>
+  <li><a href="#结构模型总结" id="markdown-toc-结构模型总结">结构模型总结</a></li>
+</ul>
+<h3 id="场景">场景</h3>
+
+<ul>
+  <li>内存属于稀缺资源，不要随便浪费。如果有很多个完全相同或相似的对象，我们可以通过享元模式，节省内存</li>
+</ul>
+
+<h3 id="核心">核心</h3>
+
+<ul>
+  <li>享元模式以共享的方式高效地支持大量细粒度对象的重用</li>
+  <li>享元对象能做到共享的关键是区分了内部状态和外部状态</li>
+  <li>内部状态：可以共享，不会随环境变化而改变</li>
+  <li>外部状态：不可以共享，会随环境变化而改变</li>
+</ul>
+
+<h3 id="案例">案例</h3>
+
+<ul>
+  <li>每个围棋棋子都是一个对象</li>
+  <li>颜色，形状，大小这些是可以共享的，称之为：内部状态</li>
+  <li>位置这些不可以共享，称之为：外部状态</li>
+</ul>
+
+<h4 id="实现">实现</h4>
+
+<ul>
+  <li>FlyweightFactory享元工厂类：创建并管理享元对象，享元池一般设计成键值对</li>
+  <li>FlyWeight抽象享元类：通常是一个接口或抽象类，声明公共方法，这些方法可以向外界提供对象的内部状态，设置外部状态</li>
+  <li>ConcreteFlyWeight具体享元类：为内部状态提供成员变量进行存储</li>
+  <li>UnsharedConcreteFlyWeight非共享享元类：不能被共享的子类可以设计为非共享享元类</li>
+</ul>
+
+<h4 id="享元类">享元类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.flyweight</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 享元接口
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ChessFlyWeight</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 设置棋子颜色
+	 * @param c
+	 */</span>
+	<span class="kt">void</span> <span class="nf">setColor</span><span class="o">(</span><span class="nc">String</span> <span class="n">c</span><span class="o">);</span>
+	<span class="cm">/**
+	 * 获取棋子颜色
+	 * @return
+	 */</span>
+	<span class="nc">String</span> <span class="nf">getColor</span><span class="o">();</span>
+	<span class="cm">/**
+	 * 设置棋子位置
+	 * @param c
+	 */</span>
+	<span class="kt">void</span> <span class="nf">display</span><span class="o">(</span><span class="nc">Coordinate</span> <span class="n">c</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="cm">/**
+ * 具体享元类（真实棋子），实现了抽象享元接口
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">class</span> <span class="nc">ConcreteChess</span> <span class="kd">implements</span> <span class="nc">ChessFlyWeight</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">color</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="nf">ConcreteChess</span><span class="o">(</span><span class="nc">String</span> <span class="n">color</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">color</span> <span class="o">=</span> <span class="n">color</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">display</span><span class="o">(</span><span class="nc">Coordinate</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"棋子颜色："</span><span class="o">+</span><span class="n">color</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"棋子位置："</span><span class="o">+</span><span class="n">c</span><span class="o">.</span><span class="na">getX</span><span class="o">()+</span><span class="s">"----"</span><span class="o">+</span><span class="n">c</span><span class="o">.</span><span class="na">getY</span><span class="o">());</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getColor</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">color</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setColor</span><span class="o">(</span><span class="nc">String</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">color</span> <span class="o">=</span> <span class="n">c</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="享元工厂">享元工厂</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.flyweight</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 享元工厂类
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChessFlyWeightFactory</span> <span class="o">{</span>
+	<span class="c1">//享元池</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">ChessFlyWeight</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">ChessFlyWeight</span><span class="o">&gt;();</span>
+	<span class="cm">/**
+	 * 根据颜色获取棋子
+	 * @param color
+	 * @return
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">ChessFlyWeight</span>  <span class="nf">getChess</span><span class="o">(</span><span class="nc">String</span> <span class="n">color</span><span class="o">){</span>
+		<span class="c1">//如果有享元池内有对应颜色的棋子则返回，否则创建一个对应颜色的棋子再返回</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">color</span><span class="o">)!=</span><span class="kc">null</span><span class="o">){</span>
+			<span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">color</span><span class="o">);</span>
+		<span class="o">}</span><span class="k">else</span><span class="o">{</span>
+			<span class="nc">ChessFlyWeight</span> <span class="n">cfw</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConcreteChess</span><span class="o">(</span><span class="n">color</span><span class="o">);</span>
+			<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">color</span><span class="o">,</span> <span class="n">cfw</span><span class="o">);</span>
+			<span class="k">return</span> <span class="n">cfw</span><span class="o">;</span>
+		<span class="o">}</span>
+		
+	<span class="o">}</span>
+	
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="外部状态">外部状态</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.flyweight</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 外部状态UnSharedConcreteFlyWeight
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Coordinate</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="kt">int</span> <span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">Coordinate</span><span class="o">(</span><span class="kt">int</span> <span class="n">x</span><span class="o">,</span> <span class="kt">int</span> <span class="n">y</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">getX</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">x</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setX</span><span class="o">(</span><span class="kt">int</span> <span class="n">x</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">getY</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">y</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setY</span><span class="o">(</span><span class="kt">int</span> <span class="n">y</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.flyweight</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Client</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ChessFlyWeight</span> <span class="n">chess1</span> <span class="o">=</span> <span class="nc">ChessFlyWeightFactory</span><span class="o">.</span><span class="na">getChess</span><span class="o">(</span><span class="s">"黑色"</span><span class="o">);</span>
+		<span class="nc">ChessFlyWeight</span> <span class="n">chess2</span> <span class="o">=</span> <span class="nc">ChessFlyWeightFactory</span><span class="o">.</span><span class="na">getChess</span><span class="o">(</span><span class="s">"黑色"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">chess1</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">chess2</span><span class="o">);</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"增加外部状态的处理==========="</span><span class="o">);</span>
+		<span class="n">chess1</span><span class="o">.</span><span class="na">display</span><span class="o">(</span><span class="k">new</span> <span class="nc">Coordinate</span><span class="o">(</span><span class="mi">10</span><span class="o">,</span> <span class="mi">10</span><span class="o">));</span>
+		<span class="n">chess2</span><span class="o">.</span><span class="na">display</span><span class="o">(</span><span class="k">new</span> <span class="nc">Coordinate</span><span class="o">(</span><span class="mi">20</span><span class="o">,</span> <span class="mi">20</span><span class="o">));</span>
+		
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>com.bjsxt.flyweight.ConcreteChess@6af62373
+com.bjsxt.flyweight.ConcreteChess@6af62373
+增加外部状态的处理===========
+棋子颜色：黑色
+棋子位置：10----10
+棋子颜色：黑色
+棋子位置：20----20
+</code></pre></div></div>
+
+<h4 id="原理">原理</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>真实棋子（包含颜色和位置）---&gt;实现棋子接口
+外部状态：位置
+享元工厂---&gt;使用map存储真实棋子对象
+测试：从享元工厂获取对应颜色的棋子---&gt;然后设置外部状态---&gt;生成唯一的棋子
+</code></pre></div></div>
+
+<h3 id="应用场景">应用场景</h3>
+
+<ul>
+  <li>享元模式由于其共享的特性，可以在任何“池”中操作，比如：线程池、数据库连接池</li>
+  <li>String类的设计也是享元模式</li>
+</ul>
+
+<h3 id="优点">优点</h3>
+
+<ul>
+  <li>极大减少内存中对象的数量</li>
+  <li>相同或相似对象内存中只存一份，极大的节约资源，提高系统性能</li>
+  <li>外部状态相对独立，不影响内部状态</li>
+</ul>
+
+<h3 id="缺点">缺点</h3>
+
+<ul>
+  <li>模式较复杂，使程序逻辑复杂化</li>
+  <li>为了节省内存，共享了内部状态，分离出外部状态，而读取外部状态使运行时间变长。用时间换取了空间</li>
+</ul>
+
+<h3 id="结构模型总结">结构模型总结</h3>
+
+<ul>
+  <li>代理模式：为真实对象提供一个代理，从而控制对真实对象的访问</li>
+  <li>适配模式：使原本由于接口不兼容不能一起工作的类可以一起工作</li>
+  <li>桥接模式：处理多层继承结构，处理多维度变化的场景，将各个维度设计成独立的继承结构，使各个维度可以独立的扩展在抽象层建立关联</li>
+  <li>组合模式：将对象组合成树状结构以表示”部分和整体”层次结构，使得客户可以统一的调用叶子对象和容器对象</li>
+  <li>装饰模式：动态地给一个对象添加额外的功能，比继承灵活</li>
+  <li>外观模式：为子系统提供统一的调用接口，使得子系统更加容易使用</li>
+  <li>享元模式：运用共享技术有效的实现管理大量细粒度对象，节省内存，提高效率</li>
+</ul>
+
+:ET

@@ -1,0 +1,31 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#处理器映射器" id="markdown-toc-处理器映射器">处理器映射器</a></li>
+</ul>
+<h3 id="处理器映射器">处理器映射器</h3>
+
+<ul>
+  <li>
+    <p>HandlerMapping</p>
+  </li>
+  <li>多个映射对应一个资源</li>
+  <li>andlerMapping 接口负责根据 request 请求找到对应的 Handler 处理器及 Interceptor 拦截器，并将它们封装在 HandlerExecutionChain 对象中，返回给中央调度器</li>
+  <li>其常用的实现类有两种：</li>
+  <li>BeanNameUrlHandlerMapping</li>
+  <li>SimpleUrlHandlerMapping</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--注册处理器映射器--&gt;</span>
+<span class="nt">&lt;bean</span> <span class="na">class=</span><span class="s">"org.springframework.web.servlet.handle.SimpleUrlHandlerMapping"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"mappings"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;props&gt;</span>
+			<span class="nt">&lt;prop</span> <span class="na">key=</span><span class="s">"/hello.do"</span><span class="nt">&gt;</span>myController<span class="nt">&lt;/prop&gt;</span>
+			<span class="nt">&lt;prop</span> <span class="na">key=</span><span class="s">"/hello1.do"</span><span class="nt">&gt;</span>myController<span class="nt">&lt;/prop&gt;</span>
+			<span class="nt">&lt;prop</span> <span class="na">key=</span><span class="s">"/hello2.do"</span><span class="nt">&gt;</span>myController<span class="nt">&lt;/prop&gt;</span>
+		<span class="nt">&lt;/props&gt;</span>
+	<span class="nt">&lt;/property&gt;</span>
+<span class="nt">&lt;/bean&gt;</span>
+
+<span class="c">&lt;!--注册处理器--&gt;</span>
+<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"myController"</span> <span class="na">class=</span><span class="s">"com.test.controller.MyController"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+:ET

@@ -1,0 +1,63 @@
+I"%<ul id="markdown-toc">
+  <li><a href="#继承映射" id="markdown-toc-继承映射">继承映射</a></li>
+  <li><a href="#检索策略" id="markdown-toc-检索策略">检索策略</a></li>
+  <li><a href="#检索方式" id="markdown-toc-检索方式">检索方式</a></li>
+  <li><a href="#二级缓存" id="markdown-toc-二级缓存">二级缓存</a>    <ul>
+      <li><a href="#并发访问" id="markdown-toc-并发访问">并发访问</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="继承映射">继承映射</h3>
+
+<ul>
+  <li><strong>Hibernate 的继承映射可以理解持久化类之间的继承关系</strong></li>
+  <li>使用 subclass 进行映射</li>
+  <li>使用 joined-subclass 进行映射</li>
+  <li>使用  union-subclass进行映射</li>
+</ul>
+
+<h3 id="检索策略">检索策略</h3>
+
+<ul>
+  <li>类级别可选的检索策略包括立即检索和延迟检索, 默认为延迟检索</li>
+  <li>立即检索: 立即加载检索方法指定的对象</li>
+  <li>延迟检索: 延迟加载检索方法指定的对象。在使用具体的属性时，再进行加载</li>
+  <li>类级别的检索策略可以通过 <code class="language-plaintext highlighter-rouge">&lt;class&gt; </code>元素的 lazy 属性进行设置</li>
+  <li>如果程序加载一个对象的目的是为了访问它的属性, 可以采取立即检索</li>
+  <li>如果程序加载一个持久化对象的目的是仅仅为了获得它的引用, 可以采用延迟检索。注意出现懒加载异常！</li>
+  <li>无论 <code class="language-plaintext highlighter-rouge">&lt;class&gt;</code> 元素的 lazy 属性是 true 还是 false,Session 的 get() 方法及 Query 的 list() 方法在类级别总是使用立即检索策略</li>
+</ul>
+
+<h3 id="检索方式">检索方式</h3>
+
+<ul>
+  <li><strong>HQL检索方式</strong>: 使用面向对象的 HQL 查询语言</li>
+  <li><strong>QBC检索方式</strong>: 使用 QBC(QueryBy Criteria) API 来检索对象. 这种 API 封装了基于字符串形式的查询语句, 提供了更加面向对象的查询接口</li>
+</ul>
+
+<h3 id="二级缓存">二级缓存</h3>
+
+<ul>
+  <li>缓存(Cache): 它介于应用程序和永久性数据存储源(如硬盘上的文件或者数据库)之间，其作用是降低应用程序直接读写永久性数据存储源的频率，从而提高应用的运行性能</li>
+  <li>缓存中的数据是数据存储源中数据的拷贝</li>
+  <li><strong>缓存的物理介质通常是内存</strong></li>
+  <li>第一级别的缓存是 Session 级别的缓存，它是属于事务范围的缓存。这一级别的缓存由 hibernate
+管理的</li>
+  <li>第二级别的缓存是 SessionFactory 级别的缓存，它是属于进程范围的缓存</li>
+  <li>SessionFactory 的缓存可以分为两类:</li>
+  <li>内置缓存: <strong>Hibernate 自带的,不可卸载</strong>. 通常在 Hibernate 的初始化阶段, Hibernate 会把映射元数据和预定义的 SQL 语句放到 SessionFactory 的缓存中, 映射元数据是映射文件中数据（.hbm.xml 文件中的数据）的复制. 该内置缓存是只读的</li>
+  <li><strong>外置缓存(二级缓存)</strong>: 一个可配置的缓存插件. 在默认情况下, SessionFactory 不会启用这个缓存插件. 外置缓存中的数据是数据库数据的复制, 外置缓存的物理介质可以是内存或硬盘</li>
+</ul>
+
+<h4 id="并发访问">并发访问</h4>
+
+<ul>
+  <li>
+    <p>两个并发的事务同时访问持久层的缓存的相同数据时, 也有可能出现各类并发问题</p>
+  </li>
+  <li><strong>非严格读写</strong>(Nonstrict-read-write): 不保证缓存与数据库中数据的一致性. 提供 Read Uncommited 事务隔离级别, 对于极少被修改, 而且允许脏读的数据, 可以采用这种策略</li>
+  <li><strong>读写型</strong>(Read-write): 提供 Read Commited 数据隔离级别.对于经常读但是很少被修改的数据, 可以采用这种隔离类型, 因为它可以防止脏读</li>
+  <li><strong>事务型</strong>(Transactional):仅在受管理环境下适用. 它提供了 Repeatable Read 事务隔离级别. 对于经常读但是很少被修改的数据, 可以采用这种隔离类型, 因为它可以防止脏读和不可重复读</li>
+  <li><strong>只读型</strong>(Read-Only):提供 Serializable 数据隔离级别, 对于从来不会被修改的数据, 可以采用这种访问策略</li>
+</ul>
+:ET

@@ -1,0 +1,1422 @@
+I"<ul id="markdown-toc">
+  <li><a href="#基本概念" id="markdown-toc-基本概念">基本概念</a>    <ul>
+      <li><a href="#架构" id="markdown-toc-架构">架构</a></li>
+    </ul>
+  </li>
+  <li><a href="#登录登出" id="markdown-toc-登录登出">登录登出</a>    <ul>
+      <li><a href="#案例" id="markdown-toc-案例">案例</a></li>
+      <li><a href="#源码流程" id="markdown-toc-源码流程">源码流程</a></li>
+    </ul>
+  </li>
+  <li><a href="#自定义realm" id="markdown-toc-自定义realm">自定义realm</a>    <ul>
+      <li><a href="#案例-1" id="markdown-toc-案例-1">案例</a></li>
+      <li><a href="#realm密码加密" id="markdown-toc-realm密码加密">realm密码加密</a></li>
+    </ul>
+  </li>
+  <li><a href="#用户授权" id="markdown-toc-用户授权">用户授权</a>    <ul>
+      <li><a href="#授权方式" id="markdown-toc-授权方式">授权方式</a></li>
+      <li><a href="#授权流程" id="markdown-toc-授权流程">授权流程</a></li>
+      <li><a href="#检查角色" id="markdown-toc-检查角色">检查角色</a></li>
+      <li><a href="#检查权限" id="markdown-toc-检查权限">检查权限</a></li>
+    </ul>
+  </li>
+  <li><a href="#权限注解" id="markdown-toc-权限注解">权限注解</a></li>
+  <li><a href="#拦截器" id="markdown-toc-拦截器">拦截器</a></li>
+  <li><a href="#整合web" id="markdown-toc-整合web">整合WEB</a></li>
+  <li><a href="#整合ssm" id="markdown-toc-整合ssm">整合SSM</a></li>
+  <li><a href="#整合springboot" id="markdown-toc-整合springboot">整合springboot</a></li>
+  <li><a href="#整合jsp" id="markdown-toc-整合jsp">整合jsp</a>    <ul>
+      <li><a href="#认证通过" id="markdown-toc-认证通过">认证通过</a></li>
+      <li><a href="#认证不通过" id="markdown-toc-认证不通过">认证不通过</a></li>
+      <li><a href="#游客身份" id="markdown-toc-游客身份">游客身份</a></li>
+      <li><a href="#已登录" id="markdown-toc-已登录">已登录</a></li>
+      <li><a href="#有任一角色" id="markdown-toc-有任一角色">有任一角色</a></li>
+      <li><a href="#有某一角色" id="markdown-toc-有某一角色">有某一角色</a></li>
+      <li><a href="#无某一角色" id="markdown-toc-无某一角色">无某一角色</a></li>
+      <li><a href="#有某一权限" id="markdown-toc-有某一权限">有某一权限</a></li>
+      <li><a href="#无某一权限" id="markdown-toc-无某一权限">无某一权限</a></li>
+      <li><a href="#principal" id="markdown-toc-principal">principal</a></li>
+      <li><a href="#标签嵌套" id="markdown-toc-标签嵌套">标签嵌套</a></li>
+    </ul>
+  </li>
+  <li><a href="#整合thymeleaf" id="markdown-toc-整合thymeleaf">整合thymeleaf</a></li>
+  <li><a href="#缓存" id="markdown-toc-缓存">缓存</a></li>
+</ul>
+<p><a href="https://yubuntu0109.github.io">参考致谢</a></p>
+
+<h3 id="基本概念">基本概念</h3>
+
+<ul>
+  <li>Apache Shiro是一个强大易用的Java安全框架,提供了认证、授权、加密和会话管理等功能，对于任何一个应用程序,Shiro都可以提供全面的安全管理服务</li>
+  <li>权限管理包括用户<strong>身份认证</strong>和<strong>授权</strong>两个部分,简称认证授权</li>
+  <li><strong>身份认证</strong> : 为判断用户是否为合法用户的过程,最常用的身份认证方式就是系统通过核对用户输入的用户名和口令,将其与系统中存储的该用户信息相对比,继而来判断用户身份是否正确</li>
+  <li><strong>授权</strong> : 既访问权限,控制用户访问资源的权限. 主体(subject)进行身份认证后需要分配权限方可访问系统的资源</li>
+</ul>
+
+<h4 id="架构">架构</h4>
+
+<ul>
+  <li>Shiro可以非常容易的开发出足够好的应用,其不仅可以用在JavaSE环境,也可以用在JavaEE环境. Shiro可以帮助我们完成 : 认证、授权、加密、会话管理、与Web集成、缓存等</li>
+  <li><strong>Authentication</strong> : 身份认证 / 登录,验证用户是不是拥有相应的身份</li>
+  <li><strong>Authorization</strong> : 授权,即权限验证,验证某个已认证的用户是否拥有某个权限. 即判断用户是否能做事情,常见的如 : 验证某个用户是否拥有某个角色,或者细粒度的验证某个用户对某个资源是否具有某个权限</li>
+  <li><strong>Session Manager</strong> : 会话管理,即用户登录后就是一次会话,在没有退出之前,它的所有信息都在会话中. 会话可以是普通JavaSE环境的,也可以是如Web环境的</li>
+  <li><strong>SessionDAO</strong> : DAO大家都用过,数据访问对象,用于会话的CRUD,比如我们想把Session保存到数据库,那么可以实现自己的 SessionDAO,通过如JDBC写到数据库. 比如想把Session放到Memcached中,可以实现自己的Memcached SessionDAO. 另外SessionDAO中可以使用Cache进行缓存,以提高性能</li>
+  <li><strong>Cryptography</strong> : 加密,保护数据的安全性,如密码加密存储到数据库,而不是明文存储</li>
+  <li><strong>CacheManager</strong> : 缓存控制器,来管理如用户、角色、权限等的缓存的. 因为这些数据基本上很少去改变,放到缓存中后可以提高访问的性能</li>
+  <li><strong>Web Support</strong> : Web支持,可以非常容易的集成到Web环境中</li>
+  <li><strong>Caching</strong> : 缓存,比如用户登录后,其用户信息、拥有的角色 / 权限不必每次去查,这样可以提高效率</li>
+  <li><strong>Concurrency</strong> : shiro支持多线程应用的并发验证,即如在一个线程中开启另一个线程,能把权限自动传播过去</li>
+  <li><strong>Testing</strong> : 提供测试支持</li>
+  <li><strong>Run As</strong> : 允许一个用户假装为另一个用户(在他们允许的情况下)的身份进行访问</li>
+  <li><strong>Remember Me</strong> : 记住我,这个是非常常见的功能,即一次登录后,下次不用重复登录了</li>
+  <li>shiro API含义：</li>
+  <li><strong>Subject</strong> : 主体,代表了当前”用户”,这个用户不一定是一个具体的人,与当前应用交互的任何东西都是Subject,如网络爬虫,机器人等,即为一个抽象概念. 所有Subject都绑定到SecurityManager,与Subject的所有交互都会委托给SecurityManager. 可以把Subject认为是一个门面,SecurityManager才是实际的执行者</li>
+  <li><strong>SecurityManager</strong> : 安全管理器,即所有与安全有关的操作都会与SecurityManager交互,且它管理着所有Subject. 可以看出它是Shiro的核心,它负责与后边介绍的其他组件进行交互,如果学习过SpringMVC,你可以把它看成<code class="language-plaintext highlighter-rouge">DispatcherServlet</code>前端控制器</li>
+  <li><strong>Realm</strong> : 域,Shiro从Realm获取安全数据(如用户、角色、权限),就是说SecurityManager要验证用户身份,那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法,也需要从Realm得到用户相应的角色 / 权限进行验证用户是否能进行操作. 可以把Realm看成 DataSource,即安全数据源。注意 : Shiro不知道你的用户 / 权限存储在哪及以何种格式存储,所以我们一般在应用中都需要实现自己的Realm</li>
+  <li>
+    <p>Shiro不提供维护用户 / 权限,而是通过Realm让开发人员自己注入内部结构</p>
+  </li>
+  <li>最简单的一个Shiro应用可以基本分为以下两个步骤 :
+    <ul>
+      <li>应用代码通过Subject来进行认证和授权,而Subject又将所有的互交都委托给了SecurityManager</li>
+      <li>我们需要给Shiro的SecurityManager注入Realm,从而让SecurityManager能得到合法的用户及其权限进行判断</li>
+    </ul>
+  </li>
+  <li><strong>Authenticator</strong> : 认证器,负责主体认证的,这是一个扩展点,如果用户觉得Shiro默认的不好,可以自定义实现. 其需要认证策略(Authentication Strategy),即什么情况下算用户认证通过了</li>
+  <li><strong>Authrizer</strong> : 授权器,或者访问控制器,用来决定主体是否有权限进行相应的操作,即控制着用户能访问应用中的哪些功能</li>
+</ul>
+
+<h3 id="登录登出">登录登出</h3>
+
+<ul>
+  <li>在shiro中,用户需要提供principals(身份)和credentials(证明)给shiro,继而来验证用户的身份信息,最常见的princpals和 credentials组合就是用户名 / 密码</li>
+  <li><strong>principals</strong> : 身份,即主体的标识属性,如用户名、邮箱等,需唯一. 一个主体可以有多个principals,但只有一个Primary principals,一般是用户名 / 手机号</li>
+  <li><strong>credentials</strong> : 证明 / 凭证,即只有主体知道的安全值,如密码 / 数字证书等</li>
+</ul>
+
+<h4 id="案例">案例</h4>
+
+<ul>
+  <li>maven依赖</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependencies&gt;</span>
+    <span class="c">&lt;!--Junit 单元测试 --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>junit<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>junit<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>4.11<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- Shiro核心包 --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.apache.shiro<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>shiro-core<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.3.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- slf4j的接口实现 --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.slf4j<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>slf4j-log4j12<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.7.12<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;/dependencies&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>shiro文件：shiro.ini(存储用户身份信息(账户=密码))相当于从数据库中查询出的账号密码</li>
+</ul>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[users]</span>
+<span class="py">root</span><span class="p">=</span><span class="s">yubuntu0109</span>
+</code></pre></div></div>
+
+<ul>
+  <li>测试</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Shiro认证测试:验证用户登录信息
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShiroTest</span> <span class="o">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testLogin</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//1:加载配置文件,创建SecurityManager工厂对象</span>
+        <span class="nc">Factory</span><span class="o">&lt;</span><span class="nc">SecurityManager</span><span class="o">&gt;</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">IniSecurityManagerFactory</span><span class="o">(</span><span class="s">"classpath:shiro.ini"</span><span class="o">);</span>
+        <span class="c1">//2:获得securityManager实例对象</span>
+        <span class="nc">SecurityManager</span> <span class="n">securityManager</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">();</span>
+        <span class="c1">//3:将securityManger实例绑定到当前运行环境中,便于访问</span>
+        <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">setSecurityManager</span><span class="o">(</span><span class="n">securityManager</span><span class="o">);</span>
+        <span class="c1">//4:创建当前登录的主体</span>
+        <span class="nc">Subject</span> <span class="n">currentUser</span> <span class="o">=</span> <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">getSubject</span><span class="o">();</span>
+        <span class="c1">//5:绑定主体登录的身份/凭证,既账户及密码（相当于从前台form表单获取到的账号密码）</span>
+        <span class="nc">UsernamePasswordToken</span> <span class="n">token</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UsernamePasswordToken</span><span class="o">(</span><span class="s">"root"</span><span class="o">,</span> <span class="s">"yubuntu0109"</span><span class="o">);</span>
+        <span class="c1">//6:主体登录</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">currentUser</span><span class="o">.</span><span class="na">login</span><span class="o">(</span><span class="n">token</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户身份是否验证成功 :"</span> <span class="o">+</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnknownAccountException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户账户信息错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IncorrectCredentialsException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户密码信息错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">AuthenticationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="c1">//8:注销登录</span>
+        <span class="n">currentUser</span><span class="o">.</span><span class="na">logout</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"身份身份是否注销成功 :"</span> <span class="o">+</span> <span class="o">!</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="源码流程">源码流程</h4>
+
+<ul>
+  <li>1：调用<code class="language-plaintext highlighter-rouge">subject.login(AuthenticationToken token)</code>方法进行用户登录,其会自动委托给<code class="language-plaintext highlighter-rouge">securityManager.login(Subject subject, AuthenticationToken token)</code>方法进行登录</li>
+  <li>2：<code class="language-plaintext highlighter-rouge">securityManager</code>(安全管理器)通过<code class="language-plaintext highlighter-rouge">Authenticator</code>(认证器)进行认证</li>
+  <li>3：<code class="language-plaintext highlighter-rouge">Authenticator</code>的实现类<code class="language-plaintext highlighter-rouge">ModularRealmAuthenticator</code>通过调用<code class="language-plaintext highlighter-rouge">realm</code>从<code class="language-plaintext highlighter-rouge">shiro.ini</code>配置文件中获取用户真实的信息(账户和密码),这里的Realm(域)可以看成DataSource,即安全数据源</li>
+  <li>4：<code class="language-plaintext highlighter-rouge">IniRealm</code>(可通过加载<code class="language-plaintext highlighter-rouge">.ini</code>文件生成reaml对象)先根据<code class="language-plaintext highlighter-rouge">token</code>中的账号去<code class="language-plaintext highlighter-rouge">shiro.ini</code>配置文件中去匹配该账号,如果找不到则<code class="language-plaintext highlighter-rouge">ModularRealmAuthenticator</code>返回null,如果找到则继续匹配密码,若匹配成功则认证通过,反之不通过</li>
+  <li>5：最后可以使用<code class="language-plaintext highlighter-rouge">Subject.logout()</code>进行退出操作</li>
+</ul>
+
+<h3 id="自定义realm">自定义realm</h3>
+
+<ul>
+  <li><strong>Realm</strong> : 域,Shiro从Realm获取安全数据(如用户、角色、权限),就是说SecurityManager要验证用户身份,那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法. 也需要从Realm得到用户相应的角色 / 权限进行验证用户是否能进行操作,可以把Realm看成 DataSource,即安全数据源. 如我们之前的ini配置方式使用的是<code class="language-plaintext highlighter-rouge">org.apache.shiro.realm.text.IniRealm</code>接口</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//org.apache.shiro.realm.Realm接口</span>
+<span class="c1">//返回一个唯一的Realm名字</span>
+<span class="nc">String</span> <span class="nf">getName</span><span class="o">();</span> 
+<span class="c1">//判断此Realm是否支持此Token</span>
+<span class="kt">boolean</span> <span class="nf">supports</span><span class="o">(</span><span class="nc">AuthenticationToken</span> <span class="n">token</span><span class="o">);</span> 
+<span class="c1">//根据Token获取认证信息</span>
+<span class="nc">AuthenticationInfo</span> <span class="nf">getAuthenticationInfo</span><span class="o">(</span><span class="nc">AuthenticationToken</span> <span class="n">token</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">AuthenticationException</span><span class="o">;</span>
+</code></pre></div></div>
+
+<h4 id="案例-1">案例</h4>
+
+<ul>
+  <li>依赖</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependencies&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>junit<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>junit<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>4.11<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- Shiro核心包 --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.apache.shiro<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>shiro-core<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.3.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- slf4j的接口实现 --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.slf4j<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>slf4j-log4j12<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.7.12<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- java.lang.NoClassDefFoundError: org/apache/commons/logging/LogFactory --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>commons-logging<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>commons-logging<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;/dependencies&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>信息文件：shiro.ini</li>
+</ul>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#自定义realm
+</span><span class="py">myRealm</span> <span class="p">=</span> <span class="s">com.xxx.MyRealm</span>
+<span class="c">#指定SecurityManager的realms实现
+</span><span class="py">securityManager.realm</span> <span class="p">=</span> <span class="s">$myRealm</span>
+</code></pre></div></div>
+
+<ul>
+  <li>自定义realm：MyRealm</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyRealm</span> <span class="kd">extends</span> <span class="nc">AuthorizingRealm</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"myRealm"</span><span class="o">;</span> <span class="c1">//区分不同的Realm</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">//授权操作</span>
+    <span class="kd">protected</span> <span class="nc">AuthorizationInfo</span> <span class="nf">doGetAuthorizationInfo</span><span class="o">(</span><span class="nc">PrincipalCollection</span> <span class="n">principals</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">//认证操作:其token存储着传入的用户登录信息(usernamePasswordToken)</span>
+    <span class="kd">protected</span> <span class="nc">AuthenticationInfo</span> <span class="nf">doGetAuthenticationInfo</span><span class="o">(</span><span class="nc">AuthenticationToken</span> <span class="n">token</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">AuthenticationException</span> <span class="o">{</span>
+
+        <span class="c1">//获取并验证用户账号信息(前端传入)</span>
+        <span class="nc">String</span> <span class="n">username</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">token</span><span class="o">.</span><span class="na">getPrincipal</span><span class="o">();</span>
+        <span class="c1">//与数据库中的数据进行比较</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="s">"root"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">username</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">//假设数据库中用户密码信息</span>
+        <span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="s">"yubuntu0109"</span><span class="o">;</span>
+
+        <span class="c1">//SimpleAuthenticationInfo(Object principal, Object credentials, String realmName)</span>
+        <span class="nc">SimpleAuthenticationInfo</span> <span class="n">info</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleAuthenticationInfo</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">password</span><span class="o">,</span> <span class="n">getName</span><span class="o">());</span>
+        <span class="k">return</span> <span class="n">info</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>测试</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 测试自定义realm
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">loginByMyRealm</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//1:加载配置文件,创建SecurityManager工厂对象</span>
+        <span class="nc">Factory</span><span class="o">&lt;</span><span class="nc">SecurityManager</span><span class="o">&gt;</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">IniSecurityManagerFactory</span><span class="o">(</span><span class="s">"classpath:my-shiro.ini"</span><span class="o">);</span>
+        <span class="c1">//2:获得securityManager实例对象</span>
+        <span class="nc">SecurityManager</span> <span class="n">securityManager</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">();</span>
+        <span class="c1">//3:将securityManger实例绑定到当前运行环境中,便于访问</span>
+        <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">setSecurityManager</span><span class="o">(</span><span class="n">securityManager</span><span class="o">);</span>
+        <span class="c1">//4:创建当前登录的主体</span>
+        <span class="nc">Subject</span> <span class="n">currentUser</span> <span class="o">=</span> <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">getSubject</span><span class="o">();</span>
+        <span class="c1">//5:绑定主体登录的身份/凭证,既账户及密码</span>
+        <span class="nc">UsernamePasswordToken</span> <span class="n">token</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UsernamePasswordToken</span><span class="o">(</span><span class="s">"root"</span><span class="o">,</span> <span class="s">"yubuntu0109"</span><span class="o">);</span>
+        <span class="c1">//6:主体登录</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">currentUser</span><span class="o">.</span><span class="na">login</span><span class="o">(</span><span class="n">token</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户身份是否验证成功 :"</span> <span class="o">+</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnknownAccountException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户账户错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IncorrectCredentialsException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户密码错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">AuthenticationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="c1">//8:注销登录</span>
+        <span class="n">currentUser</span><span class="o">.</span><span class="na">logout</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"身份身份是否注销成功 :"</span> <span class="o">+</span> <span class="o">!</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="realm密码加密">realm密码加密</h4>
+
+<ul>
+  <li>散列算法一般用于生成数据的摘要信息,是一种不可逆的算法,一般适合存储密码之类的数据,常见的散列算法如MD5、SHA等.</li>
+  <li>通过使用MD5加密自定义Realm,</li>
+</ul>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[main]</span>
+<span class="c">#定义凭证匹配器
+</span><span class="py">credentialsMatcher</span> <span class="p">=</span> <span class="s">org.apache.shiro.authc.credential.HashedCredentialsMatcher</span>
+<span class="c">#散列算法
+</span><span class="py">credentialsMatcher.hashAlgorithmName</span> <span class="p">=</span> <span class="s">md5</span>
+<span class="c">#散列次数
+</span><span class="py">credentialsMatcher.hashIterations</span> <span class="p">=</span> <span class="s">10</span>
+<span class="c">#将凭证匹配器设置到realm
+</span><span class="py">myRealm</span> <span class="p">=</span> <span class="s">com.xxx.EncryRealm</span>
+<span class="py">myRealm.credentialsMatcher</span> <span class="p">=</span> <span class="s">$credentialsMatcher</span>
+<span class="py">securityManager.realms</span> <span class="p">=</span> <span class="s">$myRealm</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+*加密realm
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EncryRealm</span> <span class="kd">extends</span> <span class="nc">AuthorizingRealm</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"myRealm"</span><span class="o">;</span> <span class="c1">//区分不同的Realm</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">//授权操作</span>
+    <span class="kd">protected</span> <span class="nc">AuthorizationInfo</span> <span class="nf">doGetAuthorizationInfo</span><span class="o">(</span><span class="nc">PrincipalCollection</span> <span class="n">principals</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">//认证操作</span>
+    <span class="kd">protected</span> <span class="nc">AuthenticationInfo</span> <span class="nf">doGetAuthenticationInfo</span><span class="o">(</span><span class="nc">AuthenticationToken</span> <span class="n">token</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">AuthenticationException</span> <span class="o">{</span>
+
+        <span class="c1">//获取用户账户信息</span>
+        <span class="nc">String</span> <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="na">getPrincipal</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="s">"root"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">username</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">//MD5加密后的用户密码信息</span>
+        <span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="s">"f3005f7acf36cec973498845460b0c33"</span><span class="o">;</span><span class="c1">//password + username + 10</span>
+        <span class="c1">//指定盐值:ByteSource.Util.bytes(username)</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">SimpleAuthenticationInfo</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">password</span><span class="o">,</span> <span class="nc">ByteSource</span><span class="o">.</span><span class="na">Util</span><span class="o">.</span><span class="na">bytes</span><span class="o">(</span><span class="n">username</span><span class="o">),</span> <span class="n">getName</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="用户授权">用户授权</h3>
+
+<ul>
+  <li>授权,也叫访问控制,即在应用中控制谁能访问哪些资源(如访问页面/编辑数据/页面操作等). 在授权中需了解的几个关键对象 : 主体(Subject)、资源(Resource)、权限(Permission)、角色(Role)</li>
+  <li><strong>主体</strong> : 主体,即访问应用的用户,在Shiro中使用Subject代表该用户. 用户只有授权后才允许访问相应的资源</li>
+  <li><strong>资源</strong> : 在应用中用户可以访问的任何资源,比如访问JSP页面、查看/编辑某些数据、访问某个业务方法、打印文本等等..用户需要授权后方可访问</li>
+  <li><strong>权限</strong> : 安全策略中的原子授权单位,可用权限控制用户在应用中是否能访问某个资源,如访问用户列表页面,查看/新增/修改/删除用户数据(基本为CRUD式权限控制)</li>
+  <li><strong>角色</strong> : 角色代表了操作集合,可以理解为权限的集合,一般情况下我们会赋予用户角色而不是权限,即这样用户可以拥有一组权限,不同的角色拥有一组不同的权限
+    <ul>
+      <li><strong>隐式角色</strong> : 即直接通过角色来验证用户有没有操作权限,即粒度是以角色为单位进行访问控制的,粒度较粗. 若进行变更可能需要多处代码的修改</li>
+      <li><strong>显示角色</strong> : 在程序中通过权限控制谁能访问某个资源,角色聚合一组权限集合. 这样若需要哪个角色不能访问某个资源,只需要从角色代表的权限集合中移除指定的访问权限即可,无须修改多处</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="授权方式">授权方式</h4>
+
+<ul>
+  <li>编程式 : 通过写if/else授权代码块完成</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Subject</span> <span class="n">subject</span> <span class="o">=</span> <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">getSubject</span><span class="o">();</span>
+<span class="k">if</span><span class="o">(</span><span class="n">subject</span><span class="o">.</span><span class="na">hasRole</span><span class="o">(</span><span class="s">"admin"</span><span class="o">))</span> <span class="o">{</span>
+    <span class="c1">//有权限</span>
+<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+    <span class="c1">//无权限</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>注解式 : 通过在执行的Java方法上放置相应的注解完成</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RequiresRoles</span><span class="o">(</span><span class="s">"admin"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">hello</span><span class="o">()</span> <span class="o">{</span>
+    <span class="c1">//有权限</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>JSP/GSP 标签 : 在JSP/GSP页面通过相应的标签完成</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:hasRole </span><span class="na">name=</span><span class="s">"admin"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;</span><span class="err">!—</span> <span class="na">有权限</span> <span class="err">—</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/shiro:hasRole&gt;</span>
+</code></pre></div></div>
+
+<h4 id="授权流程">授权流程</h4>
+
+<ul>
+  <li>首先调用<code class="language-plaintext highlighter-rouge">Subject.isPermitted/hasRole</code>接口,其会委托给SecurityManager,而SecurityManager接着会委托给Authorizer</li>
+  <li>Authorizer是真正的授权者,如果我们调用如<code class="language-plaintext highlighter-rouge">isPermitted(“user:create”)</code>,其首先会通过PermissionResolver把字符串转换成相应的Permission实例</li>
+  <li>在进行授权之前,其会调用相应的Realm获取Subject相应的角色/权限用于匹配传入的角色/权限</li>
+  <li>Authorizer会判断Realm的角色/权限是否和传入的匹配,如果有多个Realm,则会委托给ModularRealmAuthorizer进行循环判断,如果匹配如<code class="language-plaintext highlighter-rouge">isPermitted/hasRole</code>会返回true,否则返回false以表示授权失败</li>
+</ul>
+
+<h4 id="检查角色">检查角色</h4>
+
+<ul>
+  <li>依赖</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependencies&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>junit<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>junit<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>4.11<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- Shiro核心包 --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.apache.shiro<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>shiro-core<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.3.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- slf4j的接口实现 --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.slf4j<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>slf4j-log4j12<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.7.12<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="c">&lt;!-- java.lang.NoClassDefFoundError: org/apache/commons/logging/LogFactory --&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>commons-logging<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>commons-logging<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.2<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;/dependencies&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>配置信息：shiro.ini</li>
+</ul>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#权限表达式的定义:首先根据用户名查找角色,再根据角色查找权限,角色是权限的集合
+</span>
+<span class="nn">[users]</span>
+<span class="c">#用户hunagyuhui的密码为loveyourself,且具有student和programmer两个角色
+</span><span class="py">huangyuhui</span> <span class="p">=</span> <span class="s">loveyourself,student,programmer</span>
+
+<span class="nn">[roles]</span>
+<span class="c">#角色student对资源'user'拥有create,update权限
+</span><span class="py">student</span> <span class="p">=</span> <span class="s">user:create,user:update</span>
+<span class="c">#角色programmer对资源'user'read,delete权限
+</span><span class="py">programmer</span> <span class="p">=</span> <span class="s">user:read,user:delete</span>
+</code></pre></div></div>
+
+<ul>
+  <li>测试</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RolesTest</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//1:加载配置文件,创建SecurityManager工厂对象</span>
+        <span class="nc">Factory</span><span class="o">&lt;</span><span class="nc">SecurityManager</span><span class="o">&gt;</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">IniSecurityManagerFactory</span><span class="o">(</span><span class="s">"classpath:per-shiro.ini"</span><span class="o">);</span>
+        <span class="c1">//2:获得securityManager实例对象</span>
+        <span class="nc">SecurityManager</span> <span class="n">securityManager</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">();</span>
+        <span class="c1">//3:将securityManger实例绑定到当前运行环境中,便于访问</span>
+        <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">setSecurityManager</span><span class="o">(</span><span class="n">securityManager</span><span class="o">);</span>
+        <span class="c1">//4:创建当前登录的主体</span>
+        <span class="nc">Subject</span> <span class="n">currentUser</span> <span class="o">=</span> <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">getSubject</span><span class="o">();</span>
+        <span class="c1">//5:绑定主体登录的身份/凭证,既账户及密码</span>
+        <span class="nc">UsernamePasswordToken</span> <span class="n">token</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UsernamePasswordToken</span><span class="o">(</span><span class="s">"huangyuhui"</span><span class="o">,</span> <span class="s">"loveyourself"</span><span class="o">);</span>
+        <span class="c1">//6:主体登录</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">currentUser</span><span class="o">.</span><span class="na">login</span><span class="o">(</span><span class="n">token</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户身份是否验证成功 :"</span> <span class="o">+</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+            <span class="c1">//7:进行用户角色判断</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"判断当前登录用户是否拥有'student'角色 : "</span> <span class="o">+</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">hasRole</span><span class="o">(</span><span class="s">"student"</span><span class="o">));</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"判断当前登录用户是否同时拥有'student'与'programmer'角色 : "</span> <span class="o">+</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">hasAllRoles</span><span class="o">(</span><span class="nc">List</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"student"</span><span class="o">,</span> <span class="s">"programmer"</span><span class="o">)));</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"判断当前登录用户是否拥有'student','programmer','singer'角色 : "</span> <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">currentUser</span><span class="o">.</span><span class="na">hasRoles</span><span class="o">(</span><span class="nc">List</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"student"</span><span class="o">,</span> <span class="s">"programmer"</span><span class="o">,</span> <span class="s">"singer"</span><span class="o">))));</span>
+            <span class="c1">//判断当前用户是否拥有某个角色,若拥有该角色则不做任何操作(无返回值),反之则抛出:UnauthorizedException</span>
+            <span class="n">currentUser</span><span class="o">.</span><span class="na">checkRole</span><span class="o">(</span><span class="s">"singer"</span><span class="o">);</span>
+
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnknownAccountException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户账户错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IncorrectCredentialsException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户密码错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnauthorizedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户并不拥有'singer'角色 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">AuthenticationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="c1">//8:注销登录</span>
+        <span class="n">currentUser</span><span class="o">.</span><span class="na">logout</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户信息是否注销成功 :"</span> <span class="o">+</span> <span class="o">!</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*
+// ······
+用户身份是否验证成功 :true
+// ······
+判断当前登录用户是否拥有'student'角色 : true
+// ······
+判断当前登录用户是否同时拥有'student'与'programmer'角色 : true
+// ······
+判断当前登录用户是否拥有'student','programmer','singer'角色 : [true, true, false]
+// ······
+用户并不拥有'singer'角色 !
+// ······
+用户信息是否注销成功 :true
+*/</span>
+</code></pre></div></div>
+
+<h4 id="检查权限">检查权限</h4>
+
+<ul>
+  <li>
+    <p>依赖和配置同检查角色</p>
+  </li>
+  <li>
+    <p>测试</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PermissionsTest</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//1:加载配置文件,创建SecurityManager工厂对象</span>
+        <span class="nc">Factory</span><span class="o">&lt;</span><span class="nc">SecurityManager</span><span class="o">&gt;</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">IniSecurityManagerFactory</span><span class="o">(</span><span class="s">"classpath:per-shiro.ini"</span><span class="o">);</span>
+        <span class="c1">//2:获得securityManager实例对象</span>
+        <span class="nc">SecurityManager</span> <span class="n">securityManager</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">();</span>
+        <span class="c1">//3:将securityManger实例绑定到当前运行环境中,便于访问</span>
+        <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">setSecurityManager</span><span class="o">(</span><span class="n">securityManager</span><span class="o">);</span>
+        <span class="c1">//4:创建当前登录的主体</span>
+        <span class="nc">Subject</span> <span class="n">currentUser</span> <span class="o">=</span> <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">getSubject</span><span class="o">();</span>
+        <span class="c1">//5:绑定主体登录的身份/凭证,既账户及密码</span>
+        <span class="nc">UsernamePasswordToken</span> <span class="n">token</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UsernamePasswordToken</span><span class="o">(</span><span class="s">"huangyuhui"</span><span class="o">,</span> <span class="s">"loveyourself"</span><span class="o">);</span>
+        <span class="c1">//6:主体登录</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">currentUser</span><span class="o">.</span><span class="na">login</span><span class="o">(</span><span class="n">token</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户身份是否验证成功 :"</span> <span class="o">+</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+            <span class="c1">//7:进行用户权限判断</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"当前用户是否拥有对资源'user'的'create'与'read'权限 : "</span> <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isPermitted</span><span class="o">(</span><span class="s">"user:create"</span><span class="o">,</span> <span class="s">"user:read"</span><span class="o">)));</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"当前用户是否拥有对资源'user'的'update'与'delete'权限 : "</span> <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isPermitted</span><span class="o">(</span><span class="s">"user:update"</span><span class="o">,</span> <span class="s">"user:delete"</span><span class="o">)));</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"当前用户是否拥有对资源'user'的'import'与'export'权限 : "</span> <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isPermitted</span><span class="o">(</span><span class="s">"user:import"</span><span class="o">,</span> <span class="s">"user:export"</span><span class="o">)));</span>
+            <span class="c1">//判断当前用户是否拥有某个权限,若有则不做任何操作(无返回值),反之抛出:UnauthorizedException</span>
+            <span class="n">currentUser</span><span class="o">.</span><span class="na">checkPermission</span><span class="o">(</span><span class="s">"user:getUserList"</span><span class="o">);</span>
+
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnknownAccountException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户账户错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IncorrectCredentialsException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户密码错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnauthorizedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"当前用户并未拥有对资源'user'的'getUserList'权限 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">AuthenticationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="c1">//8:注销登录</span>
+        <span class="n">currentUser</span><span class="o">.</span><span class="na">logout</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户信息是否注销成功 :"</span> <span class="o">+</span> <span class="o">!</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*
+// ······
+用户身份是否验证成功 :true
+// ······
+当前用户是否拥有对资源'user'的'create'与'read'权限 : [true, true]
+// ······
+当前用户是否拥有对资源'user'的'update'与'delete'权限 : [true, true]
+// ······
+当前用户是否拥有对资源'user'的'import'与'export'权限 : [false, false]
+// ······
+当前用户并未拥有对资源'user'的'getUserList'权限 !
+// ······
+用户信息是否注销成功 :true
+*/</span>
+</code></pre></div></div>
+
+<ul>
+  <li>自定义Realm检查用户拥有的权限</li>
+</ul>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#指定自定义realm
+</span><span class="py">myRealm</span> <span class="p">=</span> <span class="s">com.xxx.PermissRealm</span>
+<span class="c">#指定SecurityManager的realms实现
+</span><span class="py">securityManager.realm</span> <span class="p">=</span> <span class="s">$myRealm</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PermissRealm</span> <span class="kd">extends</span> <span class="nc">AuthorizingRealm</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"permissRealm"</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">//授权:其principals存储着用户认证的凭证信息</span>
+    <span class="kd">protected</span> <span class="nc">AuthorizationInfo</span> <span class="nf">doGetAuthorizationInfo</span><span class="o">(</span><span class="nc">PrincipalCollection</span> <span class="n">principals</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">//获取当前登录的用户名信息,既用户凭证</span>
+        <span class="c1">//Object username = principals.getPrimaryPrincipal();</span>
+
+        <span class="c1">//模拟查询数据库操作:查询用户所拥有的的角色及权限信息</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">roles</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">permiss</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        <span class="c1">//假设该用户拥有'student'与'programmer'角色</span>
+        <span class="n">roles</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"student"</span><span class="o">);</span>
+        <span class="n">roles</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"programmer"</span><span class="o">);</span>
+        <span class="c1">//假设该用户拥有对资源'user'的'read'与'update'权限</span>
+        <span class="n">permiss</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"user:create"</span><span class="o">);</span>
+        <span class="n">permiss</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"user:update"</span><span class="o">);</span>
+
+        <span class="c1">//封装用户的角色与权限信息并返回</span>
+        <span class="nc">SimpleAuthorizationInfo</span> <span class="n">info</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleAuthorizationInfo</span><span class="o">();</span>
+        <span class="n">info</span><span class="o">.</span><span class="na">addRoles</span><span class="o">(</span><span class="n">roles</span><span class="o">);</span>
+        <span class="n">info</span><span class="o">.</span><span class="na">addStringPermissions</span><span class="o">(</span><span class="n">permiss</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">info</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="c1">//认证:其token存储着传入的用户身份信息(usernamePasswordToken)</span>
+    <span class="kd">protected</span> <span class="nc">AuthenticationInfo</span> <span class="nf">doGetAuthenticationInfo</span><span class="o">(</span><span class="nc">AuthenticationToken</span> <span class="n">token</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">AuthenticationException</span> <span class="o">{</span>
+        <span class="c1">//获取用户的账户信息并验证</span>
+        <span class="nc">String</span> <span class="n">username</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">token</span><span class="o">.</span><span class="na">getPrincipal</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="s">"github"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">username</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="c1">//模拟用户密码信息</span>
+        <span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="s">"yubuntu0109"</span><span class="o">;</span>
+
+        <span class="c1">//SimpleAuthenticationInfo(Object principal, Object credentials, String realmName)</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">SimpleAuthenticationInfo</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">password</span><span class="o">,</span> <span class="n">getName</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PermissTest</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//1:加载配置文件,创建SecurityManager工厂对象</span>
+        <span class="nc">Factory</span><span class="o">&lt;</span><span class="nc">SecurityManager</span><span class="o">&gt;</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">IniSecurityManagerFactory</span><span class="o">(</span><span class="s">"classpath:my-per-shiro.ini"</span><span class="o">);</span>
+        <span class="c1">//2:获得securityManager实例对象</span>
+        <span class="nc">SecurityManager</span> <span class="n">securityManager</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">();</span>
+        <span class="c1">//3:将securityManger实例绑定到当前运行环境中,便于访问</span>
+        <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">setSecurityManager</span><span class="o">(</span><span class="n">securityManager</span><span class="o">);</span>
+        <span class="c1">//4:创建当前登录的主体</span>
+        <span class="nc">Subject</span> <span class="n">currentUser</span> <span class="o">=</span> <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">getSubject</span><span class="o">();</span>
+        <span class="c1">//5:绑定主体登录的身份/凭证,既账户及密码</span>
+        <span class="nc">UsernamePasswordToken</span> <span class="n">token</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UsernamePasswordToken</span><span class="o">(</span><span class="s">"github"</span><span class="o">,</span> <span class="s">"yubuntu0109"</span><span class="o">);</span>
+        <span class="c1">//6:主体登录</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">currentUser</span><span class="o">.</span><span class="na">login</span><span class="o">(</span><span class="n">token</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户身份是否验证成功 :"</span> <span class="o">+</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+            <span class="c1">//7:验证用户角色</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"判断当前登录用户是否拥有'student','programmer','singer'角色 : "</span>
+                    <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">currentUser</span><span class="o">.</span><span class="na">hasRoles</span><span class="o">(</span><span class="nc">List</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"student"</span><span class="o">,</span> <span class="s">"programmer"</span><span class="o">,</span> <span class="s">"singer"</span><span class="o">))));</span>
+            <span class="c1">//8:验证用户权限</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"当前用户是否拥有对'user'资源的'create','update','read','delete'权限 : "</span>
+                    <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isPermitted</span><span class="o">(</span><span class="s">"user:create"</span><span class="o">,</span> <span class="s">"user:update"</span><span class="o">,</span> <span class="s">"user:read"</span><span class="o">,</span> <span class="s">"user:delete"</span><span class="o">)));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">UnknownAccountException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户账户错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IncorrectCredentialsException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户密码错误 !"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">AuthenticationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="c1">//8:注销登录</span>
+        <span class="n">currentUser</span><span class="o">.</span><span class="na">logout</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"用户信息是否注销成功 :"</span> <span class="o">+</span> <span class="o">!</span><span class="n">currentUser</span><span class="o">.</span><span class="na">isAuthenticated</span><span class="o">());</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*
+// ······
+用户身份是否验证成功 :true
+// ······
+判断当前登录用户是否拥有'student','programmer','singer'角色 : [true, true, false]
+// ······
+当前用户是否拥有对'user'资源的'create','update','read','delete'权限 : [true, true, false, false]
+// ······
+用户信息是否注销成功 :true
+*/</span>
+</code></pre></div></div>
+
+<h3 id="权限注解">权限注解</h3>
+
+<ul>
+  <li>
+    <p>一般把注解加在controller层的方法上进行权限控制</p>
+  </li>
+  <li>@RequiresAuthentication：表示当前Subject已经通过login 进行了身份验证；即Subject. isAuthenticated() 返回true</li>
+  <li>@RequiresUser：表示当前Subject 已经身份验证或者通过记住我登录的</li>
+  <li>@RequiresGuest：表示当前Subject没有身份验证或通过记住我登录过，即是游客身份</li>
+  <li>@RequiresRoles(value={“admin”, “user”}, logical= Logical.AND)：表示当前Subject 需要角色admin 和user</li>
+  <li>@RequiresPermissions(value={“user:a”, “user:b”}, logical= Logical.OR)：表示当前Subject 需要权限user:a或user:b</li>
+</ul>
+
+<h3 id="拦截器">拦截器</h3>
+
+<ul>
+  <li>Shiro内置了很多默认的拦截器,比如身份验证、授权等相关的.更多默认拦截器可以参考 <code class="language-plaintext highlighter-rouge">org.apache.shiro.web.filter.mgt.DefaultFilter</code>中的枚举拦截器</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">过滤器简称</th>
+      <th style="text-align: center">对应的java类</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">anon</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authc.AnonymousFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">authc</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authc.FormAuthenticationFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">authcBasic</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">roles</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authz.RolesAuthorizationFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">perms</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authz.PermissionsAuthorizationFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">user</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authc.UserFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">logout</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authc.LogoutFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">port</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authz.PortFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">rest</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authz.HttpMethodPermissionFilter</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">ssl</td>
+      <td style="text-align: center">org.apache.shiro.web.filter.authz.SslFilter</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>
+    <p><strong>anon</strong> : 匿名拦截器,即不需要登录即可访问. 一般用于静态资源过滤,示例”/static/**=anon”</p>
+  </li>
+  <li>
+    <p><strong>authc</strong> : 表示需要认证(登录)才能使用,示例”/**=authc”,主要属性有 :</p>
+
+    <ul>
+      <li>usernameParam : 表单提交的用户名参数名(username)</li>
+      <li>passwordParam : 表单提交的密码参数名(password)</li>
+      <li>rememberMeParam : 表单提交的密码参数名(rememberMe)</li>
+      <li>loginUrl : 登录请求地址(/login.jsp)</li>
+      <li>successUrl : 登录成功后的默认重定向地址</li>
+      <li>failureKeyAttribute : 登录失败后错误信息存储key(shiroLoginFailure)</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>authcBasic</strong> : Basic HTTP身份验证拦截器,主要属性 : applicationName:弹出登录框显示的信息(application)</p>
+  </li>
+  <li>
+    <p><strong>roles</strong> : 角色授权拦截器,验证用户是否拥有资源角色. 示例”/admin/**=roles[admin]”</p>
+  </li>
+  <li>
+    <p><strong>perms</strong> : 权限授权拦截器,验证用户是否拥有资源权限. 示例”/user/create=perms[“user:create”]”</p>
+  </li>
+  <li>
+    <p><strong>user</strong> : 用户拦截器,用户已经身份验证/记住我的登录. 示例”/index=user”</p>
+  </li>
+  <li>
+    <p><strong>logout</strong> : 退出拦截器,主要属性 : redirectUrl:退出成功后重定向的地址(/). 示例”/logout=logout”</p>
+  </li>
+  <li>
+    <p><strong>port</strong> : 端口拦截器,主要属性 : port(80):可以通过的端口. 示例”/test= port[80]”,如果用户访问该页面是非80,将自动将请求端口改为80并重定向到该80端口,其他路径/参数等相同</p>
+  </li>
+  <li>
+    <p>rest : rest风格拦截器,自动根据请求方法构建权限字符串。</p>
+
+    <p>(GET=read,POST=create,PUT=update,DELETE=delete,HEAD=read,TRACE=read,OPTIONS=read, MKCOL=create)构建权限字符串. 示例”/users=rest[user]”,会自动拼出”user:read,user:create,user:update,user:delete”权限字符串进行权限匹配(所有都得匹配:isPermittedAll)</p>
+  </li>
+  <li>
+    <p><strong>ssl</strong> : SSL拦截器,只有请求协议是https才能通过. 否则自动跳转会https端口(443). 其他和port拦截器一样</p>
+  </li>
+  <li>
+    <p>注 : anon,authcBasic,auchc,user是认证过滤器. perms,roles,ssl,rest,port是授权过滤器</p>
+  </li>
+</ul>
+
+<h3 id="整合web">整合WEB</h3>
+
+<p><a href="https://gitee.com/shanyuanjushi/shiro">shiro整合WEB</a></p>
+
+<h3 id="整合ssm">整合SSM</h3>
+
+<p><a href="https://gitee.com/shanyuanjushi/shiro">整合SSM</a></p>
+
+<ul>
+  <li>数据库表设计</li>
+</ul>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="nv">`tb_user`</span> <span class="p">(</span>
+  <span class="nv">`uid`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span> <span class="k">COMMENT</span> <span class="s1">'用户id'</span><span class="p">,</span>
+  <span class="nv">`username`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">utf8mb4_unicode_ci</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'用户名'</span><span class="p">,</span>
+  <span class="nv">`password`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">utf8mb4_unicode_ci</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'密码'</span><span class="p">,</span>
+  <span class="nv">`rid`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'角色id'</span><span class="p">,</span>
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="nv">`uid`</span><span class="p">),</span>
+  <span class="k">KEY</span> <span class="nv">`user_rid_tb_role_key_idx`</span> <span class="p">(</span><span class="nv">`rid`</span><span class="p">),</span>
+  <span class="k">CONSTRAINT</span> <span class="nv">`user_rid_role_key`</span> <span class="k">FOREIGN</span> <span class="k">KEY</span> <span class="p">(</span><span class="nv">`rid`</span><span class="p">)</span> <span class="k">REFERENCES</span> <span class="nv">`tb_role`</span> <span class="p">(</span><span class="nv">`rid`</span><span class="p">)</span>
+<span class="p">)</span> <span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="n">AUTO_INCREMENT</span><span class="o">=</span><span class="mi">4</span> <span class="k">DEFAULT</span> <span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8mb4</span> <span class="k">COLLATE</span><span class="o">=</span><span class="n">utf8mb4_unicode_ci</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="nv">`tb_role`</span> <span class="p">(</span>
+  <span class="nv">`rid`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'角色id'</span><span class="p">,</span>
+  <span class="nv">`role_name`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">utf8mb4_unicode_ci</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'角色名称'</span><span class="p">,</span>
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="nv">`rid`</span><span class="p">)</span>
+<span class="p">)</span> <span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="k">DEFAULT</span> <span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8mb4</span> <span class="k">COLLATE</span><span class="o">=</span><span class="n">utf8mb4_unicode_ci</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="nv">`tb_permission`</span> <span class="p">(</span>
+  <span class="nv">`pid`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'权限id'</span><span class="p">,</span>
+  <span class="nv">`permission_name`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span> <span class="k">COLLATE</span> <span class="n">utf8mb4_unicode_ci</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'权限名称'</span><span class="p">,</span>
+  <span class="nv">`rid`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="k">DEFAULT</span> <span class="k">NULL</span> <span class="k">COMMENT</span> <span class="s1">'角色id'</span><span class="p">,</span>
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="nv">`pid`</span><span class="p">),</span>
+  <span class="k">KEY</span> <span class="nv">`permission_rid_role_key_idx`</span> <span class="p">(</span><span class="nv">`rid`</span><span class="p">),</span>
+  <span class="k">CONSTRAINT</span> <span class="nv">`permission_rid_role_key`</span> <span class="k">FOREIGN</span> <span class="k">KEY</span> <span class="p">(</span><span class="nv">`rid`</span><span class="p">)</span> <span class="k">REFERENCES</span> <span class="nv">`tb_role`</span> <span class="p">(</span><span class="nv">`rid`</span><span class="p">)</span>
+<span class="p">)</span> <span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="k">DEFAULT</span> <span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8mb4</span> <span class="k">COLLATE</span><span class="o">=</span><span class="n">utf8mb4_unicode_ci</span><span class="p">;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>1：添加依赖</li>
+  <li>2：配置web.xml</li>
+  <li>3：配置applicationContext-shiro.xml</li>
+  <li>4：自定义Realm实现授权认证和登录认证</li>
+</ul>
+
+<h3 id="整合springboot">整合springboot</h3>
+
+<ul>
+  <li>Spring集成Shiro一般通过的 xml 配置,比较繁琐,而Spring Boot集成Shiro相对简单,只需要配置两个类 : ShiroConfiguration类及继承AuthorizingRealm的Realm类</li>
+  <li><strong>ShiroConfig</strong> : 顾名思义就是对Shiro的一些配置,相对于Spring中的xml配置. 包括 : 包括过滤器(ShiroFilter)、安全事务管理器(SecurityManager)、密码凭证匹配器(CredentialsMatcher)、缓冲管理器(EhCacheManager)、aop注解支持(authorizationAttributeSourceAdvisor)、等等</li>
+  <li><strong>CustomRealm</strong> : 自定义的CustomRealm继承自AuthorizingRealm,重写了父类中的doGetAuthorizationInfo(授权认证)、doGetAuthenticationInfo(登陆认证)这两个方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShiroConfig</span> <span class="o">{</span>
+
+    <span class="cm">/**
+     * @description: 配置过滤器
+     * @param: securityManager
+     * @date: 2019-08-05 7:59 AM
+     * @return: org.apache.shiro.spring.web.ShiroFilterFactoryBean
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">ShiroFilterFactoryBean</span> <span class="nf">shiroFilterFactoryBean</span><span class="o">(</span><span class="nc">SecurityManager</span> <span class="n">securityManager</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ShiroFilterFactoryBean</span> <span class="n">shiroFilterFactoryBean</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ShiroFilterFactoryBean</span><span class="o">();</span>
+        <span class="c1">//设置安全管理器</span>
+        <span class="n">shiroFilterFactoryBean</span><span class="o">.</span><span class="na">setSecurityManager</span><span class="o">(</span><span class="n">securityManager</span><span class="o">);</span>
+        <span class="c1">//设置自定义过滤器</span>
+        <span class="n">shiroFilterFactoryBean</span><span class="o">.</span><span class="na">setFilterChainDefinitionMap</span><span class="o">(</span><span class="n">filterChainDefinitionMap</span><span class="o">());</span>
+        <span class="c1">//设置用户登录页,默认: http://localhost:8080/login.jsp</span>
+        <span class="n">shiroFilterFactoryBean</span><span class="o">.</span><span class="na">setLoginUrl</span><span class="o">(</span><span class="s">"/loginView"</span><span class="o">);</span>
+        <span class="c1">//设置用户未授权操作提示页</span>
+        <span class="n">shiroFilterFactoryBean</span><span class="o">.</span><span class="na">setUnauthorizedUrl</span><span class="o">(</span><span class="s">"/unauthorizedView"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">shiroFilterFactoryBean</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @description: 初始化自定义Realm
+     * @param: credentialsMatcher
+     * @date: 2019-08-05 7:50 AM
+     * @return: pers.huangyuhui.ss.shiro.UserRealm
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">UserRealm</span> <span class="nf">userRealm</span><span class="o">(</span><span class="nc">HashedCredentialsMatcher</span> <span class="n">hashedCredentialsMatcher</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">UserRealm</span> <span class="n">userRealm</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UserRealm</span><span class="o">();</span>
+        <span class="c1">//设置凭证匹配器</span>
+        <span class="n">userRealm</span><span class="o">.</span><span class="na">setCredentialsMatcher</span><span class="o">(</span><span class="n">hashedCredentialsMatcher</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">userRealm</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @description: 安全事务管理器
+     * @param: credentialsMatcher
+     * @date: 2019-08-05 7:53 AM
+     * @return: org.apache.shiro.web.mgt.DefaultWebSecurityManager
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">SecurityManager</span> <span class="nf">securityManager</span><span class="o">(</span><span class="nc">UserRealm</span> <span class="n">userRealm</span><span class="o">,</span> <span class="nc">EhCacheManager</span> <span class="n">ehCacheManager</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">DefaultWebSecurityManager</span> <span class="n">defaultWebSecurityManager</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DefaultWebSecurityManager</span><span class="o">();</span>
+        <span class="c1">//关联自定义realm</span>
+        <span class="n">defaultWebSecurityManager</span><span class="o">.</span><span class="na">setRealm</span><span class="o">(</span><span class="n">userRealm</span><span class="o">);</span>
+        <span class="c1">//关联缓存管理</span>
+        <span class="n">defaultWebSecurityManager</span><span class="o">.</span><span class="na">setCacheManager</span><span class="o">(</span><span class="n">ehCacheManager</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">defaultWebSecurityManager</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @description: 哈希密码匹配器:比较用户登录时输入的密码,跟数据库密码配合盐值salt解密后是否一致
+     * @date: 2019-08-05 9:01 PM
+     * @return: org.apache.shiro.authc.credential.HashedCredentialsMatcher
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">HashedCredentialsMatcher</span> <span class="nf">hashedCredentialsMatcher</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">HashedCredentialsMatcher</span> <span class="n">hashedCredentialsMatcher</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashedCredentialsMatcher</span><span class="o">();</span>
+        <span class="n">hashedCredentialsMatcher</span><span class="o">.</span><span class="na">setHashAlgorithmName</span><span class="o">(</span><span class="s">"md5"</span><span class="o">);</span> <span class="c1">//散列算法</span>
+        <span class="n">hashedCredentialsMatcher</span><span class="o">.</span><span class="na">setHashIterations</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span> <span class="c1">//散列的次数</span>
+        <span class="n">hashedCredentialsMatcher</span><span class="o">.</span><span class="na">setStoredCredentialsHexEncoded</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span> <span class="c1">//默认是true:Hex编码.false:Base64编码</span>
+        <span class="k">return</span> <span class="n">hashedCredentialsMatcher</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @description: 设置缓存管理, 缓存用户及其权限信息
+     * @date: 2019-08-07 7:51 AM
+     * @return: org.apache.shiro.cache.ehcache.EhCacheManager
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">EhCacheManager</span> <span class="nf">ehCacheManager</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//注意:myEhcache对应ehcache-shiro.xml中的'&lt;ehcache name="myEhcache"&gt;'</span>
+        <span class="nc">CacheManager</span> <span class="n">cacheManager</span> <span class="o">=</span> <span class="nc">CacheManager</span><span class="o">.</span><span class="na">getCacheManager</span><span class="o">(</span><span class="s">"myEhcache"</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">cacheManager</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">cacheManager</span> <span class="o">=</span> <span class="nc">CacheManager</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="nc">EhCacheManager</span> <span class="n">ehCacheManager</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">EhCacheManager</span><span class="o">();</span>
+        <span class="n">ehCacheManager</span><span class="o">.</span><span class="na">setCacheManager</span><span class="o">(</span><span class="n">cacheManager</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">ehCacheManager</span><span class="o">;</span>
+    <span class="o">}</span>
+
+
+    <span class="cm">/**
+     * @description: 设置资源的权限控制
+     * @date: 2019-08-05 8:31 AM
+     * @return: java.util.Map
+     */</span>
+    <span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="nf">filterChainDefinitionMap</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">filterMap</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">LinkedHashMap</span><span class="o">&lt;&gt;();</span>
+        <span class="c1">//需身份认证</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/stuListView"</span><span class="o">,</span> <span class="s">"authc"</span><span class="o">);</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/teaListView"</span><span class="o">,</span> <span class="s">"authc"</span><span class="o">);</span>
+        <span class="c1">//无需身份认证:防止验证用户登录信息操作被'filterMap.put("/**", "authc")'拦截</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/login"</span><span class="o">,</span> <span class="s">"anon"</span><span class="o">);</span>
+        <span class="c1">//注销过滤器:其具体的注销逻辑代码Shiro已经替我们实现了哟</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/logout"</span><span class="o">,</span> <span class="s">"logout"</span><span class="o">);</span>
+        <span class="c1">//角色过滤:需要用户拥有'admin'角色</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/teaListView"</span><span class="o">,</span> <span class="s">"roles[admin]"</span><span class="o">);</span>
+        <span class="c1">//权限过滤:除身份认证外,还需要用户拥有对stuListView资源的view权限</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/stuListView"</span><span class="o">,</span> <span class="s">"perms[stuListView:view]"</span><span class="o">);</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/teaListView"</span><span class="o">,</span> <span class="s">"perms[teaListView:view]"</span><span class="o">);</span>
+        <span class="c1">//拦截需要登录(用户认证)方可访问的资源(一般将/**放在最下边,不然会导致所有url都被拦截哟)</span>
+        <span class="n">filterMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"/**"</span><span class="o">,</span> <span class="s">"authc"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">filterMap</span><span class="o">;</span>
+    <span class="o">}</span>
+
+
+    <span class="cm">/**
+     * @description: 配置ShiroDialect, 用于thymeleaf和shiro标签配合使用
+     * @date: 2019-08-05 6:37 PM
+     * @return: at.pollux.thymeleaf.shiro.dialect.ShiroDialect
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">ShiroDialect</span> <span class="nf">shiroDialect</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">ShiroDialect</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>ehcache-shiro.xml : EhCache缓存框架的配置文件</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;ehcache</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+         <span class="na">xsi:noNamespaceSchemaLocation=</span><span class="s">"http://ehcache.org/ehcache.xsd"</span>
+         <span class="na">updateCheck=</span><span class="s">"false"</span>
+         <span class="na">name=</span><span class="s">"myEhcache"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;diskStore</span> <span class="na">path=</span><span class="s">"java.io.tmpdir"</span><span class="nt">/&gt;</span>
+    <span class="c">&lt;!-- 授权信息缓存 --&gt;</span>
+    <span class="nt">&lt;cache</span> <span class="na">name=</span><span class="s">"authorizationCache"</span>
+           <span class="na">maxEntriesLocalHeap=</span><span class="s">"2000"</span>
+           <span class="na">timeToIdleSeconds=</span><span class="s">"1800"</span>
+           <span class="na">timeToLiveSeconds=</span><span class="s">"1800"</span>
+           <span class="na">overflowToDisk=</span><span class="s">"false"</span>
+           <span class="na">statistics=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/cache&gt;</span>
+    <span class="c">&lt;!-- 身份信息缓存 --&gt;</span>
+    <span class="nt">&lt;cache</span> <span class="na">name=</span><span class="s">"authenticationCache"</span>
+           <span class="na">maxEntriesLocalHeap=</span><span class="s">"2000"</span>
+           <span class="na">timeToIdleSeconds=</span><span class="s">"1800"</span>
+           <span class="na">timeToLiveSeconds=</span><span class="s">"1800"</span>
+           <span class="na">overflowToDisk=</span><span class="s">"false"</span>
+           <span class="na">statistics=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/cache&gt;</span>
+    <span class="c">&lt;!-- Session缓存 --&gt;</span>
+    <span class="nt">&lt;cache</span> <span class="na">name=</span><span class="s">"activeSessionCache"</span>
+           <span class="na">maxEntriesLocalHeap=</span><span class="s">"2000"</span>
+           <span class="na">timeToIdleSeconds=</span><span class="s">"1800"</span>
+           <span class="na">timeToLiveSeconds=</span><span class="s">"1800"</span>
+           <span class="na">overflowToDisk=</span><span class="s">"false"</span>
+           <span class="na">statistics=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/cache&gt;</span>
+    <span class="c">&lt;!-- 缓存半小时 --&gt;</span>
+    <span class="nt">&lt;cache</span> <span class="na">name=</span><span class="s">"halfHour"</span>
+           <span class="na">maxElementsInMemory=</span><span class="s">"10000"</span>
+           <span class="na">maxElementsOnDisk=</span><span class="s">"100000"</span>
+           <span class="na">timeToIdleSeconds=</span><span class="s">"1800"</span>
+           <span class="na">timeToLiveSeconds=</span><span class="s">"1800"</span>
+           <span class="na">overflowToDisk=</span><span class="s">"false"</span>
+           <span class="na">diskPersistent=</span><span class="s">"false"</span><span class="nt">/&gt;</span>
+    <span class="c">&lt;!-- 缓存一小时 --&gt;</span>
+    <span class="nt">&lt;cache</span> <span class="na">name=</span><span class="s">"hour"</span>
+           <span class="na">maxElementsInMemory=</span><span class="s">"10000"</span>
+           <span class="na">maxElementsOnDisk=</span><span class="s">"100000"</span>
+           <span class="na">timeToIdleSeconds=</span><span class="s">"3600"</span>
+           <span class="na">timeToLiveSeconds=</span><span class="s">"3600"</span>
+           <span class="na">overflowToDisk=</span><span class="s">"false"</span>
+           <span class="na">diskPersistent=</span><span class="s">"false"</span><span class="nt">/&gt;</span>
+    <span class="c">&lt;!-- 缓存一天 --&gt;</span>
+    <span class="nt">&lt;cache</span> <span class="na">name=</span><span class="s">"oneDay"</span>
+           <span class="na">maxElementsInMemory=</span><span class="s">"10000"</span>
+           <span class="na">maxElementsOnDisk=</span><span class="s">"100000"</span>
+           <span class="na">timeToIdleSeconds=</span><span class="s">"86400"</span>
+           <span class="na">timeToLiveSeconds=</span><span class="s">"86400"</span>
+           <span class="na">overflowToDisk=</span><span class="s">"false"</span>
+           <span class="na">diskPersistent=</span><span class="s">"false"</span><span class="nt">/&gt;</span>
+
+    <span class="c">&lt;!--
+         name: 缓存名称。
+         maxElementsInMemory: 缓存最大个数
+         eternal: 对象是否永久有效,一但设置了,timeout将不起作用
+         timeToIdleSeconds: 设置对象在失效前的允许闲置时间(单位：秒). 仅当eternal=false对象不是永久有效时使用,可选属性,默认值是0,也就是可闲置时间无穷大
+         timeToLiveSeconds: 设置对象在失效前允许存活时间(单位：秒). 最大时间介于创建时间和失效时间之间. 仅当eternal=false对象不是永久有效时使用,默认是0,也就是对象存活时间无穷大
+         overflowToDisk: 当内存中对象数量达到maxElementsInMemory时,Ehcache将会对象写到磁盘中
+         diskSpoolBufferSizeMB: 这个参数设置DiskStore(磁盘缓存)的缓存区大小,默认是30MB. 每个Cache都应该有自己的一个缓冲区
+         maxElementsOnDisk: 硬盘最大缓存个数
+         diskPersistent: 是否缓存虚拟机重启期数据 Whether the disk store persists between restarts of the Virtual Machine. The default value is false.
+         diskExpiryThreadIntervalSeconds: 磁盘失效线程运行时间间隔,默认是120秒
+         memoryStoreEvictionPolicy: 当达到maxElementsInMemory限制时,Ehcache将会根据指定的策略去清理内存. 默认策略是LRU(最近最少使用). 你可以设置为FIFO(先进先出)或是LFU(较少使用)
+         clearOnFlush: 内存数量最大时是否清除
+     --&gt;</span>
+    <span class="nt">&lt;defaultCache</span> <span class="na">name=</span><span class="s">"defaultCache"</span>
+                  <span class="na">maxElementsInMemory=</span><span class="s">"10000"</span>
+                  <span class="na">timeToIdleSeconds=</span><span class="s">"600"</span>
+                  <span class="na">timeToLiveSeconds=</span><span class="s">"600"</span>
+                  <span class="na">overflowToDisk=</span><span class="s">"false"</span>
+                  <span class="na">maxElementsOnDisk=</span><span class="s">"100000"</span>
+                  <span class="na">diskPersistent=</span><span class="s">"false"</span>
+                  <span class="na">diskExpiryThreadIntervalSeconds=</span><span class="s">"120"</span>
+                  <span class="na">memoryStoreEvictionPolicy=</span><span class="s">"LRU"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/defaultCache&gt;</span>
+<span class="nt">&lt;/ehcache&gt;</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRealm</span> <span class="kd">extends</span> <span class="nc">AuthorizingRealm</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">UserService</span> <span class="n">userService</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * @description: 授权认证:提供用户信息,返回权限信息
+     * @param: principalCollection
+     * @date: 2019-08-06 6:02 PM
+     * @return: org.apache.shiro.authz.AuthorizationInfo
+     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="nc">AuthorizationInfo</span> <span class="nf">doGetAuthorizationInfo</span><span class="o">(</span><span class="nc">PrincipalCollection</span> <span class="n">principalCollection</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------&gt; 授权认证 ------------&gt;"</span><span class="o">);</span>
+        <span class="c1">//获取当前登录的用户信息</span>
+        <span class="nc">Subject</span> <span class="n">currentUser</span> <span class="o">=</span> <span class="nc">SecurityUtils</span><span class="o">.</span><span class="na">getSubject</span><span class="o">();</span>
+        <span class="nc">User</span> <span class="n">u</span> <span class="o">=</span> <span class="o">(</span><span class="nc">User</span><span class="o">)</span> <span class="n">currentUser</span><span class="o">.</span><span class="na">getPrincipal</span><span class="o">();</span>
+        <span class="c1">//从数据库中获取用户所拥有的角色及权限信息</span>
+        <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="n">userService</span><span class="o">.</span><span class="na">findByName</span><span class="o">(</span><span class="n">u</span><span class="o">.</span><span class="na">getUsername</span><span class="o">());</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">user</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">SimpleAuthorizationInfo</span> <span class="n">info</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleAuthorizationInfo</span><span class="o">();</span>
+            <span class="c1">//用于存储用户的角色及权限信息</span>
+            <span class="nc">Collection</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">rolesCollection</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;&gt;();</span>
+            <span class="nc">Collection</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">permissionsCollection</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;&gt;();</span>
+            <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Role</span><span class="o">&gt;</span> <span class="n">roles</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getRoles</span><span class="o">();</span> <span class="c1">//获取用户Role的Set集合</span>
+            <span class="c1">//通过遍历用户所拥有的角色,来获取其对应的权限信息</span>
+            <span class="k">for</span> <span class="o">(</span><span class="nc">Role</span> <span class="n">role</span> <span class="o">:</span> <span class="n">roles</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">rolesCollection</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">role</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span> <span class="c1">//将每一个role的name封装到集合中</span>
+                <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Permission</span><span class="o">&gt;</span> <span class="n">permissionSet</span> <span class="o">=</span> <span class="n">role</span><span class="o">.</span><span class="na">getPermissions</span><span class="o">();</span> <span class="c1">//获取每一个role所对应的permission的set集合</span>
+                <span class="c1">//遍历用户所拥有的权限信息</span>
+                <span class="k">for</span> <span class="o">(</span><span class="nc">Permission</span> <span class="n">permission</span> <span class="o">:</span> <span class="n">permissionSet</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">permissionsCollection</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">permission</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span> <span class="c1">//将每一个permission的name封装到集合中</span>
+                <span class="o">}</span>
+                <span class="n">info</span><span class="o">.</span><span class="na">addStringPermissions</span><span class="o">(</span><span class="n">permissionsCollection</span><span class="o">);</span> <span class="c1">//为用户授权</span>
+            <span class="o">}</span>
+            <span class="n">info</span><span class="o">.</span><span class="na">addRoles</span><span class="o">(</span><span class="n">rolesCollection</span><span class="o">);</span> <span class="c1">//为用户授予角色</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"[roles]------------&gt;"</span> <span class="o">+</span> <span class="n">rolesCollection</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"[permissions]------------&gt;"</span> <span class="o">+</span> <span class="n">permissionsCollection</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+            <span class="k">return</span> <span class="n">info</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @description: 登录认证:提供帐户信息,返回认证信息
+     * @param: authenticationToken
+     * @date: 2019-08-06 6:12 PM
+     * @return: org.apache.shiro.authc.AuthenticationInfo
+     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="nc">AuthenticationInfo</span> <span class="nf">doGetAuthenticationInfo</span><span class="o">(</span><span class="nc">AuthenticationToken</span> <span class="n">authenticationToken</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">AuthenticationException</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------&gt; 开始认证 ------------&gt;"</span><span class="o">);</span>
+        <span class="nc">UsernamePasswordToken</span> <span class="n">token</span> <span class="o">=</span> <span class="o">(</span><span class="nc">UsernamePasswordToken</span><span class="o">)</span> <span class="n">authenticationToken</span><span class="o">;</span>
+        <span class="c1">//从数据库中获取用户信息</span>
+        <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="n">userService</span><span class="o">.</span><span class="na">findByName</span><span class="o">(</span><span class="n">token</span><span class="o">.</span><span class="na">getUsername</span><span class="o">());</span>
+        <span class="c1">//验证账户信息</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">user</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span> <span class="c1">//it's will be throw a UnknownAccountException</span>
+        <span class="o">}</span>
+        <span class="c1">//验证密码信息</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">SimpleAuthenticationInfo</span><span class="o">(</span><span class="n">user</span><span class="o">,</span> <span class="n">user</span><span class="o">.</span><span class="na">getPassword</span><span class="o">(),</span> <span class="nc">ByteSource</span><span class="o">.</span><span class="na">Util</span><span class="o">.</span><span class="na">bytes</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getUsername</span><span class="o">()),</span> <span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>加密逻辑</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SecurityUtils</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//admin-pwd [source:demo+salt:admin+hashIterations:3] :  257e3b15d67a9127d230175e43118e40</span>
+        <span class="c1">//tea-pwd [source:demo+salt:tea+hashIterations:3] : f97ccdcf125073d5f19bd3de0b67eb40</span>
+        <span class="c1">//stu-pwd [source:demo+salt:stu+hashIterations:3] : e1a1c9a1340d179077086b5dbee621b4</span>
+        <span class="nc">String</span> <span class="n">md5Pwd</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleHash</span><span class="o">(</span><span class="s">"md5"</span><span class="o">,</span> <span class="s">"demo"</span><span class="o">,</span> <span class="nc">ByteSource</span><span class="o">.</span><span class="na">Util</span><span class="o">.</span><span class="na">bytes</span><span class="o">(</span><span class="s">"stu"</span><span class="o">),</span> <span class="mi">3</span><span class="o">).</span><span class="na">toHex</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">md5Pwd</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="整合jsp">整合jsp</h3>
+
+<ul>
+  <li>引入shiro标签</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;%@ taglib </span><span class="na">prefix=</span><span class="s">"shiro"</span><span class="na"> uri=</span><span class="s">"http://shiro.apache.org/tags"</span> <span class="nt">%&gt;</span>
+</code></pre></div></div>
+
+<h4 id="认证通过">认证通过</h4>
+
+<ul>
+  <li>表示认证已通过,但不包括remember me登录的</li>
+  <li>说明 : 只有已通过用户认证,但不是通过记住我(remember me)浏览才会看到标签内的内容</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:authenticated&gt;</span>
+    <span class="nt">&lt;label&gt;</span>用户身份验证已通过<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/shiro:authenticated&gt;</span>
+</code></pre></div></div>
+
+<h4 id="认证不通过">认证不通过</h4>
+
+<ul>
+  <li>表示没有通过验证</li>
+  <li>说明 : 只有没有通过验证的才可以看到标签内的内容,包括通过记住我(remember me)登录的</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:notAuthenticated&gt;</span>
+    <span class="nt">&lt;label&gt;</span>用户身份验证没有通过<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/shiro:notAuthenticated&gt;</span>
+</code></pre></div></div>
+
+<h4 id="游客身份">游客身份</h4>
+
+<ul>
+  <li>表示是游客身份,没有登录</li>
+  <li>说明 : 只有是没有登录过,以游客的身份浏览才会看到标签内的内容</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:guest&gt;</span>
+    <span class="nt">&lt;label&gt;</span>您当前是游客,<span class="nt">&lt;/label&gt;&lt;a</span> <span class="na">href=</span><span class="s">"/login.jsp"</span> <span class="nt">&gt;</span>请登录<span class="nt">&lt;/a&gt;</span>
+<span class="nt">&lt;/shiro:guest&gt;</span>
+</code></pre></div></div>
+
+<h4 id="已登录">已登录</h4>
+
+<ul>
+  <li>表示已登录</li>
+  <li>说明 : 只有已经登录(包含通过记住我(remember me)登录的)的用户才可以看到标签内的内容. 一般和标签<code class="language-plaintext highlighter-rouge">shiro : principal</code>一起用,来做显示用户的名称</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:user&gt;</span>
+    <span class="nt">&lt;label&gt;</span>欢迎[<span class="nt">&lt;shiro:principal/&gt;</span>],<span class="nt">&lt;/label&gt;&lt;a</span> <span class="na">href=</span><span class="s">"/logout.jsp"</span><span class="nt">&gt;</span>退出<span class="nt">&lt;/a&gt;</span>
+<span class="nt">&lt;/shiro:user&gt;</span>
+</code></pre></div></div>
+
+<h4 id="有任一角色">有任一角色</h4>
+
+<ul>
+  <li>表示拥有这些角色中其中一个</li>
+  <li>说明 : 只有成功登录后,且具有admin或者user角色的用户才会看到标签内的内容. name属性中可以填写多个角色名称，以逗号( , )分隔</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:hasAnyRoles </span><span class="na">name=</span><span class="s">"admin,user"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label&gt;</span>这是拥有admin或者是user角色的用户<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/shiro:hasAnyRoles&gt;</span>
+</code></pre></div></div>
+
+<h4 id="有某一角色">有某一角色</h4>
+
+<ul>
+  <li>表示拥有某一角色</li>
+  <li>说明 : 只有成功登录后,且具有admin角色的用户才可以看到标签内的内容,name属性中只能填写一个角色的名称</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:hasRole </span><span class="na">name=</span><span class="s">"admin"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label&gt;</span>这个用户拥有的角色是admin<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/shiro:hasRole&gt;</span>
+</code></pre></div></div>
+
+<h4 id="无某一角色">无某一角色</h4>
+
+<ul>
+  <li>表示不拥有某一角色</li>
+  <li>说明 : 只有成功登录后,且不具有admin:delete权限的用户才可以看到标签内的内容,name属性中只能填写一个权限的名称</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:lacksRole </span><span class="na">name=</span><span class="s">"admin"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label&gt;</span>这个用户不拥有admin的角色<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/shiro:lacksRole&gt;</span>
+</code></pre></div></div>
+
+<h4 id="有某一权限">有某一权限</h4>
+
+<ul>
+  <li>表示拥有某一权限</li>
+  <li>说明 : 只有成功登录后,且具有admin:add权限的用户才可以看到标签内的内容,name属性中只能填写一个权限的名称</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:hasPermission </span><span class="na">name=</span><span class="s">"admin:add"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label&gt;</span>这个用户拥有admin:add的权限<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/shiro:hasPermission&gt;</span>
+</code></pre></div></div>
+
+<h4 id="无某一权限">无某一权限</h4>
+
+<ul>
+  <li>表示不拥有某一权限</li>
+  <li>说明 : 只有成功登录后,且不具有admin:delete权限的用户才可以看到标签内的内容,name属性中只能填写一个权限的名称</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:lacksPermission </span><span class="na">name=</span><span class="s">"admin:delete"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label&gt;</span>这个用户不拥有admin:delete的权限<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;/shiro:lacksPermission&gt;</span>
+</code></pre></div></div>
+
+<h4 id="principal">principal</h4>
+
+<ul>
+  <li>表示用户的身份 : 取值取的是你登录的时候,在Realm实现类中的<code class="language-plaintext highlighter-rouge">SimpleAuthenticationInfo(Object principal, Object hashedCredentials, ByteSource credentialsSalt, String realmName)</code>放的第一个参数</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="k">new</span> <span class="nc">SimpleAuthenticationInfo</span><span class="o">(</span><span class="n">user</span><span class="o">,</span> <span class="n">user</span><span class="o">.</span><span class="na">getPassword</span><span class="o">(),</span> <span class="nc">ByteSource</span><span class="o">.</span><span class="na">Util</span><span class="o">.</span><span class="na">bytes</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getUsername</span><span class="o">()),</span> <span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+</code></pre></div></div>
+
+<ul>
+  <li>如果第一个放的是username或者是一个值,那么就可以直接用</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--取到username--&gt;</span>
+<span class="nt">&lt;shiro: </span>principal<span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>如果第一个参数放的是对象,比如放User对象. 那么如果要取其中某一个值,可以通过property属性来指定</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--需要指定property--&gt;</span>
+<span class="nt">&lt;shiro:principal </span><span class="na">property=</span><span class="s">"username"</span><span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<h4 id="标签嵌套">标签嵌套</h4>
+
+<ul>
+  <li>shiro的jsp标签可以嵌套使用,可以根据业务的具体场景进行使用. 例如一个按钮需要排除不是admin或user角色的用户才可以显示,则可以像如下这样实现 :</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;shiro:lacksRole </span><span class="na">name=</span><span class="s">"admin"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;shiro:lacksRole </span><span class="na">name=</span><span class="s">"user"</span><span class="nt">&gt;</span> 
+        <span class="nt">&lt;label&gt;</span>这个用户不拥有admin或user的角色<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;/shiro:lacksRole&gt;</span>
+<span class="nt">&lt;/shiro:lacksRole&gt;</span>
+</code></pre></div></div>
+
+<p><a href="https://blog.csdn.net/yaodieteng1510/article/details/79992247">参考感谢</a></p>
+
+<h3 id="整合thymeleaf">整合thymeleaf</h3>
+
+<ul>
+  <li>添加依赖</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- Thymeleaf --&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-thymeleaf<span class="nt">&lt;/artifactId&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="c">&lt;!-- Thymeleaf对shiro的扩展 --&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.github.theborakompanioni<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>thymeleaf-extras-shiro<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>2.0.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>添加配置</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+     * @description: 配置ShiroDialect, 用于thymeleaf和shiro标签配合使用
+     * @date: 2019-08-05 6:37 PM
+     * @return: at.pollux.thymeleaf.shiro.dialect.ShiroDialect
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">ShiroDialect</span> <span class="nf">shiroDialect</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">ShiroDialect</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>命名空间</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"zh_CN"</span> <span class="na">xmlns:th=</span><span class="s">"http://www.thymeleaf.org"</span> <span class="na">xmlns:shiro=</span><span class="s">"http://www.pollix.at/thymeleaf/shiro"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>标签</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- guest标签:用户没有身份验证时显示相应信息,即游客访问信息 --&gt;</span>
+<span class="nt">&lt;shiro:guest&gt;&lt;/shiro:guest&gt;</span>
+
+<span class="c">&lt;!-- user标签:用户已经身份验证/记住我登录后显示相应的信息 --&gt;</span>
+<span class="nt">&lt;shiro:user&gt;&lt;/shiro:user&gt;</span>
+
+<span class="c">&lt;!-- authenticated标签:用户已经身份验证通过,即Subject.login登录成功,不是记住我登录的 --&gt;</span>
+<span class="nt">&lt;shiro:authenticated&gt;&lt;/shiro:authenticated&gt;</span>
+
+<span class="c">&lt;!-- notAuthenticated标签:用户已经身份验证通过,即没有调用Subject.login进行登录,包括记住我,自动登录的也属于未进行身份验证 --&gt;</span>
+<span class="nt">&lt;shiro:notAuthenticated&gt;&lt;/shiro:notAuthenticated&gt;</span>
+
+<span class="c">&lt;!-- principal标签:相当于((User)Subject.getPrincipals()).getUsername()  --&gt;</span>
+<span class="nt">&lt;shiro:</span> <span class="na">principal</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;shiro:principal</span> <span class="na">property=</span><span class="s">"username"</span><span class="nt">/&gt;</span>
+　　
+<span class="c">&lt;!-- lacksPermission标签:如果当前Subject没有权限将显示body体内容 --&gt;</span>
+<span class="nt">&lt;shiro:lacksPermission</span> <span class="na">name=</span><span class="s">"org:create"</span><span class="nt">&gt;&lt;/shiro:lacksPermission&gt;</span>
+
+<span class="c">&lt;!-- hasRole标签:如果当前Subject有角色将显示body体内容 --&gt;</span>
+<span class="nt">&lt;shiro:hasRole</span> <span class="na">name=</span><span class="s">"admin"</span><span class="nt">&gt;&lt;/shiro:hasRole&gt;</span>
+
+<span class="c">&lt;!-- hasAnyRoles标签:如果当前Subject有任意一个角色（或的关系）将显示body体内容 --&gt;</span>
+<span class="nt">&lt;shiro:hasAnyRoles</span> <span class="na">name=</span><span class="s">"admin,user"</span><span class="nt">&gt;&lt;/shiro:hasAnyRoles&gt;</span>
+
+<span class="c">&lt;!-- lacksRole标签:如果当前Subject没有角色将显示body体内容 --&gt;</span>
+<span class="nt">&lt;shiro:lacksRole</span> <span class="na">name=</span><span class="s">"abc"</span><span class="nt">&gt;&lt;/shiro:lacksRole&gt;</span>　
+
+<span class="c">&lt;!-- hasPermission标签:如果当前Subject有权限将显示body体内容 --&gt;</span>
+<span class="nt">&lt;shiro:hasPermission</span> <span class="na">name=</span><span class="s">"user:create"</span><span class="nt">&gt;&lt;/shiro:hasPermission&gt;</span>
+</code></pre></div></div>
+
+<p><a href="https://www.jianshu.com/p/c8b53445cbb0">参考感谢</a></p>
+
+<h3 id="缓存">缓存</h3>
+
+<ul>
+  <li>当权限信息存放在数据库中时,对于每次前端的访问请求都需要进行一次数据库查询. 特别是在大量使用shiro的jsp标签的场景下,对应前端的一个页面访问请求会同时出现很多的权限查询操作,这对于权限信息变化不是很频繁的场景,每次前端页面访问都进行大量的权限数据库查询是非常不经济的! 因此非常有必要对权限数据使用缓存方案</li>
+  <li>关于shiro权限数据的缓存方式,可以分为以下两类 :
+    <ul>
+      <li>将权限数据缓存到集中式存储中间件中,比如redis或者memcached</li>
+      <li>将权限数据缓存到本地</li>
+    </ul>
+  </li>
+  <li>Shiro只提供了一个可以支持具体缓存实现(如 : Hazelcast, Ehcache, OSCache, Terracotta, Coherence, GigaSpaces, JBossCache 等)的抽象API接口,这样就允许Shiro用户根据自己的需求灵活地选择具体的CacheManager,当然,其实Shiro也自带了一个本地内存CacheManager(<code class="language-plaintext highlighter-rouge">org.apache.shiro.cache.MemoryConstrainedCacheManager</code>)</li>
+  <li>从以上分析我们知道Shiro支持在2个地方定义缓存管理器,既可以在SecurityManager中定义,也可以在Realm中定义,任选其一即可. 通常我们都会自定义Realm实现,例如将权限数据存放在数据库中,那么在Realm实现中定义缓存管理器再合适不过了</li>
+</ul>
+:ET

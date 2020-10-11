@@ -1,0 +1,33 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#tomcat" id="markdown-toc-tomcat">Tomcat</a>    <ul>
+      <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+      <li><a href="#启动" id="markdown-toc-启动">启动</a></li>
+      <li><a href="#部署网页" id="markdown-toc-部署网页">部署网页</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="tomcat">Tomcat</h2>
+
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>Tomcat是常见的免费的web服务器.</li>
+  <li>Tomcat 这个名字的来历，Tomcat是一种野外的猫科动物，不依赖人类，独立生活。</li>
+</ul>
+
+<h3 id="启动">启动</h3>
+
+<ul>
+  <li>运行批处理文件： D:/tomcat/bin/startup.bat</li>
+  <li>最后如果你看到Server startup in xxx ms，就表明启动成功了。</li>
+  <li>注 Tomcat启动之后，不要关闭。。。。 关闭了就不能访问了</li>
+</ul>
+
+<h3 id="部署网页">部署网页</h3>
+
+<ul>
+  <li>部署一个功能完备的web应用 有很多种方式，但是如果只是部署一个test.html，很简单</li>
+  <li>把test.html 复制到 D:\tomcat\webapps\ROOT 目录下</li>
+  <li>就可以通过 http://127.0.0.1:8080/test.html 访问了</li>
+</ul>
+:ET

@@ -1,0 +1,12 @@
+I"k<ul id="markdown-toc">
+  <li><a href="#构造器说明" id="markdown-toc-构造器说明">构造器说明</a></li>
+</ul>
+<h3 id="构造器说明">构造器说明</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1)</span>	<span class="err">Mybatis-Plus</span> <span class="err">通过</span> <span class="err">EntityWrapper（简称</span> <span class="err">EW，MP</span> <span class="err">封装的一个查询条件构造器）或者Condition（与EW</span> <span class="err">类似）</span> <span class="err">来让用户自由的构建查询条件，简单便捷，没有额外的负担，能够有效提高开发效率</span>
+
+<span class="err">2)</span>	<span class="err">实体包装器，主要用于处理</span> <span class="err">sql</span> <span class="err">拼接，排序，实体参数查询等</span>
+
+<span class="err">3)</span>	<span class="err">注意:</span> <span class="err">使用的是数据库字段，不是</span> <span class="err">Java</span> <span class="err">属性</span><span class="c">!
+</span></code></pre></div></div>
+:ET

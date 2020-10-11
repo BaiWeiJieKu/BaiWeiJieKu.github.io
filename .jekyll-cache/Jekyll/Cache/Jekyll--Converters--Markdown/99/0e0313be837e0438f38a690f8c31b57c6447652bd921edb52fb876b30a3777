@@ -1,0 +1,360 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#工具类中无法注入mapper" id="markdown-toc-工具类中无法注入mapper">工具类中无法注入mapper</a></li>
+  <li><a href="#使用java8拼接单日排班模板信息" id="markdown-toc-使用java8拼接单日排班模板信息">使用java8拼接单日排班模板信息</a></li>
+</ul>
+<h3 id="工具类中无法注入mapper">工具类中无法注入mapper</h3>
+
+<ul>
+  <li>因为一般情况下工具类是不归spring容器管理的，这时候使用@Autowired注解去注入mapper是不管用的</li>
+  <li>使用@PostConstruct注解声明一个初始化方法</li>
+  <li>声明一个本工具类的静态变量</li>
+  <li>在初始化方法中初始化mapper</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MysqlDateUtils</span> <span class="o">{</span>
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">SysUserMapper</span> <span class="n">sysUserMapper</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="nc">MysqlDateUtils</span> <span class="n">mysqlDateUtils</span><span class="o">;</span> 
+	
+	<span class="nd">@PostConstruct</span>  
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>  
+		<span class="n">mysqlDateUtils</span> <span class="o">=</span> <span class="k">this</span><span class="o">;</span>  
+		<span class="n">mysqlDateUtils</span><span class="o">.</span><span class="na">sysUserMapper</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">sysUserMapper</span><span class="o">;</span>  
+    <span class="o">}</span>
+	
+	<span class="cm">/**
+	 * 获取数据库当前的年月日（yyyy-MM-dd HH:mm:ss）
+	 * @return Date
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">getMysqlNowDate</span><span class="o">()</span> <span class="o">{</span>
+		
+		<span class="k">return</span> <span class="nf">parseMysqlDateToStr</span><span class="o">(</span><span class="s">"yyyy-MM-dd"</span><span class="o">,</span><span class="n">mysqlDateUtils</span><span class="o">.</span><span class="na">sysUserMapper</span><span class="o">.</span><span class="na">getMysqlNowDate</span><span class="o">());</span>
+	<span class="o">}</span>
+    <span class="cm">/**
+	 * 获取数据库当前的年月日时分秒（yyyy-MM-dd HH:mm:ss）
+	 * @return DateTime
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">getMysqlNowDateTime</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="nf">parseMysqlDateToStr</span><span class="o">(</span><span class="s">"yyyy-MM-dd HH:mm:ss"</span><span class="o">,</span><span class="n">mysqlDateUtils</span><span class="o">.</span><span class="na">sysUserMapper</span><span class="o">.</span><span class="na">getMysqlNowDate</span><span class="o">());</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="nf">parseMysqlDateToStr</span><span class="o">(</span><span class="kd">final</span> <span class="nc">String</span> <span class="n">format</span><span class="o">,</span> <span class="kd">final</span> <span class="nc">Date</span> <span class="n">date</span><span class="o">)</span>
+    <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">SimpleDateFormat</span><span class="o">(</span><span class="n">format</span><span class="o">).</span><span class="na">format</span><span class="o">(</span><span class="n">date</span><span class="o">);</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="使用java8拼接单日排班模板信息">使用java8拼接单日排班模板信息</h3>
+
+<ul>
+  <li>从数据库中查询到的原始数据</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">48</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">院级模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">07</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">上午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">14</span><span class="err">:</span><span class="w"> </span><span class="mi">05</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">52</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">院级模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">下午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">18</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">48</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">妇产科模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">07</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">上午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">14</span><span class="err">:</span><span class="w"> </span><span class="mi">05</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">52</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">妇产科模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">下午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">18</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">48</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">张三模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">07</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">上午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">14</span><span class="err">:</span><span class="w"> </span><span class="mi">05</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">52</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">张三模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">下午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">18</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">07</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">48</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">院级模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">08</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">上午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">52</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">院级模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">16</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">下午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">18</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">07</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">48</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">妇产科模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">08</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">上午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">52</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">妇产科模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">16</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">下午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">18</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">52</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">张三模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">15</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">16</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">下午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">18</span><span class="err">:</span><span class="w"> </span><span class="mi">30</span><span class="w">
+</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">auto_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+    </span><span class="err">admStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">07</span><span class="err">:</span><span class="w"> </span><span class="mi">01</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_allot_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">48</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">张三模板</span><span class="p">,</span><span class="w">
+    </span><span class="err">maintain_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsStart</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">06</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">admEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">08</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="p">,</span><span class="w">
+    </span><span class="err">classes_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">上午</span><span class="p">,</span><span class="w">
+    </span><span class="err">source_number</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+    </span><span class="err">amsEnd</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="mi">11</span><span class="err">:</span><span class="w"> </span><span class="mi">00</span><span class="w">
+</span><span class="p">}]</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>最终要求效果：</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"msg"</span><span class="p">:</span><span class="w"> </span><span class="s2">"操作成功"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"code"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"amsStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"06:00"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"segmentdata"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"06:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"07:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"上午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"06:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"07:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"上午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"06:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"07:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"上午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"07:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"08:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"上午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"07:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"08:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"上午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"07:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"08:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"上午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"上午"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"amsEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"11:00"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"amsStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:30"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"segmentdata"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"14:05:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"下午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"14:05:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"下午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"14:05:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"下午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"16:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"下午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"16:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"下午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"admStart"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:01:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"admEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"16:00:00"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"下午"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"source_number"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"classes_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"下午"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"amsEnd"</span><span class="p">:</span><span class="w"> </span><span class="s2">"18:30"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>代码处理</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">AjaxResult</span> <span class="nf">selectDayTemplateByMoreOperation</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"name"</span><span class="o">,</span> <span class="n">required</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span> <span class="nc">String</span> <span class="n">name</span><span class="o">,</span>
+			<span class="nd">@RequestParam</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"scheludingclass"</span><span class="o">,</span> <span class="n">required</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span> <span class="nc">String</span> <span class="n">scheludingclass</span><span class="o">,</span>
+			<span class="nd">@RequestParam</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"deptId"</span><span class="o">,</span> <span class="n">required</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span> <span class="nc">String</span> <span class="n">deptId</span><span class="o">,</span>
+			<span class="nd">@RequestParam</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"arsDocId"</span><span class="o">,</span> <span class="n">required</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span> <span class="nc">String</span> <span class="n">arsDocId</span><span class="o">)</span> <span class="o">{</span>
+    
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="n">arsDayMaintainService</span><span class="o">.</span><span class="na">selectDayTemplateByMoreOperation</span><span class="o">(</span><span class="n">name</span><span class="o">,</span> <span class="n">deptId</span><span class="o">,</span> <span class="n">arsDocId</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"原始数据："</span> <span class="o">+</span> <span class="n">list</span><span class="o">);</span>
+		<span class="c1">// 筛选list中的map，让每个map只包含班次名称，开始时间，结束时间三个字段</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;&gt;</span> <span class="n">allList</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;&gt;();</span>
+		<span class="n">list</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="n">map</span> <span class="o">-&gt;</span> <span class="o">{</span>
+			<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">collect</span> <span class="o">=</span> <span class="n">map</span><span class="o">.</span><span class="na">entrySet</span><span class="o">().</span><span class="na">stream</span><span class="o">()</span>
+					<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">m</span> <span class="o">-&gt;</span> <span class="n">m</span><span class="o">.</span><span class="na">getKey</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"classes_name"</span><span class="o">)</span> <span class="o">||</span> <span class="n">m</span><span class="o">.</span><span class="na">getKey</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"amsStart"</span><span class="o">)</span>
+							<span class="o">||</span> <span class="n">m</span><span class="o">.</span><span class="na">getKey</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"amsEnd"</span><span class="o">))</span>
+					<span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toMap</span><span class="o">(</span><span class="n">h</span> <span class="o">-&gt;</span> <span class="n">h</span><span class="o">.</span><span class="na">getKey</span><span class="o">(),</span> <span class="n">h</span> <span class="o">-&gt;</span> <span class="n">h</span><span class="o">.</span><span class="na">getValue</span><span class="o">()));</span>
+			<span class="n">allList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">collect</span><span class="o">);</span>
+		<span class="o">});</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"没去重之前："</span> <span class="o">+</span> <span class="n">allList</span><span class="o">);</span>
+		<span class="c1">// 针对筛选完成后的list中的map去重</span>
+		<span class="cm">/*
+		  去重后：
+		 [{
+		    amsStart = 06: 00,
+		    classes_name = 上午,
+		    amsEnd = 11: 00
+		  }, 
+		  {
+		    amsStart = 15: 30,
+		    classes_name = 下午,
+		    amsEnd = 18: 30
+		  }
+		]  
+		*/</span> 
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;&gt;</span> <span class="n">distinctcollect</span> <span class="o">=</span> <span class="n">allList</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">distinct</span><span class="o">().</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"去重之后"</span> <span class="o">+</span> <span class="n">distinctcollect</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">distinctcollect</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="c1">// 获取当前的班次名称</span>
+			<span class="nc">Object</span> <span class="n">classesName</span> <span class="o">=</span> <span class="n">distinctcollect</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">get</span><span class="o">(</span><span class="s">"classes_name"</span><span class="o">);</span>
+			<span class="c1">// 开始封装第二层</span>
+			<span class="c1">// 筛选list中的map，让每个map只包含分段开始时间，分段结束时间，号源数三个字段</span>
+			<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;&gt;</span> <span class="n">segmentList</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;&gt;();</span>
+			<span class="n">list</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="n">map</span> <span class="o">-&gt;</span> <span class="o">{</span>
+				<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">collect</span> <span class="o">=</span> <span class="n">map</span><span class="o">.</span><span class="na">entrySet</span><span class="o">().</span><span class="na">stream</span><span class="o">()</span>
+						<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">m</span> <span class="o">-&gt;</span> <span class="n">m</span><span class="o">.</span><span class="na">getKey</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"admStart"</span><span class="o">)</span> <span class="o">||</span> <span class="n">m</span><span class="o">.</span><span class="na">getKey</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"admEnd"</span><span class="o">)</span>
+								<span class="o">||</span> <span class="n">m</span><span class="o">.</span><span class="na">getKey</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"source_number"</span><span class="o">)</span> <span class="o">||</span> <span class="n">m</span><span class="o">.</span><span class="na">getValue</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">classesName</span><span class="o">))</span>
+						<span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toMap</span><span class="o">(</span><span class="n">h</span> <span class="o">-&gt;</span> <span class="n">h</span><span class="o">.</span><span class="na">getKey</span><span class="o">(),</span> <span class="n">h</span> <span class="o">-&gt;</span> <span class="n">h</span><span class="o">.</span><span class="na">getValue</span><span class="o">()));</span>
+				<span class="c1">// 开始进行过滤，过滤掉map中没有classes_name这个key的map</span>
+				<span class="k">if</span> <span class="o">(</span><span class="n">collect</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"classes_name"</span><span class="o">))</span> <span class="o">{</span>
+					<span class="n">segmentList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">collect</span><span class="o">);</span>
+				<span class="o">}</span>
+			<span class="o">});</span>
+			<span class="c1">// 把分段数据挂到相应的班次下面</span>
+			<span class="n">distinctcollect</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">put</span><span class="o">(</span><span class="s">"segmentdata"</span><span class="o">,</span> <span class="n">segmentList</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">classesName</span><span class="o">.</span><span class="na">toString</span><span class="o">()</span> <span class="o">+</span> <span class="s">"班次中的所有分段数据："</span> <span class="o">+</span> <span class="n">segmentList</span><span class="o">);</span>
+		<span class="o">}</span>
+
+		<span class="k">return</span> <span class="nc">AjaxResult</span><span class="o">.</span><span class="na">success</span><span class="o">(</span><span class="n">distinctcollect</span><span class="o">);</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+:ET

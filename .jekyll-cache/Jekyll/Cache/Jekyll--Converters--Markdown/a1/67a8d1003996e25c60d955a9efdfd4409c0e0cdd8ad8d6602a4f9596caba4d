@@ -1,0 +1,26 @@
+I"F<ul id="markdown-toc">
+  <li><a href="#环境搭建" id="markdown-toc-环境搭建">环境搭建</a></li>
+</ul>
+<h3 id="环境搭建">环境搭建</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        &lt;!-- https://mvnrepository.com/artifact/org.springframework/spring-context --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+            &lt;version&gt;4.3.12.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-aspects&lt;/artifactId&gt;
+            &lt;version&gt;4.3.12.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-jdbc&lt;/artifactId&gt;
+            &lt;version&gt;4.3.12.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+
+</code></pre></div></div>
+:ET

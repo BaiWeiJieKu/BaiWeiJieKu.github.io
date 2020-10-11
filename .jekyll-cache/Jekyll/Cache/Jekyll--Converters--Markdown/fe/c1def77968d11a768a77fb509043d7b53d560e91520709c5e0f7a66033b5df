@@ -1,0 +1,28 @@
+I"<ul id="markdown-toc">
+  <li><a href="#性能分析" id="markdown-toc-性能分析">性能分析</a>    <ul>
+      <li><a href="#常见瓶颈" id="markdown-toc-常见瓶颈">常见瓶颈</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="性能分析">性能分析</h2>
+
+<h3 id="常见瓶颈">常见瓶颈</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CPU
+SQL中对大量数据进行比较、关联、排序、分组
+最大的压力在于 比较
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>IO
+实例内存满足不了缓存数据或排序等需要，导致产生大量 物理 IO。
+查询执行效率低，扫描过多数据行。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>锁
+不适宜的锁的设置，导致线程阻塞，性能下降。
+死锁，线程之间交叉调用资源，导致死锁，程序卡住。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>服务器硬件的性能瓶颈：top,free, iostat和vmstat来查看系统的性能状态
+</code></pre></div></div>
+:ET

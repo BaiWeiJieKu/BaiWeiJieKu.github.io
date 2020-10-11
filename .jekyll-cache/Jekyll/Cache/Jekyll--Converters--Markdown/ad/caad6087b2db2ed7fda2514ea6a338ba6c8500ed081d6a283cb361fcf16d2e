@@ -1,0 +1,13 @@
+I"R<ul id="markdown-toc">
+  <li><a href="#session" id="markdown-toc-session">Session</a></li>
+</ul>
+<h3 id="session">Session</h3>
+
+<ul>
+  <li>Session 接口是 Hibernate 向应用程序提供的操纵数据库的最主要的接口, 它提供了基本的保存, 更新, 删除和加载 Java 对象的方法</li>
+  <li>Session 具有一个缓存, 位于缓存中的对象称为持久化对象, 它和数据库中的相关记录对应</li>
+  <li>Session 能够在某些时间点, 按照缓存中对象的变化来执行相关的 SQL 语句, 来同步更新数据库, 这一过程被称为刷新缓存(flush)</li>
+  <li>站在持久化的角度, Hibernate 把对象分为 4 种状态: <strong>持久化状态, 临时状态, 游离状态, 删除状态</strong></li>
+  <li>Session 的特定方法能使对象从一个状态转换到另一个状态</li>
+</ul>
+:ET

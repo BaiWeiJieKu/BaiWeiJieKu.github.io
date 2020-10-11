@@ -1,0 +1,1866 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+  <li><a href="#传统模式聊天室" id="markdown-toc-传统模式聊天室">传统模式聊天室</a></li>
+  <li><a href="#通道与缓冲区" id="markdown-toc-通道与缓冲区">通道与缓冲区</a>    <ul>
+      <li><a href="#缓冲区buffer" id="markdown-toc-缓冲区buffer">缓冲区（Buffer）</a></li>
+      <li><a href="#通道channel" id="markdown-toc-通道channel">通道（Channel）</a></li>
+    </ul>
+  </li>
+  <li><a href="#分散scatter和聚集gather" id="markdown-toc-分散scatter和聚集gather">分散（Scatter）和聚集（Gather）</a></li>
+  <li><a href="#选择器selector" id="markdown-toc-选择器selector">选择器（Selector）</a></li>
+  <li><a href="#管道pipe" id="markdown-toc-管道pipe">管道（Pipe）</a></li>
+  <li><a href="#文件拷贝" id="markdown-toc-文件拷贝">文件拷贝</a></li>
+  <li><a href="#聊天室" id="markdown-toc-聊天室">聊天室</a></li>
+  <li><a href="#path" id="markdown-toc-path">Path</a></li>
+  <li><a href="#files" id="markdown-toc-files">Files</a></li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>
+    <p>Java NIO（New IO）是从Java 1.4版本开始引入的一个新的IO API，可以替代标准的Java IO API。 NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同，NIO支持<strong>面向缓冲区的、基于通道的IO操作</strong>。NIO将以更加高效的方式进行文件的读写操作。</p>
+  </li>
+  <li>
+    <p>NIO与IO的区别</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align: center">IO</th>
+          <th style="text-align: center">NIO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center">面向流（Stream Oriented）</td>
+          <td style="text-align: center">面向缓冲区（Buffer Oriented）</td>
+        </tr>
+        <tr>
+          <td style="text-align: center">阻塞IO（Blocking IO）</td>
+          <td style="text-align: center">非阻塞IO（Non Blocking IO）</td>
+        </tr>
+        <tr>
+          <td style="text-align: center">无</td>
+          <td style="text-align: center">选择器（Selectors）</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <p>传统的IO 流都是阻塞式的。也就是说，当一个线程调用read() 或write()时，该线程被阻塞，直到有一些数据被读取或写入，该线程在此期间不能执行其他任务。因此，在完成网络通信进行IO 操作时，由于线程会阻塞，所以服务器端必须为每个客户端都提供一个独立的线程进行处理，当服务器端需要处理大量客户端时，性能急剧下降。</p>
+  </li>
+  <li>
+    <p>Java NIO 是非阻塞模式的。当线程从某通道进行读写数据时，若没有数据可用时，该线程可以进行其他任务。线程通常将非阻塞IO 的空闲时间用于在其他通道上执行IO 操作，所以单独的线程可以管理多个输入和输出通道。因此，NIO 可以让服务器端使用一个或有限几个线程来同时处理连接到服务器端的所有客户端。</p>
+  </li>
+</ul>
+
+<h3 id="传统模式聊天室">传统模式聊天室</h3>
+
+<ul>
+  <li>服务端</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChatServer</span> <span class="o">{</span>
+ 
+    <span class="kd">private</span> <span class="kt">int</span> <span class="no">DEFAULT_PORT</span> <span class="o">=</span> <span class="mi">8888</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">QUIT</span> <span class="o">=</span> <span class="s">"quit"</span><span class="o">;</span>
+ 
+    <span class="kd">private</span> <span class="nc">ExecutorService</span> <span class="n">executorService</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">ServerSocket</span> <span class="n">serverSocket</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Writer</span><span class="o">&gt;</span> <span class="n">connectedClients</span><span class="o">;</span>
+ 
+    <span class="kd">public</span> <span class="nf">ChatServer</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">executorService</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newFixedThreadPool</span><span class="o">(</span><span class="mi">10</span><span class="o">);</span>
+        <span class="n">connectedClients</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">addClient</span><span class="o">(</span><span class="nc">Socket</span> <span class="n">socket</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">socket</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">port</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="na">getPort</span><span class="o">();</span>
+            <span class="nc">BufferedWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedWriter</span><span class="o">(</span>
+                    <span class="k">new</span> <span class="nf">OutputStreamWriter</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">())</span>
+            <span class="o">);</span>
+            <span class="n">connectedClients</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">port</span><span class="o">,</span> <span class="n">writer</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"客户端["</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s">"]已连接到服务器"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">removeClient</span><span class="o">(</span><span class="nc">Socket</span> <span class="n">socket</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">socket</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">int</span> <span class="n">port</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="na">getPort</span><span class="o">();</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">connectedClients</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="n">port</span><span class="o">))</span> <span class="o">{</span>
+                <span class="n">connectedClients</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">port</span><span class="o">).</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span>
+            <span class="n">connectedClients</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">port</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"客户端["</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s">"]已断开连接"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">forwardMessage</span><span class="o">(</span><span class="nc">Socket</span> <span class="n">socket</span><span class="o">,</span> <span class="nc">String</span> <span class="n">fwdMsg</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span> <span class="o">:</span> <span class="n">connectedClients</span><span class="o">.</span><span class="na">keySet</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">id</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getPort</span><span class="o">()))</span> <span class="o">{</span>
+                <span class="nc">Writer</span> <span class="n">writer</span> <span class="o">=</span> <span class="n">connectedClients</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+                <span class="n">writer</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fwdMsg</span><span class="o">);</span>
+                <span class="n">writer</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">readyToQuit</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="no">QUIT</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">serverSocket</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">serverSocket</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"关闭serverSocket"</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+ 
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 绑定监听端口</span>
+            <span class="n">serverSocket</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ServerSocket</span><span class="o">(</span><span class="no">DEFAULT_PORT</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"启动服务器，监听端口："</span> <span class="o">+</span> <span class="no">DEFAULT_PORT</span> <span class="o">+</span> <span class="s">"..."</span><span class="o">);</span>
+ 
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// 等待客户端连接</span>
+                <span class="nc">Socket</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">serverSocket</span><span class="o">.</span><span class="na">accept</span><span class="o">();</span>
+                <span class="c1">// 创建ChatHandler线程</span>
+                <span class="n">executorService</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">ChatHandler</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">socket</span><span class="o">));</span>
+            <span class="o">}</span>
+ 
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">close</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ChatServer</span> <span class="n">server</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ChatServer</span><span class="o">();</span>
+        <span class="n">server</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChatHandler</span> <span class="kd">implements</span> <span class="nc">Runnable</span> <span class="o">{</span>
+ 
+    <span class="kd">private</span> <span class="nc">ChatServer</span> <span class="n">server</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Socket</span> <span class="n">socket</span><span class="o">;</span>
+ 
+    <span class="kd">public</span> <span class="nf">ChatHandler</span><span class="o">(</span><span class="nc">ChatServer</span> <span class="n">server</span><span class="o">,</span> <span class="nc">Socket</span> <span class="n">socket</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">server</span> <span class="o">=</span> <span class="n">server</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">socket</span> <span class="o">=</span> <span class="n">socket</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 存储新上线用户</span>
+            <span class="n">server</span><span class="o">.</span><span class="na">addClient</span><span class="o">(</span><span class="n">socket</span><span class="o">);</span>
+ 
+            <span class="c1">// 读取用户发送的消息</span>
+            <span class="nc">BufferedReader</span> <span class="n">reader</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span>
+                    <span class="k">new</span> <span class="nf">InputStreamReader</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">())</span>
+            <span class="o">);</span>
+ 
+            <span class="nc">String</span> <span class="n">msg</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">((</span><span class="n">msg</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">readLine</span><span class="o">())</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">fwdMsg</span> <span class="o">=</span> <span class="s">"客户端["</span> <span class="o">+</span> <span class="n">socket</span><span class="o">.</span><span class="na">getPort</span><span class="o">()</span> <span class="o">+</span> <span class="s">"]: "</span> <span class="o">+</span> <span class="n">msg</span> <span class="o">+</span> <span class="s">"\n"</span><span class="o">;</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">fwdMsg</span><span class="o">);</span>
+ 
+                <span class="c1">// 将消息转发给聊天室里在线的其他用户</span>
+                <span class="n">server</span><span class="o">.</span><span class="na">forwardMessage</span><span class="o">(</span><span class="n">socket</span><span class="o">,</span> <span class="n">fwdMsg</span><span class="o">);</span>
+ 
+                <span class="c1">// 检查用户是否准备退出</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">server</span><span class="o">.</span><span class="na">readyToQuit</span><span class="o">(</span><span class="n">msg</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">server</span><span class="o">.</span><span class="na">removeClient</span><span class="o">(</span><span class="n">socket</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>客户端</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChatClient</span> <span class="o">{</span>
+ 
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">DEFAULT_SERVER_HOST</span> <span class="o">=</span> <span class="s">"127.0.0.1"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">DEFAULT_SERVER_PORT</span> <span class="o">=</span> <span class="mi">8888</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">QUIT</span> <span class="o">=</span> <span class="s">"quit"</span><span class="o">;</span>
+ 
+    <span class="kd">private</span> <span class="nc">Socket</span> <span class="n">socket</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">BufferedReader</span> <span class="n">reader</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">BufferedWriter</span> <span class="n">writer</span><span class="o">;</span>
+ 
+    <span class="c1">// 发送消息给服务器</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">send</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">socket</span><span class="o">.</span><span class="na">isOutputShutdown</span><span class="o">())</span> <span class="o">{</span>
+            <span class="n">writer</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s">"\n"</span><span class="o">);</span>
+            <span class="n">writer</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="c1">// 从服务器接收消息</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">receive</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">msg</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">socket</span><span class="o">.</span><span class="na">isInputShutdown</span><span class="o">())</span> <span class="o">{</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">readLine</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="c1">// 检查用户是否准备退出</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">readyToQuit</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="no">QUIT</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">writer</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"关闭socket"</span><span class="o">);</span>
+                <span class="n">writer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+ 
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 创建socket</span>
+            <span class="n">socket</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Socket</span><span class="o">(</span><span class="no">DEFAULT_SERVER_HOST</span><span class="o">,</span> <span class="no">DEFAULT_SERVER_PORT</span><span class="o">);</span>
+ 
+            <span class="c1">// 创建IO流</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span>
+                    <span class="k">new</span> <span class="nf">InputStreamReader</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">())</span>
+            <span class="o">);</span>
+            <span class="n">writer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedWriter</span><span class="o">(</span>
+                    <span class="k">new</span> <span class="nf">OutputStreamWriter</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">())</span>
+            <span class="o">);</span>
+ 
+            <span class="c1">// 处理用户的输入</span>
+            <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="k">new</span> <span class="nc">UserInputHandler</span><span class="o">(</span><span class="k">this</span><span class="o">)).</span><span class="na">start</span><span class="o">();</span>
+ 
+            <span class="c1">// 读取服务器转发的消息</span>
+            <span class="nc">String</span> <span class="n">msg</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">((</span><span class="n">msg</span> <span class="o">=</span> <span class="n">receive</span><span class="o">())</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">close</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ChatClient</span> <span class="n">chatClient</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ChatClient</span><span class="o">();</span>
+        <span class="n">chatClient</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserInputHandler</span> <span class="kd">implements</span> <span class="nc">Runnable</span> <span class="o">{</span>
+ 
+    <span class="kd">private</span> <span class="nc">ChatClient</span> <span class="n">chatClient</span><span class="o">;</span>
+ 
+    <span class="kd">public</span> <span class="nf">UserInputHandler</span><span class="o">(</span><span class="nc">ChatClient</span> <span class="n">chatClient</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">chatClient</span> <span class="o">=</span> <span class="n">chatClient</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 等待用户输入消息</span>
+            <span class="nc">BufferedReader</span> <span class="n">consoleReader</span> <span class="o">=</span>
+                    <span class="k">new</span> <span class="nf">BufferedReader</span><span class="o">(</span><span class="k">new</span> <span class="nc">InputStreamReader</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">));</span>
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">input</span> <span class="o">=</span> <span class="n">consoleReader</span><span class="o">.</span><span class="na">readLine</span><span class="o">();</span>
+ 
+                <span class="c1">// 向服务器发送消息</span>
+                <span class="n">chatClient</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">input</span><span class="o">);</span>
+ 
+                <span class="c1">// 检查用户是否准备退出</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">chatClient</span><span class="o">.</span><span class="na">readyToQuit</span><span class="o">(</span><span class="n">input</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="通道与缓冲区">通道与缓冲区</h3>
+
+<ul>
+  <li>Java NIO系统的核心在于：通道(Channel)和缓冲区(Buffer)。通道表示打开到IO 设备(例如：文件、套接字)的连接。若需要使用NIO 系统，需要获取用于连接IO 设备的通道以及用于容纳数据的缓冲区。然后操作缓冲区，对数据进行处理。简而言之，<strong>Channel负责传输，Buffer负责存储</strong>。</li>
+  <li>缓冲区（Buffer）：一个用于特定基本数据类型的容器。由java.nio包定义的，所有缓冲区都是Buffer抽象类的子类。</li>
+  <li>java NIO 中的Buffer主要用于与NIO通道进行交互，数据是从通道读入缓冲区，从缓冲区写入通道中的。</li>
+</ul>
+
+<h4 id="缓冲区buffer">缓冲区（Buffer）</h4>
+
+<ul>
+  <li>Buffer就像一个数组，可以保存多个相同类型的数据。根据数据类型不同(boolean 除外) ，有以下Buffer 常用子类：
+    <ul>
+      <li>ByteBuffer</li>
+      <li>CharBuffer</li>
+      <li>ShortBuffer</li>
+      <li>IntBuffer</li>
+      <li>LongBuffer</li>
+      <li>FloatBuffer</li>
+      <li>DoubleBuffer</li>
+    </ul>
+  </li>
+  <li>获取Buffer对象的方法：<code class="language-plaintext highlighter-rouge">static XxxBuffer allocate(int capacity) </code>：创建一个容量为capacity的XxxBuffer对象</li>
+  <li>缓冲区的重要概念：
+    <ul>
+      <li><strong>容量（capacity）</strong>:表示Buffer 最大数据容量，缓冲区容量不能为负，并且创建后不能更改。</li>
+      <li><strong>限制（limit）</strong>：第一个不应该读取或写入的数据的索引，即位于limit 后的数据不可读写。缓冲区的限制不能为负，并且不能大于其容量。</li>
+      <li><strong>位置（position）</strong>：下一个要读取或写入的数据的索引。缓冲区的位置不能为负，并且不能大于其限制</li>
+      <li><strong>标记（Mark）与重置（reset）</strong>：标记是一个索引，通过Buffer 中的mark() 方法指定Buffer 中一个特定的position，之后可以通过调用reset() 方法恢复到这个position.</li>
+      <li>标记、位置、限制、容量遵守以下不变式： 0 &lt;= mark &lt;= position &lt;= limit &lt;= capacity</li>
+    </ul>
+  </li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/08/01/hSnU6TIBQsiLVWK.png" alt="image.png" /></p>
+
+<ul>
+  <li>Buffer常用方法</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">方法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Buffer clear()</td>
+      <td style="text-align: center">清空缓冲区并返回对缓冲区的引用</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Buffer flip()</td>
+      <td style="text-align: center">将缓冲区的界限（limit）设置为当前位置，并将当前位置（position）重置为0</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int capacity()</td>
+      <td style="text-align: center">返回 Buffer 的 capacity 大小</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">boolean hasRemaining()</td>
+      <td style="text-align: center">判断缓冲区中是否还有元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int limit()</td>
+      <td style="text-align: center">返回 Buffer 的界限(limit) 的位置</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Buffer limit(int n)</td>
+      <td style="text-align: center">将设置缓冲区界限为 n, 并返回一个具有新 limit 的缓冲区对象</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Buffer mark()</td>
+      <td style="text-align: center">对缓冲区设置标记</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int position()</td>
+      <td style="text-align: center">返回缓冲区的当前位置 position</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Buffer position(int n)</td>
+      <td style="text-align: center">将设置缓冲区的当前位置为 n , 并返回修改后的 Buffer 对象</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int remaining()</td>
+      <td style="text-align: center">返回 position 和 limit 之间的元素个数</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Buffer reset()</td>
+      <td style="text-align: center">将位置 position 转到以前设置的 mark 所在的位置</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Buffer rewind()</td>
+      <td style="text-align: center">将位置设为为 0， 取消设置的 mark</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>Buffer 所有子类提供了两个用于数据操作的方法：get()与put() 方法</li>
+  <li>获取Buffer中的数据
+    <ul>
+      <li>get() ：读取单个字节</li>
+      <li>get(byte[] dst)：批量读取多个字节到dst 中</li>
+      <li>get(int index)：读取指定索引位置的字节(不会移动position)</li>
+    </ul>
+  </li>
+  <li>放入数据到Buffer 中
+    <ul>
+      <li>put(byte b)：将给定单个字节写入缓冲区的当前位置</li>
+      <li>put(byte[] src)：将src 中的字节写入缓冲区的当前位置</li>
+      <li>put(int index, byte b)：将指定字节写入缓冲区的索引位置(不会移动position)</li>
+    </ul>
+  </li>
+  <li>字节缓冲区要么是直接的，要么是非直接的。如果为直接字节缓冲区，则Java 虚拟机会尽最大努力直接在此缓冲区上执行本机I/O 操作。也就是说，在每次调用基础操作系统的一个本机I/O 操作之前（或之后），虚拟机都会尽量避免将缓冲区的内容复制到中间缓冲区中（或从中间缓冲区中复制内容）。</li>
+  <li><strong>直接字节缓冲区</strong>可以通过调用此类的<strong>allocateDirect() 工厂方法</strong>来创建。此方法返回的<strong>缓冲区进行分配和取消分配所需成本通常高于非直接缓冲区</strong>。直接缓冲区的内容可以驻留在常规的垃圾回收堆之外，因此，它们对应用程序的内存需求量造成的影响可能并不明显。所以，建议将直接缓冲区主要分配给那些易受基础系统的本机I/O 操作影响的大型、持久的缓冲区。一般情况下，最好仅在直接缓冲区能在程序性能方面带来明显好处时分配它们。</li>
+  <li>直接字节缓冲区还可以通过<strong>FileChannel 的map() 方法</strong>将文件区域直接映射到内存中来创建。该方法返回<strong>MappedByteBuffer</strong> 。Java 平台的实现有助于通过JNI 从本机代码创建直接字节缓冲区。如果以上这些缓冲区中的某个缓冲区实例指的是不可访问的内存区域，则试图访问该区域不会更改该缓冲区的内容，并且将会在访问期间或稍后的某个时间导致抛出不确定的异常。</li>
+  <li>字节缓冲区是直接缓冲区还是非直接缓冲区可通过调用其<strong>isDirect()</strong> 方法来确定。提供此方法是为了能够在性能关键型代码中执行显式缓冲区管理。</li>
+  <li>非直接缓冲区</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/08/01/ShI3nKeuFicRE7g.png" alt="image.png" /></p>
+
+<ul>
+  <li>直接缓冲区</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/08/01/k5x8HTrZYWdq4BP.png" alt="image.png" /></p>
+
+<ul>
+  <li>案例</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * 一、缓冲区（Buffer）：在 Java NIO 中负责数据的存取。缓冲区就是数组。用于存储不同数据类型的数据
+ * 
+ * 根据数据类型不同（boolean 除外），提供了相应类型的缓冲区：
+ * ByteBuffer
+ * CharBuffer
+ * ShortBuffer
+ * IntBuffer
+ * LongBuffer
+ * FloatBuffer
+ * DoubleBuffer
+ * 
+ * 上述缓冲区的管理方式几乎一致，通过 allocate() 获取缓冲区
+ * 
+ * 二、缓冲区存取数据的两个核心方法：
+ * put() : 存入数据到缓冲区中
+ * get() : 获取缓冲区中的数据
+ * 
+ * 三、缓冲区中的四个核心属性：
+ * capacity : 容量，表示缓冲区中最大存储数据的容量。一旦声明不能改变。
+ * limit : 界限，表示缓冲区中可以操作数据的大小。（limit 后数据不能进行读写）
+ * position : 位置，表示缓冲区中正在操作数据的位置。
+ * 
+ * mark : 标记，表示记录当前 position 的位置。可以通过 reset() 恢复到 mark 的位置
+ * 
+ * 0 &lt;= mark &lt;= position &lt;= limit &lt;= capacity
+ * 
+ * 四、直接缓冲区与非直接缓冲区：
+ * 非直接缓冲区：通过 allocate() 方法分配缓冲区，将缓冲区建立在 JVM 的内存中
+ * 直接缓冲区：通过 allocateDirect() 方法分配直接缓冲区，将缓冲区建立在物理内存中。可以提高效率
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestBuffer</span> <span class="o">{</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test3</span><span class="o">(){</span>
+		<span class="c1">//分配直接缓冲区</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocateDirect</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">isDirect</span><span class="o">());</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test2</span><span class="o">(){</span>
+		<span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="s">"abcde"</span><span class="o">;</span>
+		
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="n">buf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+		
+		<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		
+		<span class="kt">byte</span><span class="o">[]</span> <span class="n">dst</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">()];</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">dst</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">dst</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">2</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		
+		<span class="c1">//mark() : 标记</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">mark</span><span class="o">();</span>
+		
+		<span class="n">buf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">dst</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">dst</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">2</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		
+		<span class="c1">//reset() : 恢复到 mark 的位置</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">reset</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		
+		<span class="c1">//判断缓冲区中是否还有剩余数据</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">hasRemaining</span><span class="o">()){</span>
+			
+			<span class="c1">//获取缓冲区中可以操作的数量</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">remaining</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test1</span><span class="o">(){</span>
+		<span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="s">"abcde"</span><span class="o">;</span>
+		
+		<span class="c1">//1. 分配一个指定大小的缓冲区</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"-----------------allocate()----------------"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">capacity</span><span class="o">());</span>
+		
+		<span class="c1">//2. 利用 put() 存入数据到缓冲区中</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"-----------------put()----------------"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">capacity</span><span class="o">());</span>
+		
+		<span class="c1">//3. 切换读取数据模式</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"-----------------flip()----------------"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">capacity</span><span class="o">());</span>
+		
+		<span class="c1">//4. 利用 get() 读取缓冲区中的数据</span>
+		<span class="kt">byte</span><span class="o">[]</span> <span class="n">dst</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">()];</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">dst</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">dst</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">dst</span><span class="o">.</span><span class="na">length</span><span class="o">));</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"-----------------get()----------------"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">capacity</span><span class="o">());</span>
+		
+		<span class="c1">//5. rewind() : 可重复读</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">rewind</span><span class="o">();</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"-----------------rewind()----------------"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">capacity</span><span class="o">());</span>
+		
+		<span class="c1">//6. clear() : 清空缓冲区. 但是缓冲区中的数据依然存在，但是处于“被遗忘”状态</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"-----------------clear()----------------"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">position</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">capacity</span><span class="o">());</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">((</span><span class="kt">char</span><span class="o">)</span><span class="n">buf</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="通道channel">通道（Channel）</h4>
+
+<ul>
+  <li>通道（Channel）：由java.nio.channels 包定义的。Channel 表示IO 源与目标打开的连接。 Channel 类似于传统的“流”。只不过 Channel本身不能直接访问数据，Channel 只能与Buffer 进行交互。</li>
+  <li>Java 为 Channel 接口提供的最主要实现类如下：
+    <ul>
+      <li>FileChannel：用于读取、写入、映射和操作文件的通道。</li>
+      <li>DatagramChannel：通过 UDP 读写网络中的数据通道。</li>
+      <li>SocketChannel：通过 TCP 读写网络中的数据。</li>
+      <li>ServerSocketChannel：可以监听新进来的 TCP 连接，对每一个新进来的连接都会创建一个SocketChannel。</li>
+    </ul>
+  </li>
+  <li>获取通道的一种方式是对支持通道的对象调用<strong>getChannel() 方法</strong>。支持通道的类如下：
+    <ul>
+      <li>FileInputStream</li>
+      <li>FileOutputStream</li>
+      <li>RandomAccessFile</li>
+      <li>DatagramSocket</li>
+      <li>Socket</li>
+      <li>ServerSocket</li>
+    </ul>
+  </li>
+  <li>获取通道的其他方式是使用 Files 类的静态方法 <strong>newByteChannel()</strong> 获取字节通道。或者通过通道的静态方法 <strong>open()</strong> 打开并返回指定通道。</li>
+  <li>通道的数据传输
+    <ul>
+      <li>将Buffer中的数据写入Channel：<code class="language-plaintext highlighter-rouge">int bytesWritten = inChannel.write(buf)</code></li>
+      <li>从Channel读取数据到Buffer：<code class="language-plaintext highlighter-rouge">int bytesRead = inChannel.read(buf)</code></li>
+    </ul>
+  </li>
+  <li>案例</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 一、通道（Channel）：用于源节点与目标节点的连接。在 Java NIO 中负责缓冲区中数据的传输。Channel 本身不存储数据，因此需要配合缓冲区进行传输。
+ * 
+ * 二、通道的主要实现类
+ * 	java.nio.channels.Channel 接口：
+ * 		|--FileChannel
+ * 		|--SocketChannel
+ * 		|--ServerSocketChannel
+ * 		|--DatagramChannel
+ * 
+ * 三、获取通道
+ * 1. Java 针对支持通道的类提供了 getChannel() 方法
+ * 		本地 IO：
+ * 		FileInputStream/FileOutputStream
+ * 		RandomAccessFile
+ * 
+ * 		网络IO：
+ * 		Socket
+ * 		ServerSocket
+ * 		DatagramSocket
+ * 		
+ * 2. 在 JDK 1.7 中的 NIO.2 针对各个通道提供了静态方法 open()
+ * 3. 在 JDK 1.7 中的 NIO.2 的 Files 工具类的 newByteChannel()
+ * 
+ * 四、通道之间的数据传输
+ * transferFrom()
+ * transferTo()
+ * 
+ * 五、分散(Scatter)与聚集(Gather)
+ * 分散读取（Scattering Reads）：将通道中的数据分散到多个缓冲区中
+ * 聚集写入（Gathering Writes）：将多个缓冲区中的数据聚集到通道中
+ * 
+ * 六、字符集：Charset
+ * 编码：字符串 -&gt; 字节数组
+ * 解码：字节数组  -&gt; 字符串
+ * 
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestChannel</span> <span class="o">{</span>
+	
+	<span class="c1">//字符集</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test6</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="nc">Charset</span> <span class="n">cs1</span> <span class="o">=</span> <span class="nc">Charset</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"GBK"</span><span class="o">);</span>
+		
+		<span class="c1">//获取编码器</span>
+		<span class="nc">CharsetEncoder</span> <span class="n">ce</span> <span class="o">=</span> <span class="n">cs1</span><span class="o">.</span><span class="na">newEncoder</span><span class="o">();</span>
+		
+		<span class="c1">//获取解码器</span>
+		<span class="nc">CharsetDecoder</span> <span class="n">cd</span> <span class="o">=</span> <span class="n">cs1</span><span class="o">.</span><span class="na">newDecoder</span><span class="o">();</span>
+		
+		<span class="nc">CharBuffer</span> <span class="n">cBuf</span> <span class="o">=</span> <span class="nc">CharBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		<span class="n">cBuf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"尚硅谷威武！"</span><span class="o">);</span>
+		<span class="n">cBuf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		
+		<span class="c1">//编码</span>
+		<span class="nc">ByteBuffer</span> <span class="n">bBuf</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="n">cBuf</span><span class="o">);</span>
+		
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">bBuf</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+		<span class="o">}</span>
+		
+		<span class="c1">//解码</span>
+		<span class="n">bBuf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		<span class="nc">CharBuffer</span> <span class="n">cBuf2</span> <span class="o">=</span> <span class="n">cd</span><span class="o">.</span><span class="na">decode</span><span class="o">(</span><span class="n">bBuf</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">cBuf2</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------------------------"</span><span class="o">);</span>
+		
+		<span class="nc">Charset</span> <span class="n">cs2</span> <span class="o">=</span> <span class="nc">Charset</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"GBK"</span><span class="o">);</span>
+		<span class="n">bBuf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		<span class="nc">CharBuffer</span> <span class="n">cBuf3</span> <span class="o">=</span> <span class="n">cs2</span><span class="o">.</span><span class="na">decode</span><span class="o">(</span><span class="n">bBuf</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">cBuf3</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test5</span><span class="o">(){</span>
+		<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Charset</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="nc">Charset</span><span class="o">.</span><span class="na">availableCharsets</span><span class="o">();</span>
+		
+		<span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Entry</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Charset</span><span class="o">&gt;&gt;</span> <span class="n">set</span> <span class="o">=</span> <span class="n">map</span><span class="o">.</span><span class="na">entrySet</span><span class="o">();</span>
+		
+		<span class="k">for</span> <span class="o">(</span><span class="nc">Entry</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Charset</span><span class="o">&gt;</span> <span class="n">entry</span> <span class="o">:</span> <span class="n">set</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">entry</span><span class="o">.</span><span class="na">getKey</span><span class="o">()</span> <span class="o">+</span> <span class="s">"="</span> <span class="o">+</span> <span class="n">entry</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+	<span class="c1">//分散和聚集</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test4</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">RandomAccessFile</span> <span class="n">raf1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">RandomAccessFile</span><span class="o">(</span><span class="s">"1.txt"</span><span class="o">,</span> <span class="s">"rw"</span><span class="o">);</span>
+		
+		<span class="c1">//1. 获取通道</span>
+		<span class="nc">FileChannel</span> <span class="n">channel1</span> <span class="o">=</span> <span class="n">raf1</span><span class="o">.</span><span class="na">getChannel</span><span class="o">();</span>
+		
+		<span class="c1">//2. 分配指定大小的缓冲区</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf1</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf2</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="c1">//3. 分散读取</span>
+		<span class="nc">ByteBuffer</span><span class="o">[]</span> <span class="n">bufs</span> <span class="o">=</span> <span class="o">{</span><span class="n">buf1</span><span class="o">,</span> <span class="n">buf2</span><span class="o">};</span>
+		<span class="n">channel1</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">bufs</span><span class="o">);</span>
+		
+		<span class="k">for</span> <span class="o">(</span><span class="nc">ByteBuffer</span> <span class="n">byteBuffer</span> <span class="o">:</span> <span class="n">bufs</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">byteBuffer</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">bufs</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">array</span><span class="o">(),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">bufs</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">limit</span><span class="o">()));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"-----------------"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">bufs</span><span class="o">[</span><span class="mi">1</span><span class="o">].</span><span class="na">array</span><span class="o">(),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">bufs</span><span class="o">[</span><span class="mi">1</span><span class="o">].</span><span class="na">limit</span><span class="o">()));</span>
+		
+		<span class="c1">//4. 聚集写入</span>
+		<span class="nc">RandomAccessFile</span> <span class="n">raf2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">RandomAccessFile</span><span class="o">(</span><span class="s">"2.txt"</span><span class="o">,</span> <span class="s">"rw"</span><span class="o">);</span>
+		<span class="nc">FileChannel</span> <span class="n">channel2</span> <span class="o">=</span> <span class="n">raf2</span><span class="o">.</span><span class="na">getChannel</span><span class="o">();</span>
+		
+		<span class="n">channel2</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">bufs</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="c1">//通道之间的数据传输(直接缓冲区)</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test3</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">FileChannel</span> <span class="n">inChannel</span> <span class="o">=</span> <span class="nc">FileChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"1.jpg"</span><span class="o">),</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">READ</span><span class="o">);</span>
+		<span class="nc">FileChannel</span> <span class="n">outChannel</span> <span class="o">=</span> <span class="nc">FileChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"4.jpg"</span><span class="o">),</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">WRITE</span><span class="o">,</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">READ</span><span class="o">,</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">CREATE</span><span class="o">);</span>
+		
+<span class="c1">//		inChannel.transferTo(0, inChannel.size(), outChannel);</span>
+		<span class="n">outChannel</span><span class="o">.</span><span class="na">transferFrom</span><span class="o">(</span><span class="n">inChannel</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">inChannel</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+		
+		<span class="n">inChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="n">outChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	<span class="c1">//使用直接缓冲区完成文件的复制(内存映射文件)</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test2</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span><span class="c1">//2127-1902-1777</span>
+<span class="c1">//		long start = System.currentTimeMillis();</span>
+		
+		<span class="nc">FileChannel</span> <span class="n">inChannel</span> <span class="o">=</span> <span class="nc">FileChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"1.jpg"</span><span class="o">),</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">READ</span><span class="o">);</span>
+		<span class="nc">FileChannel</span> <span class="n">outChannel</span> <span class="o">=</span> <span class="nc">FileChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"3.jpg"</span><span class="o">),</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">WRITE</span><span class="o">,</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">READ</span><span class="o">,</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">CREATE</span><span class="o">);</span>
+		
+		<span class="c1">//内存映射文件</span>
+		<span class="nc">MappedByteBuffer</span> <span class="n">inMappedBuf</span> <span class="o">=</span> <span class="n">inChannel</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nc">MapMode</span><span class="o">.</span><span class="na">READ_ONLY</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">inChannel</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+		<span class="nc">MappedByteBuffer</span> <span class="n">outMappedBuf</span> <span class="o">=</span> <span class="n">outChannel</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nc">MapMode</span><span class="o">.</span><span class="na">READ_WRITE</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">inChannel</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+		
+		<span class="c1">//直接对缓冲区进行数据的读写操作</span>
+		<span class="kt">byte</span><span class="o">[]</span> <span class="n">dst</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">inMappedBuf</span><span class="o">.</span><span class="na">limit</span><span class="o">()];</span>
+		<span class="n">inMappedBuf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">dst</span><span class="o">);</span>
+		<span class="n">outMappedBuf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">dst</span><span class="o">);</span>
+		
+		<span class="n">inChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="n">outChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		
+<span class="c1">//		long end = System.currentTimeMillis();</span>
+<span class="c1">//		System.out.println("耗费时间为：" + (end - start));</span>
+	<span class="o">}</span>
+	
+	<span class="c1">//利用通道完成文件的复制（非直接缓冲区）</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test1</span><span class="o">(){</span><span class="c1">//10874-10953</span>
+<span class="c1">//		long start = System.currentTimeMillis();</span>
+		
+		<span class="nc">FileInputStream</span> <span class="n">fis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="nc">FileOutputStream</span> <span class="n">fos</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="c1">//①获取通道</span>
+		<span class="nc">FileChannel</span> <span class="n">inChannel</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="nc">FileChannel</span> <span class="n">outChannel</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">fis</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="s">"1.jpg"</span><span class="o">);</span>
+			<span class="n">fos</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"2.jpg"</span><span class="o">);</span>
+			
+			<span class="n">inChannel</span> <span class="o">=</span> <span class="n">fis</span><span class="o">.</span><span class="na">getChannel</span><span class="o">();</span>
+			<span class="n">outChannel</span> <span class="o">=</span> <span class="n">fos</span><span class="o">.</span><span class="na">getChannel</span><span class="o">();</span>
+			
+			<span class="c1">//②分配指定大小的缓冲区</span>
+			<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+			
+			<span class="c1">//③将通道中的数据存入缓冲区中</span>
+			<span class="k">while</span><span class="o">(</span><span class="n">inChannel</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+				<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span> <span class="c1">//切换读取数据的模式</span>
+				<span class="c1">//④将缓冲区中的数据写入通道中</span>
+				<span class="n">outChannel</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+				<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span> <span class="c1">//清空缓冲区</span>
+			<span class="o">}</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">outChannel</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">outChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+			
+			<span class="k">if</span><span class="o">(</span><span class="n">inChannel</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">inChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+			
+			<span class="k">if</span><span class="o">(</span><span class="n">fos</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">fos</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+			
+			<span class="k">if</span><span class="o">(</span><span class="n">fis</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+				<span class="k">try</span> <span class="o">{</span>
+					<span class="n">fis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+				<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		
+<span class="c1">//		long end = System.currentTimeMillis();</span>
+<span class="c1">//		System.out.println("耗费时间为：" + (end - start));</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>阻塞NIO</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 一、使用 NIO 完成网络通信的三个核心：
+ * 
+ * 1. 通道（Channel）：负责连接
+ * 		
+ * 	   java.nio.channels.Channel 接口：
+ * 			|--SelectableChannel
+ * 				|--SocketChannel
+ * 				|--ServerSocketChannel
+ * 				|--DatagramChannel
+ * 
+ * 				|--Pipe.SinkChannel
+ * 				|--Pipe.SourceChannel
+ * 
+ * 2. 缓冲区（Buffer）：负责数据的存取
+ * 
+ * 3. 选择器（Selector）：是 SelectableChannel 的多路复用器。用于监控 SelectableChannel 的 IO 状况
+ * 
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestBlockingNIO</span> <span class="o">{</span>
+
+	<span class="c1">//客户端</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">client</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="c1">//1. 获取通道</span>
+		<span class="nc">SocketChannel</span> <span class="n">sChannel</span> <span class="o">=</span> <span class="nc">SocketChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">9898</span><span class="o">));</span>
+		
+		<span class="nc">FileChannel</span> <span class="n">inChannel</span> <span class="o">=</span> <span class="nc">FileChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"1.jpg"</span><span class="o">),</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">READ</span><span class="o">);</span>
+		
+		<span class="c1">//2. 分配指定大小的缓冲区</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="c1">//3. 读取本地文件，并发送到服务端</span>
+		<span class="k">while</span><span class="o">(</span><span class="n">inChannel</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+			<span class="n">sChannel</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="c1">//4. 关闭通道</span>
+		<span class="n">inChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="n">sChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	<span class="c1">//服务端</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">server</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="c1">//1. 获取通道</span>
+		<span class="nc">ServerSocketChannel</span> <span class="n">ssChannel</span> <span class="o">=</span> <span class="nc">ServerSocketChannel</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+		
+		<span class="nc">FileChannel</span> <span class="n">outChannel</span> <span class="o">=</span> <span class="nc">FileChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"5.jpg"</span><span class="o">),</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">WRITE</span><span class="o">,</span> <span class="nc">StandardOpenOption</span><span class="o">.</span><span class="na">CREATE</span><span class="o">);</span>
+		
+		<span class="c1">//2. 绑定连接</span>
+		<span class="n">ssChannel</span><span class="o">.</span><span class="na">bind</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="mi">9898</span><span class="o">));</span>
+		
+		<span class="c1">//3. 获取客户端连接的通道</span>
+		<span class="nc">SocketChannel</span> <span class="n">sChannel</span> <span class="o">=</span> <span class="n">ssChannel</span><span class="o">.</span><span class="na">accept</span><span class="o">();</span>
+		
+		<span class="c1">//4. 分配指定大小的缓冲区</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="c1">//5. 接收客户端的数据，并保存到本地</span>
+		<span class="k">while</span><span class="o">(</span><span class="n">sChannel</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">){</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+			<span class="n">outChannel</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="c1">//6. 关闭通道</span>
+		<span class="n">sChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="n">outChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="n">ssChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="分散scatter和聚集gather">分散（Scatter）和聚集（Gather）</h3>
+
+<ul>
+  <li>分散读取（Scattering Reads）是指从Channel 中读取的数据“分散”到多个Buffer 中。注意：按照缓冲区的顺序，从 Channel 中读取的数据依次将 Buffer 填满。</li>
+  <li><img src="https://i.loli.net/2020/08/01/u9Mw6ZrAjl7aBFq.png" alt="image.png" /></li>
+  <li>聚集写入（Gathering Writes）是指将多个Buffer 中的数据“聚集” 到Channel。注意：按照缓冲区的顺序，写入 position 和 limit 之间的数据到 Channel 。</li>
+  <li>FileChannnel的常用方法：</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">方法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">int read(ByteBuffer dst)</td>
+      <td style="text-align: center">从 Channel 中读取数据到 ByteBuffer</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">long read(ByteBuffer[] dsts)</td>
+      <td style="text-align: center">将 Channel 中的数据“分散”到 ByteBuffer[]</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int write(ByteBuffer src)</td>
+      <td style="text-align: center">将 ByteBuffer 中的数据写入到 Channel</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">long write(ByteBuffer[] srcs)</td>
+      <td style="text-align: center">将 ByteBuffer[] 中的数据“聚集”到 Channel</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">long position()</td>
+      <td style="text-align: center">返回此通道的文件位置</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">FileChannel position(long p)</td>
+      <td style="text-align: center">设置此通道的文件位置</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">long size()</td>
+      <td style="text-align: center">返回此通道的文件的当前大小</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">FileChannel truncate(long s)</td>
+      <td style="text-align: center">将此通道的文件截取为给定大小</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">void force(boolean metaData)</td>
+      <td style="text-align: center">强制将所有对此通道的文件更新写入到存储设备中</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="选择器selector">选择器（Selector）</h3>
+
+<ul>
+  <li>选择器（Selector）是SelectableChannle 对象的多路复用器，<strong>Selector 可以同时监控多个SelectableChannel 的IO 状况</strong>，也就是说，利用Selector可使一个单独的线程管理多个Channel。Selector 是非阻塞IO 的核心。</li>
+  <li>创建Selector ：通过调用Selector.open() 方法创建一个Selector。<code class="language-plaintext highlighter-rouge">Selector sr = Selector.open()</code></li>
+  <li>向选择器注册通道：<code class="language-plaintext highlighter-rouge">SelectableChannel.register(Selector sel,int ops)</code></li>
+  <li>当调用register(Selector sel, int ops)  将通道注册选择器时，选择器对通道的监听事件，需要通过第二个参数ops 指定。</li>
+  <li>可以监听的事件类型（可使用SelectionKey 的四个常量表示）：
+    <ul>
+      <li>读: SelectionKey.OP_READ</li>
+      <li>写: SelectionKey.OP_WRITE</li>
+      <li>连接: SelectionKey.OP_CONNECT</li>
+      <li>接收: SelectionKey.OP_ACCEPT</li>
+    </ul>
+  </li>
+  <li>selector的常用方法：</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">方法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code class="language-plaintext highlighter-rouge">Set&lt;SelectionKey&gt; keys()</code></td>
+      <td style="text-align: center">所有的 SelectionKey 集合。代表注册在该Selector上的Channel</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">selectedKeys()</td>
+      <td style="text-align: center">被选择的 SelectionKey 集合。返回此Selector的已选择键集</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int select()</td>
+      <td style="text-align: center">监控所有注册的Channel，当它们中间有需要处理的 IO 操作时，该方法返回，并将对应得的 SelectionKey 加入被选择的SelectionKey 集合中，该方法返回这些 Channel 的数量。</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int select(long timeout)</td>
+      <td style="text-align: center">可以设置超时时长的 select() 操作</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int selectNow()</td>
+      <td style="text-align: center">执行一个立即返回的 select() 操作，该方法不会阻塞线程</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Selector wakeup()</td>
+      <td style="text-align: center">使一个还未返回的 select() 方法立即返回</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">void close()</td>
+      <td style="text-align: center">关闭该选择器</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li><strong>SelectionKey</strong>：表示SelectableChannel 和Selector 之间的注册关系。每次向选择器注册通道时就会选择一个事件(选择键)。选择键包含两个表示为整数值的操作集。操作集的每一位都表示该键的通道所支持的一类可选择操作。</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">方法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">int    interestOps()</td>
+      <td style="text-align: center">获取感兴趣事件集合</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int    readyOps()</td>
+      <td style="text-align: center">获取通道已经准备就绪的操作的集合</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">SelectableChannel  channel()</td>
+      <td style="text-align: center">获取注册通道</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Selector  selector()</td>
+      <td style="text-align: center">返回选择器</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">boolean isReadable()</td>
+      <td style="text-align: center">检测 Channal 中读事件是否就绪</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">boolean isWritable()</td>
+      <td style="text-align: center">检测 Channal 中写事件是否就绪</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">boolean isConnectable()</td>
+      <td style="text-align: center">检测 Channel 中连接是否就绪</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">boolean isAcceptable()</td>
+      <td style="text-align: center">检测 Channel 中接收是否就绪</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>
+    <p>SocketChannel：Java NIO中的SocketChannel是一个连接到TCP网络套接字的通道。Java NIO中的ServerSocketChannel 是一个可以监听新进来的TCP连接的通道，就像标准IO中的ServerSocket一样。</p>
+  </li>
+  <li>
+    <p>操作步骤：</p>
+
+    <p>打开SocketChannel</p>
+
+    <p>读写数据</p>
+
+    <p>关闭SocketChannel</p>
+  </li>
+  <li>
+    <p>Java NIO中的DatagramChannel是一个能收发UDP包的通道。</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 一、使用 NIO 完成网络通信的三个核心：
+ * 
+ * 1. 通道（Channel）：负责连接
+ * 		
+ * 	   java.nio.channels.Channel 接口：
+ * 			|--SelectableChannel
+ * 				|--SocketChannel
+ * 				|--ServerSocketChannel
+ * 				|--DatagramChannel
+ * 
+ * 				|--Pipe.SinkChannel
+ * 				|--Pipe.SourceChannel
+ * 
+ * 2. 缓冲区（Buffer）：负责数据的存取
+ * 
+ * 3. 选择器（Selector）：是 SelectableChannel 的多路复用器。用于监控 SelectableChannel 的 IO 状况
+ * 
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestNonBlockingNIO</span> <span class="o">{</span>
+	
+	<span class="c1">//客户端</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">client</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="c1">//1. 获取通道</span>
+		<span class="nc">SocketChannel</span> <span class="n">sChannel</span> <span class="o">=</span> <span class="nc">SocketChannel</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">9898</span><span class="o">));</span>
+		
+		<span class="c1">//2. 切换非阻塞模式</span>
+		<span class="n">sChannel</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+		
+		<span class="c1">//3. 分配指定大小的缓冲区</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="c1">//4. 发送数据给服务端</span>
+		<span class="nc">Scanner</span> <span class="n">scan</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Scanner</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">);</span>
+		
+		<span class="k">while</span><span class="o">(</span><span class="n">scan</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+			<span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">toString</span><span class="o">()</span> <span class="o">+</span> <span class="s">"\n"</span> <span class="o">+</span> <span class="n">str</span><span class="o">).</span><span class="na">getBytes</span><span class="o">());</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+			<span class="n">sChannel</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="c1">//5. 关闭通道</span>
+		<span class="n">sChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+
+	<span class="c1">//服务端</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">server</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="c1">//1. 获取通道</span>
+		<span class="nc">ServerSocketChannel</span> <span class="n">ssChannel</span> <span class="o">=</span> <span class="nc">ServerSocketChannel</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+		
+		<span class="c1">//2. 切换非阻塞模式</span>
+		<span class="n">ssChannel</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+		
+		<span class="c1">//3. 绑定连接</span>
+		<span class="n">ssChannel</span><span class="o">.</span><span class="na">bind</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="mi">9898</span><span class="o">));</span>
+		
+		<span class="c1">//4. 获取选择器</span>
+		<span class="nc">Selector</span> <span class="n">selector</span> <span class="o">=</span> <span class="nc">Selector</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+		
+		<span class="c1">//5. 将通道注册到选择器上, 并且指定“监听接收事件”</span>
+		<span class="n">ssChannel</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="nc">SelectionKey</span><span class="o">.</span><span class="na">OP_ACCEPT</span><span class="o">);</span>
+		
+		<span class="c1">//6. 轮询式的获取选择器上已经“准备就绪”的事件</span>
+		<span class="k">while</span><span class="o">(</span><span class="n">selector</span><span class="o">.</span><span class="na">select</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">){</span>
+			
+			<span class="c1">//7. 获取当前选择器中所有注册的“选择键(已就绪的监听事件)”</span>
+			<span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">SelectionKey</span><span class="o">&gt;</span> <span class="n">it</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="na">selectedKeys</span><span class="o">().</span><span class="na">iterator</span><span class="o">();</span>
+			
+			<span class="k">while</span><span class="o">(</span><span class="n">it</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+				<span class="c1">//8. 获取准备“就绪”的是事件</span>
+				<span class="nc">SelectionKey</span> <span class="n">sk</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+				
+				<span class="c1">//9. 判断具体是什么事件准备就绪</span>
+				<span class="k">if</span><span class="o">(</span><span class="n">sk</span><span class="o">.</span><span class="na">isAcceptable</span><span class="o">()){</span>
+					<span class="c1">//10. 若“接收就绪”，获取客户端连接</span>
+					<span class="nc">SocketChannel</span> <span class="n">sChannel</span> <span class="o">=</span> <span class="n">ssChannel</span><span class="o">.</span><span class="na">accept</span><span class="o">();</span>
+					
+					<span class="c1">//11. 切换非阻塞模式</span>
+					<span class="n">sChannel</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+					
+					<span class="c1">//12. 将该通道注册到选择器上</span>
+					<span class="n">sChannel</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="nc">SelectionKey</span><span class="o">.</span><span class="na">OP_READ</span><span class="o">);</span>
+				<span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">sk</span><span class="o">.</span><span class="na">isReadable</span><span class="o">()){</span>
+					<span class="c1">//13. 获取当前选择器上“读就绪”状态的通道</span>
+					<span class="nc">SocketChannel</span> <span class="n">sChannel</span> <span class="o">=</span> <span class="o">(</span><span class="nc">SocketChannel</span><span class="o">)</span> <span class="n">sk</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+					
+					<span class="c1">//14. 读取数据</span>
+					<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+					
+					<span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+					<span class="k">while</span><span class="o">((</span><span class="n">len</span> <span class="o">=</span> <span class="n">sChannel</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">))</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">){</span>
+						<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+						<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">array</span><span class="o">(),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">));</span>
+						<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+					<span class="o">}</span>
+				<span class="o">}</span>
+				
+				<span class="c1">//15. 取消选择键 SelectionKey</span>
+				<span class="n">it</span><span class="o">.</span><span class="na">remove</span><span class="o">();</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="管道pipe">管道（Pipe）</h3>
+
+<ul>
+  <li>Java NIO 管道是2个线程之间的单向数据连接。 Pipe有一个source通道和一个sink通道。数据会被写到sink通道，从source通道读取。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestNonBlockingNIO2</span> <span class="o">{</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">send</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="nc">DatagramChannel</span> <span class="n">dc</span> <span class="o">=</span> <span class="nc">DatagramChannel</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+		
+		<span class="n">dc</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+		
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="nc">Scanner</span> <span class="n">scan</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Scanner</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">);</span>
+		
+		<span class="k">while</span><span class="o">(</span><span class="n">scan</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+			<span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">toString</span><span class="o">()</span> <span class="o">+</span> <span class="s">":\n"</span> <span class="o">+</span> <span class="n">str</span><span class="o">).</span><span class="na">getBytes</span><span class="o">());</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+			<span class="n">dc</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">9898</span><span class="o">));</span>
+			<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="n">dc</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">receive</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="nc">DatagramChannel</span> <span class="n">dc</span> <span class="o">=</span> <span class="nc">DatagramChannel</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+		
+		<span class="n">dc</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+		
+		<span class="n">dc</span><span class="o">.</span><span class="na">bind</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="mi">9898</span><span class="o">));</span>
+		
+		<span class="nc">Selector</span> <span class="n">selector</span> <span class="o">=</span> <span class="nc">Selector</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+		
+		<span class="n">dc</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="nc">SelectionKey</span><span class="o">.</span><span class="na">OP_READ</span><span class="o">);</span>
+		
+		<span class="k">while</span><span class="o">(</span><span class="n">selector</span><span class="o">.</span><span class="na">select</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">){</span>
+			<span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">SelectionKey</span><span class="o">&gt;</span> <span class="n">it</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="na">selectedKeys</span><span class="o">().</span><span class="na">iterator</span><span class="o">();</span>
+			
+			<span class="k">while</span><span class="o">(</span><span class="n">it</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+				<span class="nc">SelectionKey</span> <span class="n">sk</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+				
+				<span class="k">if</span><span class="o">(</span><span class="n">sk</span><span class="o">.</span><span class="na">isReadable</span><span class="o">()){</span>
+					<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+					
+					<span class="n">dc</span><span class="o">.</span><span class="na">receive</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+					<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+					<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">array</span><span class="o">(),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">buf</span><span class="o">.</span><span class="na">limit</span><span class="o">()));</span>
+					<span class="n">buf</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+			
+			<span class="n">it</span><span class="o">.</span><span class="na">remove</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>​</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestPipe</span> <span class="o">{</span>
+
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test1</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="c1">//1. 获取管道</span>
+		<span class="nc">Pipe</span> <span class="n">pipe</span> <span class="o">=</span> <span class="nc">Pipe</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+		
+		<span class="c1">//2. 将缓冲区中的数据写入管道</span>
+		<span class="nc">ByteBuffer</span> <span class="n">buf</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+		
+		<span class="nc">Pipe</span><span class="o">.</span><span class="na">SinkChannel</span> <span class="n">sinkChannel</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="na">sink</span><span class="o">();</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"通过单向管道发送数据"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		<span class="n">sinkChannel</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+		
+		<span class="c1">//3. 读取缓冲区中的数据</span>
+		<span class="nc">Pipe</span><span class="o">.</span><span class="na">SourceChannel</span> <span class="n">sourceChannel</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="na">source</span><span class="o">();</span>
+		<span class="n">buf</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+		<span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">sourceChannel</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">buf</span><span class="o">.</span><span class="na">array</span><span class="o">(),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">));</span>
+		
+		<span class="n">sourceChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="n">sinkChannel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="文件拷贝">文件拷贝</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">FileCopyRunner</span> <span class="o">{</span>
+ 
+    <span class="kt">void</span> <span class="nf">copyFile</span><span class="o">(</span><span class="nc">File</span> <span class="n">source</span><span class="o">,</span> <span class="nc">File</span> <span class="n">target</span><span class="o">);</span>
+ 
+<span class="o">}</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FileCopyDemo</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">ROUNDS</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+    <span class="c1">//时间性能对比</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">benchmark</span><span class="o">(</span><span class="nc">FileCopyRunner</span> <span class="n">test</span><span class="o">,</span> <span class="nc">File</span> <span class="n">source</span><span class="o">,</span> <span class="nc">File</span> <span class="n">target</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">long</span> <span class="n">elapsed</span> <span class="o">=</span> <span class="mi">0L</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="no">ROUNDS</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kt">long</span> <span class="n">startTime</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">();</span>
+            <span class="n">test</span><span class="o">.</span><span class="na">copyFile</span><span class="o">(</span><span class="n">source</span><span class="o">,</span> <span class="n">target</span><span class="o">);</span>
+            <span class="n">elapsed</span> <span class="o">+=</span> <span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="o">;</span>
+            <span class="n">target</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">test</span> <span class="o">+</span> <span class="s">": "</span> <span class="o">+</span> <span class="n">elapsed</span> <span class="o">/</span> <span class="no">ROUNDS</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+    <span class="c1">// 关闭资源</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">(</span><span class="nc">Closeable</span> <span class="n">closeable</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">closeable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">closeable</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+ 
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         <span class="c1">// 不使用缓冲区，很慢</span>
+        <span class="nc">FileCopyRunner</span> <span class="n">noBufferStreamCopy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileCopyRunner</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">copyFile</span><span class="o">(</span><span class="nc">File</span> <span class="n">source</span><span class="o">,</span> <span class="nc">File</span> <span class="n">target</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">InputStream</span> <span class="n">fin</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="nc">OutputStream</span> <span class="n">fout</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">fin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">source</span><span class="o">);</span>
+                    <span class="n">fout</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="n">target</span><span class="o">);</span>
+ 
+                    <span class="kt">int</span> <span class="n">result</span><span class="o">;</span>
+                    <span class="k">while</span> <span class="o">((</span><span class="n">result</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="na">read</span><span class="o">())</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">fout</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+                    <span class="o">}</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fin</span><span class="o">);</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fout</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+ 
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="s">"noBufferStreamCopy"</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+ 
+         <span class="c1">//使用缓冲区</span>
+        <span class="nc">FileCopyRunner</span> <span class="n">bufferedStreamCopy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileCopyRunner</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">copyFile</span><span class="o">(</span><span class="nc">File</span> <span class="n">source</span><span class="o">,</span> <span class="nc">File</span> <span class="n">target</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">InputStream</span> <span class="n">fin</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="nc">OutputStream</span> <span class="n">fout</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">fin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedInputStream</span><span class="o">(</span><span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">source</span><span class="o">));</span>
+                    <span class="n">fout</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="n">target</span><span class="o">));</span>
+ 
+                    <span class="kt">byte</span><span class="o">[]</span> <span class="n">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">];</span>
+ 
+                    <span class="kt">int</span> <span class="n">result</span><span class="o">;</span>
+                    <span class="k">while</span> <span class="o">((</span><span class="n">result</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">))</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">fout</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+                    <span class="o">}</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fin</span><span class="o">);</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fout</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+ 
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="s">"bufferedStreamCopy"</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+ 
+         <span class="c1">//使用NIO缓冲区</span>
+        <span class="nc">FileCopyRunner</span> <span class="n">nioBufferCopy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileCopyRunner</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">copyFile</span><span class="o">(</span><span class="nc">File</span> <span class="n">source</span><span class="o">,</span> <span class="nc">File</span> <span class="n">target</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">FileChannel</span> <span class="n">fin</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="nc">FileChannel</span> <span class="n">fout</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+ 
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">fin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">source</span><span class="o">).</span><span class="na">getChannel</span><span class="o">();</span>
+                    <span class="n">fout</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="n">target</span><span class="o">).</span><span class="na">getChannel</span><span class="o">();</span>
+ 
+                    <span class="nc">ByteBuffer</span> <span class="n">buffer</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">1024</span><span class="o">);</span>
+                    <span class="k">while</span> <span class="o">(</span><span class="n">fin</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+                        <span class="k">while</span> <span class="o">(</span><span class="n">buffer</span><span class="o">.</span><span class="na">hasRemaining</span><span class="o">())</span> <span class="o">{</span>
+                            <span class="n">fout</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">);</span>
+                        <span class="o">}</span>
+                        <span class="n">buffer</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fin</span><span class="o">);</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fout</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+ 
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="s">"nioBufferCopy"</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+ 
+         <span class="c1">// 使用NIO通道</span>
+        <span class="nc">FileCopyRunner</span> <span class="n">nioTransferCopy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileCopyRunner</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">copyFile</span><span class="o">(</span><span class="nc">File</span> <span class="n">source</span><span class="o">,</span> <span class="nc">File</span> <span class="n">target</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">FileChannel</span> <span class="n">fin</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="nc">FileChannel</span> <span class="n">fout</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">fin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">source</span><span class="o">).</span><span class="na">getChannel</span><span class="o">();</span>
+                    <span class="n">fout</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="n">target</span><span class="o">).</span><span class="na">getChannel</span><span class="o">();</span>
+                    <span class="kt">long</span> <span class="n">transferred</span> <span class="o">=</span> <span class="mi">0L</span><span class="o">;</span>
+                    <span class="kt">long</span> <span class="n">size</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+                    <span class="k">while</span> <span class="o">(</span><span class="n">transferred</span> <span class="o">!=</span> <span class="n">size</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">transferred</span> <span class="o">+=</span> <span class="n">fin</span><span class="o">.</span><span class="na">transferTo</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">size</span><span class="o">,</span> <span class="n">fout</span><span class="o">);</span>
+                    <span class="o">}</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fin</span><span class="o">);</span>
+                    <span class="n">close</span><span class="o">(</span><span class="n">fout</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+ 
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="s">"nioTransferCopy"</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+ 
+         <span class="c1">//------------测试开始----------------------</span>
+        <span class="nc">File</span> <span class="n">smallFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"/var/tmp/smallFile"</span><span class="o">);</span>
+        <span class="nc">File</span> <span class="n">smallFileCopy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"/var/tmp/smallFile-copy"</span><span class="o">);</span>
+ 
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"---Copying small file---"</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">noBufferStreamCopy</span><span class="o">,</span> <span class="n">smallFile</span><span class="o">,</span> <span class="n">smallFileCopy</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">bufferedStreamCopy</span><span class="o">,</span> <span class="n">smallFile</span><span class="o">,</span> <span class="n">smallFileCopy</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">nioBufferCopy</span><span class="o">,</span> <span class="n">smallFile</span><span class="o">,</span> <span class="n">smallFileCopy</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">nioTransferCopy</span><span class="o">,</span> <span class="n">smallFile</span><span class="o">,</span> <span class="n">smallFileCopy</span><span class="o">);</span>
+ 
+        <span class="nc">File</span> <span class="n">bigFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"/var/tmp/bigFile"</span><span class="o">);</span>
+        <span class="nc">File</span> <span class="n">bigFileCopy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"/var/tmp/bigFile-copy"</span><span class="o">);</span>
+ 
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"---Copying big file---"</span><span class="o">);</span>
+        <span class="c1">//benchmark(noBufferStreamCopy, bigFile, bigFileCopy);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">bufferedStreamCopy</span><span class="o">,</span> <span class="n">bigFile</span><span class="o">,</span> <span class="n">bigFileCopy</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">nioBufferCopy</span><span class="o">,</span> <span class="n">bigFile</span><span class="o">,</span> <span class="n">bigFileCopy</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">nioTransferCopy</span><span class="o">,</span> <span class="n">bigFile</span><span class="o">,</span> <span class="n">bigFileCopy</span><span class="o">);</span>
+ 
+        <span class="nc">File</span> <span class="n">hugeFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"/var/tmp/hugeFile"</span><span class="o">);</span>
+        <span class="nc">File</span> <span class="n">hugeFileCopy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"/var/tmp/hugeFile-copy"</span><span class="o">);</span>
+ 
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"---Copying huge file---"</span><span class="o">);</span>
+        <span class="c1">//benchmark(noBufferStreamCopy, hugeFile, hugeFileCopy);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">bufferedStreamCopy</span><span class="o">,</span> <span class="n">hugeFile</span><span class="o">,</span> <span class="n">hugeFileCopy</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">nioBufferCopy</span><span class="o">,</span> <span class="n">hugeFile</span><span class="o">,</span> <span class="n">hugeFileCopy</span><span class="o">);</span>
+        <span class="n">benchmark</span><span class="o">(</span><span class="n">nioTransferCopy</span><span class="o">,</span> <span class="n">hugeFile</span><span class="o">,</span> <span class="n">hugeFileCopy</span><span class="o">);</span>
+ 
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="聊天室">聊天室</h3>
+
+<ul>
+  <li>服务端</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChatServer</span> <span class="o">{</span>
+ 
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">DEFAULT_PORT</span> <span class="o">=</span> <span class="mi">8888</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">QUIT</span> <span class="o">=</span> <span class="s">"quit"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">BUFFER</span> <span class="o">=</span> <span class="mi">1024</span><span class="o">;</span>
+ 
+    <span class="kd">private</span> <span class="nc">ServerSocketChannel</span> <span class="n">server</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Selector</span> <span class="n">selector</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">ByteBuffer</span> <span class="n">rBuffer</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="no">BUFFER</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="nc">ByteBuffer</span> <span class="n">wBuffer</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="no">BUFFER</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="nc">Charset</span> <span class="n">charset</span> <span class="o">=</span> <span class="nc">Charset</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">port</span><span class="o">;</span>
+ 
+    <span class="kd">public</span> <span class="nf">ChatServer</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="no">DEFAULT_PORT</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="nf">ChatServer</span><span class="o">(</span><span class="kt">int</span> <span class="n">port</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">port</span> <span class="o">=</span> <span class="n">port</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="nc">ServerSocketChannel</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+             <span class="c1">//设置为不阻塞模式</span>
+            <span class="n">server</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+             <span class="c1">//绑定端口</span>
+            <span class="n">server</span><span class="o">.</span><span class="na">socket</span><span class="o">().</span><span class="na">bind</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="n">port</span><span class="o">));</span>
+             <span class="c1">// 开启一个selector选择器</span>
+            <span class="n">selector</span> <span class="o">=</span> <span class="nc">Selector</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+            <span class="n">server</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="nc">SelectionKey</span><span class="o">.</span><span class="na">OP_ACCEPT</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"启动服务器， 监听端口："</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s">"..."</span><span class="o">);</span>
+ 
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">selector</span><span class="o">.</span><span class="na">select</span><span class="o">();</span>
+                <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">SelectionKey</span><span class="o">&gt;</span> <span class="n">selectionKeys</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="na">selectedKeys</span><span class="o">();</span>
+                <span class="k">for</span> <span class="o">(</span><span class="nc">SelectionKey</span> <span class="n">key</span> <span class="o">:</span> <span class="n">selectionKeys</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">// 处理被触发的事件</span>
+                    <span class="n">handles</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="n">selectionKeys</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+            <span class="o">}</span>
+ 
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">close</span><span class="o">(</span><span class="n">selector</span><span class="o">);</span>
+        <span class="o">}</span>
+ 
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handles</span><span class="o">(</span><span class="nc">SelectionKey</span> <span class="n">key</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="c1">// ACCEPT事件 - 和客户端建立了连接</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">isAcceptable</span><span class="o">())</span> <span class="o">{</span>
+            <span class="nc">ServerSocketChannel</span> <span class="n">server</span> <span class="o">=</span> <span class="o">(</span><span class="nc">ServerSocketChannel</span><span class="o">)</span> <span class="n">key</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+            <span class="nc">SocketChannel</span> <span class="n">client</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="na">accept</span><span class="o">();</span>
+            <span class="n">client</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+            <span class="n">client</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="nc">SelectionKey</span><span class="o">.</span><span class="na">OP_READ</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">getClientName</span><span class="o">(</span><span class="n">client</span><span class="o">)</span> <span class="o">+</span> <span class="s">"已连接"</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="c1">// READ事件 - 客户端发送了消息</span>
+        <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">isReadable</span><span class="o">())</span> <span class="o">{</span>
+            <span class="nc">SocketChannel</span> <span class="n">client</span> <span class="o">=</span> <span class="o">(</span><span class="nc">SocketChannel</span><span class="o">)</span> <span class="n">key</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+            <span class="nc">String</span> <span class="n">fwdMsg</span> <span class="o">=</span> <span class="n">receive</span><span class="o">(</span><span class="n">client</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">fwdMsg</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+                <span class="c1">// 客户端异常</span>
+                <span class="n">key</span><span class="o">.</span><span class="na">cancel</span><span class="o">();</span>
+                <span class="n">selector</span><span class="o">.</span><span class="na">wakeup</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">getClientName</span><span class="o">(</span><span class="n">client</span><span class="o">)</span> <span class="o">+</span> <span class="s">":"</span> <span class="o">+</span> <span class="n">fwdMsg</span><span class="o">);</span>
+                <span class="n">forwardMessage</span><span class="o">(</span><span class="n">client</span><span class="o">,</span> <span class="n">fwdMsg</span><span class="o">);</span>
+ 
+                <span class="c1">// 检查用户是否退出</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">readyToQuit</span><span class="o">(</span><span class="n">fwdMsg</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="n">key</span><span class="o">.</span><span class="na">cancel</span><span class="o">();</span>
+                    <span class="n">selector</span><span class="o">.</span><span class="na">wakeup</span><span class="o">();</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">getClientName</span><span class="o">(</span><span class="n">client</span><span class="o">)</span> <span class="o">+</span> <span class="s">"已断开"</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+ 
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">forwardMessage</span><span class="o">(</span><span class="nc">SocketChannel</span> <span class="n">client</span><span class="o">,</span> <span class="nc">String</span> <span class="n">fwdMsg</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">SelectionKey</span> <span class="nl">key:</span> <span class="n">selector</span><span class="o">.</span><span class="na">keys</span><span class="o">())</span> <span class="o">{</span>
+            <span class="nc">Channel</span> <span class="n">connectedClient</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">connectedClient</span> <span class="k">instanceof</span> <span class="nc">ServerSocketChannel</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">continue</span><span class="o">;</span>
+            <span class="o">}</span>
+ 
+            <span class="k">if</span> <span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">isValid</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">client</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">connectedClient</span><span class="o">))</span> <span class="o">{</span>
+                <span class="n">wBuffer</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+                <span class="n">wBuffer</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">charset</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="n">getClientName</span><span class="o">(</span><span class="n">client</span><span class="o">)</span> <span class="o">+</span> <span class="s">":"</span> <span class="o">+</span> <span class="n">fwdMsg</span><span class="o">));</span>
+                <span class="n">wBuffer</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+                <span class="k">while</span> <span class="o">(</span><span class="n">wBuffer</span><span class="o">.</span><span class="na">hasRemaining</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="o">((</span><span class="nc">SocketChannel</span><span class="o">)</span><span class="n">connectedClient</span><span class="o">).</span><span class="na">write</span><span class="o">(</span><span class="n">wBuffer</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">receive</span><span class="o">(</span><span class="nc">SocketChannel</span> <span class="n">client</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="n">rBuffer</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+        <span class="k">while</span><span class="o">(</span><span class="n">client</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">rBuffer</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">);</span>
+        <span class="n">rBuffer</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+        <span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">charset</span><span class="o">.</span><span class="na">decode</span><span class="o">(</span><span class="n">rBuffer</span><span class="o">));</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">getClientName</span><span class="o">(</span><span class="nc">SocketChannel</span> <span class="n">client</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"客户端["</span> <span class="o">+</span> <span class="n">client</span><span class="o">.</span><span class="na">socket</span><span class="o">().</span><span class="na">getPort</span><span class="o">()</span> <span class="o">+</span> <span class="s">"]"</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">readyToQuit</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="no">QUIT</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">(</span><span class="nc">Closeable</span> <span class="n">closable</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">closable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">closable</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ChatServer</span> <span class="n">chatServer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ChatServer</span><span class="o">(</span><span class="mi">7777</span><span class="o">);</span>
+        <span class="n">chatServer</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>客户端</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ChatClient</span> <span class="o">{</span>
+ 
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">DEFAULT_SERVER_HOST</span> <span class="o">=</span> <span class="s">"127.0.0.1"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">DEFAULT_SERVER_PORT</span> <span class="o">=</span> <span class="mi">8888</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">QUIT</span> <span class="o">=</span> <span class="s">"quit"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">BUFFER</span> <span class="o">=</span> <span class="mi">1024</span><span class="o">;</span>
+ 
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">host</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">port</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">SocketChannel</span> <span class="n">client</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">ByteBuffer</span> <span class="n">rBuffer</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="no">BUFFER</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="nc">ByteBuffer</span> <span class="n">wBuffer</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="no">BUFFER</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="nc">Selector</span> <span class="n">selector</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Charset</span> <span class="n">charset</span> <span class="o">=</span> <span class="nc">Charset</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+ 
+    <span class="kd">public</span> <span class="nf">ChatClient</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="no">DEFAULT_SERVER_HOST</span><span class="o">,</span> <span class="no">DEFAULT_SERVER_PORT</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="nf">ChatClient</span><span class="o">(</span><span class="nc">String</span> <span class="n">host</span><span class="o">,</span> <span class="kt">int</span> <span class="n">port</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">host</span> <span class="o">=</span> <span class="n">host</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">port</span> <span class="o">=</span> <span class="n">port</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">readyToQuit</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="no">QUIT</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">(</span><span class="nc">Closeable</span> <span class="n">closable</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">closable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">closable</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="nc">SocketChannel</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+            <span class="n">client</span><span class="o">.</span><span class="na">configureBlocking</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+ 
+            <span class="n">selector</span> <span class="o">=</span> <span class="nc">Selector</span><span class="o">.</span><span class="na">open</span><span class="o">();</span>
+            <span class="n">client</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="nc">SelectionKey</span><span class="o">.</span><span class="na">OP_CONNECT</span><span class="o">);</span>
+            <span class="n">client</span><span class="o">.</span><span class="na">connect</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">));</span>
+ 
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">selector</span><span class="o">.</span><span class="na">select</span><span class="o">();</span>
+                <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">SelectionKey</span><span class="o">&gt;</span> <span class="n">selectionKeys</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="na">selectedKeys</span><span class="o">();</span>
+                <span class="k">for</span> <span class="o">(</span><span class="nc">SelectionKey</span> <span class="n">key</span> <span class="o">:</span> <span class="n">selectionKeys</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">handles</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="n">selectionKeys</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClosedSelectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// 用户正常退出</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">close</span><span class="o">(</span><span class="n">selector</span><span class="o">);</span>
+        <span class="o">}</span>
+ 
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handles</span><span class="o">(</span><span class="nc">SelectionKey</span> <span class="n">key</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="c1">// CONNECT事件 - 连接就绪事件</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">isConnectable</span><span class="o">())</span> <span class="o">{</span>
+            <span class="nc">SocketChannel</span> <span class="n">client</span> <span class="o">=</span> <span class="o">(</span><span class="nc">SocketChannel</span><span class="o">)</span> <span class="n">key</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">client</span><span class="o">.</span><span class="na">isConnectionPending</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">client</span><span class="o">.</span><span class="na">finishConnect</span><span class="o">();</span>
+                <span class="c1">// 处理用户的输入</span>
+                <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="k">new</span> <span class="nc">UserInputHandler</span><span class="o">(</span><span class="k">this</span><span class="o">)).</span><span class="na">start</span><span class="o">();</span>
+            <span class="o">}</span>
+            <span class="n">client</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="n">selector</span><span class="o">,</span> <span class="nc">SelectionKey</span><span class="o">.</span><span class="na">OP_READ</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="c1">// READ事件 -  服务器转发消息</span>
+        <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">isReadable</span><span class="o">())</span> <span class="o">{</span>
+            <span class="nc">SocketChannel</span> <span class="n">client</span> <span class="o">=</span> <span class="o">(</span><span class="nc">SocketChannel</span><span class="o">)</span> <span class="n">key</span><span class="o">.</span><span class="na">channel</span><span class="o">();</span>
+            <span class="nc">String</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">receive</span><span class="o">(</span><span class="n">client</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">msg</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+                <span class="c1">// 服务器异常</span>
+                <span class="n">close</span><span class="o">(</span><span class="n">selector</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">send</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">msg</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">return</span><span class="o">;</span>
+        <span class="o">}</span>
+ 
+        <span class="n">wBuffer</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+        <span class="n">wBuffer</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">charset</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="n">msg</span><span class="o">));</span>
+        <span class="n">wBuffer</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">wBuffer</span><span class="o">.</span><span class="na">hasRemaining</span><span class="o">())</span> <span class="o">{</span>
+            <span class="n">client</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">wBuffer</span><span class="o">);</span>
+        <span class="o">}</span>
+ 
+        <span class="c1">// 检查用户是否准备退出</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">readyToQuit</span><span class="o">(</span><span class="n">msg</span><span class="o">))</span> <span class="o">{</span>
+            <span class="n">close</span><span class="o">(</span><span class="n">selector</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">receive</span><span class="o">(</span><span class="nc">SocketChannel</span> <span class="n">client</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="n">rBuffer</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">client</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">rBuffer</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">);</span>
+        <span class="n">rBuffer</span><span class="o">.</span><span class="na">flip</span><span class="o">();</span>
+        <span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">charset</span><span class="o">.</span><span class="na">decode</span><span class="o">(</span><span class="n">rBuffer</span><span class="o">));</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ChatClient</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ChatClient</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">7777</span><span class="o">);</span>
+        <span class="n">client</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserInputHandler</span> <span class="kd">implements</span> <span class="nc">Runnable</span> <span class="o">{</span>
+ 
+    <span class="kd">private</span> <span class="nc">ChatClient</span> <span class="n">chatClient</span><span class="o">;</span>
+ 
+    <span class="kd">public</span> <span class="nf">UserInputHandler</span><span class="o">(</span><span class="nc">ChatClient</span> <span class="n">chatClient</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">chatClient</span> <span class="o">=</span> <span class="n">chatClient</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 等待用户输入消息</span>
+            <span class="nc">BufferedReader</span> <span class="n">consoleReader</span> <span class="o">=</span>
+                    <span class="k">new</span> <span class="nf">BufferedReader</span><span class="o">(</span><span class="k">new</span> <span class="nc">InputStreamReader</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">));</span>
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">input</span> <span class="o">=</span> <span class="n">consoleReader</span><span class="o">.</span><span class="na">readLine</span><span class="o">();</span>
+ 
+                <span class="c1">// 向服务器发送消息</span>
+                <span class="n">chatClient</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">input</span><span class="o">);</span>
+ 
+                <span class="c1">// 检查用户是否准备退出</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">chatClient</span><span class="o">.</span><span class="na">readyToQuit</span><span class="o">(</span><span class="n">input</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="path">Path</h3>
+
+<ul>
+  <li>
+    <p>java.nio.file.Path 接口代表一个平台无关的平台路径，描述了目录结构中文件的位置。</p>
+  </li>
+  <li>
+    <p>Paths 提供的get() 方法用来获取Path 对象：</p>
+
+    <p>Path get(String first, String … more) : 用于将多个字符串串连成路径。</p>
+  </li>
+  <li>
+    <p>Path 常用方法：</p>
+
+    <ul>
+      <li>boolean endsWith(String path) : 判断是否以path 路径结束</li>
+      <li>boolean startsWith(String path) : 判断是否以path 路径开始</li>
+      <li>boolean isAbsolute() : 判断是否是绝对路径</li>
+      <li>Path getFileName() : 返回与调用Path 对象关联的文件名</li>
+      <li>Path getName(int idx) : 返回的指定索引位置idx 的路径名称</li>
+      <li>int getNameCount() : 返回Path 根目录后面元素的数量</li>
+      <li>Path getParent() ：返回Path对象包含整个路径，不包含Path 对象指定的文件路径</li>
+      <li>Path getRoot() ：返回调用Path 对象的根路径</li>
+      <li>Path resolve(Path p) :将相对路径解析为绝对路径</li>
+      <li>Path toAbsolutePath() : 作为绝对路径返回调用Path 对象</li>
+      <li>String toString() ：返回调用Path 对象的字符串表示形式</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="files">Files</h3>
+
+<ul>
+  <li>java.nio.file.Files 用于操作文件或目录的工具类。</li>
+  <li>Files常用方法：
+    <ul>
+      <li>Path copy(Path src, Path dest, CopyOption … how) : 文件的复制</li>
+      <li>Path createDirectory(Path path, FileAttribute&lt;?&gt; … attr) : 创建一个目录</li>
+      <li>Path createFile(Path path, FileAttribute&lt;?&gt; … arr) : 创建一个文件</li>
+      <li>void delete(Path path) : 删除一个文件</li>
+      <li>Path move(Path src, Path dest, CopyOption…how) : 将src 移动到dest 位置</li>
+      <li>long size(Path path) : 返回path 指定文件的大小</li>
+      <li>boolean exists(Path path, LinkOption … opts) : 判断文件是否存在</li>
+      <li>boolean isDirectory(Path path, LinkOption … opts) : 判断是否是目录</li>
+      <li>boolean isExecutable(Path path) : 判断是否是可执行文件</li>
+      <li>boolean isHidden(Path path) : 判断是否是隐藏文件</li>
+      <li>boolean isReadable(Path path) : 判断文件是否可读</li>
+      <li>boolean isWritable(Path path) : 判断文件是否可写</li>
+      <li>boolean notExists(Path path, LinkOption … opts) : 判断文件是否不存在</li>
+      <li><code class="language-plaintext highlighter-rouge">public static &lt;A extends BasicFileAttributes&gt; A readAttributes(Path path,Class&lt;A&gt; type,LinkOption... options) </code>: 获取与path 指定的文件相关联的属性。</li>
+      <li>SeekableByteChannel newByteChannel(Path path, OpenOption…how) : 获取与指定文件的连接， how 指定打开方式。</li>
+      <li>DirectoryStream newDirectoryStream(Path path) : 打开path 指定的目录</li>
+      <li>InputStream newInputStream(Path path, OpenOption…how):获取InputStream 对象</li>
+      <li>OutputStream newOutputStream(Path path, OpenOption…how) : 获取OutputStream 对象</li>
+    </ul>
+  </li>
+</ul>
+:ET

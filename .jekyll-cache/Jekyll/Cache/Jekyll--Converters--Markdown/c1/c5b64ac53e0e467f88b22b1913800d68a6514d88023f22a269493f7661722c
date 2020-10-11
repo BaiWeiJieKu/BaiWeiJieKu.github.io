@@ -1,0 +1,147 @@
+I"#;<ul id="markdown-toc">
+  <li><a href="#概念" id="markdown-toc-概念">概念</a></li>
+  <li><a href="#工具类" id="markdown-toc-工具类">工具类</a></li>
+</ul>
+<h2 id="概念">概念</h2>
+
+<ul>
+  <li>JDBC (Java DataBase Connection) 是通过JAVA访问数据库</li>
+  <li>JDBC是一组规范，通过操作数据库驱动来操作数据库</li>
+</ul>
+
+<h2 id="工具类">工具类</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.zhuoer.qmaintance.utils</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.DriverManager</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DBTools</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">URL</span> <span class="o">=</span> <span class="s">"jdbc:mysql://127.0.0.1:3306/database?useUnicode=true&amp;characterEncoding=UTF-8"</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">DRIVER</span> <span class="o">=</span> <span class="s">"com.mysql.jdbc.Driver"</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">USER</span> <span class="o">=</span> <span class="s">"root"</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">PASS</span> <span class="o">=</span> <span class="s">"123456"</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="nc">Connection</span> <span class="n">conn</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+ 	<span class="c1">// 建立与数据库的Connection连接</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">Connection</span> <span class="nf">getConnection</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">conn</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">conn</span><span class="o">.</span><span class="na">isClosed</span><span class="o">())</span> <span class="o">{</span>
+				<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="no">DRIVER</span><span class="o">);</span>
+				<span class="n">conn</span> <span class="o">=</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="no">URL</span><span class="o">,</span> <span class="no">USER</span><span class="o">,</span> <span class="no">PASS</span><span class="o">);</span>
+			<span class="o">}</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">conn</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.zhuoer.qmaintance.utils</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.sql.PreparedStatement</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.ResultSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.ResultSetMetaData</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">com.zhuoer.qmaintance.beans.RepairInfo</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RepairInfoTools</span> <span class="o">{</span>
+	
+	<span class="cm">/**
+	 * 所有查询工具类
+	 * @param sql
+	 * @param objects
+	 * @return
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">List</span> <span class="nf">executeQuary</span><span class="o">(</span><span class="nc">String</span> <span class="n">sql</span><span class="o">,</span> <span class="nc">Object</span><span class="o">...</span> <span class="n">objects</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span> <span class="n">li</span><span class="o">=</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">();</span>
+		<span class="nc">ResultSet</span> <span class="n">rs</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">PreparedStatement</span> <span class="n">ps</span><span class="o">=</span><span class="nc">DBTools</span><span class="o">.</span><span class="na">getConnection</span><span class="o">().</span><span class="na">prepareStatement</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">objects</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">objects</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+					<span class="n">ps</span><span class="o">.</span><span class="na">setObject</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">objects</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+ 
+				<span class="o">}</span>
+			<span class="o">}</span>
+			<span class="n">rs</span><span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="na">executeQuery</span><span class="o">();</span>
+			
+			<span class="nc">ResultSetMetaData</span> <span class="n">md</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getMetaData</span><span class="o">();</span>
+			<span class="kt">int</span> <span class="n">columnCount</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="na">getColumnCount</span><span class="o">();</span>
+			<span class="k">while</span> <span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">())</span> <span class="o">{</span>
+				<span class="nc">Map</span> <span class="n">rowData</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">();</span>
+				<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">columnCount</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>
+				<span class="o">{</span>
+					<span class="n">rowData</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">md</span><span class="o">.</span><span class="na">getColumnName</span><span class="o">(</span><span class="n">i</span><span class="o">),</span> <span class="n">rs</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+				<span class="o">}</span>
+				<span class="n">li</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">rowData</span><span class="o">);</span>
+			<span class="o">}</span>
+			<span class="n">rs</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+ 
+		<span class="k">return</span> <span class="n">li</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="cm">/**
+	 * 查询总页数
+	 * @param sql
+	 * @return
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">selectCount</span><span class="o">(</span><span class="nc">String</span> <span class="n">sql</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kt">int</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="nc">DBTools</span><span class="o">.</span><span class="na">getConnection</span><span class="o">().</span><span class="na">prepareStatement</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+			<span class="nc">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="na">executeQuery</span><span class="o">();</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">())</span>
+			<span class="o">{</span>
+				<span class="n">count</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+			<span class="o">}</span>
+			<span class="n">rs</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+		<span class="k">return</span> <span class="n">count</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="cm">/**
+	 * 修改操作工具类(增删改)
+	 * @param sql
+	 * @param objects
+	 * @return
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">executeUpdate</span><span class="o">(</span><span class="nc">String</span> <span class="n">sql</span><span class="o">,</span> <span class="nc">Object</span><span class="o">...</span> <span class="n">objects</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kt">int</span> <span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			
+			<span class="nc">PreparedStatement</span> <span class="n">ps</span><span class="o">=</span><span class="nc">DBTools</span><span class="o">.</span><span class="na">getConnection</span><span class="o">().</span><span class="na">prepareStatement</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">objects</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+				<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">objects</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+					
+					<span class="n">ps</span><span class="o">.</span><span class="na">setObject</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">objects</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+				<span class="o">}</span>
+ 
+			<span class="n">s</span><span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="na">executeUpdate</span><span class="o">();</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+			<span class="k">return</span> <span class="n">s</span><span class="o">;</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">s</span><span class="o">;</span>
+	<span class="o">}</span>
+ 
+ 
+<span class="o">}</span>
+</code></pre></div></div>
+:ET

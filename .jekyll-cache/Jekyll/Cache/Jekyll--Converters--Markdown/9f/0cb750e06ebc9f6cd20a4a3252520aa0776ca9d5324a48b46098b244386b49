@@ -1,0 +1,120 @@
+I"+)<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a>    <ul>
+      <li><a href="#job" id="markdown-toc-job">Job</a></li>
+      <li><a href="#jobdetail" id="markdown-toc-jobdetail">JobDetail</a></li>
+      <li><a href="#jobexecutioncontext" id="markdown-toc-jobexecutioncontext">JobExecutionContext</a></li>
+      <li><a href="#jobdatamap" id="markdown-toc-jobdatamap">JobDataMap</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<h4 id="job">Job</h4>
+
+<ul>
+  <li>Job：实现业务逻辑的任务接口。job接口很容易实现，只有一个execute方法，类似TimerTask的run方法，在里面编写业务逻辑。</li>
+  <li>Job实例在quartz中的生命周期：每次调度器执行job时，它在调用execute方法前会创建一个新的job实例。当调用完成后，关联的job对象实例会被释放，释放的实例会被垃圾回收机制回收。</li>
+</ul>
+
+<h4 id="jobdetail">JobDetail</h4>
+
+<ul>
+  <li>JobDetail为Job实例提供了许多设置属性，以及JobDataMap成员变量属性，它用来存储特定Job实例的状态信息，调度器需要借助JobDetail对象来添加Job实例。
+    <ul>
+      <li>name：名称</li>
+      <li>group：所在组</li>
+      <li>jobClass：任务类</li>
+      <li>jobDataMap：</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="jobexecutioncontext">JobExecutionContext</h4>
+
+<ul>
+  <li>当Scheduler调用一个job，就会将JobExecutionContext传递给job的execute方法</li>
+  <li>job能通过JobExecutionContext对象访问到quartz运行时候的环境以及job本身的明细数据</li>
+</ul>
+
+<h4 id="jobdatamap">JobDataMap</h4>
+
+<ul>
+  <li>
+    <p>属于JobDetail的一部分，可以在构建JobDetail时传递参数</p>
+  </li>
+  <li>在进行job任务调度时JobDataMap存储在execute方法的入参JobExecutionContext中，非常方便获取。</li>
+  <li>JobDataMap可以用来装载任何可序列化的对象，当job实例对象被执行时这些参数对象会传递给它</li>
+  <li>JobDataMap实现了JDK中的Map接口，并且添加了一些非常方便的方法来存取基本数据类型。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyJob</span> <span class="kd">implements</span> <span class="nc">Job</span> <span class="o">{</span>
+
+    <span class="nd">@Setter@Getter</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">msg</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">(</span><span class="nc">JobExecutionContext</span> <span class="n">context</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">JobExecutionException</span> <span class="o">{</span>
+        <span class="nc">LocalTime</span> <span class="n">localTime</span> <span class="o">=</span> <span class="nc">LocalTime</span><span class="o">.</span><span class="na">now</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">localTime</span><span class="o">.</span><span class="na">toString</span><span class="o">()+</span><span class="s">"，msg="</span><span class="o">+</span><span class="n">msg</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">QuartzDemo</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">SchedulerException</span> <span class="o">{</span>
+        <span class="nc">Scheduler</span> <span class="n">scheduler</span> <span class="o">=</span> <span class="nc">StdSchedulerFactory</span><span class="o">.</span><span class="na">getDefaultScheduler</span><span class="o">();</span>
+        
+        <span class="n">scheduler</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="nc">JobDetail</span> <span class="n">jobDetail</span> <span class="o">=</span> <span class="nc">JobBuilder</span><span class="o">.</span><span class="na">newJob</span><span class="o">(</span><span class="nc">MyJob</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">withIdentity</span><span class="o">(</span><span class="s">"jobDetail1"</span><span class="o">,</span><span class="s">"group1"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">usingJobData</span><span class="o">(</span><span class="s">"name"</span><span class="o">,</span><span class="s">"value"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+        
+        <span class="nc">Trigger</span> <span class="n">trigger</span> <span class="o">=</span> <span class="nc">TriggerBuilder</span><span class="o">.</span><span class="na">newTrigger</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">startNow</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">withSchedule</span><span class="o">(</span>
+                        <span class="nc">SimpleScheduleBuilder</span><span class="o">.</span><span class="na">simpleSchedule</span><span class="o">()</span>
+            		<span class="o">.</span><span class="na">withIntervallnSeconds</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span>
+            			<span class="o">.</span><span class="na">repeatForever</span><span class="o">()</span>
+                <span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+        
+        <span class="n">scheduler</span><span class="o">.</span><span class="na">scheduleJob</span><span class="o">(</span><span class="n">jobDetail</span><span class="o">,</span><span class="n">trigger</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">600000</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+
+        <span class="n">scheduler</span><span class="o">.</span><span class="na">shutdown</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>可以使用@PersistJobDataAfterExecution注解更新JobDataMap</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@PersistJobDataAfterExecution</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyJob</span> <span class="kd">implements</span> <span class="nc">Job</span> <span class="o">{</span>
+
+    <span class="nd">@Setter@Getter</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">count</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">(</span><span class="nc">JobExecutionContext</span> <span class="n">context</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">JobExecutionException</span> <span class="o">{</span>
+        <span class="nc">LocalTime</span> <span class="n">localTime</span> <span class="o">=</span> <span class="nc">LocalTime</span><span class="o">.</span><span class="na">now</span><span class="o">();</span>
+        <span class="n">count</span><span class="o">++;</span>
+        <span class="n">context</span><span class="o">.</span><span class="na">getJobDetail</span><span class="o">().</span><span class="na">getJobDataMap</span><span class="o">().</span><span class="na">put</span><span class="o">(</span><span class="s">"count"</span><span class="o">+</span><span class="n">count</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">localTime</span><span class="o">.</span><span class="na">toString</span><span class="o">()+</span><span class="s">"，count="</span><span class="o">+</span><span class="n">count</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">JobDetail</span> <span class="n">jobDetail</span> <span class="o">=</span> <span class="nc">JobBuilder</span><span class="o">.</span><span class="na">newJob</span><span class="o">(</span><span class="nc">MyJob</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">withIdentity</span><span class="o">(</span><span class="s">"jobDetail1"</span><span class="o">,</span><span class="s">"group1"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">usingJobData</span><span class="o">(</span><span class="s">"count"</span><span class="o">,</span><span class="k">new</span> <span class="nc">Random</span><span class="o">().</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">10</span><span class="o">))</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+</code></pre></div></div>
+:ET

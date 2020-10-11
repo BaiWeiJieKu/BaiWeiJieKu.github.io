@@ -1,0 +1,208 @@
+I"�6<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a>    <ul>
+      <li><a href="#授权模型" id="markdown-toc-授权模型">授权模型</a></li>
+    </ul>
+  </li>
+  <li><a href="#rbac" id="markdown-toc-rbac">RBAC</a>    <ul>
+      <li><a href="#基于角色访问控制" id="markdown-toc-基于角色访问控制">基于角色访问控制</a></li>
+      <li><a href="#基于资源访问控制" id="markdown-toc-基于资源访问控制">基于资源访问控制</a></li>
+    </ul>
+  </li>
+  <li><a href="#session认证" id="markdown-toc-session认证">session认证</a>    <ul>
+      <li><a href="#pom" id="markdown-toc-pom">pom</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>系统为什么要认证？认证是为了保护系统的隐私数据与资源，用户的身份合法方可访问该系统的资源。</li>
+  <li><strong>认证</strong> ：用户认证就是判断一个用户的身份是否合法的过程，用户去访问系统资源时系统要求验证用户的身份信息，身份合法方可继续访问，不合法则拒绝访问。常见的用户身份认证方式有：用户名密码登录，二维码登录，手机短信登录，指纹认证等方式。</li>
+  <li><strong>会话</strong>：用户认证通过后，为了避免用户的每次操作都进行认证可将用户的信息保证在会话中。会话就是系统为了保持当前用户的登录状态所提供的机制，常见的有基于session方式、基于token方式等。</li>
+  <li>基于session的认证方式流程是，用户认证成功后，在服务端生成用户相关的数据保存在session(当前会话)中，发给客户端的 sesssion_id 存放到 cookie 中，这样用户客户端请求时带上 session_id 就可以验证服务器端是否存在 session 数据，以此完成用户的合法校验，当用户退出系统或session过期销毁时,客户端的session_id也就无效了。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/01/02/mPpJqUCaZ2sAGSo.png" alt="image.png" /></p>
+
+<ul>
+  <li>基于token方式交互流程是，用户认证成功后，服务端生成一个token发给客户端，客户端可以放到 cookie 或 localStorage 等存储中，每次请求时带上 token，服务端收到token通过验证后即可确认用户身份。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/01/02/XLWU8KDvdk94QS5.png" alt="image.png" /></p>
+
+<ul>
+  <li>基于session的认证方式由Servlet规范定制，服务端要存储session信息需要占用内存资源，客户端需要支持cookie；</li>
+  <li>基于token的方式则一般不需要服务端存储token，并且不限制客户端的存储方式。如今移动互联网时代更多类型的客户端需要接入系统，系统多是采用前后端分离的架构进行实现，所以基于token的方式更适合。</li>
+  <li><strong>授权</strong>： 授权是用户认证通过根据用户的权限来控制用户访问资源的过程，拥有资源的访问权限则正常访问，没有权限则拒绝访问。</li>
+  <li>认证是为了保证用户身份的合法性，授权则是为了更细粒度的对隐私数据进行划分，授权是在认证通过后发生的，控制不同的用户能够访问不同的资源。</li>
+</ul>
+
+<h4 id="授权模型">授权模型</h4>
+
+<ul>
+  <li>授权可简单理解为Who对What(which)进行How操作</li>
+  <li>Who，即主体（Subject），主体一般是指用户，也可以是程序，需要访问系统中的资源。</li>
+  <li>What，即资源（Resource），如系统菜单、页面、按钮、代码方法、系统商品信息、系统订单信息等。</li>
+  <li>系统菜单、页面、按钮、代码方法都属于系统功能资源，对于web系统每个功能资源通常对应一个URL；系统商品信息、系统订单信息都属于实体资源（数据资源），实体资源由资源类型和资源实例组成，比如商品信息为资源类型，商品编号 为001的商品为资源实例。</li>
+  <li>How，权限/许可（Permission），规定了用户对资源的操作许可，权限离开资源没有意义，如用户查询权限、用户添加权限、某个代码方法的调用权限、编号为001的用户的修改权限等，通过权限可知用户对哪些资源都有哪些操作许可。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/01/02/Hi7FlEOMPqshr6Y.png" alt="image.png" /></p>
+
+<ul>
+  <li>主体、资源、权限相关的数据模型如下：
+    <ul>
+      <li>主体（用户id、账号、密码、…）</li>
+      <li>资源（资源id、资源名称、访问地址、…）</li>
+      <li>权限（权限id、权限标识、权限名称、资源id、…）</li>
+      <li>角色（角色id、角色名称、…）</li>
+      <li>角色和权限关系（角色id、权限id、…）</li>
+      <li>主体（用户）和角色关系（用户id、角色id、…）</li>
+    </ul>
+  </li>
+  <li>主体（用户）、资源、权限关系如下图：</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/02/22/MpGdaUH2TENn5Rg.png" alt="image.png" /></p>
+
+<ul>
+  <li>
+    <p>通常企业开发中将资源和权限表合并为一张权限表，如下：</p>
+
+    <p>资源（资源id、资源名称、访问地址、…）</p>
+
+    <p>权限（权限id、权限标识、权限名称、资源id、…）</p>
+
+    <p>合并为：</p>
+
+    <p>权限（权限id、权限标识、权限名称、资源名称、资源访问地址、…）</p>
+  </li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/02/22/4RCgeAc8fp7w5JO.png" alt="image.png" /></p>
+
+<h3 id="rbac">RBAC</h3>
+
+<h4 id="基于角色访问控制">基于角色访问控制</h4>
+
+<ul>
+  <li>RBAC基于角色的访问控制（Role-Based Access Control）是按角色进行授权，比如：主体的角色为总经理可以查询企业运营报表，查询员工工资信息等，访问控制流程如下：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if(主体.hasRole("总经理角色id")){
+查询工资
+}
+</code></pre></div></div>
+
+<ul>
+  <li>当需要修改角色的权限时就需要修改授权的相关代码，系统可扩展性差</li>
+</ul>
+
+<h4 id="基于资源访问控制">基于资源访问控制</h4>
+
+<ul>
+  <li>RBAC基于资源的访问控制（Resource-Based Access Control）是按资源（或权限）进行授权，比如：用户必须具有查询工资权限才可以查询员工工资信息等</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if(主体.hasPermission("查询工资权限标识")){
+    查询工资
+}
+</code></pre></div></div>
+
+<ul>
+  <li>优点：系统设计时定义好查询工资的权限标识，即使查询工资所需要的角色变化为总经理和部门经理也不需要修改授权代码，系统可扩展性强。</li>
+</ul>
+
+<h3 id="session认证">session认证</h3>
+
+<ul>
+  <li>基于Session的认证机制由Servlet规范定制，Servlet容器已实现，用户通过HttpSession的操作方法即可实现，如下是HttpSession相关的操作API。</li>
+  <li>本案例工程使用maven进行构建，使用SpringMVC、Servlet3.0实现。</li>
+  <li>创建maven工程 security-springmvc</li>
+</ul>
+
+<p><img src="https://i.loli.net/2020/02/22/5bKpiBSJrOn2FMy.png" alt="image.png" /></p>
+
+<h4 id="pom">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span>
+         <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+         <span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+
+    <span class="nt">&lt;groupId&gt;</span>com.pbteach.security<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>security-springmvc<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>war<span class="nt">&lt;/packaging&gt;</span>
+    <span class="nt">&lt;properties&gt;</span>
+        <span class="nt">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.build.sourceEncoding&gt;</span>
+        <span class="nt">&lt;maven.compiler.source&gt;</span>1.8<span class="nt">&lt;/maven.compiler.source&gt;</span>
+        <span class="nt">&lt;maven.compiler.target&gt;</span>1.8<span class="nt">&lt;/maven.compiler.target&gt;</span>
+    <span class="nt">&lt;/properties&gt;</span>
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-webmvc<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>5.1.5.RELEASE<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>javax.servlet<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>javax.servlet-api<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>3.0.1<span class="nt">&lt;/version&gt;</span>
+            <span class="nt">&lt;scope&gt;</span>provided<span class="nt">&lt;/scope&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+         <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.projectlombok<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>lombok<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>1.18.8<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;finalName&gt;</span>security-springmvc<span class="nt">&lt;/finalName&gt;</span>
+        <span class="nt">&lt;pluginManagement&gt;</span>
+            <span class="nt">&lt;plugins&gt;</span>
+                <span class="nt">&lt;plugin&gt;</span>
+                    <span class="nt">&lt;groupId&gt;</span>org.apache.tomcat.maven<span class="nt">&lt;/groupId&gt;</span>
+                    <span class="nt">&lt;artifactId&gt;</span>tomcat7-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                    <span class="nt">&lt;version&gt;</span>2.2<span class="nt">&lt;/version&gt;</span>
+                <span class="nt">&lt;/plugin&gt;</span>
+                <span class="nt">&lt;plugin&gt;</span>
+                    <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+                    <span class="nt">&lt;artifactId&gt;</span>maven-compiler-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                    <span class="nt">&lt;configuration&gt;</span>
+                        <span class="nt">&lt;source&gt;</span>1.8<span class="nt">&lt;/source&gt;</span>
+                        <span class="nt">&lt;target&gt;</span>1.8<span class="nt">&lt;/target&gt;</span>
+                    <span class="nt">&lt;/configuration&gt;</span>
+                <span class="nt">&lt;/plugin&gt;</span>
+
+                <span class="nt">&lt;plugin&gt;</span>
+                    <span class="nt">&lt;artifactId&gt;</span>maven-resources-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                    <span class="nt">&lt;configuration&gt;</span>
+                        <span class="nt">&lt;encoding&gt;</span>utf-8<span class="nt">&lt;/encoding&gt;</span>
+                        <span class="nt">&lt;useDefaultDelimiters&gt;</span>true<span class="nt">&lt;/useDefaultDelimiters&gt;</span>
+                        <span class="nt">&lt;resources&gt;</span>
+                            <span class="nt">&lt;resource&gt;</span>
+                                <span class="nt">&lt;directory&gt;</span>src/main/resources<span class="nt">&lt;/directory&gt;</span>
+                                <span class="nt">&lt;filtering&gt;</span>true<span class="nt">&lt;/filtering&gt;</span>
+                                <span class="nt">&lt;includes&gt;</span>
+                                    <span class="nt">&lt;include&gt;</span>**/*<span class="nt">&lt;/include&gt;</span>
+                                <span class="nt">&lt;/includes&gt;</span>
+                            <span class="nt">&lt;/resource&gt;</span>
+                            <span class="nt">&lt;resource&gt;</span>
+                                <span class="nt">&lt;directory&gt;</span>src/main/java<span class="nt">&lt;/directory&gt;</span>
+                                <span class="nt">&lt;includes&gt;</span>
+                                    <span class="nt">&lt;include&gt;</span>**/*.xml<span class="nt">&lt;/include&gt;</span>
+                                <span class="nt">&lt;/includes&gt;</span>
+                            <span class="nt">&lt;/resource&gt;</span>
+                        <span class="nt">&lt;/resources&gt;</span>
+                    <span class="nt">&lt;/configuration&gt;</span>
+                <span class="nt">&lt;/plugin&gt;</span>
+            <span class="nt">&lt;/plugins&gt;</span>
+        <span class="nt">&lt;/pluginManagement&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+:ET

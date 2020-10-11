@@ -1,0 +1,169 @@
+I"A+<ul id="markdown-toc">
+  <li><a href="#场景" id="markdown-toc-场景">场景</a></li>
+  <li><a href="#结构" id="markdown-toc-结构">结构</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a>    <ul>
+      <li><a href="#迭代接口" id="markdown-toc-迭代接口">迭代接口</a></li>
+      <li><a href="#聚合类" id="markdown-toc-聚合类">聚合类</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+    </ul>
+  </li>
+  <li><a href="#使用场景" id="markdown-toc-使用场景">使用场景</a></li>
+</ul>
+<h3 id="场景">场景</h3>
+
+<ul>
+  <li>提供一种可以遍历聚合对象的方式。又称为：游标cursor模式</li>
+  <li>聚合对象：存储数据</li>
+  <li>迭代器：遍历数据</li>
+</ul>
+
+<h3 id="结构">结构</h3>
+
+<ul>
+  <li>聚合对象：存储数据</li>
+  <li>迭代器：遍历数据</li>
+</ul>
+
+<h3 id="案例">案例</h3>
+
+<h4 id="迭代接口">迭代接口</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.iterator</span><span class="o">;</span>
+
+
+<span class="cm">/**
+ *  自定义的迭代器接口
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">MyIterator</span> <span class="o">{</span>
+	<span class="kt">void</span> <span class="nf">first</span><span class="o">();</span>	<span class="c1">//将游标指向第一个元素</span>
+	<span class="kt">void</span> <span class="nf">next</span><span class="o">();</span>	<span class="c1">//将游标指向下一个元素</span>
+	<span class="kt">boolean</span> <span class="nf">hasNext</span><span class="o">();</span><span class="c1">//判断是否存在下一个元素</span>
+	
+	<span class="kt">boolean</span> <span class="nf">isFirst</span><span class="o">();</span>
+	<span class="kt">boolean</span> <span class="nf">isLast</span><span class="o">();</span>
+	
+	<span class="nc">Object</span> <span class="nf">getCurrentObj</span><span class="o">();</span>  <span class="c1">//获取当前游标指向的对象</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="聚合类">聚合类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.iterator</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 自定义的聚合类
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConcreteMyAggregate</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;();</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">addObject</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">obj</span><span class="o">);</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">removeObject</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">list</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">obj</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="nf">getList</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">list</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setList</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">list</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">list</span> <span class="o">=</span> <span class="n">list</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	
+	<span class="c1">//获得迭代器</span>
+	<span class="kd">public</span> <span class="nc">MyIterator</span>  <span class="nf">createIterator</span><span class="o">(){</span>
+		<span class="k">return</span> <span class="k">new</span> <span class="nf">ConcreteIterator</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	
+	
+	<span class="c1">//使用内部类定义迭代器，可以直接使用外部类的属性</span>
+	<span class="kd">private</span> <span class="kd">class</span> <span class="nc">ConcreteIterator</span> <span class="kd">implements</span> <span class="nc">MyIterator</span> <span class="o">{</span>
+
+		<span class="kd">private</span> <span class="kt">int</span> <span class="n">cursor</span><span class="o">;</span>  <span class="c1">//定义游标用于记录遍历时的位置</span>
+		
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">void</span> <span class="nf">first</span><span class="o">()</span> <span class="o">{</span>
+			<span class="n">cursor</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="nc">Object</span> <span class="nf">getCurrentObj</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">cursor</span><span class="o">);</span>
+		<span class="o">}</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">hasNext</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">cursor</span><span class="o">&lt;</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()){</span>
+				<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+			<span class="o">}</span>
+			<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isFirst</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="n">cursor</span><span class="o">==</span><span class="mi">0</span><span class="o">?</span><span class="kc">true</span><span class="o">:</span><span class="kc">false</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isLast</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="n">cursor</span><span class="o">==(</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()-</span><span class="mi">1</span><span class="o">)?</span><span class="kc">true</span><span class="o">:</span><span class="kc">false</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">void</span> <span class="nf">next</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">cursor</span><span class="o">&lt;</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()){</span>
+				<span class="n">cursor</span><span class="o">++;</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.iterator</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Client</span> <span class="o">{</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">ConcreteMyAggregate</span> <span class="n">cma</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConcreteMyAggregate</span><span class="o">();</span>
+		<span class="n">cma</span><span class="o">.</span><span class="na">addObject</span><span class="o">(</span><span class="s">"aa"</span><span class="o">);</span>
+		<span class="n">cma</span><span class="o">.</span><span class="na">addObject</span><span class="o">(</span><span class="s">"bb"</span><span class="o">);</span>
+		<span class="n">cma</span><span class="o">.</span><span class="na">addObject</span><span class="o">(</span><span class="s">"cc"</span><span class="o">);</span>
+		
+		<span class="nc">MyIterator</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">cma</span><span class="o">.</span><span class="na">createIterator</span><span class="o">();</span>
+		<span class="k">while</span><span class="o">(</span><span class="n">iter</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">iter</span><span class="o">.</span><span class="na">getCurrentObj</span><span class="o">());</span>
+			<span class="n">iter</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aa
+bb
+cc
+</code></pre></div></div>
+
+<h3 id="使用场景">使用场景</h3>
+
+<ul>
+  <li>JDK内置的迭代器(List/Set)</li>
+</ul>
+:ET

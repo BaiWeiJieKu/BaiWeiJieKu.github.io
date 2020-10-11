@@ -1,0 +1,148 @@
+I"~N<ul id="markdown-toc">
+  <li><a href="#utilities" id="markdown-toc-utilities">utilities</a>    <ul>
+      <li><a href="#joiner" id="markdown-toc-joiner">joiner</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="utilities">utilities</h3>
+
+<h4 id="joiner">joiner</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.base.Joiner</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.io.Files</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileWriter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">common</span><span class="o">.</span><span class="na">collect</span><span class="o">.</span><span class="na">ImmutableMap</span><span class="o">.</span><span class="na">of</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">stream</span><span class="o">.</span><span class="na">Collectors</span><span class="o">.</span><span class="na">joining</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsSame</span><span class="o">.</span><span class="na">sameInstance</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">fail</span><span class="o">;</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JoinerTest</span> <span class="o">{</span>
+
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringList</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span>
+            <span class="s">"Google"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">,</span> <span class="s">"Kafka"</span>
+    <span class="o">);</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringListWithNullValue</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span>
+            <span class="s">"Google"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">,</span> <span class="kc">null</span>
+    <span class="o">);</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringMap</span> <span class="o">=</span> <span class="n">of</span><span class="o">(</span><span class="s">"Hello"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">);</span>
+
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">targetFileName</span> <span class="o">=</span> <span class="s">"G:\\Teaching\\汪文君Google Guava实战视频\\guava-joiner.txt"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">targetFileNameToMap</span> <span class="o">=</span> <span class="s">"G:\\Teaching\\汪文君Google Guava实战视频\\guava-joiner-map.txt"</span><span class="o">;</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnJoin</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringList</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#Kafka"</span><span class="o">));</span>
+    <span class="o">}</span>
+	<span class="cm">/**
+    *测试连接list中有null的元素，会抛出NPE异常
+    */</span>
+    <span class="nd">@Test</span><span class="o">(</span><span class="n">expected</span> <span class="o">=</span> <span class="nc">NullPointerException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnJoinWithNullValue</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#Kafka"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素，忽略null
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnJoinWithNullValueButSkip</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">skipNulls</span><span class="o">().</span><span class="na">join</span><span class="o">(</span><span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *测试连接list中的元素，如果有null，设置默认值
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoin_On_Join_WithNullValue_UseDefaultValue</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">useForNull</span><span class="o">(</span><span class="s">"DEFAULT"</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素，并添加到StringBuilder中
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoin_On_Append_To_StringBuilder</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">final</span> <span class="nc">StringBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>
+        <span class="nc">StringBuilder</span> <span class="n">resultBuilder</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">useForNull</span><span class="o">(</span><span class="s">"DEFAULT"</span><span class="o">).</span><span class="na">appendTo</span><span class="o">(</span><span class="n">builder</span><span class="o">,</span> <span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">resultBuilder</span><span class="o">,</span> <span class="n">sameInstance</span><span class="o">(</span><span class="n">builder</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">resultBuilder</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">builder</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素，并把连接后的结果写入到文件中
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoin_On_Append_To_Writer</span><span class="o">()</span> <span class="o">{</span>
+
+        <span class="k">try</span> <span class="o">(</span><span class="nc">FileWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileWriter</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileName</span><span class="o">)))</span> <span class="o">{</span>
+            <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">useForNull</span><span class="o">(</span><span class="s">"DEFAULT"</span><span class="o">).</span><span class="na">appendTo</span><span class="o">(</span><span class="n">writer</span><span class="o">,</span> <span class="n">stringListWithNullValue</span><span class="o">);</span>
+            <span class="n">assertThat</span><span class="o">(</span><span class="nc">Files</span><span class="o">.</span><span class="na">isFile</span><span class="o">().</span><span class="na">test</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileName</span><span class="o">)),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">fail</span><span class="o">(</span><span class="s">"append to the writer occur fetal error."</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *使用java8中的stream流连接list中的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoiningByStreamSkipNullValues</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">stringListWithNullValue</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">item</span> <span class="o">-&gt;</span> <span class="n">item</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">item</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()).</span><span class="na">collect</span><span class="o">(</span><span class="n">joining</span><span class="o">(</span><span class="s">"#"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *使用java8中的stream流连接list中的元素，并且给null元素默认值
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoiningByStreamWithDefaultValue</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">stringListWithNullValue</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">map</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">defaultValue</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="n">joining</span><span class="o">(</span><span class="s">"#"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">defaultValue</span><span class="o">(</span><span class="kd">final</span> <span class="nc">String</span> <span class="n">item</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">item</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">item</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()</span> <span class="o">?</span> <span class="s">"DEFAULT"</span> <span class="o">:</span> <span class="n">item</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *连接map中的键值对
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnWithMap</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="sc">'#'</span><span class="o">).</span><span class="na">withKeyValueSeparator</span><span class="o">(</span><span class="s">"="</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringMap</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Hello=Guava#Java=Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *连接map中的键值对，把结果写入到文件中
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnWithMapToAppendable</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">(</span><span class="nc">FileWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileWriter</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileNameToMap</span><span class="o">)))</span> <span class="o">{</span>
+            <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">withKeyValueSeparator</span><span class="o">(</span><span class="s">"="</span><span class="o">).</span><span class="na">appendTo</span><span class="o">(</span><span class="n">writer</span><span class="o">,</span> <span class="n">stringMap</span><span class="o">);</span>
+            <span class="n">assertThat</span><span class="o">(</span><span class="nc">Files</span><span class="o">.</span><span class="na">isFile</span><span class="o">().</span><span class="na">test</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileNameToMap</span><span class="o">)),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">fail</span><span class="o">(</span><span class="s">"append to the writer occur fetal error."</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET

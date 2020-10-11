@@ -1,0 +1,21 @@
+I"T<ul id="markdown-toc">
+  <li><a href="#1lambda-表达式" id="markdown-toc-1lambda-表达式">1：Lambda 表达式</a></li>
+</ul>
+
+<h3 id="1lambda-表达式">1：Lambda 表达式</h3>
+
+<ul>
+  <li>可以把Lambda表达式理解为简洁地表示可传递的匿名函数的一种方式：它没有名称，但它有参数列表、函数主体、返回类型，可能还有一个可以抛出的异常列表。</li>
+  <li>Lambda的基本语法是(parameters) -&gt; expression或(parameters) -&gt; { statements; }</li>
+  <li>Lambda示例
+    <ul>
+      <li>布尔表达式:<code class="language-plaintext highlighter-rouge">(List&lt;String&gt; list) -&gt; list.isEmpty()</code></li>
+      <li>创建对象:<code class="language-plaintext highlighter-rouge">() -&gt; new Apple(10)</code></li>
+      <li>消费一个对象:<code class="language-plaintext highlighter-rouge">(Apple a) -&gt; {System.out.println(a.getWeight());}</code></li>
+      <li>从一个对象中选择/抽取:<code class="language-plaintext highlighter-rouge">(String s) -&gt; s.length()</code></li>
+      <li>组合两个值:<code class="language-plaintext highlighter-rouge">(int a, int b) -&gt; a * b</code></li>
+      <li>比较两个对象:<code class="language-plaintext highlighter-rouge">(Apple a1, Apple a2) -&gt;a1.getWeight().compareTo(a2.getWeight())</code></li>
+    </ul>
+  </li>
+</ul>
+:ET

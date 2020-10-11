@@ -1,0 +1,104 @@
+I"7<ul id="markdown-toc">
+  <li><a href="#组管理" id="markdown-toc-组管理">组管理</a>    <ul>
+      <li><a href="#文件所有者" id="markdown-toc-文件所有者">文件所有者</a>        <ul>
+          <li><a href="#修改文件所有者" id="markdown-toc-修改文件所有者">修改文件所有者</a></li>
+        </ul>
+      </li>
+      <li><a href="#组创建" id="markdown-toc-组创建">组创建</a></li>
+      <li><a href="#查看组" id="markdown-toc-查看组">查看组</a></li>
+      <li><a href="#修改文件所在组" id="markdown-toc-修改文件所在组">修改文件所在组</a></li>
+      <li><a href="#其他组" id="markdown-toc-其他组">其他组</a></li>
+      <li><a href="#修改用户所在组" id="markdown-toc-修改用户所在组">修改用户所在组</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="组管理">组管理</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>在linux 中的每个用户必须属于一个组，不能独立于组外。在linux 中每个文件有所有者、所在组、其它组的概念。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1)	所有者
+2)	所在组
+3)	其它组
+4)	改变用户所在的组
+</code></pre></div></div>
+
+<h3 id="文件所有者">文件所有者</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>一般为文件的创建者,谁创建了该文件，就自然的成为该文件的所有者。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1)	指令：ls -ahl
+2)	应用实例：创建一个组 police,再创建一个用户 tom,将 tom 放在 police 组 ,然后使用 tom 来创建一个文	件 ok.txt，看看情况如何
+
+groupadd police
+useradd -g police tom
+passwd tom
+
+touch ok.txt
+</code></pre></div></div>
+
+<h4 id="修改文件所有者">修改文件所有者</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>指令：chown 用户名 文件名
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>要求：使用root 创建一个文件apple.txt ，然后将其所有者修改成 tom
+
+chown tom apple.txt
+</code></pre></div></div>
+
+<h3 id="组创建">组创建</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>groupadd 组名
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>创建一个组,monster
+创建一个用户 fox ，并放入到 monster 组中
+
+groupadd monster
+useradd -g monster fox
+
+id fox
+</code></pre></div></div>
+
+<h3 id="查看组">查看组</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>当某个用户创建了一个文件后，默认这个文件的所在组就是该用户所在的组。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>基本指令
+	ls –ahl
+</code></pre></div></div>
+
+<h3 id="修改文件所在组">修改文件所在组</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>基本指令
+	chgrp 组名 文件名
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>使用root 用户创建文件 orange.txt ,看看当前这个文件属于哪个组，然后将这个文件所在组，修改到 police 组。
+
+chgrp police orange.txt
+</code></pre></div></div>
+
+<h3 id="其他组">其他组</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>除文件的所有者和所在组的用户外，系统的其它用户都是文件的其它组.
+</code></pre></div></div>
+
+<h3 id="修改用户所在组">修改用户所在组</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>在添加用户时，可以指定将该用户添加到哪个组中，同样的用root 的管理权限可以改变某个用户所在的组。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1)	usermod –g 组名 用户名
+2)	usermod –d 目录名 用户名 改变该用户登陆的初始目录。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>创建一个土匪组（bandit）将 tom 这个用户从原来所在的police 组，修改到 bandit(土匪) 组
+
+usermod -g bandit tom
+id tom
+</code></pre></div></div>
+:ET

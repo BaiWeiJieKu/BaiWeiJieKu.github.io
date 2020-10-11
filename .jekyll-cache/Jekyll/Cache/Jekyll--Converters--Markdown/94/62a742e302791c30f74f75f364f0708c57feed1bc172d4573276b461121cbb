@@ -1,0 +1,1407 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#线程启动" id="markdown-toc-线程启动">线程启动</a>    <ul>
+      <li><a href="#线程概念" id="markdown-toc-线程概念">线程概念</a></li>
+      <li><a href="#创建线程" id="markdown-toc-创建线程">创建线程</a>        <ul>
+          <li><a href="#runnable接口" id="markdown-toc-runnable接口">Runnable接口</a></li>
+          <li><a href="#匿名类" id="markdown-toc-匿名类">匿名类</a></li>
+          <li><a href="#三种方式" id="markdown-toc-三种方式">三种方式</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#线程方法" id="markdown-toc-线程方法">线程方法</a>    <ul>
+      <li><a href="#线程暂停" id="markdown-toc-线程暂停">线程暂停</a></li>
+      <li><a href="#加入线程" id="markdown-toc-加入线程">加入线程</a></li>
+      <li><a href="#优先级" id="markdown-toc-优先级">优先级</a></li>
+      <li><a href="#临时暂停" id="markdown-toc-临时暂停">临时暂停</a></li>
+      <li><a href="#守护线程" id="markdown-toc-守护线程">守护线程</a></li>
+    </ul>
+  </li>
+  <li><a href="#线程同步" id="markdown-toc-线程同步">线程同步</a>    <ul>
+      <li><a href="#同步案例" id="markdown-toc-同步案例">同步案例</a></li>
+      <li><a href="#问题原因" id="markdown-toc-问题原因">问题原因</a></li>
+      <li><a href="#解决思路" id="markdown-toc-解决思路">解决思路</a></li>
+      <li><a href="#synchronized" id="markdown-toc-synchronized">synchronized</a></li>
+    </ul>
+  </li>
+  <li><a href="#线程安全" id="markdown-toc-线程安全">线程安全</a></li>
+  <li><a href="#死锁" id="markdown-toc-死锁">死锁</a></li>
+  <li><a href="#交互" id="markdown-toc-交互">交互</a></li>
+</ul>
+<h2 id="线程启动">线程启动</h2>
+
+<ul>
+  <li>多线程即在同一时间，可以做多件事情。</li>
+  <li>创建多线程有3种方式，分别是<a href="http://how2j.cn/k/thread/thread-start/353.html#step778">继承线程类</a>,<a href="http://how2j.cn/k/thread/thread-start/353.html#step779">实现Runnable接口</a>,<a href="http://how2j.cn/k/thread/thread-start/353.html#step780">匿名类</a></li>
+</ul>
+
+<h3 id="线程概念">线程概念</h3>
+
+<ul>
+  <li>首先要理解进程(Processor)和线程(Thread)的区别</li>
+  <li>进程：启动一个LOL.exe就叫一个进程。 接着又启动一个DOTA.exe，这叫两个进程。</li>
+  <li>线程：线程是在进程内部同时做的事情，比如在LOL里，有很多事情要同时做，比如”盖伦” 击杀“提莫”，同时“赏金猎人”又在击杀“盲僧”，这就是由多线程来实现的。</li>
+</ul>
+
+<h3 id="创建线程">创建线程</h3>
+
+<ul>
+  <li>使用多线程，就可以做到盖伦在攻击提莫的同时，赏金猎人也在攻击盲僧</li>
+  <li>设计一个类KillThread 继承Thread，并且重写run方法</li>
+  <li>启动线程办法： 实例化一个KillThread对象，并且调用其start方法</li>
+  <li>就可以观察到 赏金猎人攻击盲僧的同时，盖伦也在攻击提莫</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">KillThread</span> <span class="kd">extends</span> <span class="nc">Thread</span><span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="nc">Hero</span> <span class="n">h1</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">Hero</span> <span class="n">h2</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">KillThread</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h1</span><span class="o">,</span> <span class="nc">Hero</span> <span class="n">h2</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">h1</span> <span class="o">=</span> <span class="n">h1</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">h2</span> <span class="o">=</span> <span class="n">h2</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+		<span class="k">while</span><span class="o">(!</span><span class="n">h2</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+			<span class="n">h1</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">h2</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+
+<span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+		<span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">616</span><span class="o">;</span>
+		<span class="n">gareen</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">50</span><span class="o">;</span>
+
+		<span class="nc">Hero</span> <span class="n">teemo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">teemo</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"提莫"</span><span class="o">;</span>
+		<span class="n">teemo</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">300</span><span class="o">;</span>
+		<span class="n">teemo</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">30</span><span class="o">;</span>
+		
+		<span class="nc">Hero</span> <span class="n">bh</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">bh</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"赏金猎人"</span><span class="o">;</span>
+		<span class="n">bh</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">500</span><span class="o">;</span>
+		<span class="n">bh</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">65</span><span class="o">;</span>
+		
+		<span class="nc">Hero</span> <span class="n">leesin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">leesin</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盲僧"</span><span class="o">;</span>
+		<span class="n">leesin</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">455</span><span class="o">;</span>
+		<span class="n">leesin</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span>
+		
+		<span class="nc">KillThread</span> <span class="n">killThread1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KillThread</span><span class="o">(</span><span class="n">gareen</span><span class="o">,</span><span class="n">teemo</span><span class="o">);</span>
+		<span class="n">killThread1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+		<span class="nc">KillThread</span> <span class="n">killThread2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KillThread</span><span class="o">(</span><span class="n">bh</span><span class="o">,</span><span class="n">leesin</span><span class="o">);</span>
+		<span class="n">killThread2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+		
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/778.png" alt="" /></p>
+
+<h4 id="runnable接口">Runnable接口</h4>
+
+<ul>
+  <li>创建类Battle，实现Runnable接口,启动的时候，首先创建一个Battle对象，然后再根据该battle对象创建一个线程对象，并启动</li>
+  <li>battle1 对象实现了Runnable接口，所以有run方法，但是直接调用run方法，并不会启动一个新的线程。</li>
+  <li>必须，借助一个线程对象的start()方法，才会启动一个新的线程。</li>
+  <li>所以，在创建Thread对象的时候，把battle1作为构造方法的参数传递进去，这个线程启动的时候，就会去执行battle1.run()方法了。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Battle</span> <span class="kd">implements</span> <span class="nc">Runnable</span><span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="nc">Hero</span> <span class="n">h1</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">Hero</span> <span class="n">h2</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">Battle</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h1</span><span class="o">,</span> <span class="nc">Hero</span> <span class="n">h2</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">h1</span> <span class="o">=</span> <span class="n">h1</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">h2</span> <span class="o">=</span> <span class="n">h2</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+		<span class="k">while</span><span class="o">(!</span><span class="n">h2</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+			<span class="n">h1</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">h2</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+		<span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">616</span><span class="o">;</span>
+		<span class="n">gareen</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">50</span><span class="o">;</span>
+
+		<span class="nc">Hero</span> <span class="n">teemo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">teemo</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"提莫"</span><span class="o">;</span>
+		<span class="n">teemo</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">300</span><span class="o">;</span>
+		<span class="n">teemo</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">30</span><span class="o">;</span>
+		
+		<span class="nc">Hero</span> <span class="n">bh</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">bh</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"赏金猎人"</span><span class="o">;</span>
+		<span class="n">bh</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">500</span><span class="o">;</span>
+		<span class="n">bh</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">65</span><span class="o">;</span>
+		
+		<span class="nc">Hero</span> <span class="n">leesin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+		<span class="n">leesin</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盲僧"</span><span class="o">;</span>
+		<span class="n">leesin</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">455</span><span class="o">;</span>
+		<span class="n">leesin</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span>
+		
+		<span class="nc">Battle</span> <span class="n">battle1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Battle</span><span class="o">(</span><span class="n">gareen</span><span class="o">,</span><span class="n">teemo</span><span class="o">);</span>
+		
+		<span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="n">battle1</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+
+		<span class="nc">Battle</span> <span class="n">battle2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Battle</span><span class="o">(</span><span class="n">bh</span><span class="o">,</span><span class="n">leesin</span><span class="o">);</span>
+		<span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="n">battle2</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="匿名类">匿名类</h4>
+
+<ul>
+  <li>使用<a href="http://how2j.cn/k/interface-inheritance/interface-inheritance-inner-class/322.html#step687">匿名类</a>，继承Thread,重写run方法，直接在run方法中写业务代码</li>
+  <li>匿名类的一个好处是可以很方便的访问外部的局部变量。</li>
+  <li>前提是外部的局部变量需要被声明为final。(JDK7以后就不需要了)</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">616</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">50</span><span class="o">;</span>
+ 
+        <span class="nc">Hero</span> <span class="n">teemo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"提莫"</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">300</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">30</span><span class="o">;</span>
+         
+        <span class="nc">Hero</span> <span class="n">bh</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"赏金猎人"</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">500</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">65</span><span class="o">;</span>
+         
+        <span class="nc">Hero</span> <span class="n">leesin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盲僧"</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">455</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span>
+         
+        <span class="c1">//匿名类</span>
+        <span class="nc">Thread</span> <span class="n">t1</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="c1">//匿名类中用到外部的局部变量teemo，必须把teemo声明为final</span>
+            	<span class="c1">//但是在JDK7以后，就不是必须加final的了</span>
+                <span class="k">while</span><span class="o">(!</span><span class="n">teemo</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">teemo</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+        
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+         
+        <span class="nc">Thread</span> <span class="n">t2</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">while</span><span class="o">(!</span><span class="n">leesin</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                    <span class="n">bh</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">leesin</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="三种方式">三种方式</h4>
+
+<ul>
+  <li>继承Thread类</li>
+  <li>实现Runnable接口</li>
+  <li>匿名类的方式</li>
+  <li>注： 启动线程是start()方法，run()并不能启动一个新的线程</li>
+</ul>
+
+<h2 id="线程方法">线程方法</h2>
+
+<h3 id="线程暂停">线程暂停</h3>
+
+<ul>
+  <li>Thread.sleep(1000); 表示当前线程暂停1000毫秒 ，其他线程不受影响</li>
+  <li>Thread.sleep(1000); 会抛出InterruptedException 中断异常，因为当前线程sleep的时候，有可能被停止，这时就会抛出 InterruptedException</li>
+  <li>线程休眠：指的是让线程暂缓执行一下，等到了预计时间之后再恢复执行。线程休眠会交出CPU，让CPU去执行其他的任务。</li>
+  <li>sleep方法不会释放锁，也就是说如果当前线程持有对某个对象的锁，即使调用sleep方法，其他线程也无法访问这个对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="nc">Thread</span> <span class="n">t1</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+			<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+				<span class="kt">int</span> <span class="n">seconds</span> <span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+				<span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+					<span class="k">try</span> <span class="o">{</span>
+						<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+					<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+						<span class="c1">// TODO Auto-generated catch block</span>
+						<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+					<span class="o">}</span>
+					<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"已经玩了LOL %d 秒%n"</span><span class="o">,</span> <span class="n">seconds</span><span class="o">++);</span>
+				<span class="o">}</span>				
+			<span class="o">}</span>
+		<span class="o">};</span>
+		<span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+		
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="加入线程">加入线程</h3>
+
+<ul>
+  <li>所有进程，至少会有一个线程即主线程，即main方法开始执行，就会有一个看不见的主线程存在。</li>
+  <li>如果在主线程中调用join方法时就会让主线程休眠，让调用该方法的线程run方法先执行完毕之后在开始执行主线程</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">616</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">50</span><span class="o">;</span>
+ 
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">teemo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"提莫"</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">300</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">30</span><span class="o">;</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">bh</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"赏金猎人"</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">500</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">65</span><span class="o">;</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">leesin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盲僧"</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">455</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span>
+         
+        <span class="nc">Thread</span> <span class="n">t1</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">while</span><span class="o">(!</span><span class="n">teemo</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">teemo</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+         
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="c1">//代码执行到这里，一直是main线程在运行</span>
+        <span class="k">try</span> <span class="o">{</span>
+        	<span class="c1">//t1线程加入到main线程中来，只有t1线程运行结束，才会继续往下走</span>
+			<span class="n">t1</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+
+        <span class="nc">Thread</span> <span class="n">t2</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">while</span><span class="o">(!</span><span class="n">leesin</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                    <span class="n">bh</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">leesin</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="c1">//会观察到盖伦把提莫杀掉后，才运行t2线程</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+         
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="优先级">优先级</h3>
+
+<ul>
+  <li>当线程处于竞争关系的时候，优先级高的线程会有更大的几率获得CPU资源</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> 
+    <span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+     
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+     
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attackHero</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="c1">//把暂停时间去掉，多条线程各自会尽力去占有CPU资源</span>
+    	<span class="c1">//线程的优先级效果才可以看得出来</span>
+<span class="c1">//        try {</span>
+<span class="c1">//            </span>
+<span class="c1">//            Thread.sleep(0);</span>
+<span class="c1">//        } catch (InterruptedException e) {</span>
+<span class="c1">//            // TODO Auto-generated catch block</span>
+<span class="c1">//            e.printStackTrace();</span>
+<span class="c1">//        }</span>
+        <span class="n">h</span><span class="o">.</span><span class="na">hp</span><span class="o">-=</span><span class="n">damage</span><span class="o">;</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"%s 正在攻击 %s, %s的血变成了 %.0f%n"</span><span class="o">,</span><span class="n">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+         
+        <span class="k">if</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">isDead</span><span class="o">())</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">name</span> <span class="o">+</span><span class="s">"死了！"</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isDead</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="o">&gt;=</span><span class="n">hp</span><span class="o">?</span><span class="kc">true</span><span class="o">:</span><span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">6160</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+ 
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">teemo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"提莫"</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">3000</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">bh</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"赏金猎人"</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">5000</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">leesin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盲僧"</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">4505</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+         
+        <span class="nc">Thread</span> <span class="n">t1</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+
+                <span class="k">while</span><span class="o">(!</span><span class="n">teemo</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">teemo</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+         
+        <span class="nc">Thread</span> <span class="n">t2</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">while</span><span class="o">(!</span><span class="n">leesin</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                    <span class="n">bh</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">leesin</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+        
+        <span class="n">t1</span><span class="o">.</span><span class="na">setPriority</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">MAX_PRIORITY</span><span class="o">);</span><span class="c1">//优先级为10</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">setPriority</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">MIN_PRIORITY</span><span class="o">);</span><span class="c1">//优先级为1</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+         
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/783.png" alt="" /></p>
+
+<h3 id="临时暂停">临时暂停</h3>
+
+<ul>
+  <li>暂停当前正在执行的线程对象，并执行其他线程。</li>
+  <li>意思就是调用yield方法会让当前线程交出CPU权限，让CPU去执行其他的线程。它跟sleep方法类似，同样不会释放锁。</li>
+  <li>但是yield不能控制具体的交出CPU的时间，另外，yield方法只能让拥有相同优先级的线程有获取CPU执行时间的机会。</li>
+  <li>调用yield方法并不会让线程进入阻塞状态，而是让线程重回就绪状态，它只需要等待重新获取CPU执行时间</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">61600</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+ 
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">teemo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"提莫"</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">30000</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">bh</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"赏金猎人"</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">50000</span><span class="o">;</span>
+        <span class="n">bh</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+         
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">leesin</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盲僧"</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">45050</span><span class="o">;</span>
+        <span class="n">leesin</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+         
+        <span class="nc">Thread</span> <span class="n">t1</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+
+                <span class="k">while</span><span class="o">(!</span><span class="n">teemo</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">teemo</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+         
+        <span class="nc">Thread</span> <span class="n">t2</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">while</span><span class="o">(!</span><span class="n">leesin</span><span class="o">.</span><span class="na">isDead</span><span class="o">()){</span>
+                	<span class="c1">//临时暂停，使得t1可以占用CPU资源</span>
+                	<span class="nc">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+                	
+                    <span class="n">bh</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">leesin</span><span class="o">);</span>
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+        
+        <span class="n">t1</span><span class="o">.</span><span class="na">setPriority</span><span class="o">(</span><span class="mi">5</span><span class="o">);</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">setPriority</span><span class="o">(</span><span class="mi">5</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+         
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="守护线程">守护线程</h3>
+
+<ul>
+  <li>守护线程的概念是： 当一个进程里，所有的线程都是守护线程的时候，结束当前进程。</li>
+  <li>就好像一个公司有销售部，生产部这些和业务挂钩的部门。除此之外，还有后勤，行政等这些支持部门。</li>
+  <li>如果一家公司销售部，生产部都解散了，那么只剩下后勤和行政，那么这家公司也可以解散了。</li>
+  <li>守护线程就相当于那些支持部门，如果一个进程只剩下守护线程，那么进程就会自动结束。</li>
+  <li>守护线程通常会被用来做日志，性能统计等工作。</li>
+  <li>守护线程的唯一用途是为其他线程提供服务</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="nc">Thread</span> <span class="n">t1</span><span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="kt">int</span> <span class="n">seconds</span> <span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+                
+                <span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"已经玩了LOL %d 秒%n"</span><span class="o">,</span> <span class="n">seconds</span><span class="o">++);</span>
+                    
+                <span class="o">}</span>               
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">setDaemon</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span><span class="c1">//将线程转为守护线程</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+         
+    <span class="o">}</span>
+     
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="线程同步">线程同步</h2>
+
+<ul>
+  <li>多线程的同步问题指的是多个线程同时修改一个数据的时候，可能导致的问题</li>
+  <li>多线程的问题，又叫Concurrency 问题</li>
+</ul>
+
+<h3 id="同步案例">同步案例</h3>
+
+<ul>
+  <li>假设盖伦有10000滴血，并且在基地里，同时又被对方多个英雄攻击</li>
+  <li>就是有多个线程在减少盖伦的hp，同时又有多个线程在恢复盖伦的hp</li>
+  <li>假设线程的数量是一样的，并且每次改变的值都是1，那么所有线程结束后，盖伦应该还是10000滴血。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+   
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+   
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+   
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+           
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+          
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"盖伦的初始血量是 %.0f%n"</span><span class="o">,</span> <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+          
+        <span class="c1">//多线程同步问题指的是多个线程同时修改一个数据的时候，导致的问题</span>
+          
+        <span class="c1">//假设盖伦有10000滴血，并且在基地里，同时又被对方多个英雄攻击</span>
+          
+        <span class="c1">//用JAVA代码来表示，就是有多个线程在减少盖伦的hp</span>
+        <span class="c1">//同时又有多个线程在恢复盖伦的hp</span>
+          
+        <span class="c1">//n个线程增加盖伦的hp</span>
+          
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+  
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">addThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">reduceThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+          
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">recover</span><span class="o">();</span><span class="c1">//回血方法，每次回1</span>
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">addThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+              
+        <span class="o">}</span>
+          
+        <span class="c1">//n个线程减少盖伦的hp</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">hurt</span><span class="o">();</span><span class="c1">//掉血方法，每次减1</span>
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">reduceThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+        <span class="o">}</span>
+          
+        <span class="c1">//等待所有增加线程结束</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">addThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="c1">//等待所有减少线程结束</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">reduceThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+          
+        <span class="c1">//代码执行到这里，所有增加和减少线程都结束了</span>
+          
+        <span class="c1">//增加和减少线程的数量是一样的，每次都增加，减少1.</span>
+        <span class="c1">//那么所有线程都结束后，盖伦的hp应该还是初始值</span>
+          
+        <span class="c1">//但是事实上观察到的是：</span>
+                  
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"%d个增加线程和%d个减少线程结束后%n盖伦的血量变成了 %.0f%n"</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">gareen</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+          
+    <span class="o">}</span>
+       
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/786.png" alt="" /></p>
+
+<h3 id="问题原因">问题原因</h3>
+
+<ul>
+  <li>假设增加线程先进入，得到的hp是10000</li>
+  <li>进行增加运算</li>
+  <li>正在做增加运算的时候，还没有来得及修改hp的值，减少线程来了</li>
+  <li>减少线程得到的hp的值也是10000</li>
+  <li>减少线程进行减少运算</li>
+  <li>增加线程运算结束，得到值10001，并把这个值赋予hp</li>
+  <li>减少线程也运算结束，得到值9999，并把这个值赋予hp</li>
+  <li>hp，最后的值就是9999 ，这个时候的值9999是一个错误的值，在业务上又叫做脏数据</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/787.png" alt="" /></p>
+
+<h3 id="解决思路">解决思路</h3>
+
+<ul>
+  <li>总体解决思路是： 在增加线程访问hp期间，其他线程不可以访问hp</li>
+  <li>增加线程获取到hp的值，并进行运算</li>
+  <li>在运算期间，减少线程试图来获取hp的值，但是不被允许</li>
+  <li>增加线程运算结束，并成功修改hp的值为10001</li>
+  <li>减少线程，在增加线程做完后，才能访问hp的值，即10001</li>
+  <li>减少线程运算，并得到新的值10000</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/788.png" alt="" /></p>
+
+<h3 id="synchronized">synchronized</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Object</span> <span class="n">someObject</span> <span class="o">=</span><span class="k">new</span> <span class="nc">Object</span><span class="o">();</span>
+<span class="kd">synchronized</span> <span class="o">(</span><span class="n">someObject</span><span class="o">){</span>
+  <span class="c1">//此处的代码只有占有了someObject后才可以执行</span>
+<span class="o">}</span>
+<span class="cm">/*
+synchronized表示当前线程，独占 对象 someObject
+当前线程独占 了对象someObject，如果有其他线程试图占有对象someObject，就会等待，直到当前线程释放对someObject的占用。
+someObject 又叫同步对象，所有的对象，都可以作为同步对象
+为了达到同步的效果，必须使用同一个同步对象
+释放同步对象的方式： synchronized 块自然结束，或者有异常抛出
+*/</span>
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/789.png" alt="" /></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.text.SimpleDateFormat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">now</span><span class="o">(){</span>
+		<span class="k">return</span> <span class="k">new</span> <span class="nf">SimpleDateFormat</span><span class="o">(</span><span class="s">"HH:mm:ss"</span><span class="o">).</span><span class="na">format</span><span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">());</span>
+	<span class="o">}</span>
+	
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">final</span> <span class="nc">Object</span> <span class="n">someObject</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">();</span>
+         
+        <span class="nc">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="s">" t1 线程已经运行"</span><span class="o">);</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span> <span class="s">" 试图占有对象：someObject"</span><span class="o">);</span>
+                    <span class="kd">synchronized</span> <span class="o">(</span><span class="n">someObject</span><span class="o">)</span> <span class="o">{</span>
+                         
+                        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span> <span class="s">" 占有对象：someObject"</span><span class="o">);</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">5000</span><span class="o">);</span>
+                        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span> <span class="s">" 释放对象：someObject"</span><span class="o">);</span>
+                    <span class="o">}</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">now</span><span class="o">()+</span><span class="s">" t1 线程结束"</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">// TODO Auto-generated catch block</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">" t1"</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="nc">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+ 
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="s">" t2 线程已经运行"</span><span class="o">);</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span> <span class="s">" 试图占有对象：someObject"</span><span class="o">);</span>
+                    <span class="kd">synchronized</span> <span class="o">(</span><span class="n">someObject</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span> <span class="s">" 占有对象：someObject"</span><span class="o">);</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">5000</span><span class="o">);</span>
+                        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">now</span><span class="o">()+</span><span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span> <span class="s">" 释放对象：someObject"</span><span class="o">);</span>
+                    <span class="o">}</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">now</span><span class="o">()+</span><span class="s">" t2 线程结束"</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">// TODO Auto-generated catch block</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">" t2"</span><span class="o">);</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>所有需要修改hp的地方，有要建立在占有someObject的基础上。</li>
+  <li>而对象 someObject在同一时间，只能被一个线程占有。 间接地，导致同一时间，hp只能被一个线程修改。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.awt.GradientPaint</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+    	<span class="kd">final</span> <span class="nc">Object</span> <span class="n">someObject</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">();</span>
+    	
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+         
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+ 
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">addThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">reduceThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                	
+                	<span class="c1">//任何线程要修改hp的值，必须先占用someObject</span>
+                	<span class="kd">synchronized</span> <span class="o">(</span><span class="n">someObject</span><span class="o">)</span> <span class="o">{</span>
+                		<span class="n">gareen</span><span class="o">.</span><span class="na">recover</span><span class="o">();</span>
+					<span class="o">}</span>
+                    
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">addThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+             
+        <span class="o">}</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                	<span class="c1">//任何线程要修改hp的值，必须先占用someObject</span>
+                	<span class="kd">synchronized</span> <span class="o">(</span><span class="n">someObject</span><span class="o">)</span> <span class="o">{</span>
+                		<span class="n">gareen</span><span class="o">.</span><span class="na">hurt</span><span class="o">();</span>
+                	<span class="o">}</span>
+                	
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">reduceThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+        <span class="o">}</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">addThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">reduceThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"%d个增加线程和%d个减少线程结束后%n盖伦的血量是 %.0f%n"</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">gareen</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/790.png" alt="" /></p>
+
+<ul>
+  <li>既然任意对象都可以用来作为同步对象，而所有的线程访问的都是同一个hero对象，索性就使用gareen来作为同步对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> 
+    <span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+    
+    <span class="c1">//回血</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">recover</span><span class="o">(){</span>
+    	<span class="n">hp</span><span class="o">=</span><span class="n">hp</span><span class="o">+</span><span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//掉血</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">hurt</span><span class="o">(){</span>
+    	<span class="c1">//使用this作为同步对象</span>
+    	<span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+    		<span class="n">hp</span><span class="o">=</span><span class="n">hp</span><span class="o">-</span><span class="mi">1</span><span class="o">;</span>	
+		<span class="o">}</span>
+    <span class="o">}</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attackHero</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">h</span><span class="o">.</span><span class="na">hp</span><span class="o">-=</span><span class="n">damage</span><span class="o">;</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"%s 正在攻击 %s, %s的血变成了 %.0f%n"</span><span class="o">,</span><span class="n">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">isDead</span><span class="o">())</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">name</span> <span class="o">+</span><span class="s">"死了！"</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isDead</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="o">&gt;=</span><span class="n">hp</span><span class="o">?</span><span class="kc">true</span><span class="o">:</span><span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.awt.GradientPaint</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+         
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+ 
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">addThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">reduceThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                	
+                	<span class="c1">//使用gareen作为synchronized</span>
+                	<span class="kd">synchronized</span> <span class="o">(</span><span class="n">gareen</span><span class="o">)</span> <span class="o">{</span>
+                		<span class="n">gareen</span><span class="o">.</span><span class="na">recover</span><span class="o">();</span>
+					<span class="o">}</span>
+                    
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">addThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+             
+        <span class="o">}</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                	<span class="c1">//使用gareen作为synchronized</span>
+                	<span class="c1">//在方法hurt中有synchronized(this)</span>
+                	<span class="n">gareen</span><span class="o">.</span><span class="na">hurt</span><span class="o">();</span>
+                    
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">reduceThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+        <span class="o">}</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">addThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">reduceThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"%d个增加线程和%d个减少线程结束后%n盖伦的血量是 %.0f%n"</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">gareen</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<ul>
+  <li>在recover前，直接加上synchronized ，其所对应的同步对象，就是this</li>
+  <li>和hurt方法达到的效果是一样
+外部线程访问gareen的方法，就不需要额外使用synchronized 了</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> 
+    <span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+    
+    <span class="c1">//回血</span>
+    <span class="c1">//直接在方法前加上修饰符synchronized</span>
+    <span class="c1">//其所对应的同步对象，就是this</span>
+    <span class="c1">//和hurt方法达到的效果一样</span>
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">recover</span><span class="o">(){</span>
+    	<span class="n">hp</span><span class="o">=</span><span class="n">hp</span><span class="o">+</span><span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//掉血</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">hurt</span><span class="o">(){</span>
+    	<span class="c1">//使用this作为同步对象</span>
+    	<span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+    		<span class="n">hp</span><span class="o">=</span><span class="n">hp</span><span class="o">-</span><span class="mi">1</span><span class="o">;</span>	
+		<span class="o">}</span>
+    <span class="o">}</span>
+    
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attackHero</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">h</span><span class="o">.</span><span class="na">hp</span><span class="o">-=</span><span class="n">damage</span><span class="o">;</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"%s 正在攻击 %s, %s的血变成了 %.0f%n"</span><span class="o">,</span><span class="n">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span><span class="n">h</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">isDead</span><span class="o">())</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">name</span> <span class="o">+</span><span class="s">"死了！"</span><span class="o">);</span>
+    <span class="o">}</span>
+ 
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isDead</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="o">&gt;=</span><span class="n">hp</span><span class="o">?</span><span class="kc">true</span><span class="o">:</span><span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+  
+<span class="kn">import</span> <span class="nn">java.awt.GradientPaint</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+  
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+         
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+ 
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">addThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+        <span class="nc">Thread</span><span class="o">[]</span> <span class="n">reduceThreads</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                	
+                	<span class="c1">//recover自带synchronized</span>
+               		<span class="n">gareen</span><span class="o">.</span><span class="na">recover</span><span class="o">();</span>
+                    
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">addThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+             
+        <span class="o">}</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                	<span class="c1">//hurt自带synchronized</span>
+                	<span class="n">gareen</span><span class="o">.</span><span class="na">hurt</span><span class="o">();</span>
+                    
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="n">reduceThreads</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">;</span>
+        <span class="o">}</span>
+         
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">addThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Thread</span> <span class="n">t</span> <span class="o">:</span> <span class="n">reduceThreads</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">t</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+         
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"%d个增加线程和%d个减少线程结束后%n盖伦的血量是 %.0f%n"</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">gareen</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>如果一个类，其方法都是有synchronized修饰的，那么该类就叫做线程安全的类</li>
+  <li>同一时间，只有一个线程能够进入 这种类的一个实例 的去修改数据，进而保证了这个实例中的数据的安全(不会同时被多线程修改而变成脏数据)</li>
+  <li>StringBuffer的方法都是有synchronized修饰的，StringBuffer就叫做线程安全的类,而StringBuilder就不是线程安全的类</li>
+</ul>
+
+<h2 id="线程安全">线程安全</h2>
+
+<ul>
+  <li>HashMap和Hashtable都实现了Map接口，都是键值对保存数据的方式</li>
+  <li>区别1： 
+HashMap可以存放 null
+Hashtable不能存放null</li>
+  <li>别2：
+HashMap不是<a href="http://how2j.cn/k/thread/thread-synchronized/355.html#step793">线程安全的类</a>
+Hashtable是线程安全的类</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/2595.png" alt="" /></p>
+
+<ul>
+  <li>StringBuffer 是线程安全的,StringBuilder 是非线程安全的</li>
+  <li>所以当进行大量字符串拼接操作的时候，如果是单线程就用StringBuilder会更快些，如果是多线程，就需要用StringBuffer 保证数据的安全性</li>
+  <li>非线程安全的为什么会比线程安全的 快？ 因为不需要同步嘛，省略了些时间</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/2596.png" alt="" /></p>
+
+<ul>
+  <li>Vector是线程安全的类，而ArrayList是非线程安全的。</li>
+  <li>ArrayList是非线程安全的，换句话说，多个线程可以同时进入一个ArrayList对象的add方法</li>
+  <li>借助Collections.synchronizedList，可以把ArrayList转换为线程安全的List。</li>
+  <li>与此类似的，还有HashSet,LinkedList,HashMap等等非线程安全的类，都通过<a href="http://how2j.cn/k/collection/collection-collections/369.html">工具类Collections</a>转换为线程安全的</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+   
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+    	<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list2</span> <span class="o">=</span> <span class="nc">Collections</span><span class="o">.</span><span class="na">synchronizedList</span><span class="o">(</span><span class="n">list1</span><span class="o">);</span>
+    <span class="o">}</span>
+       
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="死锁">死锁</h2>
+
+<ul>
+  <li>当业务比较复杂，多线程应用里有可能会发生死锁</li>
+  <li>线程1 首先占有对象1，接着试图占有对象2</li>
+  <li>线程2 首先占有对象2，接着试图占有对象1</li>
+  <li>线程1 等待线程2释放对象2</li>
+  <li>与此同时，线程2等待线程1释放对象1</li>
+  <li>就会。。。一直等待下去，直到天荒地老，海枯石烂，山无棱 ，天地合。。。</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/794.png" alt="" /></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DeadlockTest</span> <span class="o">{</span>
+	<span class="c1">//定义2个资源</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Integer</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Integer</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//启动2个线程,分别调用getA()和getB()</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="nl">DeadlockTest:</span><span class="o">:</span><span class="n">getA</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="nl">DeadlockTest:</span><span class="o">:</span><span class="n">getB</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+	<span class="kd">static</span> <span class="kt">void</span> <span class="nf">getA</span><span class="o">()</span> <span class="o">{</span>
+		<span class="c1">//用synchronized 对a对象加锁</span>
+        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">a</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">"获取到A锁"</span><span class="o">);</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="c1">//等待500ms,再去获取B资源锁,让另一个线程有时间去独占b</span>
+                <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+                <span class="n">getB</span><span class="o">();</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">"获取到B锁"</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="kt">void</span> <span class="nf">getB</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">"获取到B锁"</span><span class="o">);</span>
+             <span class="k">try</span> <span class="o">{</span>
+                <span class="c1">//等待500ms,再去获取A资源锁,让另一个线程有时间去独占a</span>
+                <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+            	<span class="n">getA</span><span class="o">();</span>
+            	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">"获取到A锁"</span><span class="o">);</span>
+             <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*
+Thread-0获取到A锁
+Thread-1获取到B锁
+
+Thread-0在拿到a对象的监视器锁（后文简称“A锁”）之后，又要去拿b对象的监视器锁（简称“B锁”），而此时B锁在Thread-1手中，于是Thread-0只能阻塞，等待B锁被Thread-1释放。对Thread-1而言，亦是如此，死锁产生。
+
+互斥条件:在上面代码中就是通过synchronized加锁，该锁是独占的、排它的。一个线程获取到之后，不允许第二个线程同时获取。
+
+请求和保持条件：Thread-0拿到A锁的同时，又要请求B锁，但B锁被 Thread-1占有，所以要阻塞自己，等待B资源。
+
+不剥夺条件：Thread-0不能抢占Thread-1已拥有的资源，只能等待其主动释放。
+
+环路等待条件：hread-0等待Thread-1占用的资源B，Thread-1等待Thread-0占用的资源A，形成环路等待条件。
+*/</span>
+</code></pre></div></div>
+
+<h2 id="交互">交互</h2>
+
+<ul>
+  <li>线程之间有交互通知的需求，考虑如下情况：</li>
+  <li>有两个线程，处理同一个英雄。 一个加血，一个减血。减血的线程，发现血量=1，就停止减血，直到加血的线程为英雄加了血，才可以继续减血</li>
+  <li>在Hero类中：hurt()减血方法：当hp=1的时候，执行this.wait().</li>
+  <li>this.wait()表示 让占有this的线程等待，并临时释放占有</li>
+  <li>进入hurt方法的线程必然是减血线程，this.wait()会让减血线程临时释放对this的占有。 这样加血线程，就有机会进入recover()加血方法了。</li>
+  <li>recover() 加血方法：增加了血量，执行this.notify();</li>
+  <li>this.notify() 表示通知那些等待在this的线程，可以苏醒过来了。 等待在this的线程，恰恰就是减血线程。 一旦recover()结束， 加血线程释放了this，减血线程，就可以重新占有this，并执行后面的减血工作。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="kt">int</span> <span class="n">damage</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">recover</span><span class="o">()</span> <span class="o">{</span>
+		<span class="n">hp</span> <span class="o">=</span> <span class="n">hp</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"%s 回血1点,增加血后，%s的血量是%.0f%n"</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">hp</span><span class="o">);</span>
+		<span class="c1">// 通知那些等待在this对象上的线程，可以醒过来了，如第20行，等待着的减血线程，苏醒过来</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">notify</span><span class="o">();</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">hurt</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">if</span> <span class="o">(</span><span class="n">hp</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">try</span> <span class="o">{</span>
+				<span class="c1">// 让占有this的减血线程，暂时释放对this的占有，并等待</span>
+				<span class="k">this</span><span class="o">.</span><span class="na">wait</span><span class="o">();</span>
+			<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+				<span class="c1">// TODO Auto-generated catch block</span>
+				<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+
+		<span class="n">hp</span> <span class="o">=</span> <span class="n">hp</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"%s 减血1点,减少血后，%s的血量是%.0f%n"</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">hp</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">attackHero</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">h</span><span class="o">.</span><span class="na">hp</span> <span class="o">-=</span> <span class="n">damage</span><span class="o">;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"%s 正在攻击 %s, %s的血变成了 %.0f%n"</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span> <span class="n">h</span><span class="o">.</span><span class="na">name</span><span class="o">,</span> <span class="n">h</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+		<span class="k">if</span> <span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">isDead</span><span class="o">())</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">name</span> <span class="o">+</span> <span class="s">"死了！"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isDead</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="mi">0</span> <span class="o">&gt;=</span> <span class="n">hp</span> <span class="o">?</span> <span class="kc">true</span> <span class="o">:</span> <span class="kc">false</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">package</span> <span class="nn">multiplethread</span><span class="o">;</span>
+     
+<span class="kn">import</span> <span class="nn">java.awt.GradientPaint</span><span class="o">;</span>
+   
+<span class="kn">import</span> <span class="nn">charactor.Hero</span><span class="o">;</span>
+     
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestThread</span> <span class="o">{</span>
+     
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+   
+        <span class="kd">final</span> <span class="nc">Hero</span> <span class="n">gareen</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">gareen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">616</span><span class="o">;</span>
+            
+        <span class="nc">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+                      
+                    <span class="c1">//无需循环判断</span>
+<span class="c1">//                    while(gareen.hp==1){</span>
+<span class="c1">//                        continue;</span>
+<span class="c1">//                    }</span>
+                      
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">hurt</span><span class="o">();</span>
+                    
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">10</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+  
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+  
+        <span class="nc">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(){</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+                <span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+                    <span class="n">gareen</span><span class="o">.</span><span class="na">recover</span><span class="o">();</span>
+  
+                    <span class="k">try</span> <span class="o">{</span>
+                        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// TODO Auto-generated catch block</span>
+                        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+  
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            
+    <span class="o">}</span>
+         
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/796.png" alt="" /></p>
+
+<ul>
+  <li>这里需要强调的是，wait方法和notify方法，并不是Thread线程上的方法，它们是Object上的方法。</li>
+  <li>因为所有的Object都可以被用来作为同步对象，所以准确的讲，wait和notify是同步对象上的方法。</li>
+  <li>wait()的意思是： 让占用了这个同步对象的线程，临时释放当前的占用，并且等待。 所以调用wait是有前提条件的，一定是在synchronized块里，否则就会出错。</li>
+  <li>notify() 的意思是，通知一个等待在这个同步对象上的线程，你可以苏醒过来了，有机会重新占用当前对象了。</li>
+  <li>notifyAll() 的意思是，通知所有的等待在这个同步对象上的线程，你们可以苏醒过来了，有机会重新占用当前对象了。</li>
+</ul>
+:ET

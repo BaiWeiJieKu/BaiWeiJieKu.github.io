@@ -1,0 +1,580 @@
+I"w�<ul id="markdown-toc">
+  <li><a href="#异常" id="markdown-toc-异常">异常</a>    <ul>
+      <li><a href="#异常处理" id="markdown-toc-异常处理">异常处理</a>        <ul>
+          <li><a href="#try-catch" id="markdown-toc-try-catch">try catch</a></li>
+          <li><a href="#父类catch" id="markdown-toc-父类catch">父类catch</a></li>
+          <li><a href="#多异常" id="markdown-toc-多异常">多异常</a></li>
+          <li><a href="#finally" id="markdown-toc-finally">finally</a></li>
+          <li><a href="#throws" id="markdown-toc-throws">throws</a></li>
+        </ul>
+      </li>
+      <li><a href="#异常分类" id="markdown-toc-异常分类">异常分类</a>        <ul>
+          <li><a href="#可查异常" id="markdown-toc-可查异常">可查异常</a></li>
+          <li><a href="#运行异常" id="markdown-toc-运行异常">运行异常</a></li>
+          <li><a href="#错误" id="markdown-toc-错误">错误</a></li>
+        </ul>
+      </li>
+      <li><a href="#throwable" id="markdown-toc-throwable">Throwable</a></li>
+      <li><a href="#自定义异常" id="markdown-toc-自定义异常">自定义异常</a>        <ul>
+          <li><a href="#创建" id="markdown-toc-创建">创建</a></li>
+          <li><a href="#抛出" id="markdown-toc-抛出">抛出</a></li>
+        </ul>
+      </li>
+      <li><a href="#api" id="markdown-toc-api">API</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="异常">异常</h2>
+
+<ul>
+  <li>导致程序的正常流程被中断的事件，叫做异常</li>
+  <li>Java使用异常处理的错误捕获机制处理</li>
+  <li>如果由于出现错误而使得某些操作没有完成，程序应该：返回到一种安全状态，并能够让用户执行一些其他的命令，或者允许用户保存所有操作的结果，并以适当的形式终止程序</li>
+  <li>异常处理的任务就是将控制权从错误产生的地方转移到能够处理这种情况的错误处理器</li>
+  <li>常见的错误和问题有：1、用户输入错误。2、设备错误。3、物理限制。4、代码错误。</li>
+  <li>异常对象都是派生于throwable类的一个实例，如果Java中内置的异常类不能够满足需求，用户可以创建自己的异常类</li>
+  <li>所有的异常都是由Throwable继承而来，但是在下一层立刻分解为两个分支：error和exception</li>
+  <li>error类层次结构描述了Java运行时系统内部错误和资源耗尽错误</li>
+  <li>exception层次机构又分解为两个分支：一个分支派生于RuntimeException；另一个分支是其他异常</li>
+  <li>由程序错误导致的异常属于RuntimeException；而程序本身没问题，但有I/O错误这一类问题导致的异常属于其他异常</li>
+  <li>RuntimeException异常包含下面几种情况：</li>
+  <li>1）错误的类型转换</li>
+  <li>2）数组访问越界</li>
+  <li>3）访问空指针</li>
+  <li>其他异常包含下面几种情况：</li>
+  <li>1）试图在文件尾部后面读取数据</li>
+  <li>2）试图打开一个不存在的文件</li>
+  <li>3）试图根据指定的字符串查找Class对象，而这个字符串表示的类并不存在</li>
+  <li>在遇到下面情况时应该抛出异常：</li>
+  <li>1）调用一个抛出已检查异常的方法，如FileInputStream构造器</li>
+  <li>2）程序运行过程中发生错误，并且利用throw语句抛出一个已检查异常</li>
+  <li>3）程序出现错误</li>
+  <li>4）Java虚拟机和运行时库出现的内部错误</li>
+  <li>如果一个方法有可能抛出多个已检查异常，那么就必须在方法的首部列出所有的异常类，每个异常类之间用逗号隔开</li>
+  <li>不需要声明Java的内部错误，即从error继承的错误，也不应该声明从RuntimeException继承的未检查异常</li>
+  <li>一个方法必须声明所有可能抛出的已检查异常，而未检查异常要么不可控制（error），要么就应该避免发生（RuntimeException）。如果方法没有声明所有可能发生的已检查异常，编译器就会给出一个错误消息</li>
+  <li>除了声明异常之外，还可以捕获异常</li>
+  <li>子类方法中可以抛出更特定的异常，或者根本不抛出任何异常。如果超类方法没有抛出任何已检查异常，子类也不能抛出任何已检查异常</li>
+</ul>
+
+<h3 id="异常处理">异常处理</h3>
+
+<ul>
+  <li>异常处理常见手段： try catch finally throws</li>
+</ul>
+
+<h4 id="try-catch">try catch</h4>
+
+<ul>
+  <li>将可能抛出FileNotFoundException 文件不存在异常的代码放在try里</li>
+  <li>如果文件存在，就会顺序往下执行，并且不执行catch块中的代码</li>
+  <li>如果文件不存在，try 里的代码会立即终止，程序流程会运行到对应的catch块中</li>
+  <li>e.printStackTrace(); 会打印出方法的调用痕迹，如此例，会打印出异常开始于TestException的第16行，这样就便于定位和分析到底哪里出了异常</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileNotFoundException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="nc">File</span> <span class="n">f</span><span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+		
+		<span class="k">try</span><span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"试图打开 d:/LOL.exe"</span><span class="o">);</span>
+			<span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"成功打开"</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="k">catch</span><span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">){</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"d:/LOL.exe不存在"</span><span class="o">);</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/735.png" alt="" /></p>
+
+<h4 id="父类catch">父类catch</h4>
+
+<ul>
+  <li>FileNotFoundException是Exception的子类，使用Exception也可以catch住FileNotFoundException</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileNotFoundException</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="nc">File</span> <span class="n">f</span><span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+         
+        <span class="k">try</span><span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"试图打开 d:/LOL.exe"</span><span class="o">);</span>
+            <span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"成功打开"</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="k">catch</span><span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">){</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"d:/LOL.exe不存在"</span><span class="o">);</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+         
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="多异常">多异常</h4>
+
+<ul>
+  <li>有的时候一段代码会抛出多种异常，比如</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+<span class="nc">Date</span> <span class="n">d</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">"2016-06-03"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<ul>
+  <li>这段代码，会抛出 文件不存在异常 FileNotFoundException 和 解析异常ParseException 
+解决办法之一是分别进行catch</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileNotFoundException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.text.ParseException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.text.SimpleDateFormat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"试图打开 d:/LOL.exe"</span><span class="o">);</span>
+			<span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"成功打开"</span><span class="o">);</span>
+			<span class="nc">SimpleDateFormat</span> <span class="n">sdf</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleDateFormat</span><span class="o">(</span><span class="s">"yyyy-MM-dd"</span><span class="o">);</span>
+			<span class="nc">Date</span> <span class="n">d</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">"2016-06-03"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"d:/LOL.exe不存在"</span><span class="o">);</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ParseException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"日期格式解析错误"</span><span class="o">);</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>另一个种办法是把多个异常，放在一个catch里统一捕捉</li>
+  <li>这种方式从 JDK7开始支持，好处是捕捉的代码更紧凑，不足之处是，一旦发生异常，不能确定到底是哪种异常，需要通过instanceof 进行判断具体的异常类型</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileNotFoundException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.text.ParseException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.text.SimpleDateFormat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"试图打开 d:/LOL.exe"</span><span class="o">);</span>
+			<span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"成功打开"</span><span class="o">);</span>
+			<span class="nc">SimpleDateFormat</span> <span class="n">sdf</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleDateFormat</span><span class="o">(</span><span class="s">"yyyy-MM-dd"</span><span class="o">);</span>
+			<span class="nc">Date</span> <span class="n">d</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">"2016-06-03"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="o">|</span> <span class="nc">ParseException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="k">instanceof</span> <span class="nc">FileNotFoundException</span><span class="o">)</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"d:/LOL.exe不存在"</span><span class="o">);</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="k">instanceof</span> <span class="nc">ParseException</span><span class="o">)</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"日期格式解析错误"</span><span class="o">);</span>
+
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="finally">finally</h4>
+
+<ul>
+  <li>当代码抛出一个异常时，就会终止方法中剩余代码的处理，并退出这个方法的执行</li>
+  <li>假设利用return语句从try语句块中退出，在方法返回前，finally子句的内容将被执行，如果finally子句中也有一个return语句，这个返回值将会覆盖原始的返回值</li>
+  <li>无论是否出现异常，finally中的代码都会被执行</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileNotFoundException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="nc">File</span> <span class="n">f</span><span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+		
+		<span class="k">try</span><span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"试图打开 d:/LOL.exe"</span><span class="o">);</span>
+			<span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"成功打开"</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="k">catch</span><span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">){</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"d:/LOL.exe不存在"</span><span class="o">);</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="k">finally</span><span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"无论文件是否存在， 都会执行的代码"</span><span class="o">);</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="throws">throws</h4>
+
+<ul>
+  <li>考虑如下情况：
+主方法调用method1
+method1调用method2
+method2中打开文件</li>
+  <li>method2中需要进行异常处理
+但是method2不打算处理，而是把这个异常通过throws抛出去
+那么method1就会接到该异常。 处理办法也是两种，要么是try catch处理掉，要么也是抛出去。
+method1选择本地try catch住 一旦try catch住了，就相当于把这个异常消化掉了，主方法在调用method1的时候，就不需要进行异常处理了</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileNotFoundException</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">method1</span><span class="o">();</span>
+
+	<span class="o">}</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">method1</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">method2</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">method2</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">FileNotFoundException</span> <span class="o">{</span>
+
+		<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"试图打开 d:/LOL.exe"</span><span class="o">);</span>
+		<span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"成功打开"</span><span class="o">);</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>throw和throws的区别</li>
+  <li>1)throws 出现在方法声明上，而throw通常都出现在方法体内。</li>
+  <li>2) throws 表示出现异常的一种可能性，并不一定会发生这些异常；throw则是抛出了异常，执行throw则一定抛出了某个异常对象。</li>
+</ul>
+
+<h3 id="异常分类">异常分类</h3>
+
+<ul>
+  <li>异常分类： 可查异常，运行时异常和错误3种 ，其中，运行时异常和错误又叫非可查异常</li>
+</ul>
+
+<h4 id="可查异常">可查异常</h4>
+
+<ul>
+  <li>可查异常： CheckedException</li>
+  <li>可查异常即必须进行处理的异常，要么try catch住,要么往外抛，谁调用，谁处理，比如 FileNotFoundException</li>
+  <li>如果不处理，编译器，就不让你通过</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+ 
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileNotFoundException</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+         
+        <span class="nc">File</span> <span class="n">f</span><span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+         
+        <span class="k">try</span><span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"试图打开 d:/LOL.exe"</span><span class="o">);</span>
+            <span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"成功打开"</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">catch</span><span class="o">(</span><span class="nc">FileNotFoundException</span> <span class="n">e</span><span class="o">){</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"d:/LOL.exe不存在"</span><span class="o">);</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+         
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="运行异常">运行异常</h4>
+
+<ul>
+  <li>运行时异常RuntimeException指： 不是必须进行try catch的异常</li>
+  <li>常见运行时异常: 
+除数不能为0异常:ArithmeticException 
+下标越界异常:ArrayIndexOutOfBoundsException 
+空指针异常:NullPointerException</li>
+  <li>在编写代码的时候，依然可以使用try catch throws进行处理，与可查异常不同之处在于，即便不进行try catch，也不会有编译错误</li>
+  <li>Java之所以会设计运行时异常的原因之一，是因为下标越界，空指针这些运行时异常太过于普遍，如果都需要进行捕捉，代码的可读性就会变得很糟糕。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	
+    	<span class="c1">//任何除数不能为0:ArithmeticException</span>
+    	<span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">5</span><span class="o">/</span><span class="mi">0</span><span class="o">;</span> 
+    	
+    	<span class="c1">//下标越界异常：ArrayIndexOutOfBoundsException</span>
+    	<span class="kt">int</span> <span class="n">j</span><span class="o">[]</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="mi">5</span><span class="o">];</span>
+    	<span class="n">j</span><span class="o">[</span><span class="mi">10</span><span class="o">]</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+    	
+    	<span class="c1">//空指针异常：NullPointerException</span>
+    	<span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    	<span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+   <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="错误">错误</h4>
+
+<ul>
+  <li>错误Error，指的是系统级别的异常，通常是内存用光了</li>
+  <li>在默认设置下，一般java程序启动的时候，最大可以使用16m的内存</li>
+  <li>如例不停的给StringBuffer追加字符，很快就把内存使用光了。抛出OutOfMemoryError</li>
+  <li>与运行时异常一样，错误也是不要求强制捕捉的</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+ 
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    
+    	<span class="nc">StringBuffer</span> <span class="n">sb</span> <span class="o">=</span><span class="k">new</span> <span class="nc">StringBuffer</span><span class="o">();</span>
+    	
+    	<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="sc">'a'</span><span class="o">);</span>
+		<span class="o">}</span>
+    	
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/2412.png" alt="" /></p>
+
+<h3 id="throwable">Throwable</h3>
+
+<ul>
+  <li>Throwable是类，Exception和Error都继承了该类</li>
+  <li>所以在捕捉的时候，也可以使用Throwable进行捕捉</li>
+  <li>异常分Error和Exception,Exception里又分运行时异常和可查异常。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">exception</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestException</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"d:/LOL.exe"</span><span class="o">);</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="k">new</span> <span class="nf">FileInputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+			<span class="c1">//使用Throwable进行异常捕捉</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Throwable</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">t</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/742.png" alt="" /></p>
+
+<h3 id="自定义异常">自定义异常</h3>
+
+<h4 id="创建">创建</h4>
+
+<ul>
+  <li>一个英雄攻击另一个英雄的时候，如果发现另一个英雄已经挂了，就会抛出EnemyHeroIsDeadException</li>
+  <li>创建一个类EnemyHeroIsDeadException，并继承Exception</li>
+  <li>提供两个构造方法：无参的构造方法，带参的构造方法，并调用父类的对应的构造方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">EnemyHeroIsDeadException</span> <span class="kd">extends</span> <span class="nc">Exception</span><span class="o">{</span>
+    
+	<span class="kd">public</span> <span class="nf">EnemyHeroIsDeadException</span><span class="o">(){</span>
+		
+	<span class="o">}</span>
+    <span class="kd">public</span> <span class="nf">EnemyHeroIsDeadException</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">){</span>
+        <span class="kd">super</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="抛出">抛出</h4>
+
+<ul>
+  <li>在Hero的attack方法中，当发现敌方英雄的血量为0的时候，抛出该异常</li>
+  <li>创建一个EnemyHeroIsDeadException实例</li>
+  <li>通过throw 抛出该异常</li>
+  <li>当前方法通过 throws 抛出该异常</li>
+  <li>在外部调用attack方法的时候，就需要进行捕捉，并且捕捉的时候，可以通过e.getMessage() 获取当时出错的具体原因</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">charactor</span><span class="o">;</span>
+ 
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Hero</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span> 
+    <span class="kd">protected</span> <span class="kt">float</span> <span class="n">hp</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">attackHero</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">h</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">EnemyHeroIsDeadException</span><span class="o">{</span>
+    	<span class="k">if</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">hp</span> <span class="o">==</span> <span class="mi">0</span><span class="o">){</span>
+    		<span class="k">throw</span> <span class="k">new</span> <span class="nf">EnemyHeroIsDeadException</span><span class="o">(</span><span class="n">h</span><span class="o">.</span><span class="na">name</span> <span class="o">+</span> <span class="s">" 已经挂了,不需要施放技能"</span> <span class="o">);</span>
+    	<span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">(){</span>
+    	<span class="k">return</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="kd">class</span> <span class="nc">EnemyHeroIsDeadException</span> <span class="kd">extends</span> <span class="nc">Exception</span><span class="o">{</span>
+        
+    	<span class="kd">public</span> <span class="nf">EnemyHeroIsDeadException</span><span class="o">(){</span>
+    		
+    	<span class="o">}</span>
+        <span class="kd">public</span> <span class="nf">EnemyHeroIsDeadException</span><span class="o">(</span><span class="nc">String</span> <span class="n">msg</span><span class="o">){</span>
+            <span class="kd">super</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+     
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    	
+        <span class="nc">Hero</span> <span class="n">garen</span> <span class="o">=</span>  <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">garen</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"盖伦"</span><span class="o">;</span>
+        <span class="n">garen</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">616</span><span class="o">;</span>
+
+        <span class="nc">Hero</span> <span class="n">teemo</span> <span class="o">=</span>  <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"提莫"</span><span class="o">;</span>
+        <span class="n">teemo</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        
+        <span class="k">try</span> <span class="o">{</span>
+			<span class="n">garen</span><span class="o">.</span><span class="na">attackHero</span><span class="o">(</span><span class="n">teemo</span><span class="o">);</span>
+			
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">EnemyHeroIsDeadException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"异常的具体原因:"</span><span class="o">+</span><span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/744.png" alt="" /></p>
+
+<p><a href="http://how2j.cn/k/exception/exception-tutorial/332.html">特别感谢</a></p>
+
+<h3 id="api">API</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">"Throwable构造方法摘要 "</span>
+<span class="nc">Throwable</span><span class="o">()</span> 
+         <span class="s">" 构造一个将 null 作为其详细消息的新 throwable。"</span> 
+<span class="nc">Throwable</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">)</span> 
+          <span class="s">"构造带指定详细消息的新 throwable。"</span> 
+<span class="nc">Throwable</span><span class="o">(</span><span class="nc">String</span> <span class="n">message</span><span class="o">,</span> <span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> 
+          <span class="s">"构造一个带指定详细消息和 cause 的新 throwable。"</span> 
+<span class="nc">Throwable</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> 
+          <span class="s">"构造一个带指定 cause 和 (cause==null ? null :cause.toString())（它通常包含类和 cause 的			详细消息）的详细消息的新 throwable。"</span> 
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">"Throwable方法摘要"</span> 
+ <span class="nc">Throwable</span> <span class="nf">fillInStackTrace</span><span class="o">()</span> 
+          <span class="s">"在异常堆栈跟踪中填充。"</span> 
+ <span class="nc">Throwable</span> <span class="nf">getCause</span><span class="o">()</span> 
+          <span class="s">"返回此 throwable 的 cause；如果 cause 不存在或未知，则返回 null。"</span> 
+ <span class="nc">String</span> <span class="nf">getLocalizedMessage</span><span class="o">()</span> 
+         <span class="s">" 创建此 throwable 的本地化描述。"</span> 
+ <span class="nc">String</span> <span class="nf">getMessage</span><span class="o">()</span> 
+          <span class="s">"返回此 throwable 的详细消息字符串。"</span> 
+ <span class="nc">StackTraceElement</span><span class="o">[]</span> <span class="nf">getStackTrace</span><span class="o">()</span> 
+         <span class="s">" 提供编程访问由 printStackTrace() 输出的堆栈跟踪信息。"</span> 
+ <span class="nc">Throwable</span> <span class="nf">initCause</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">cause</span><span class="o">)</span> 
+          <span class="s">"将此 throwable 的 cause 初始化为指定值。"</span> 
+ <span class="kt">void</span> <span class="nf">printStackTrace</span><span class="o">()</span> 
+          <span class="s">"将此 throwable 及其追踪输出至标准错误流。"</span> 
+ <span class="kt">void</span> <span class="nf">printStackTrace</span><span class="o">(</span><span class="nc">PrintStream</span> <span class="n">s</span><span class="o">)</span> 
+         <span class="s">" 将此 throwable 及其追踪输出到指定的输出流。"</span> 
+ <span class="kt">void</span> <span class="nf">printStackTrace</span><span class="o">(</span><span class="nc">PrintWriter</span> <span class="n">s</span><span class="o">)</span> 
+         <span class="s">" 将此 throwable 及其追踪输出到指定的 PrintWriter。"</span> 
+ <span class="kt">void</span> <span class="nf">setStackTrace</span><span class="o">(</span><span class="nc">StackTraceElement</span><span class="o">[]</span> <span class="n">stackTrace</span><span class="o">)</span> 
+         <span class="s">" 设置将由 getStackTrace() 返回，并由 printStackTrace() 和相关方法输出的堆栈跟踪元素。"</span> 
+ <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> 
+         <span class="s">" 返回此 throwable 的简短描述。"</span> 
+
+</code></pre></div></div>
+:ET

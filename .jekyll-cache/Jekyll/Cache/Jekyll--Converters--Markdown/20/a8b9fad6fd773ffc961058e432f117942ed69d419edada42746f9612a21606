@@ -1,0 +1,933 @@
+I"/<ul id="markdown-toc">
+  <li><a href="#概念" id="markdown-toc-概念">概念</a></li>
+  <li><a href="#内存模型" id="markdown-toc-内存模型">内存模型</a>    <ul>
+      <li><a href="#同步操作" id="markdown-toc-同步操作">同步操作</a></li>
+      <li><a href="#同步规则" id="markdown-toc-同步规则">同步规则</a></li>
+      <li><a href="#并发优势" id="markdown-toc-并发优势">并发优势</a></li>
+      <li><a href="#并发风险" id="markdown-toc-并发风险">并发风险</a></li>
+    </ul>
+  </li>
+  <li><a href="#线程安全性" id="markdown-toc-线程安全性">线程安全性</a>    <ul>
+      <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
+    </ul>
+  </li>
+  <li><a href="#可见性" id="markdown-toc-可见性">可见性</a></li>
+  <li><a href="#安全发布对象" id="markdown-toc-安全发布对象">安全发布对象</a>    <ul>
+      <li><a href="#发布逸出" id="markdown-toc-发布逸出">发布&amp;逸出</a></li>
+      <li><a href="#安全发布" id="markdown-toc-安全发布">安全发布</a></li>
+    </ul>
+  </li>
+  <li><a href="#不可变对象" id="markdown-toc-不可变对象">不可变对象</a></li>
+  <li><a href="#线程封闭" id="markdown-toc-线程封闭">线程封闭</a></li>
+  <li><a href="#线程不安全类" id="markdown-toc-线程不安全类">线程不安全类</a></li>
+  <li><a href="#同步容器" id="markdown-toc-同步容器">同步容器</a></li>
+  <li><a href="#安全共享对象策略" id="markdown-toc-安全共享对象策略">安全共享对象策略</a></li>
+  <li><a href="#aqs" id="markdown-toc-aqs">AQS</a>    <ul>
+      <li><a href="#aqs同步组件" id="markdown-toc-aqs同步组件">AQS同步组件</a></li>
+      <li><a href="#juc拓展" id="markdown-toc-juc拓展">JUC拓展</a></li>
+    </ul>
+  </li>
+  <li><a href="#线程池" id="markdown-toc-线程池">线程池</a>    <ul>
+      <li><a href="#threadpoolexecutor" id="markdown-toc-threadpoolexecutor">ThreadPoolExecutor</a></li>
+      <li><a href="#executor框架接口" id="markdown-toc-executor框架接口">Executor框架接口</a></li>
+      <li><a href="#死锁" id="markdown-toc-死锁">死锁</a></li>
+    </ul>
+  </li>
+  <li><a href="#代码实例" id="markdown-toc-代码实例">代码实例</a>    <ul>
+      <li><a href="#计数器案例" id="markdown-toc-计数器案例">计数器案例</a></li>
+      <li><a href="#synchronized" id="markdown-toc-synchronized">synchronized</a></li>
+      <li><a href="#发布对象" id="markdown-toc-发布对象">发布对象</a></li>
+      <li><a href="#不可变对象-1" id="markdown-toc-不可变对象-1">不可变对象</a></li>
+      <li><a href="#线程封闭-1" id="markdown-toc-线程封闭-1">线程封闭</a></li>
+      <li><a href="#线程不安全类-1" id="markdown-toc-线程不安全类-1">线程不安全类</a></li>
+      <li><a href="#同步容器-1" id="markdown-toc-同步容器-1">同步容器</a></li>
+      <li><a href="#aqs-1" id="markdown-toc-aqs-1">AQS</a></li>
+    </ul>
+  </li>
+  <li><a href="#高并发之缓存" id="markdown-toc-高并发之缓存">高并发之缓存</a>    <ul>
+      <li><a href="#guavacache" id="markdown-toc-guavacache">GuavaCache</a></li>
+      <li><a href="#redis" id="markdown-toc-redis">Redis</a></li>
+    </ul>
+  </li>
+  <li><a href="#高并发之消息队列" id="markdown-toc-高并发之消息队列">高并发之消息队列</a></li>
+</ul>
+<h3 id="概念">概念</h3>
+
+<ul>
+  <li>
+    <p><a href="https://github.com/CL0610/Java-concurrency">并发编程体系</a></p>
+  </li>
+  <li>
+    <p><a href="https://github.com/BaiWeiJieKu/Concurrency">项目代码</a></p>
+  </li>
+  <li><strong>并发</strong>：同时拥有两个或者多个线程，如果程序在单核处理器上运行，多个线程将交替的换入或换出内存，这些线程是同时“存在”的，每个线程都处于执行过程中的某个状态，如果运行在多核处理器上，此时，程序中的每个线程都将分配到一个处理器核上，因此可以同时运行
+    <ul>
+      <li>多个线程操作相同的资源，保证线程安全，合理使用资源</li>
+    </ul>
+  </li>
+  <li><strong>高并发</strong>：高并发（High Concurrency）是互联网分布式系统架构设计中必须考虑的因素之一，它通常是指，通过设计保证系统能够<strong>同时并行处理</strong>很多请求。
+    <ul>
+      <li>服务能同时处理很多请求，提高程序性能</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="内存模型">内存模型</h3>
+
+<h4 id="同步操作">同步操作</h4>
+
+<ul>
+  <li><strong>lock（锁定）</strong>：作用于主内存的变量，把一个变量标识为一条线程独占状态</li>
+  <li><strong>unlock（解锁）</strong>：作用于主内存的变量，把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定。</li>
+  <li><strong>read（读取）</strong>：作用于主内存的变量，把一个变量的值从主内存传输到线程的工作内存中，以便以后的load动作使用。</li>
+  <li><strong>load（载入）</strong>：作用于工作内存的变量，它把read操作从主内存中得到的变量值放入工作内存的变量副本中。</li>
+  <li><strong>use（使用）</strong>：作用于工作内存的变量，把工作内存中的一个变量值传递给执行引擎。</li>
+  <li><strong>assign（赋值）</strong>：作用于工作内存的变量，它把一个从执行引擎接收到的值赋值给工作内存的变量。</li>
+  <li><strong>store（存储）</strong>：作用于工作内存的变量，把工作内存中的一个变量的值传送到主内存中，以便以后的write操作。</li>
+  <li><strong>write（写入）</strong>：作用于主内存的变量，它把store操作从工作内存中一个变量的值传送到主内存的变量中。</li>
+</ul>
+
+<h4 id="同步规则">同步规则</h4>
+
+<ul>
+  <li>如果要把一个变量从主内存中复制到工作内存，就需要按顺序地执行read和load操作，如果把变量从工作内存中同步回主内存中，就要按顺序地执行store和write操作。但java内存模型只要求上述操作必须按顺序执行，而没有保证必须是连续执行。</li>
+  <li>不允许read和load、store和write操作之一单独出现</li>
+  <li>不允许一个线程丢弃它的最近assign的操作，即变量在工作内存中改变了之后必须同步到主内存中</li>
+  <li>不允许一个线程无原因地（没有发生过任何assign操作）把数据从工作内存同步回主内存中。</li>
+  <li>一个新的变量只能在主内存中诞生，不允许在工作内存中直接使用一个未被初始化（load或assign）的变量。即就是对一个变量实施use和store操作之前，必须先执行过了assign和load操作。</li>
+  <li>一个变量在同一时刻只允许一条线程对其进行lock操作，但lock操作可以被同一条线程重复执行多次，多次执行lock后，只有执行相同次数的unlock操作，变量才会被解锁。lock和unlock必须成对出现。</li>
+  <li>如果一个变量执行lock操作，将会清空工作内存中此变量的值，在执行引擎使用这个变量前需要重新执行load或assign操作初始化变量的值</li>
+  <li>如果一个变量事先没有被lock操作锁定，则不允许对它执行unlock操作；也不允许去unlock一个被其他线程锁定的变量。</li>
+  <li>对一个变量执行unlock操作之前，必须先把此变量同步到主内存中（执行store和write操作）。</li>
+</ul>
+
+<h4 id="并发优势">并发优势</h4>
+
+<ul>
+  <li>速度：同时处理多个请求，响应更快；复杂的操作可以分成多个进程同时进行</li>
+  <li>设计：程序设计在某些情况下更简单，也可以有更多的选择。</li>
+  <li>资源利用：cup能够在等待io的时候做一些其他的事情</li>
+</ul>
+
+<h4 id="并发风险">并发风险</h4>
+
+<ul>
+  <li>安全性：多个线程共享数据时可能会产生与期望不符的结果</li>
+  <li>活跃性：某个操作无法继续进行下去时，就会发生活跃性问题。比如死锁，饥饿等问题</li>
+  <li>性能：线程过多时会使得CPU频繁切换，调度时间增多，同步机制，消耗过多内存</li>
+</ul>
+
+<h3 id="线程安全性">线程安全性</h3>
+
+<ul>
+  <li>当多个线程访问某个类时，不管运行时环境采用<strong>何种调度方式</strong>或者这些进程将如何交替执行，并且在主调度代码中<strong>不需要任何额外的同步或协同</strong>，这个类都能表现出<strong>正确的行为</strong>，那么就称这个类是线程安全的。</li>
+  <li>原子性：提供了互斥访问，同一时刻只能有一个线程来对它进行操作</li>
+  <li>可见性：一个线程对主内存的修改可以及时的被其他线程观察到</li>
+  <li>有序性：一个线程观察其他线程中的指令执行顺序，由于指令重排序的存在，该观察结果一般杂乱无序。</li>
+  <li>原子性锁
+    <ul>
+      <li>synchronized：依赖JVM，不可中断锁，适合竞争不激烈，可读性好</li>
+      <li>Lock：依赖特殊的CPU指令，代码实现，ReentrantLock。可中断锁，多样化同步，竞争激烈时能维持常态</li>
+    </ul>
+  </li>
+  <li>synchronized：
+    <ul>
+      <li>修饰代码块：大括号括起来的代码，作用于<strong>调用的对象</strong></li>
+      <li>修饰方法：整个方法，作用于<strong>调用的对象</strong></li>
+      <li>修饰静态方法：整个静态方法，作用于<strong>所有对象</strong></li>
+      <li>修饰类：括号括起来的部分，作用于<strong>所有对象</strong></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="总结">总结</h4>
+
+<ul>
+  <li>原子性：Atomic包，CAS算法，synchronized，Lock</li>
+  <li>可见性：synchronized，volatile</li>
+  <li>有序性：happens-before原则</li>
+</ul>
+
+<h3 id="可见性">可见性</h3>
+
+<ul>
+  <li>导致共享变量在线程间不可见的原因：
+    <ul>
+      <li>线程交叉执行</li>
+      <li>重排序结合线程交叉执行</li>
+      <li>共享变量更新后的值没有在工作内存与主存间及时更新</li>
+    </ul>
+  </li>
+  <li>JMM对synchronized的规定：
+    <ul>
+      <li>线程解锁前，必须把共享变量的最新值刷新到主内存</li>
+      <li>线程加锁时，将清空工作内存中共享变量的值，从而使用共享变量时需要从主内存中重新读取最新的值（加锁和解锁是同一把锁）</li>
+    </ul>
+  </li>
+  <li>volatile通过加入<strong>内存屏障</strong>和<strong>禁止重排序</strong>来实现可见性
+    <ul>
+      <li>对volatile变量写操作时，会在写操作后加入一条store屏障指令，将本地内存中的共享变量值刷新到主内存</li>
+      <li>对volatile变量的读操作时，会在读操作前加入一条load屏障指令，从主存中读取共享变量</li>
+      <li>volatile不具有原子性，不适用于计数</li>
+      <li>使用volatile的两个条件：
+        <ul>
+          <li>对变量的写操作不依赖于当前值</li>
+          <li>该变量没有包含在具有其他变量的不变表达式中</li>
+          <li><strong>volatile适合做状态标记量</strong></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="安全发布对象">安全发布对象</h3>
+
+<h4 id="发布逸出">发布&amp;逸出</h4>
+
+<ul>
+  <li>发布对象：使一个对象能够被当前范围之外的代码所使用</li>
+  <li>对象逸出：一种错误的发布。当一个对象还没有构造完成时，就使它被其他线程所见</li>
+</ul>
+
+<h4 id="安全发布">安全发布</h4>
+
+<ul>
+  <li>在静态初始化函数中初始化一个对象引用</li>
+  <li>将对象的引用保存到volatile类型域或者AtomicReference对象中</li>
+  <li>将对象的引用保存到某个正确构造对象的final类型域中</li>
+  <li>将对象的引用保存到一个由锁保护的域中</li>
+</ul>
+
+<h3 id="不可变对象">不可变对象</h3>
+
+<ul>
+  <li>不可变对象需要满足的条件：
+    <ul>
+      <li>对象创建以后状态就不能修改</li>
+      <li>对象所有域都是final类型</li>
+      <li>对象是正确创建的（在对象创建期间，this引用没有逸出）</li>
+    </ul>
+  </li>
+  <li>final关键字：
+    <ul>
+      <li>修饰类：不能被继承</li>
+      <li>修饰方法：锁定方法不被继承类修改，提高效率</li>
+      <li>修饰变量：基本数据类型（初始化后不能修改），引用类型变量（初始化后不能再指向其他对象）</li>
+    </ul>
+  </li>
+  <li>Collections.unmodifiableXXX：Collection、List、Set、Map</li>
+  <li>Guava:ImmutableXXX：Collection、List、Set、Map</li>
+</ul>
+
+<h3 id="线程封闭">线程封闭</h3>
+
+<ul>
+  <li>ThreadLocal线程封闭：这是一种特别好的封闭方法</li>
+  <li>堆栈封闭：局部变量（在方法中定义局部变量），无并发问题</li>
+</ul>
+
+<h3 id="线程不安全类">线程不安全类</h3>
+
+<ul>
+  <li>StringBuilder（线程不安全，但作为局部变量时安全的（堆栈封闭））</li>
+  <li>StringBuffer（线程安全，底层方法加了synchronized修饰符，但是效率低）</li>
+  <li>SimpleDateFormat（作为全局变量是不安全的，作为局部变量时安全的（堆栈封闭））</li>
+  <li>JodaTime（线程安全）</li>
+  <li>ArrayList、HashSet、HashMap都是线程不安全的类</li>
+  <li>线程不安全的写法：if（condition（a））｛handle（a）；｝</li>
+</ul>
+
+<h3 id="同步容器">同步容器</h3>
+
+<ul>
+  <li>vector，Stack，HashTable，Collections.synchronizedXXX（这些都是线程安全的）</li>
+  <li>下面是JUC（java.util.concurrent包下的同步容器）</li>
+  <li>ArrayList —&gt; CopyOnWriteArrayList</li>
+  <li>HashSet、TreeSet —&gt; CopyOnWriteArraySet、ConcurrentSkipListSet</li>
+  <li>HashMap、TreeMap —&gt; ConcurrentHashMap、ConcurrentSkipListMap</li>
+</ul>
+
+<h3 id="安全共享对象策略">安全共享对象策略</h3>
+
+<ul>
+  <li>线程限制：一个被线程限制的对象，由线程独占，并且只能被占有它的线程修改</li>
+  <li>共享只读：一个共享只读的对象，在没有额外同步的情况下，可以被多个线程并发访问，但是任何线程都不能修改它</li>
+  <li>线程安全对象：一个线程安全的对象或者容器，在内部通过同步机制来保证线程安全，所以其他线程无需额外的同步就可以通过公共接口随意访问它</li>
+  <li>被守护对象：被守护对象只能通过获取特定的锁来访问</li>
+</ul>
+
+<h3 id="aqs">AQS</h3>
+
+<ul>
+  <li>AQS（AbstractQueuedSynchronizer）使用Node实现FIFO队列，可以用于构建锁或者其他同步装置的基础框架</li>
+  <li>利用了一个int类型表示状态</li>
+  <li>使用方法是继承</li>
+  <li>子类通过继承并通过实现它的方法管理其状态｛acquire和release｝的方法操纵状态</li>
+  <li>可以同时实现排它锁和共享锁模式（独占、共享）</li>
+</ul>
+
+<h4 id="aqs同步组件">AQS同步组件</h4>
+
+<ul>
+  <li>CountDownLatch（倒计时器）</li>
+  <li>Semaphore（信号量，控制并发访问的线程个数）</li>
+  <li>CyclicBarrier（循环栅栏，允许一组线程相互等待，直到到达一个公共的屏障点）</li>
+  <li>ReentrantLock（可重入锁）
+    <ul>
+      <li>和synchronized区别是：可重入性、锁的实现、性能区别、功能区别</li>
+      <li>可指定是公平锁（先等待的线程先获取锁）还是非公平锁</li>
+      <li>提供了一个Condition类，可以分组唤醒需要唤醒的线程</li>
+      <li>提供能够中断等待锁的线程的机制，lock.lockInterruptibly()</li>
+    </ul>
+  </li>
+  <li>Condition</li>
+</ul>
+
+<h4 id="juc拓展">JUC拓展</h4>
+
+<ul>
+  <li>FutureTask（创建多线程任务，并获取任务的结果。）</li>
+  <li>ForkJoin框架（用于并行执行任务，它的思想就是讲一个大任务分割成若干小任务，最终汇总每个小任务的结果得到这个大任务的结果。）</li>
+  <li>BlockingQueue（阻塞队列）
+    <ul>
+      <li>当队列已满，线程需要入队的时候会阻塞</li>
+      <li>当队列为空，线程需要出队的时候会阻塞</li>
+      <li>实现类：ArrayBlockingQueue</li>
+      <li>实现类：DelayQueue</li>
+      <li>实现类：LinkedBlockingQueue</li>
+      <li>实现类：PriorityBlockingQueue</li>
+      <li>实习类：SynchronousQueue</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="线程池">线程池</h3>
+
+<ul>
+  <li>使用new Thread的弊端：
+    <ul>
+      <li>每次new Thread新建对象，性能差</li>
+      <li>线程缺乏统一管理，可以无限制的新建线程，相互竞争，有可能占用过多系统资源导致死机或OOM</li>
+      <li>缺乏更多功能，如更多执行、定期执行、线程中断</li>
+    </ul>
+  </li>
+  <li>线程池的好处：
+    <ul>
+      <li>重用存在的线程，减少对象创建、消亡的开销，性能佳</li>
+      <li>可有效控制最大并发线程数，提高系统资源利用率，同时可以避免过多资源竞争，避免阻塞</li>
+      <li>提供定时任务、定期执行、单线程、并发数控制等功能</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="threadpoolexecutor">ThreadPoolExecutor</h4>
+
+<ul>
+  <li>corePoolSize：核心线程数量</li>
+  <li>maximumPoolSize：线程最大线程数</li>
+  <li>workQueue：阻塞队列，存储等待执行的任务，<strong>很重要</strong>，会对线程池运行过程产生重大影响</li>
+  <li>keepAliveTime：线程没有任务执行时最多保持多久时间终止</li>
+  <li>unit：keepAliveTime的时间单位</li>
+  <li>threadFactory：线程工厂，用来创建线程</li>
+  <li>rejectHandler：当拒绝处理任务时的策略</li>
+  <li>execute（）：提交任务，交给线程池执行</li>
+  <li>submit（）：提交任务，能够返回执行结果 execute+Future</li>
+  <li>shutdown（）：关闭线程池，等待任务都执行完</li>
+  <li>shutdownNow（）：关闭线程池，不等待任务执行完</li>
+  <li>getTaskCount（）：线程池已执行和未执行的任务总数</li>
+  <li>getCompletedTaskCount（）：已完成的任务数量</li>
+  <li>getPoolSize（）：线程池当前的线程数量</li>
+  <li>getActiveCount（）：当前线程池中正在执行任务的线程数量</li>
+</ul>
+
+<h4 id="executor框架接口">Executor框架接口</h4>
+
+<ul>
+  <li>Executors.newCachedThreadPool</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.threadPool</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.ExecutorService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Executors</span><span class="o">;</span>
+
+<span class="cm">/**测试newCachedThreadPool
+ * @author Administrator
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ThreadPoolExample1</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="nc">ExecutorService</span> <span class="n">executorService</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newCachedThreadPool</span><span class="o">();</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+            <span class="n">executorService</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"task:{}"</span><span class="o">,</span> <span class="n">index</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">});</span>
+        <span class="o">}</span>
+        <span class="n">executorService</span><span class="o">.</span><span class="na">shutdown</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>Executors.newFixedThreadPool</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.threadPool</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.ExecutorService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Executors</span><span class="o">;</span>
+
+<span class="cm">/**测试newFixedThreadPool
+ * @author Administrator
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ThreadPoolExample2</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="nc">ExecutorService</span> <span class="n">executorService</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newFixedThreadPool</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+            <span class="n">executorService</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"task:{}"</span><span class="o">,</span> <span class="n">index</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">});</span>
+        <span class="o">}</span>
+        <span class="n">executorService</span><span class="o">.</span><span class="na">shutdown</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>Executors.newScheduledThreadPool</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.threadPool</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Timer</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.TimerTask</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Executors</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.ScheduledExecutorService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="cm">/**测试newScheduledThreadPool
+ * @author Administrator
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ThreadPoolExample4</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="nc">ScheduledExecutorService</span> <span class="n">executorService</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newScheduledThreadPool</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+
+<span class="c1">//        executorService.schedule(new Runnable() {</span>
+<span class="c1">//            @Override</span>
+<span class="c1">//            public void run() {</span>
+<span class="c1">//                log.warn("schedule run");</span>
+<span class="c1">//            }</span>
+<span class="c1">//        }, 3, TimeUnit.SECONDS);</span>
+
+        <span class="n">executorService</span><span class="o">.</span><span class="na">scheduleAtFixedRate</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"schedule run"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">},</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">);</span>
+<span class="c1">//        executorService.shutdown();</span>
+
+        <span class="nc">Timer</span> <span class="n">timer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Timer</span><span class="o">();</span>
+        <span class="n">timer</span><span class="o">.</span><span class="na">schedule</span><span class="o">(</span><span class="k">new</span> <span class="nc">TimerTask</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"timer run"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">},</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">(),</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>Executors.newSingleThreadExecutor</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.threadPool</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.ExecutorService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Executors</span><span class="o">;</span>
+
+<span class="cm">/**测试newSingleThreadExecutor
+ * @author Administrator
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ThreadPoolExample3</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="nc">ExecutorService</span> <span class="n">executorService</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newSingleThreadExecutor</span><span class="o">();</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+            <span class="n">executorService</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"task:{}"</span><span class="o">,</span> <span class="n">index</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">});</span>
+        <span class="o">}</span>
+        <span class="n">executorService</span><span class="o">.</span><span class="na">shutdown</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="死锁">死锁</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.deadLock</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 一个简单的死锁类
+ * 当DeadLock类的对象flag==1时（td1），先锁定o1,睡眠500毫秒
+ * 而td1在睡眠的时候另一个flag==0的对象（td2）线程启动，先锁定o2,睡眠500毫秒
+ * td1睡眠结束后需要锁定o2才能继续执行，而此时o2已被td2锁定；
+ * td2睡眠结束后需要锁定o1才能继续执行，而此时o1已被td1锁定；
+ * td1、td2相互等待，都需要得到对方锁定的资源才能继续执行，从而死锁。
+ */</span>
+
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DeadLock</span> <span class="kd">implements</span> <span class="nc">Runnable</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="c1">//静态对象是类的所有对象共享的</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Object</span> <span class="n">o1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">(),</span> <span class="n">o2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">();</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"flag:{}"</span><span class="o">,</span> <span class="n">flag</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">flag</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">o1</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+                <span class="kd">synchronized</span> <span class="o">(</span><span class="n">o2</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"1"</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">flag</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">o2</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+                <span class="kd">synchronized</span> <span class="o">(</span><span class="n">o1</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"0"</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">DeadLock</span> <span class="n">td1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DeadLock</span><span class="o">();</span>
+        <span class="nc">DeadLock</span> <span class="n">td2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DeadLock</span><span class="o">();</span>
+        <span class="n">td1</span><span class="o">.</span><span class="na">flag</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="n">td2</span><span class="o">.</span><span class="na">flag</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="c1">//td1,td2都处于可执行状态，但JVM线程调度先执行哪个线程是不确定的。</span>
+        <span class="c1">//td2的run()可能在td1的run()之前运行</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="n">td1</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="n">td2</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="代码实例">代码实例</h3>
+
+<h4 id="计数器案例">计数器案例</h4>
+
+<ul>
+  <li>
+    <p>Atomic：竞争激烈时能维持常态，比Lock性能好；只能同步一个值</p>
+  </li>
+  <li>com.mmall.concurrency.example.count.CountExample1(线程不安全的程序计数类)</li>
+  <li>com.mmall.concurrency.example.count.CountExample2(线程安全的程序计数类:AtomicInteger)</li>
+  <li>com.mmall.concurrency.example.atomic.AtomicExample3(线程安全的程序计数器类（LongAdder）)</li>
+  <li>com.mmall.concurrency.example.atomic.AtomicExample4(线程安全的类（AtomicReference）)</li>
+  <li>com.mmall.concurrency.example.atomic.AtomicExample5(线程安全的类（AtomicIntegerFieldUpdater）)</li>
+  <li>com.mmall.concurrency.example.atomic.AtomicExample6(线程安全的类（AtomicBoolean）)</li>
+</ul>
+
+<h4 id="synchronized">synchronized</h4>
+
+<ul>
+  <li>com.mmall.concurrency.example.sync.SynchronizedExample1(修饰代码块和方法)</li>
+  <li>com.mmall.concurrency.example.sync.SynchronizedExample2(修饰类或静态方法)</li>
+  <li>com.mmall.concurrency.example.count.CountExample3(使用synchronized实现计数器)</li>
+  <li>com.mmall.concurrency.example.count.CountExample4(使用volatile实现计数器)</li>
+</ul>
+
+<h4 id="发布对象">发布对象</h4>
+
+<ul>
+  <li>com.mmall.concurrency.example.publish.UnsafePublish(线程不安全的对象发布)</li>
+  <li>com.mmall.concurrency.example.publish.Escape(对象逸出)</li>
+  <li>com.mmall.concurrency.example.singleton.SingletonExample1(懒汉模式-线程不安全)</li>
+  <li>com.mmall.concurrency.example.singleton.SingletonExample2(饿汉模式-线程安全)</li>
+  <li>com.mmall.concurrency.example.singleton.SingletonExample3(线程安全的懒汉模式)</li>
+  <li>com.mmall.concurrency.example.singleton.SingletonExample4(双重同步锁单例模式)</li>
+  <li>com.mmall.concurrency.example.singleton.SingletonExample5(双重同步锁单例模式-volatile)</li>
+  <li>com.mmall.concurrency.example.singleton.SingletonExample6(饿汉模式-静态代码块)</li>
+  <li>com.mmall.concurrency.example.singleton.SingletonExample7(枚举模式：最安全)</li>
+</ul>
+
+<h4 id="不可变对象-1">不可变对象</h4>
+
+<ul>
+  <li>com.mmall.concurrency.example.immutable.ImmutableExample1(测试final)</li>
+  <li>com.mmall.concurrency.example.immutable.ImmutableExample2(测试Collections)</li>
+  <li>com.mmall.concurrency.example.immutable.ImmutableExample3(测试Immutable)</li>
+</ul>
+
+<h4 id="线程封闭-1">线程封闭</h4>
+
+<ul>
+  <li>com.mmall.concurrency.example.threadLocal.RequestHolder(请求持有的线程:封装ThreadLocal)</li>
+  <li>com.mmall.concurrency.HttpFilter(请求过滤器，往ThreadLocal中添加内容)</li>
+  <li>com.mmall.concurrency.HttpInterceptor(请求拦截器，在请求结束后清空ThreadLocal)</li>
+</ul>
+
+<p><a href="https://baiweijieku.github.io/2019/04/14/RBAC%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/#%E7%94%A8%E6%88%B7%E5%92%8C%E8%AF%B7%E6%B1%82%E7%BA%BF%E7%A8%8B%E5%B7%A5%E5%85%B7%E7%B1%BB">具体使用工具</a></p>
+
+<h4 id="线程不安全类-1">线程不安全类</h4>
+
+<ul>
+  <li>com.mmall.concurrency.example.commonUnsafe.StringExample1(测试StringBuilder,线程不安全)</li>
+  <li>com.mmall.concurrency.example.commonUnsafe.StringExample2(测试StringBuffer,线程安全)</li>
+  <li>com.mmall.concurrency.example.commonUnsafe.DateFormatExample1(测试SimpleDateFormat,线程不安全)</li>
+  <li>com.mmall.concurrency.example.commonUnsafe.DateFormatExample2(测试SimpleDateFormat作为局部变量,线程安全)</li>
+  <li>com.mmall.concurrency.example.commonUnsafe.DateFormatExample3(测试JodaTime,线程安全)</li>
+  <li>com.mmall.concurrency.example.commonUnsafe.ArrayListExample（ArrayList线程不安全）</li>
+  <li>com.mmall.concurrency.example.commonUnsafe.HashSetExample（HashSet线程不安全）</li>
+  <li>com.mmall.concurrency.example.commonUnsafe.HashMapExample（HashMap线程不安全）</li>
+</ul>
+
+<h4 id="同步容器-1">同步容器</h4>
+
+<ul>
+  <li>com.mmall.concurrency.example.syncContainer.VectorExample1（Vector线程安全）</li>
+  <li>com.mmall.concurrency.example.syncContainer.VectorExample2（Vector线程不安全的情况）</li>
+  <li>com.mmall.concurrency.example.syncContainer.VectorExample3（Vector并发修改异常）</li>
+  <li>com.mmall.concurrency.example.syncContainer.HashTableExample（HashTable线程安全）</li>
+  <li>com.mmall.concurrency.example.syncContainer.CollectionsExample1（使用Collections创建线程安全的list）</li>
+  <li>com.mmall.concurrency.example.syncContainer.CollectionsExample2（使用Collections创建线程安全的Set）</li>
+  <li>com.mmall.concurrency.example.syncContainer.CollectionsExample3（使用Collections创建线程安全的Map）</li>
+  <li>com.mmall.concurrency.example.concurrent.CopyOnWriteArrayListExample（JUC）</li>
+  <li>com.mmall.concurrency.example.concurrent.CopyOnWriteArraySetExample（JUC）</li>
+  <li>com.mmall.concurrency.example.concurrent.ConcurrentSkipListSetExample（JUC）</li>
+  <li>com.mmall.concurrency.example.concurrent.ConcurrentHashMapExample（JUC）</li>
+  <li>com.mmall.concurrency.example.concurrent.ConcurrentSkipListMapExample（JUC）</li>
+</ul>
+
+<h4 id="aqs-1">AQS</h4>
+
+<ul>
+  <li>com.mmall.concurrency.example.aqs.CountDownLatchExample1（测试CountDownLatch）</li>
+  <li>com.mmall.concurrency.example.aqs.CountDownLatchExample2（测试CountDownLatch等待超时）</li>
+  <li>com.mmall.concurrency.example.aqs.SemaphoreExample1（测试Semaphore单许可）</li>
+  <li>com.mmall.concurrency.example.aqs.SemaphoreExample2（测试Semaphore多许可）</li>
+  <li>com.mmall.concurrency.example.aqs.SemaphoreExample3（测试Semaphore尝试获取许可）</li>
+  <li>com.mmall.concurrency.example.aqs.SemaphoreExample4（测试Semaphore在超时时间内获取许可）</li>
+  <li>com.mmall.concurrency.example.aqs.CyclicBarrierExample1（测试CyclicBarrier）</li>
+  <li>com.mmall.concurrency.example.aqs.CyclicBarrierExample2（测试CyclicBarrier等待时间）</li>
+  <li>com.mmall.concurrency.example.aqs.CyclicBarrierExample3（测试CyclicBarrier结合runnable）</li>
+  <li>com.mmall.concurrency.example.lock.LockExample2（测试ReentrantLock）</li>
+  <li>com.mmall.concurrency.example.lock.LockExample3（测试ReentrantReadWriteLock）</li>
+  <li>com.mmall.concurrency.example.lock.LockExample4（测试StampedLock）</li>
+  <li>com.mmall.concurrency.example.lock.LockExample5（测试StampedLock）</li>
+  <li>com.mmall.concurrency.example.lock.LockExample6（测试Condition）</li>
+  <li>com.mmall.concurrency.example.aqs.FutureExample（测试Future）</li>
+  <li>com.mmall.concurrency.example.aqs.FutureTaskExample（测试FutureTask）</li>
+  <li>com.mmall.concurrency.example.aqs.ForkJoinTaskExample（测试ForkJoin框架）</li>
+</ul>
+
+<h3 id="高并发之缓存">高并发之缓存</h3>
+
+<ul>
+  <li>缓存一致性：
+    <ul>
+      <li>更新数据库成功 —&gt; 更新缓存失败 —&gt; 数据不一致</li>
+      <li>更新缓存成功 —&gt; 更新数据库失败 —&gt; 数据不一致</li>
+      <li>更新数据库成功 —&gt; 淘汰缓存失败 —&gt; 数据不一致</li>
+      <li>淘汰缓存成功 —&gt; 更新数据库失败 —&gt; 查询缓存Miss</li>
+    </ul>
+  </li>
+  <li>缓存工具
+    <ul>
+      <li>GuavaCache</li>
+      <li>Redis</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="guavacache">GuavaCache</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.cache</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.google.common.cache.CacheBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.cache.CacheLoader</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.cache.LoadingCache</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="cm">/**测试GuavaCache
+ * @author Administrator
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GuavaCacheExample1</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="nc">LoadingCache</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">cache</span> <span class="o">=</span> <span class="nc">CacheBuilder</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">maximumSize</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span> <span class="c1">// 最多存放10个数据</span>
+                <span class="o">.</span><span class="na">expireAfterWrite</span><span class="o">(</span><span class="mi">10</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span> <span class="c1">// 缓存10秒</span>
+                <span class="o">.</span><span class="na">recordStats</span><span class="o">()</span> <span class="c1">// 开启记录状态数据功能</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">(</span><span class="k">new</span> <span class="nc">CacheLoader</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">&gt;()</span> <span class="o">{</span>
+                    <span class="nd">@Override</span>
+                    <span class="kd">public</span> <span class="nc">Integer</span> <span class="nf">load</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+                        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+                    <span class="o">}</span>
+                <span class="o">});</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key1"</span><span class="o">));</span> <span class="c1">// null</span>
+        <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key1"</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key1"</span><span class="o">));</span> <span class="c1">// 1</span>
+        <span class="n">cache</span><span class="o">.</span><span class="na">invalidate</span><span class="o">(</span><span class="s">"key1"</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key1"</span><span class="o">));</span> <span class="c1">// null</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"key2"</span><span class="o">));</span> <span class="c1">// -1</span>
+            <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key2"</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"key2"</span><span class="o">));</span> <span class="c1">// 2</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">size</span><span class="o">());</span> <span class="c1">// 1</span>
+
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">13</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key"</span> <span class="o">+</span> <span class="n">i</span><span class="o">,</span> <span class="n">i</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">size</span><span class="o">());</span> <span class="c1">// 10</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key2"</span><span class="o">));</span> <span class="c1">// null</span>
+
+            <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">11000</span><span class="o">);</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"key5"</span><span class="o">));</span> <span class="c1">// -1</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{},{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">hitCount</span><span class="o">(),</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">missCount</span><span class="o">());</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{},{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">hitRate</span><span class="o">(),</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">missRate</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"cache exception"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.cache</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.google.common.cache.Cache</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.cache.CacheBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Callable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="cm">/**测试GuavaCache
+ * @author Administrator
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GuavaCacheExample2</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="nc">Cache</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">cache</span> <span class="o">=</span> <span class="nc">CacheBuilder</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">maximumSize</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span> <span class="c1">// 最多存放10个数据</span>
+                <span class="o">.</span><span class="na">expireAfterWrite</span><span class="o">(</span><span class="mi">10</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span> <span class="c1">// 缓存10秒</span>
+                <span class="o">.</span><span class="na">recordStats</span><span class="o">()</span> <span class="c1">// 开启记录状态数据功能</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key1"</span><span class="o">));</span> <span class="c1">// null</span>
+        <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key1"</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key1"</span><span class="o">));</span> <span class="c1">// 1</span>
+        <span class="n">cache</span><span class="o">.</span><span class="na">invalidate</span><span class="o">(</span><span class="s">"key1"</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key1"</span><span class="o">));</span> <span class="c1">// null</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"key2"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Callable</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="nc">Integer</span> <span class="nf">call</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+                    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}));</span> <span class="c1">// -1</span>
+            <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key2"</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"key2"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Callable</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="nc">Integer</span> <span class="nf">call</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+                    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}));</span> <span class="c1">// 2</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">size</span><span class="o">());</span> <span class="c1">// 1</span>
+
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">13</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"key"</span> <span class="o">+</span> <span class="n">i</span><span class="o">,</span> <span class="n">i</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">size</span><span class="o">());</span> <span class="c1">// 10</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">getIfPresent</span><span class="o">(</span><span class="s">"key2"</span><span class="o">));</span> <span class="c1">// null</span>
+
+            <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">11000</span><span class="o">);</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"key5"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Callable</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="nc">Integer</span> <span class="nf">call</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+                    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}));</span> <span class="c1">// -1</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{},{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">hitCount</span><span class="o">(),</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">missCount</span><span class="o">());</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{},{}"</span><span class="o">,</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">hitRate</span><span class="o">(),</span> <span class="n">cache</span><span class="o">.</span><span class="na">stats</span><span class="o">().</span><span class="na">missRate</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"cache exception"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="redis">Redis</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.cache</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Value</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.JedisPool</span><span class="o">;</span>
+
+<span class="cm">/**
+ * Redis配置类
+ */</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisConfig</span> <span class="o">{</span>
+
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"redisPool"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">JedisPool</span> <span class="nf">jedisPool</span><span class="o">(</span><span class="nd">@Value</span><span class="o">(</span><span class="s">"${jedis.host}"</span><span class="o">)</span> <span class="nc">String</span> <span class="n">host</span><span class="o">,</span>
+                               <span class="nd">@Value</span><span class="o">(</span><span class="s">"${jedis.port}"</span><span class="o">)</span> <span class="kt">int</span> <span class="n">port</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">JedisPool</span><span class="o">(</span><span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mmall.concurrency.example.cache</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.Jedis</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.JedisPool</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.annotation.Resource</span><span class="o">;</span>
+
+<span class="cm">/**Redis服务器
+ * http://redis.cn/
+ * @author Administrator
+ */</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisClient</span> <span class="o">{</span>
+
+    <span class="nd">@Resource</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"redisPool"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">JedisPool</span> <span class="n">jedisPool</span><span class="o">;</span>
+
+    <span class="cm">/**存储
+     * @param key 键
+     * @param value 值
+     * @throws Exception
+     */</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">jedis</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">jedis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+
+    <span class="cm">/**获取
+     * @param key 键
+     * @return 键对应的值
+     * @throws Exception
+     */</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">get</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="k">return</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">jedis</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">jedis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="高并发之消息队列">高并发之消息队列</h3>
+
+<ul>
+  <li>特性：
+    <ul>
+      <li>业务无关：只做消息分发</li>
+      <li>FIFO：先投递先到达</li>
+      <li>容灾：节点的动态增删和消息的持久化</li>
+      <li>性能：吞吐量提升，系统内部通信效率提高</li>
+    </ul>
+  </li>
+  <li>举例：
+    <ul>
+      <li>Kafka</li>
+      <li>RabbitMQ</li>
+    </ul>
+  </li>
+</ul>
+:ET

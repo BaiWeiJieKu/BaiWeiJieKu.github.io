@@ -1,0 +1,28 @@
+I"n<ul id="markdown-toc">
+  <li><a href="#jsp" id="markdown-toc-jsp">jsp</a></li>
+  <li><a href="#执行过程" id="markdown-toc-执行过程">执行过程</a></li>
+</ul>
+<h2 id="jsp">jsp</h2>
+
+<ul>
+  <li>在Servlet中输出html代码，特别是稍微复杂一点的html代码，就会给人一种很<strong>酸爽</strong>的感觉，如果能够直接使用Html代码，然后在html中写java代码，就好了，JSP就可以干这个事情</li>
+</ul>
+
+<h2 id="执行过程">执行过程</h2>
+
+<ul>
+  <li>把 hello.jsp<strong>转译</strong>为hello_jsp.java</li>
+  <li>hello_jsp.java 位于：d:\tomcat\work\Catalina\localhost_\org\apache\jsp</li>
+  <li>hello_jsp.java<strong>是一个servlet</strong></li>
+  <li>把hello_jsp.java <strong>编译</strong>为hello_jsp.class</li>
+  <li>执行hello_jsp，生成html</li>
+  <li>通过http协议把html 响应返回给浏览器</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/1655.png" alt="" /></p>
+
+<ul>
+  <li>我们说HelloServlet是一个Servlet，不是因为它的类名里有一个”Servlet”，而是因为它继承了 <strong>HttpServlet</strong></li>
+  <li>打开转译hello.jsp 后得到的hello_jsp.java，可以发现它继承了类<code class="language-plaintext highlighter-rouge">org.apache.jasper.runtime.HttpJspBase</code>,而HttpJspBase 继承了HttpServlet,所以我们说hello_.jsp.java 是一个Servlet</li>
+</ul>
+:ET

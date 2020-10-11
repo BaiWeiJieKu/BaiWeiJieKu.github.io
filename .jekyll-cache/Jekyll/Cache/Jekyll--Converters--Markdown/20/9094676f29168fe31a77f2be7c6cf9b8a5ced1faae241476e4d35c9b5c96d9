@@ -1,0 +1,1575 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#java语言规范" id="markdown-toc-java语言规范">Java语言规范</a></li>
+  <li><a href="#注释" id="markdown-toc-注释">注释</a></li>
+  <li><a href="#数据类型" id="markdown-toc-数据类型">数据类型</a></li>
+  <li><a href="#运算符" id="markdown-toc-运算符">运算符</a></li>
+  <li><a href="#字符串" id="markdown-toc-字符串">字符串</a>    <ul>
+      <li><a href="#1equals" id="markdown-toc-1equals">1、equals()</a></li>
+      <li><a href="#2ignorecase-" id="markdown-toc-2ignorecase-">2、IgnoreCase( )</a></li>
+      <li><a href="#3tostring" id="markdown-toc-3tostring">3、toString()</a></li>
+      <li><a href="#4string" id="markdown-toc-4string">4、String</a></li>
+      <li><a href="#5valueof" id="markdown-toc-5valueof">5、valueOf()</a></li>
+      <li><a href="#6split" id="markdown-toc-6split">6、split()</a></li>
+      <li><a href="#7substring" id="markdown-toc-7substring">7、subString()</a></li>
+      <li><a href="#8charat" id="markdown-toc-8charat">8、charAt()</a></li>
+      <li><a href="#9lowercase" id="markdown-toc-9lowercase">9、LowerCase()</a></li>
+      <li><a href="#10indexof" id="markdown-toc-10indexof">10、indexOf()</a></li>
+      <li><a href="#11replace" id="markdown-toc-11replace">11、replace</a></li>
+      <li><a href="#12getbytes" id="markdown-toc-12getbytes">12、getBytes()</a></li>
+      <li><a href="#13stringbuffer" id="markdown-toc-13stringbuffer">13、StringBuffer</a></li>
+      <li><a href="#14length" id="markdown-toc-14length">14、length()</a></li>
+      <li><a href="#15trim" id="markdown-toc-15trim">15、trim()</a></li>
+      <li><a href="#api" id="markdown-toc-api">API</a></li>
+      <li><a href="#stringutils" id="markdown-toc-stringutils">StringUtils</a></li>
+    </ul>
+  </li>
+  <li><a href="#输入输出" id="markdown-toc-输入输出">输入输出</a>    <ul>
+      <li><a href="#1输入处理" id="markdown-toc-1输入处理">1输入处理</a></li>
+      <li><a href="#2输出处理" id="markdown-toc-2输出处理">2输出处理</a></li>
+    </ul>
+  </li>
+  <li><a href="#流程控制" id="markdown-toc-流程控制">流程控制</a>    <ul>
+      <li><a href="#一块作用域" id="markdown-toc-一块作用域">一块作用域</a></li>
+      <li><a href="#二条件语句" id="markdown-toc-二条件语句">二条件语句</a>        <ul>
+          <li><a href="#if条件语句" id="markdown-toc-if条件语句">if条件语句</a></li>
+          <li><a href="#if-else语句" id="markdown-toc-if-else语句">if-else语句</a></li>
+          <li><a href="#if-elseif语句" id="markdown-toc-if-elseif语句">if-elseif语句</a></li>
+          <li><a href="#switch语句" id="markdown-toc-switch语句">switch语句</a></li>
+        </ul>
+      </li>
+      <li><a href="#三循环语句" id="markdown-toc-三循环语句">三循环语句</a>        <ul>
+          <li><a href="#while循环" id="markdown-toc-while循环">while循环</a></li>
+          <li><a href="#do-while循环" id="markdown-toc-do-while循环">do-while循环</a></li>
+          <li><a href="#for循环" id="markdown-toc-for循环">for循环</a></li>
+        </ul>
+      </li>
+      <li><a href="#四跳转语句" id="markdown-toc-四跳转语句">四跳转语句</a>        <ul>
+          <li><a href="#break语句" id="markdown-toc-break语句">break语句</a></li>
+          <li><a href="#continue语句" id="markdown-toc-continue语句">continue语句</a></li>
+          <li><a href="#return语句" id="markdown-toc-return语句">return语句</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#数组" id="markdown-toc-数组">数组</a>    <ul>
+      <li><a href="#数组常用方法" id="markdown-toc-数组常用方法">数组常用方法</a>        <ul>
+          <li><a href="#声明一个数组" id="markdown-toc-声明一个数组">声明一个数组</a></li>
+          <li><a href="#打印一个数组" id="markdown-toc-打印一个数组">打印一个数组</a></li>
+          <li><a href="#创建arraylist" id="markdown-toc-创建arraylist">创建ArrayList</a></li>
+          <li><a href="#包含某个值" id="markdown-toc-包含某个值">包含某个值</a></li>
+          <li><a href="#连接两个数组" id="markdown-toc-连接两个数组">连接两个数组</a></li>
+          <li><a href="#内联数组" id="markdown-toc-内联数组">内联数组</a></li>
+          <li><a href="#拼接数组元素" id="markdown-toc-拼接数组元素">拼接数组元素</a></li>
+          <li><a href="#arraylist转数组" id="markdown-toc-arraylist转数组">ArrayList转数组</a></li>
+          <li><a href="#array转set" id="markdown-toc-array转set">Array转Set</a></li>
+          <li><a href="#翻转数组" id="markdown-toc-翻转数组">翻转数组</a></li>
+          <li><a href="#删除数组元素" id="markdown-toc-删除数组元素">删除数组元素</a></li>
+          <li><a href="#整形转字节数组" id="markdown-toc-整形转字节数组">整形转字节数组</a></li>
+          <li><a href="#数组填充" id="markdown-toc-数组填充">数组填充</a></li>
+          <li><a href="#排序" id="markdown-toc-排序">排序</a></li>
+          <li><a href="#数组复制" id="markdown-toc-数组复制">数组复制</a></li>
+          <li><a href="#数组比较" id="markdown-toc-数组比较">数组比较</a></li>
+          <li><a href="#数组哈希值" id="markdown-toc-数组哈希值">数组哈希值</a></li>
+        </ul>
+      </li>
+      <li><a href="#arrays" id="markdown-toc-arrays">Arrays</a>        <ul>
+          <li><a href="#排序-1" id="markdown-toc-排序-1">排序</a></li>
+          <li><a href="#查找" id="markdown-toc-查找">查找</a></li>
+          <li><a href="#比较" id="markdown-toc-比较">比较</a></li>
+          <li><a href="#填充" id="markdown-toc-填充">填充</a></li>
+          <li><a href="#转列表" id="markdown-toc-转列表">转列表</a></li>
+          <li><a href="#转字符串" id="markdown-toc-转字符串">转字符串</a></li>
+          <li><a href="#复制" id="markdown-toc-复制">复制</a></li>
+          <li><a href="#注意事项" id="markdown-toc-注意事项">注意事项</a></li>
+          <li><a href="#正确数组转集合" id="markdown-toc-正确数组转集合">正确数组转集合</a></li>
+        </ul>
+      </li>
+      <li><a href="#arrayutils" id="markdown-toc-arrayutils">ArrayUtils</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="java语言规范">Java语言规范</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span><span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">){</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"hello world"</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>类格式：修饰符（public）+class+类名（HelloWorld首字母大写，驼峰命名，必须以字母开头，后面可以跟字母和数字的任意组合，不得使用Java保留字）</p>
+
+<p>main方法必须声明为public</p>
+
+<h2 id="注释">注释</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//单行注释</span>
+
+<span class="cm">/**
+文档注释
+*/</span>
+
+<span class="cm">/*多行注释*/</span>
+</code></pre></div></div>
+
+<h2 id="数据类型">数据类型</h2>
+
+<p>int			4字节			-2147 483 648~2147 483 647</p>
+
+<p>short		2字节			-32 768~32767</p>
+
+<p>long		8字节			-9223 372 016 854 775 808~9223 372 036 854 775 807</p>
+
+<p>byte		1字节			-128~127</p>
+
+<p>float		4字节</p>
+
+<p>double		8字节</p>
+
+<p>char</p>
+
+<ul>
+  <li>boolean(整形值和布尔值之间不能进行相互转换)</li>
+  <li>变量：第二个单词开始首字母大写，声明一个变量后必须用赋值语句对变量进行显式初始化</li>
+  <li>常量：用final修饰，只能被赋值一次，常量名用全大写</li>
+  <li>类型强转：int x=(int)6.66=&gt;x=6</li>
+</ul>
+
+<h2 id="运算符">运算符</h2>
+
+<p>+(加)-（减）*（乘）/（除）%(取余)</p>
+
+<p>++(自增)–(自减)</p>
+
+<p>==检测是否相等！=不相等&gt;,&gt;=,&lt;,&lt;=</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">&amp;&amp;与||或！=非</span>
+<span class="err">&amp;（“与”），|（“或”），^（“异或”），~（“非”）</span>
+</code></pre></div></div>
+
+<p>？：三元操作符</p>
+
+<p>二进制位右移（»）左移（«）</p>
+
+<p>平方根Math.sqrt()</p>
+
+<h2 id="字符串">字符串</h2>
+
+<p>Java字符串就是Unicode字符序列。Java没有内置的字符串类型，String是一个预定义类</p>
+
+<h3 id="1equals">1、equals()</h3>
+
+<ul>
+  <li>它具有如下的一般形式：boolean equals(Object str)</li>
+  <li>str是一个用来与调用字符串（String）对象做比较的字符串（String）对象。</li>
+  <li>如果两个字符串具有相同的字符和长度，它返回true，否则返回false。这种比较是区分大小写的。</li>
+</ul>
+
+<h3 id="2ignorecase-">2、IgnoreCase( )</h3>
+
+<ul>
+  <li>当比较两个字符串时，它会认为A-Z和a-z是一样的。</li>
+  <li>其一般形式如下：boolean equalsIgnoreCase(String str)</li>
+  <li>str是一个用来与调用字符串（String）对象做比较的字符串（String）对象。如果两个字符串具有相同的字符和长度，它也返回true，否则返回false。</li>
+</ul>
+
+<h3 id="3tostring">3、toString()</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Object</span> <span class="n">object</span> <span class="o">=</span> <span class="n">getObject</span><span class="o">();</span> 
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">object</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span> 
+
+</code></pre></div></div>
+
+<ul>
+  <li>注意：必须保证object不是null值，否则将抛出NullPointerException异常。</li>
+  <li>采用这种方法时，通常派生类会覆盖Object里的toString（）方法。</li>
+</ul>
+
+<h3 id="4string">4、String</h3>
+
+<ul>
+  <li>（String）object：这是标准的类型转换，将object转成String类型的值。</li>
+  <li>注意：类型必须能转成String类型。因此最好用instanceof做个类型检查，以判断是否可以转换。否则容易抛出CalssCastException异常。</li>
+  <li>因定义为Object 类型的对象在转成String时语法检查并不会报错，这将可能导致潜在的错误存在。</li>
+  <li>如： Object obj = new Integer(100); String strVal = (String)obj; 在运行时将会出错，因为将Integer类型强制转换为String类型，无法通过。</li>
+  <li>但是， Integer obj = new Integer(100); String strVal = (String)obj;</li>
+  <li>如是格式代码，将会报语法错误。此外，因null值可以强制转换为任何java类类型，(String)null也是合法的。</li>
+</ul>
+
+<h3 id="5valueof">5、valueOf()</h3>
+
+<ul>
+  <li>注意：当object为null 时，String.valueOf（object）的值是字符串”null”，而不是null。</li>
+</ul>
+
+<h3 id="6split">6、split()</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1、如果用“.”作为分隔的话,必须是如下写法,String.split("\\.")</span>
+
+<span class="err">2、如果用“|”作为分隔的话,必须是如下写法,String.split("\\|"),</span>
+<span class="err">“.”、“|”、"*"</span> <span class="err">和"+"都是转义字符,必须得加"\\";</span>
+
+<span class="err">3、如果在一个字符串中有多个分隔符,可以用“|”作为连字符,比如,“</span><span class="py">acount</span><span class="p">=</span><span class="s">? and uu =? or n=?”,把三个都分隔出来,可以用String.split("and|or");</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">例如</span><span class="err">：</span><span class="nc">String</span><span class="o">[]</span> <span class="n">aa</span> <span class="o">=</span> <span class="s">"aaa|bbb|ccc"</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"\*"</span><span class="o">);</span> 
+
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span><span class="n">aa</span><span class="o">.</span><span class="na">length</span> <span class="o">;</span> <span class="n">i</span><span class="o">++</span> <span class="o">)</span> <span class="o">{</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"--"</span><span class="o">+</span><span class="n">aa</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span> 
+
+<span class="o">}</span> 
+
+</code></pre></div></div>
+
+<h3 id="7substring">7、subString()</h3>
+
+<ul>
+  <li>（1）str＝str.substring(int beginIndex);截取掉str从首字母起长度为beginIndex的字符串，将剩余字符串赋值给str；</li>
+  <li>（2）str＝str.substring(int beginIndex，int endIndex);截取str中从beginIndex开始至endIndex结束时的字符串，并将其赋值给str;</li>
+</ul>
+
+<h3 id="8charat">8、charAt()</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kt">char</span> <span class="nf">charAt</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span>
+
+<span class="kt">char</span> <span class="n">s</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+
+</code></pre></div></div>
+
+<h3 id="9lowercase">9、LowerCase()</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">String</span> <span class="nf">toLowerCase</span><span class="o">()</span>
+
+<span class="nc">String</span> <span class="n">newStr</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">toLowerCase</span><span class="o">();</span>
+
+</code></pre></div></div>
+
+<h3 id="10indexof">10、indexOf()</h3>
+
+<ul>
+  <li>1、int indexOf(String str) ：返回第一次出现的指定子字符串在此字符串中的索引。</li>
+  <li>2、int indexOf(String str, int startIndex)：从指定的索引处开始，返回第一次出现的指定子字符串在此字符串中的索引。</li>
+  <li>3、int lastIndexOf(String str) ：返回在此字符串中最右边出现的指定子字符串的索引。</li>
+  <li>4、int lastIndexOf(String str, int startIndex) ：从指定的索引处开始向后搜索，返回在此字符串中最后一次出现的指定子字符串的索引。</li>
+  <li>注意：如果没有找到子字符串，则返回-1。</li>
+  <li>如果 startindex 是负数，则 startindex 被当作零。如果它比最大的字符位置索引还大，则它被当作最大的可能索引。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">例如</span><span class="err">：</span><span class="nc">String</span> <span class="n">s</span> <span class="o">=</span> <span class="s">"xXccxxxXX"</span><span class="o">;</span> 
+
+<span class="c1">// 从头开始查找是否存在指定的字符 //结果如下 </span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"c"</span><span class="o">));</span> <span class="c1">//2 </span>
+
+<span class="c1">// 从第四个字符位置开始往后继续查找，包含当前位置 </span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"c"</span><span class="o">,</span> <span class="mi">3</span><span class="o">));</span> <span class="c1">//3 </span>
+
+<span class="c1">//若指定字符串中没有该字符则系统返回-1 </span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="s">"y"</span><span class="o">));</span> <span class="c1">//-1 </span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">lastIndexOf</span><span class="o">(</span><span class="s">"x"</span><span class="o">));</span> <span class="c1">//6 </span>
+
+</code></pre></div></div>
+
+<h3 id="11replace">11、replace</h3>
+
+<ul>
+  <li>（1）replace的参数是char和CharSequence，即可以支持字符的替换，也支持字符串的替换（CharSequence即字符串序列的意思,说白了也就是字符串）；</li>
+  <li>（2）replaceAll的参数是regex，即基于规则表达式的替换，比如：可以通过replaceAll(“\d”, “*“)把一个字符串所有的数字字符都换成星号；</li>
+  <li>相同点：都是全部替换，即把源字符串中的某一字符或字符串全部换成指定的字符或字符串；</li>
+  <li>不同点：（1）replaceAll支持正则表达式，因此会对参数进行解析（两个参数均是），如replaceAll(“\d”, “<em>”)，而replace则不会，replace(“\d”,”</em>“)就是替换”\d”的字符串，而不会解析为正则。</li>
+  <li>（2）“\”在java中是一个转义字符，所以需要用两个代表一个。例如System.out.println( “\” ) ;只打印出一个”"。但是“\”也是正则表达式中的转义字符，需要用两个代表一个。所以：\\被java转换成\，\又被正则表达式转换成\，因此用replaceAll替换“\”为”\“，就要用replaceAll(“\\”,”\\\\”)，而replace则replace(“\”,”\\”)。</li>
+  <li>（3）如果只想替换第一次出现的，可以使用replaceFirst()，这个方法也是基于规则表达式的替换，但与replaceAll()不同的是，只替换第一次出现的字符串。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">说到正则表达式</span><span class="err">，</span><span class="n">有个例子就能很好的解释replaceAll的用法</span><span class="err">。</span><span class="n">即替换空格</span>
+
+<span class="nc">String</span> <span class="n">test</span> <span class="o">=</span> <span class="s">"wa n\tg_p\te\tn　g"</span><span class="o">;</span> 
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="na">replaceAll</span><span class="o">(</span><span class="s">"\t|\\t|\u0020|\u3000"</span><span class="o">,</span> <span class="s">""</span><span class="o">);</span><span class="c1">//去掉空格 </span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">test</span><span class="o">);</span> 
+
+<span class="n">其中test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="na">replaceAll</span><span class="o">(</span><span class="s">"\t|\\t|\u0020|\u3000"</span><span class="o">,</span> <span class="s">""</span><span class="o">)</span> 
+
+<span class="n">与test</span> <span class="o">=</span> <span class="nc">Pattern</span><span class="o">.</span><span class="na">compile</span><span class="o">(</span><span class="s">"\t|\\t|\u0020|\u3000"</span><span class="o">).</span><span class="na">matcher</span><span class="o">(</span><span class="n">test</span><span class="o">).</span><span class="na">replaceAll</span><span class="o">(</span><span class="s">""</span><span class="o">)</span> 
+
+<span class="n">是等效的</span><span class="err">，</span>
+
+<span class="n">因此用正则表达式仅仅是替换全部或替换第一个的话</span><span class="err">，</span><span class="n">用replaceAll或replaceFirst即可</span><span class="err">。</span>
+
+</code></pre></div></div>
+
+<h3 id="12getbytes">12、getBytes()</h3>
+
+<ul>
+  <li>都是将一个string类型的字符串转换成byte类型并且存入一个byte数组中。在java中的所有数据底层都是字节，字节数据可以存入到byte数组。</li>
+  <li>UTF-8每个汉字转成3bytes，而GBK转成2bytes，所以要说明编码方式，否则用缺省编码。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="nc">String</span> <span class="n">decode</span><span class="o">)</span>
+
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">b_gbk</span> <span class="o">=</span> <span class="s">"中"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"GBK"</span><span class="o">);</span>
+
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">b_utf8</span> <span class="o">=</span> <span class="s">"中"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">b_iso88591</span> <span class="o">=</span> <span class="s">"中"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"ISO8859-1"</span><span class="o">);</span>
+
+<span class="n">将分别返回</span><span class="s">"中"</span><span class="n">这个汉字在GBK</span><span class="err">、</span><span class="no">UTF</span><span class="o">-</span><span class="mi">8</span><span class="n">和ISO8859</span><span class="o">-</span><span class="mi">1</span><span class="n">编码下的byte数组表示</span><span class="o">,</span><span class="n">此时</span>
+
+<span class="n">b_gbk的长度为2</span><span class="o">,</span>
+
+<span class="n">b_utf8的长度为3</span><span class="o">,</span>
+
+<span class="n">b_iso88591的长度为1</span><span class="err">。</span>
+
+<span class="k">new</span> <span class="nf">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[],</span> <span class="n">decode</span><span class="o">)</span><span class="n">实际是使用指定的编码decode来将byte</span><span class="o">[]</span><span class="n">解析成字符串</span><span class="o">.</span>
+
+<span class="nc">String</span> <span class="n">s_gbk</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">b_gbk</span><span class="o">,</span><span class="s">"GBK"</span><span class="o">);</span>
+
+<span class="nc">String</span> <span class="n">s_utf8</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">b_utf8</span><span class="o">,</span><span class="s">"UTF-8"</span><span class="o">);</span>
+
+<span class="nc">String</span> <span class="n">s_iso88591</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">b_iso88591</span><span class="o">,</span><span class="s">"ISO8859-1"</span><span class="o">);</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>通过输出s_gbk、s_utf8和s_iso88591,会发现s_gbk和s_utf8都是”中”,而只有s_iso88591是一个不被识别的字符（可以理解为乱码）,为什么使用ISO8859-1编码再组合之后,无法还原”中”字？原因很简单,因为ISO8859-1编码的编码表根本就不包含汉字字符,当然也就无法通过”中”.getBytes(“ISO8859-1”);来得到正确的”中”字在ISO8859-1中的编码值了,所以，再通过new String()来还原就更是无从谈起。因此,通过String.getBytes(String decode)方法来得到byte[]时,一定要确定decode的编码表中确实存在String表示的码值,这样得到的byte[]数组才能正确被还原。</li>
+</ul>
+
+<h3 id="13stringbuffer">13、StringBuffer</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">"构造方法摘要"</span> 
+<span class="nc">StringBuffer</span><span class="o">()</span> 
+          <span class="s">"构造一个其中不带字符的字符串缓冲区，其初始容量为 16 个字符。"</span> 
+<span class="nc">StringBuffer</span><span class="o">(</span><span class="nc">CharSequence</span> <span class="n">seq</span><span class="o">)</span> 
+          <span class="s">"public java.lang.StringBuilder(CharSequence seq) 构造一个字符串缓冲区，它包含与指定的 			  CharSequence 相同的字符。"</span> 
+<span class="nc">StringBuffer</span><span class="o">(</span><span class="kt">int</span> <span class="n">capacity</span><span class="o">)</span> 
+          <span class="s">"构造一个不带字符，但具有指定初始容量的字符串缓冲区。"</span> 
+<span class="nc">StringBuffer</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 构造一个字符串缓冲区，并将其内容初始化为指定的字符串内容。"</span> 
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">"方法摘要"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">b</span><span class="o">)</span> 
+         <span class="s">" 将 boolean 参数的字符串表示形式追加到序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">char</span> <span class="n">c</span><span class="o">)</span> 
+          <span class="s">"将 char 参数的字符串表示形式追加到此序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">str</span><span class="o">)</span> 
+          <span class="s">"将 char 数组参数的字符串表示形式追加到此序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">str</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">len</span><span class="o">)</span> 
+         <span class="s">" 将 char 数组参数的子数组的字符串表示形式追加到此序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="nc">CharSequence</span> <span class="n">s</span><span class="o">)</span> 
+          <span class="s">"将指定的 CharSequence 追加到该序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="nc">CharSequence</span> <span class="n">s</span><span class="o">,</span> <span class="kt">int</span> <span class="n">start</span><span class="o">,</span> <span class="kt">int</span> <span class="n">end</span><span class="o">)</span> 
+         <span class="s">" 将指定 CharSequence 的子序列追加到此序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">double</span> <span class="n">d</span><span class="o">)</span> 
+         <span class="s">" 将 double 参数的字符串表示形式追加到此序列。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">float</span> <span class="n">f</span><span class="o">)</span> 
+          <span class="s">"将 float 参数的字符串表示形式追加到此序列。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">)</span> 
+         <span class="s">" 将 int 参数的字符串表示形式追加到此序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="kt">long</span> <span class="n">lng</span><span class="o">)</span> 
+          <span class="s">"将 long 参数的字符串表示形式追加到此序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">)</span> 
+         <span class="s">" 追加 Object 参数的字符串表示形式。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 将指定的字符串追加到此字符序列。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="nc">StringBuffer</span> <span class="n">sb</span><span class="o">)</span> 
+          <span class="s">"将指定的 StringBuffer 追加到此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">appendCodePoint</span><span class="o">(</span><span class="kt">int</span> <span class="n">codePoint</span><span class="o">)</span> 
+         <span class="s">" 将 codePoint 参数的字符串表示形式追加到此序列。"</span> 
+ <span class="kt">int</span> <span class="nf">capacity</span><span class="o">()</span> 
+          <span class="s">"返回当前容量。"</span> 
+ <span class="kt">char</span> <span class="nf">charAt</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 返回此序列中指定索引处的 char 值。"</span> 
+ <span class="kt">int</span> <span class="nf">codePointAt</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+        <span class="s">"  返回指定索引处的字符（统一代码点）。"</span> 
+ <span class="kt">int</span> <span class="nf">codePointBefore</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 返回指定索引前的字符（统一代码点）。"</span> 
+ <span class="kt">int</span> <span class="nf">codePointCount</span><span class="o">(</span><span class="kt">int</span> <span class="n">beginIndex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">endIndex</span><span class="o">)</span> 
+         <span class="s">" 返回此序列指定文本范围内的统一代码点。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">delete</span><span class="o">(</span><span class="kt">int</span> <span class="n">start</span><span class="o">,</span> <span class="kt">int</span> <span class="n">end</span><span class="o">)</span> 
+         <span class="s">" 移除此序列的子字符串中的字符。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">deleteCharAt</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 移除此序列指定位置的 char。 "</span>
+ <span class="kt">void</span> <span class="nf">ensureCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minimumCapacity</span><span class="o">)</span> 
+         <span class="s">" 确保容量至少等于指定的最小值。"</span> 
+ <span class="kt">void</span> <span class="nf">getChars</span><span class="o">(</span><span class="kt">int</span> <span class="n">srcBegin</span><span class="o">,</span> <span class="kt">int</span> <span class="n">srcEnd</span><span class="o">,</span> <span class="kt">char</span><span class="o">[]</span> <span class="n">dst</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dstBegin</span><span class="o">)</span> 
+         <span class="s">" 将字符从此序列复制到目标字符数组 dst。"</span> 
+ <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 返回第一次出现的指定子字符串在该字符串中的索引。"</span> 
+ <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">)</span> 
+         <span class="s">" 从指定的索引处开始，返回第一次出现的指定子字符串在该字符串中的索引。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">b</span><span class="o">)</span> 
+          <span class="s">"将 boolean 参数的字符串表示形式插入此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">char</span> <span class="n">c</span><span class="o">)</span> 
+         <span class="s">" 将 char 参数的字符串表示形式插入此序列中。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">char</span><span class="o">[]</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">"将 char 数组参数的字符串表示形式插入此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="kt">char</span><span class="o">[]</span> <span class="n">str</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">len</span><span class="o">)</span> 
+         <span class="s">" 将数组参数 str 的子数组的字符串表示形式插入此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">dstOffset</span><span class="o">,</span> <span class="nc">CharSequence</span> <span class="n">s</span><span class="o">)</span> 
+         <span class="s">" 将指定 CharSequence 插入此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">dstOffset</span><span class="o">,</span> <span class="nc">CharSequence</span> <span class="n">s</span><span class="o">,</span> <span class="kt">int</span> <span class="n">start</span><span class="o">,</span> <span class="kt">int</span> <span class="n">end</span><span class="o">)</span> 
+         <span class="s">" 将指定 CharSequence 的子序列插入此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">double</span> <span class="n">d</span><span class="o">)</span> 
+         <span class="s">" 将 double 参数的字符串表示形式插入此序列中。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">float</span> <span class="n">f</span><span class="o">)</span> 
+         <span class="s">" 将 float 参数的字符串表示形式插入此序列中。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">)</span> 
+         <span class="s">" 将 int 参数的字符串表示形式插入此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">long</span> <span class="n">l</span><span class="o">)</span> 
+         <span class="s">" 将 long 参数的字符串表示形式插入此序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">obj</span><span class="o">)</span> 
+         <span class="s">" 将 Object 参数的字符串表示形式插入此字符序列中。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">insert</span><span class="o">(</span><span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 将字符串插入此字符序列中。"</span> 
+ <span class="kt">int</span> <span class="nf">lastIndexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 返回最右边出现的指定子字符串在此字符串中的索引。"</span> 
+ <span class="kt">int</span> <span class="nf">lastIndexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">)</span> 
+          <span class="s">"返回最后一次出现的指定子字符串在此字符串中的索引。"</span> 
+ <span class="kt">int</span> <span class="nf">length</span><span class="o">()</span> 
+          <span class="s">"返回长度（字符数）。"</span> 
+ <span class="kt">int</span> <span class="nf">offsetByCodePoints</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="kt">int</span> <span class="n">codePointOffset</span><span class="o">)</span> 
+         <span class="s">" 返回此序列中的一个索引，该索引是从给定 index 偏移 codePointOffset 个代码点后得到的。 "</span>
+ <span class="nc">StringBuffer</span> <span class="nf">replace</span><span class="o">(</span><span class="kt">int</span> <span class="n">start</span><span class="o">,</span> <span class="kt">int</span> <span class="n">end</span><span class="o">,</span> <span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 使用给定 String 中的字符替换此序列的子字符串中的字符。"</span> 
+ <span class="nc">StringBuffer</span> <span class="nf">reverse</span><span class="o">()</span> 
+          <span class="s">"将此字符序列用其反转形式取代。"</span> 
+ <span class="kt">void</span> <span class="nf">setCharAt</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="kt">char</span> <span class="n">ch</span><span class="o">)</span> 
+         <span class="s">" 将给定索引处的字符设置为 ch。 "</span>
+ <span class="kt">void</span> <span class="nf">setLength</span><span class="o">(</span><span class="kt">int</span> <span class="n">newLength</span><span class="o">)</span> 
+          <span class="s">"设置字符序列的长度。"</span> 
+ <span class="nc">CharSequence</span> <span class="nf">subSequence</span><span class="o">(</span><span class="kt">int</span> <span class="n">start</span><span class="o">,</span> <span class="kt">int</span> <span class="n">end</span><span class="o">)</span> 
+         <span class="s">" 返回一个新的字符序列，该字符序列是此序列的子序列。"</span> 
+ <span class="nc">String</span> <span class="nf">substring</span><span class="o">(</span><span class="kt">int</span> <span class="n">start</span><span class="o">)</span> 
+         <span class="s">" 返回一个新的 String，它包含此字符序列当前所包含的字符子序列。"</span> 
+ <span class="nc">String</span> <span class="nf">substring</span><span class="o">(</span><span class="kt">int</span> <span class="n">start</span><span class="o">,</span> <span class="kt">int</span> <span class="n">end</span><span class="o">)</span> 
+         <span class="s">" 返回一个新的 String，它包含此序列当前所包含的字符子序列。 "</span>
+ <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> 
+          <span class="s">"返回此序列中数据的字符串表示形式。 "</span>
+ <span class="kt">void</span> <span class="nf">trimToSize</span><span class="o">()</span> 
+          <span class="s">"尝试减少用于字符序列的存储空间。 "</span>
+
+</code></pre></div></div>
+
+<h3 id="14length">14、length()</h3>
+
+<p>返回字符串长度</p>
+
+<h3 id="15trim">15、trim()</h3>
+
+<p>返回一个新字符串，这个字符串将删除了原始字符串头部和尾部的空格</p>
+
+<h3 id="api">API</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">构造方法摘要</span> 
+<span class="nc">String</span><span class="o">()</span> 
+          <span class="s">"初始化一个新创建的 String 对象，使其表示一个空字符序列。"</span> 
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">)</span> 
+          <span class="s">"通过使用平台的默认字符集解码指定的 byte 数组，构造一个新的 String。 "</span>
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">,</span> <span class="nc">Charset</span> <span class="n">charset</span><span class="o">)</span> 
+          <span class="s">"通过使用指定的 charset 解码指定的 byte 数组，构造一个新的 String。 "</span>
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">ascii</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hibyte</span><span class="o">)</span> 
+          <span class="s">"已过时。 该方法无法将字节正确地转换为字符。从 JDK 1.1 开始，完成该转换的首选方法是使用带有 		   Charset、字符集名称，或使用平台默认字符集的 String 构造方法。"</span> 
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">length</span><span class="o">)</span> 
+          <span class="s">"通过使用平台的默认字符集解码指定的 byte 子数组，构造一个新的 String。 "</span>
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">length</span><span class="o">,</span> <span class="nc">Charset</span> <span class="n">charset</span><span class="o">)</span> 
+          <span class="s">"通过使用指定的 charset 解码指定的 byte 子数组，构造一个新的 String。"</span>
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">ascii</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hibyte</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> 
+          <span class="s">"已过时。 该方法无法将字节正确地转换为字符。从 JDK 1.1 开始，完成该转换的首选方法是使用带有 		   Charset、字符集名称，或使用平台默认字符集的 String 构造方法。"</span> 
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">length</span><span class="o">,</span> <span class="nc">String</span> <span class="n">charsetName</span><span class="o">)</span> 
+          <span class="s">"通过使用指定的字符集解码指定的 byte 子数组，构造一个新的 String。 "</span>
+<span class="nc">String</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span><span class="o">,</span> <span class="nc">String</span> <span class="n">charsetName</span><span class="o">)</span> 
+         <span class="s">" 通过使用指定的 charset 解码指定的 byte 数组，构造一个新的 String。"</span> 
+<span class="nc">String</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">value</span><span class="o">)</span> 
+         <span class="s">" 分配一个新的 String，使其表示字符数组参数中当前包含的字符序列。 "</span>
+<span class="nc">String</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> 
+         <span class="s">" 分配一个新的 String，它包含取自字符数组参数一个子数组的字符。 "</span>
+<span class="nc">String</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">codePoints</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> 
+          <span class="s">"分配一个新的 String，它包含 Unicode 代码点数组参数一个子数组的字符。"</span> 
+<span class="nc">String</span><span class="o">(</span><span class="nc">String</span> <span class="n">original</span><span class="o">)</span> 
+         <span class="s">" 初始化一个新创建的 String 对象，使其表示一个与参数相同的字符序列；换句话说，新创建的字符串是		  该参数字符串的副本。"</span> 
+<span class="nc">String</span><span class="o">(</span><span class="nc">StringBuffer</span> <span class="n">buffer</span><span class="o">)</span> 
+         <span class="s">" 分配一个新的字符串，它包含字符串缓冲区参数中当前包含的字符序列。 "</span>
+<span class="nc">String</span><span class="o">(</span><span class="nc">StringBuilder</span> <span class="n">builder</span><span class="o">)</span> 
+          <span class="s">"分配一个新的字符串，它包含字符串生成器参数中当前包含的字符序列。 "</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">方法摘要</span> 
+ <span class="kt">char</span> <span class="nf">charAt</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 返回指定索引处的 char 值。"</span> 
+ <span class="kt">int</span> <span class="nf">codePointAt</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+          <span class="s">"返回指定索引处的字符（Unicode 代码点）。 "</span>
+ <span class="kt">int</span> <span class="nf">codePointBefore</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+         <span class="s">" 返回指定索引之前的字符（Unicode 代码点）。"</span> 
+ <span class="kt">int</span> <span class="nf">codePointCount</span><span class="o">(</span><span class="kt">int</span> <span class="n">beginIndex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">endIndex</span><span class="o">)</span> 
+         <span class="s">" 返回此 String 的指定文本范围中的 Unicode 代码点数。 "</span>
+ <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="nc">String</span> <span class="n">anotherString</span><span class="o">)</span> 
+          <span class="s">"按字典顺序比较两个字符串。"</span> 
+ <span class="kt">int</span> <span class="nf">compareToIgnoreCase</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 按字典顺序比较两个字符串，不考虑大小写。"</span> 
+ <span class="nc">String</span> <span class="nf">concat</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+          <span class="s">"将指定字符串连接到此字符串的结尾。"</span> 
+ <span class="kt">boolean</span> <span class="nf">contains</span><span class="o">(</span><span class="nc">CharSequence</span> <span class="n">s</span><span class="o">)</span> 
+          <span class="s">"当且仅当此字符串包含指定的 char 值序列时，返回 true。 "</span>
+ <span class="kt">boolean</span> <span class="nf">contentEquals</span><span class="o">(</span><span class="nc">CharSequence</span> <span class="n">cs</span><span class="o">)</span> 
+         <span class="s">" 将此字符串与指定的 CharSequence 比较。"</span> 
+ <span class="kt">boolean</span> <span class="nf">contentEquals</span><span class="o">(</span><span class="nc">StringBuffer</span> <span class="n">sb</span><span class="o">)</span> 
+         <span class="s">" 将此字符串与指定的 StringBuffer 比较。 "</span>
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">copyValueOf</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">data</span><span class="o">)</span> 
+         <span class="s">" 返回指定数组中表示该字符序列的 String。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">copyValueOf</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">data</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> 
+          <span class="s">"返回指定数组中表示该字符序列的 String。"</span> 
+ <span class="kt">boolean</span> <span class="nf">endsWith</span><span class="o">(</span><span class="nc">String</span> <span class="n">suffix</span><span class="o">)</span> 
+          <span class="s">"测试此字符串是否以指定的后缀结束。 "</span>
+ <span class="kt">boolean</span> <span class="nf">equals</span><span class="o">(</span><span class="nc">Object</span> <span class="n">anObject</span><span class="o">)</span> 
+         <span class="s">" 将此字符串与指定的对象比较。"</span> 
+ <span class="kt">boolean</span> <span class="nf">equalsIgnoreCase</span><span class="o">(</span><span class="nc">String</span> <span class="n">anotherString</span><span class="o">)</span> 
+         <span class="s">" 将此 String 与另一个 String 比较，不考虑大小写。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">format</span><span class="o">(</span><span class="nc">Locale</span> <span class="n">l</span><span class="o">,</span> <span class="nc">String</span> <span class="n">format</span><span class="o">,</span> <span class="nc">Object</span><span class="o">...</span> <span class="n">args</span><span class="o">)</span> 
+         <span class="s">" 使用指定的语言环境、格式字符串和参数返回一个格式化字符串。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">format</span><span class="o">(</span><span class="nc">String</span> <span class="n">format</span><span class="o">,</span> <span class="nc">Object</span><span class="o">...</span> <span class="n">args</span><span class="o">)</span> 
+          <span class="s">"使用指定的格式字符串和参数返回一个格式化字符串。"</span> 
+ <span class="kt">byte</span><span class="o">[]</span> <span class="nf">getBytes</span><span class="o">()</span> 
+          <span class="s">"使用平台的默认字符集将此 String 编码为 byte 序列，并将结果存储到一个新的 byte 数组中。"</span> 
+ <span class="kt">byte</span><span class="o">[]</span> <span class="nf">getBytes</span><span class="o">(</span><span class="nc">Charset</span> <span class="n">charset</span><span class="o">)</span> 
+          <span class="s">"使用给定的 charset 将此 String 编码到 byte 序列，并将结果存储到新的 byte 数组。"</span> 
+ <span class="kt">void</span> <span class="nf">getBytes</span><span class="o">(</span><span class="kt">int</span> <span class="n">srcBegin</span><span class="o">,</span> <span class="kt">int</span> <span class="n">srcEnd</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">dst</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dstBegin</span><span class="o">)</span> 
+         <span class="s">" 已过时。 该方法无法将字符正确转换为字节。从 JDK 1.1 起，完成该转换的首选方法是通过 				  getBytes() 方法，该方法使用平台的默认字符集。"</span> 
+ <span class="kt">byte</span><span class="o">[]</span> <span class="nf">getBytes</span><span class="o">(</span><span class="nc">String</span> <span class="n">charsetName</span><span class="o">)</span> 
+         <span class="s">" 使用指定的字符集将此 String 编码为 byte 序列，并将结果存储到一个新的 byte 数组中。"</span> 
+ <span class="kt">void</span> <span class="nf">getChars</span><span class="o">(</span><span class="kt">int</span> <span class="n">srcBegin</span><span class="o">,</span> <span class="kt">int</span> <span class="n">srcEnd</span><span class="o">,</span> <span class="kt">char</span><span class="o">[]</span> <span class="n">dst</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dstBegin</span><span class="o">)</span> 
+          <span class="s">"将字符从此字符串复制到目标字符数组。"</span> 
+ <span class="kt">int</span> <span class="nf">hashCode</span><span class="o">()</span> 
+         <span class="s">" 返回此字符串的哈希码。"</span> 
+ <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="kt">int</span> <span class="n">ch</span><span class="o">)</span> 
+          <span class="s">"返回指定字符在此字符串中第一次出现处的索引。"</span> 
+ <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="kt">int</span> <span class="n">ch</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">)</span> 
+          <span class="s">"返回在此字符串中第一次出现指定字符处的索引，从指定的索引开始搜索。"</span> 
+ <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+         <span class="s">" 返回指定子字符串在此字符串中第一次出现处的索引。"</span> 
+ <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">)</span> 
+          <span class="s">"返回指定子字符串在此字符串中第一次出现处的索引，从指定的索引开始。"</span> 
+ <span class="nc">String</span> <span class="nf">intern</span><span class="o">()</span> 
+          <span class="s">"返回字符串对象的规范化表示形式。"</span> 
+ <span class="kt">boolean</span> <span class="nf">isEmpty</span><span class="o">()</span> 
+         <span class="s">" 当且仅当 length() 为 0 时返回 true。 "</span>
+ <span class="kt">int</span> <span class="nf">lastIndexOf</span><span class="o">(</span><span class="kt">int</span> <span class="n">ch</span><span class="o">)</span> 
+          <span class="s">"返回指定字符在此字符串中最后一次出现处的索引。 "</span>
+ <span class="kt">int</span> <span class="nf">lastIndexOf</span><span class="o">(</span><span class="kt">int</span> <span class="n">ch</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">)</span> 
+          <span class="s">"返回指定字符在此字符串中最后一次出现处的索引，从指定的索引处开始进行反向搜索。"</span> 
+ <span class="kt">int</span> <span class="nf">lastIndexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+          <span class="s">"返回指定子字符串在此字符串中最右边出现处的索引。"</span> 
+ <span class="kt">int</span> <span class="nf">lastIndexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">)</span> 
+         <span class="s">" 返回指定子字符串在此字符串中最后一次出现处的索引，从指定的索引开始反向搜索。 "</span>
+ <span class="kt">int</span> <span class="nf">length</span><span class="o">()</span> 
+         <span class="s">" 返回此字符串的长度。 "</span>
+ <span class="kt">boolean</span> <span class="nf">matches</span><span class="o">(</span><span class="nc">String</span> <span class="n">regex</span><span class="o">)</span> 
+         <span class="s">" 告知此字符串是否匹配给定的正则表达式。"</span> 
+ <span class="kt">int</span> <span class="nf">offsetByCodePoints</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="kt">int</span> <span class="n">codePointOffset</span><span class="o">)</span> 
+          <span class="s">"返回此 String 中从给定的 index 处偏移 codePointOffset 个代码点的索引。"</span> 
+ <span class="kt">boolean</span> <span class="nf">regionMatches</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">ignoreCase</span><span class="o">,</span> <span class="kt">int</span> <span class="n">toffset</span><span class="o">,</span> <span class="nc">String</span> <span class="n">other</span><span class="o">,</span> <span class="kt">int</span> <span class="n">ooffset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">len</span><span class="o">)</span> 
+          <span class="s">"测试两个字符串区域是否相等。"</span> 
+ <span class="kt">boolean</span> <span class="nf">regionMatches</span><span class="o">(</span><span class="kt">int</span> <span class="n">toffset</span><span class="o">,</span> <span class="nc">String</span> <span class="n">other</span><span class="o">,</span> <span class="kt">int</span> <span class="n">ooffset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">len</span><span class="o">)</span> 
+         <span class="s">" 测试两个字符串区域是否相等。 "</span>
+ <span class="nc">String</span> <span class="nf">replace</span><span class="o">(</span><span class="kt">char</span> <span class="n">oldChar</span><span class="o">,</span> <span class="kt">char</span> <span class="n">newChar</span><span class="o">)</span> 
+         <span class="s">" 返回一个新的字符串，它是通过用 newChar 替换此字符串中出现的所有 oldChar 得到的。"</span> 
+ <span class="nc">String</span> <span class="nf">replace</span><span class="o">(</span><span class="nc">CharSequence</span> <span class="n">target</span><span class="o">,</span> <span class="nc">CharSequence</span> <span class="n">replacement</span><span class="o">)</span> 
+         <span class="s">" 使用指定的字面值替换序列替换此字符串所有匹配字面值目标序列的子字符串。 "</span>
+ <span class="nc">String</span> <span class="nf">replaceAll</span><span class="o">(</span><span class="nc">String</span> <span class="n">regex</span><span class="o">,</span> <span class="nc">String</span> <span class="n">replacement</span><span class="o">)</span> 
+          <span class="s">"使用给定的 replacement 替换此字符串所有匹配给定的正则表达式的子字符串。"</span> 
+ <span class="nc">String</span> <span class="nf">replaceFirst</span><span class="o">(</span><span class="nc">String</span> <span class="n">regex</span><span class="o">,</span> <span class="nc">String</span> <span class="n">replacement</span><span class="o">)</span> 
+          <span class="s">"使用给定的 replacement 替换此字符串匹配给定的正则表达式的第一个子字符串。 "</span>
+ <span class="nc">String</span><span class="o">[]</span> <span class="nf">split</span><span class="o">(</span><span class="nc">String</span> <span class="n">regex</span><span class="o">)</span> 
+          <span class="s">"根据给定正则表达式的匹配拆分此字符串。 "</span>
+ <span class="nc">String</span><span class="o">[]</span> <span class="nf">split</span><span class="o">(</span><span class="nc">String</span> <span class="n">regex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">limit</span><span class="o">)</span> 
+          <span class="s">"根据匹配给定的正则表达式来拆分此字符串。"</span> 
+ <span class="kt">boolean</span> <span class="nf">startsWith</span><span class="o">(</span><span class="nc">String</span> <span class="n">prefix</span><span class="o">)</span> 
+          <span class="s">"测试此字符串是否以指定的前缀开始。"</span> 
+ <span class="kt">boolean</span> <span class="nf">startsWith</span><span class="o">(</span><span class="nc">String</span> <span class="n">prefix</span><span class="o">,</span> <span class="kt">int</span> <span class="n">toffset</span><span class="o">)</span> 
+          <span class="s">"测试此字符串从指定索引开始的子字符串是否以指定前缀开始。"</span> 
+ <span class="nc">CharSequence</span> <span class="nf">subSequence</span><span class="o">(</span><span class="kt">int</span> <span class="n">beginIndex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">endIndex</span><span class="o">)</span> 
+          <span class="s">"返回一个新的字符序列，它是此序列的一个子序列。"</span> 
+ <span class="nc">String</span> <span class="nf">substring</span><span class="o">(</span><span class="kt">int</span> <span class="n">beginIndex</span><span class="o">)</span> 
+         <span class="s">" 返回一个新的字符串，它是此字符串的一个子字符串。 "</span>
+ <span class="nc">String</span> <span class="nf">substring</span><span class="o">(</span><span class="kt">int</span> <span class="n">beginIndex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">endIndex</span><span class="o">)</span> 
+         <span class="s">" 返回一个新字符串，它是此字符串的一个子字符串。 "</span>
+ <span class="kt">char</span><span class="o">[]</span> <span class="nf">toCharArray</span><span class="o">()</span> 
+        <span class="s">"  将此字符串转换为一个新的字符数组。 "</span>
+ <span class="nc">String</span> <span class="nf">toLowerCase</span><span class="o">()</span> 
+         <span class="s">" 使用默认语言环境的规则将此 String 中的所有字符都转换为小写。 "</span>
+ <span class="nc">String</span> <span class="nf">toLowerCase</span><span class="o">(</span><span class="nc">Locale</span> <span class="n">locale</span><span class="o">)</span> 
+         <span class="s">" 使用给定 Locale 的规则将此 String 中的所有字符都转换为小写。"</span> 
+ <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> 
+         <span class="s">" 返回此对象本身（它已经是一个字符串！）。 "</span>
+ <span class="nc">String</span> <span class="nf">toUpperCase</span><span class="o">()</span> 
+          <span class="s">"使用默认语言环境的规则将此 String 中的所有字符都转换为大写。 "</span>
+ <span class="nc">String</span> <span class="nf">toUpperCase</span><span class="o">(</span><span class="nc">Locale</span> <span class="n">locale</span><span class="o">)</span> 
+         <span class="s">" 使用给定 Locale 的规则将此 String 中的所有字符都转换为大写。 "</span>
+ <span class="nc">String</span> <span class="nf">trim</span><span class="o">()</span> 
+         <span class="s">" 返回字符串的副本，忽略前导空白和尾部空白。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">b</span><span class="o">)</span> 
+          <span class="s">"返回 boolean 参数的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">char</span> <span class="n">c</span><span class="o">)</span> 
+          <span class="s">"返回 char 参数的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">data</span><span class="o">)</span> 
+         <span class="s">" 返回 char 数组参数的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">char</span><span class="o">[]</span> <span class="n">data</span><span class="o">,</span> <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> 
+          <span class="s">"返回 char 数组参数的特定子数组的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">double</span> <span class="n">d</span><span class="o">)</span> 
+         <span class="s">" 返回 double 参数的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">float</span> <span class="n">f</span><span class="o">)</span> 
+          <span class="s">"返回 float 参数的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">)</span> 
+          <span class="s">"返回 int 参数的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="kt">long</span> <span class="n">l</span><span class="o">)</span> 
+         <span class="s">" 返回 long 参数的字符串表示形式。 "</span>
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">valueOf</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">)</span> 
+          <span class="s">"返回 Object 参数的字符串表示形式。 "</span>
+
+</code></pre></div></div>
+
+<h3 id="stringutils">StringUtils</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isEmpty</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"判断某字符串是否为空，为空的标准是 str==null 或 str.length()==0 "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isNotEmpty</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"判断某字符串是否非空，等于 !isEmpty(String str) "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isBlank</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+  <span class="s">" 判断某字符串是否为空或长度为0或由空白符(whitespace) 构成"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isNotBlank</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"判断某字符串是否不为空且长度不为0且不由空白符(whitespace) 构成，等于 !isBlank(String str) "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">trim</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"去掉字符串两端的控制符(control characters, char &lt;= 32) , 如果输入为 null 则返回null "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">trimToNull</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"去掉字符串两端的控制符(control characters, char &lt;= 32) ,如果变为 null 或""，则返回 null "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">trimToEmpty</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"去掉字符串两端的控制符(control characters, char &lt;= 32) ,如果变为 null 或 "" ，则返回 "" "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">strip</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"去掉字符串两端的空白符(whitespace) ，如果输入为 null 则返回 null "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">stripToNull</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+   <span class="s">"去掉字符串两端的空白符(whitespace) ，如果变为 null 或""，则返回 null "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">stripToEmpty</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> 
+    <span class="s">"去掉字符串两端的空白符(whitespace) ，如果变为 null 或"" ，则返回"" "</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">strip</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">String</span> <span class="n">stripChars</span><span class="o">)</span> 
+   <span class="s">"去掉 str 两端的在 stripChars 中的字符。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">stripStart</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">String</span> <span class="n">stripChars</span><span class="o">)</span> 
+    <span class="s">"和11相似，去掉 str 前端的在 stripChars 中的字符。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">stripEnd</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">String</span> <span class="n">stripChars</span><span class="o">)</span> 
+   <span class="s">" 和11相似，去掉 str 末端的在 stripChars 中的字符。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span><span class="o">[]</span> <span class="nf">stripAll</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">strs</span><span class="o">)</span> 
+   <span class="s">" 对字符串数组中的每个字符串进行 strip(String str) ，然后返回。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span><span class="o">[]</span> <span class="nf">stripAll</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">strs</span><span class="o">,</span> <span class="nc">String</span> <span class="n">stripChars</span><span class="o">)</span> 
+    <span class="s">"对字符串数组中的每个字符串进行 strip(String str, String stripChars) ，然后返回。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="o">(</span><span class="nc">String</span> <span class="n">str1</span><span class="o">,</span> <span class="nc">String</span> <span class="n">str2</span><span class="o">)</span> 
+   <span class="s">" 比较两个字符串是否相等，如果两个均为空则也认为相等。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">equalsIgnoreCase</span><span class="o">(</span><span class="nc">String</span> <span class="n">str1</span><span class="o">,</span> <span class="nc">String</span> <span class="n">str2</span><span class="o">)</span> 
+   <span class="s">" 比较两个字符串是否相等，不区分大小写，如果两个均为空则也认为相等。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="kt">char</span> <span class="n">searchChar</span><span class="o">)</span> 
+    <span class="s">"返回字符 searchChar 在字符串 str 中第一次出现的位置。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="kt">char</span> <span class="n">searchChar</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startPos</span><span class="o">)</span> 
+   <span class="s">" 返回字符 searchChar 从 startPos 开始在字符串 str 中第一次出现的位置。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">String</span> <span class="n">searchStr</span><span class="o">)</span> 
+   <span class="s">" 返回字符串 searchStr 在字符串 str 中第一次出现的位置。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">ordinalIndexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">String</span> <span class="n">searchStr</span><span class="o">,</span> <span class="kt">int</span> <span class="n">ordinal</span><span class="o">)</span> 
+    <span class="s">"返回字符串 searchStr 在字符串 str 中第 ordinal 次出现的位置。"</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">String</span> <span class="n">searchStr</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startPos</span><span class="o">)</span> 
+   <span class="s">" 返回字符串 searchStr 从 startPos 开始在字符串 str 中第一次出现的位置。"</span>
+</code></pre></div></div>
+
+<h2 id="输入输出">输入输出</h2>
+
+<p>本模块参考自：https://blog.csdn.net/wobushixiaobailian/article/details/80279880</p>
+
+<h3 id="1输入处理">1输入处理</h3>
+
+<ul>
+  <li>java的输入，我们用到Scanner类，可以用它创建一个对象</li>
+  <li>Scanner reader=new Scanner(System.in);</li>
+  <li>然后reader对象调用nextBoolean(),nextByte(),nextShort(),nextInt(),nextLong(),nextFloat(),nextDouble()方法来从输入流中获取数据。</li>
+  <li>这些方法在执行时都会阻塞，程序等待用户在输入流中输入enter键（\n）时继续执行。</li>
+  <li>这里的nextInt,hasNextInt()这些方法的调用，会判断当前字节流里面是否有东西，没有就阻塞等待输入直到用户按enter键（\n）结束输入,在Scanner类中有一个变量needInput,当需要读取数据时，needInput=true(也就是调用nextInt,hasNextInt()这些函数的时候)。</li>
+  <li>有一个readInput方法，当字节流中有东西可读时，让needInput=false（表示不需要阻塞等待输入）;</li>
+  <li>总之，在调用next(),hasNext()方法时，字节流里面有东西，就不用等待，没有东西就阻塞等待。例如：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// TODO Auto-generated method stub</span>
+		<span class="nc">Scanner</span> <span class="n">s</span><span class="o">=</span><span class="k">new</span> <span class="nc">Scanner</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">);</span>
+		<span class="kt">int</span> <span class="n">a</span><span class="o">,</span><span class="n">b</span><span class="o">;</span>
+		<span class="n">a</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="na">nextInt</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">a</span><span class="o">);</span>
+		<span class="n">b</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="na">nextInt</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">b</span><span class="o">);</span>
+		<span class="cm">/*a=s.nextInt();
+		b=s.nextInt();
+		System.out.println(a+"  "+b);*/</span>
+	<span class="o">}</span>
+<span class="cm">/*
+第一种情况
+2 3
+2
+3
+*/</span>
+<span class="cm">/*
+第二种情况
+2
+2
+3
+3
+*/</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>当在命令行时输入时，我可以这样输入（在一行就输入两个数据再按enter）,当运行到b=s.nextInt()时，发现字节流里面有东西，就没有阻塞等待输入了。（如第一种情况）</li>
+  <li>当然我们也可以这样输入（第一行输入2后，按enter键，然后在输入3，再按enter键）。运行过程是这样的，首先，当运行到a=s.nextInput()时发现，字节流里面没东西，等待输入，于是我们在命令行的第一行输入了2，按回车确认，这时程序继续执行。当运行到b=s.nextInt()时，发现字节流里面没东西，则阻塞等待输入，于是我们在命令行第三行输入3,按enter键确认，程序继续执行。（如第二种情况） Scanner 使用分隔符模式将其输入分解为标记，默认情况下该分隔符模式与空白匹配（当然可以自定义分隔符）。</li>
+</ul>
+
+<h3 id="2输出处理">2输出处理</h3>
+
+<ul>
+  <li>可用System.out.println()或System.out.print()来向屏幕进行输出。</li>
+  <li>jdk1.5新增了和C语言中printf函数类似的数据输出方法</li>
+  <li>System.out.printf(“格式控制部分”，表达式1，表达式2，……，表达式n)</li>
+  <li>格式控制部分由格式控制符号：%d,%c,%f,%s和普通字符组成，普通字符原样输出。格式控制符用来输出表达式的值。</li>
+  <li>%d:输出int类型数据值</li>
+  <li>%<a href="https://www.baidu.com/s?wd=c%3A&amp;tn=24004469_oem_dg&amp;rsv_dl=gh_pl_sl_csd">c:</a>输出int类型数据</li>
+  <li>%f:输出浮点型数据，小数点部分最多保留6位</li>
+  <li>%s:输出字符串数据</li>
+  <li>%md:输出int型数据占m列</li>
+  <li>%m.nf:输出的浮点型数据占m列，小数点保留n位</li>
+  <li>格式字符串语法：每个格式控制以%开始，以空格或标点符号结尾。</li>
+</ul>
+
+<pre><code class="language-Java">
+public class Main {
+ 
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		for(int i=1;i&lt;=9;i++)
+		{
+			for(int j=1;j&lt;=i;j++)
+			{
+				System.out.printf("%2d X%2d=%3d ",j,i,i*j);
+			}
+			System.out.println();
+		}
+	}
+}
+//输出99乘法表
+</code></pre>
+
+<h2 id="流程控制">流程控制</h2>
+
+<p>本模块参考自：https://www.cnblogs.com/adamjwh/p/8329496.html</p>
+
+<h3 id="一块作用域">一块作用域</h3>
+
+<ul>
+  <li>Java语言的复合语句是以整个块区为单位的语句，又称块语句。复合语句由“{”开始，“}”结束。</li>
+  <li>对于复合语句，我们只需要知道，复合语句为局部变量创建了一个作用域，该作用域为程序的一部分，在该作用域中某个变量被创建并能够被使用，如果在某个变量的作用域外使用该变量，则会发生错误。并且复合语句中可以嵌套复合语句。</li>
+</ul>
+
+<h3 id="二条件语句">二条件语句</h3>
+
+<ul>
+  <li>条件语句可根据不同的条件执行不同的语句。包括if条件语句与switch多分支语句。这是学习Java的一个基础与重点。</li>
+</ul>
+
+<h4 id="if条件语句">if条件语句</h4>
+
+<ul>
+  <li>使用if条件语句，可选择是否要执行紧跟在条件之后的那个语句。关键字if之后是作为条件的“布尔表达式”，如果该表达式返回true，则执行其后的语句；若为false，则不执行if后的语句。可分为简单的if条件语句、if···else语句和if···else if多分支语句。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">100</span><span class="o">;</span>
+<span class="k">if</span><span class="o">(</span><span class="n">a</span> <span class="o">==</span> <span class="mi">100</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">a</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>如上方代码，｛｝之间为复合语句，if为条件语句，翻译过来就是如果a等于100，则输出a的值，否则不执行。</li>
+  <li>如果if后只有一条语句，比如上述代码只有一条输出，可以不加｛｝，但为了代码的可读性，以及防止代码过多出现不必要的错误，建议所有的if、else后都加上相应的｛｝。</li>
+</ul>
+
+<h4 id="if-else语句">if-else语句</h4>
+
+<ul>
+  <li>if···else语句是条件语句中最常用的一种形式，它会针对某种条件有选择的作出处理。通常表现为“如果满足某种条件，就进行某种处理，否则就进行另一种处理”。</li>
+  <li>if后的()内的表达式必须是boolean型的。如果为true，则执行if后的复合语句；如果为false，则执行else后的复合语句。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Getifelse</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">math</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span>        <span class="c1">// 声明，数学成绩为80（及格）</span>
+        <span class="kt">int</span> <span class="n">english</span> <span class="o">=</span> <span class="mi">50</span><span class="o">;</span>    <span class="c1">// 声明，英语成绩为50（不及格）</span>
+        
+        <span class="k">if</span><span class="o">(</span><span class="n">math</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="o">)</span> <span class="o">{</span>    <span class="c1">// if判断语句判断math是否大于等于60</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"math has passed"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>            <span class="c1">// if条件不成立</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"math has not passed"</span><span class="o">);</span>
+        <span class="o">}</span>
+        
+        <span class="k">if</span><span class="o">(</span><span class="n">english</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="o">)</span> <span class="o">{</span>    <span class="c1">// if判断语句判断english是否大于等于60</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"english has passed"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>            <span class="c1">// if条件不成立</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"english has not passed"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="if-elseif语句">if-elseif语句</h4>
+
+<ul>
+  <li>if···else if多分支语句用于针对某一事件的多种情况进行处理。通常表现为“如果满足某种条件”，就进行某种处理，否则，如果满足另一种条件，则进行另一种处理。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">GetTerm</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">40</span><span class="o">;</span>
+        
+        <span class="k">if</span><span class="o">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"x的值大于60"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"x的值大于30但小于60"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"x的值大于0但小于30"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"x的值小于等于0"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="switch语句">switch语句</h4>
+
+<ul>
+  <li>switch语句是一种比较简单明了的多选一的选择，在Java语言中，可以用switch语句将动作组织起来进行多选一。语法格式如下：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">switch</span><span class="o">(</span><span class="n">表达式</span><span class="o">)</span>
+<span class="o">{</span> 
+ <span class="k">case</span> <span class="nl">常量值1:</span>
+        <span class="n">语句块1</span>
+        <span class="o">[</span><span class="k">break</span><span class="o">;]</span>
+<span class="o">...</span>
+<span class="k">case</span> <span class="nl">常量值n:</span>
+        <span class="n">语句块2</span>
+        <span class="o">[</span><span class="k">break</span><span class="o">;]</span>
+<span class="k">default</span><span class="o">:</span>
+        <span class="n">语句块</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="o">;</span>
+        <span class="o">[</span><span class="k">break</span><span class="o">;]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>switch语句中表达式的值必须是<strong>整型或字符型</strong>，常量值1~n必须也是整型或字符型。</li>
+  <li>简单说一下switch语句是怎么执行的（重点，初学的朋友要注意）。首先switch语句先计算表达式的值，如果表达式的值与case后的常量值相同，则执行该case后的若干个语句，直到遇到break语句为止。如果没有break，则继续执行下一case中的若干语句，直到遇到break为止。若没有一个常量的值与表达式的值相同，则执行default后面的语句。default语句可选，如果不存在default语句，而且switch语句中的表达式的值与任何case的常量值都不相同，则switch不做任何处理。并且，同一个switch语句，case的常量值必须互不相同。</li>
+  <li>要注意的是case后的常量表达式的值可以为整数和字符，但不可以是实数后字符串，比如case 1.1，case “ok”都是非法的。</li>
+</ul>
+
+<h3 id="三循环语句">三循环语句</h3>
+
+<ul>
+  <li>循环语句就是在满足一定条件的情况下反复执行某一个操作。包括while循环语句、do···while循环语句和for循环语句。</li>
+</ul>
+
+<h4 id="while循环">while循环</h4>
+
+<ul>
+  <li>while循环语句的循环方式为利用一个条件来控制是否要继续反复执行这个语句。</li>
+  <li>假设现在有1~10十个数字，我们要将它们相加求和，在学习while之前可能会直接用+运算符从1加到10，也就是1+2+3+4+5+6+7+8+9+10，但如果现在需要从1加到1万呢？10万？所以，我们要引入while循环来进行循环相加，如下：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">GetSum</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>            <span class="c1">// 定义初值</span>
+        <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>        <span class="c1">// 定义求和变量，用于存储相加后的结果</span>
+        
+        <span class="k">while</span><span class="o">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">sum</span> <span class="o">+=</span> <span class="n">x</span><span class="o">;</span>        <span class="c1">// 循环相加，也即    sum = sum + x;</span>
+            <span class="n">x</span><span class="o">++;</span>
+        <span class="o">}</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">sum</span><span class="o">);</span>
+    <span class="o">}</span>
+  <span class="cm">/*
+  这就是一个从1加到10的代码，首先定义一个初值x为1，然后定义一个存储相加结果的变量sum为0，循环条件为x&lt;=10，也就是每次判断x&lt;=10是否成立，成立则继续循环。循环内第一句“sum +=x;”其实就是“sum = sum +x;”的另一种写法，是在sum的基础上加x，并赋给sum，那么此时sum的值为0+1=1了，然后x++，x自增1为2，判断x&lt;=10，则继续循环，sum的值变为1+2=3，然后x++变为3，如此循环下去，直到x为11时退出循环，此时sum的值就是1+2+3+4+5+6+7+8+9+10最后的结果55了。
+  */</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>在while循环语句中，如果while语句后直接加分号，如while(a == 5);代表当前while为空语句，进入无线循环。</li>
+</ul>
+
+<h4 id="do-while循环">do-while循环</h4>
+
+<ul>
+  <li>do···while循环语句与while循环语句的区别是，while循环语句先判断条件是否成立再执行循环体，而do···while循环语句则先执行一次循环后，再判断条件是否成立。也即do···while至少执行一次。语法格式如下：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">do</span>
+<span class="o">{</span>
+    <span class="n">执行语句</span>
+<span class="o">}</span>  <span class="k">while</span> <span class="o">(</span><span class="n">条件表达式</span><span class="o">);</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Cycle</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+        
+        <span class="c1">// while循环语句</span>
+        <span class="k">while</span><span class="o">(</span><span class="n">a</span> <span class="o">==</span> <span class="mi">8</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"a == "</span> <span class="o">+</span> <span class="n">a</span><span class="o">);</span>
+            <span class="n">a</span><span class="o">--;</span>
+        <span class="o">}</span>
+        
+        <span class="c1">// do···while循环语句</span>
+        <span class="k">do</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"b == "</span> <span class="o">+</span> <span class="n">b</span><span class="o">);</span>
+            <span class="n">b</span><span class="o">--;</span>
+        <span class="o">}</span> <span class="k">while</span><span class="o">(</span><span class="n">b</span> <span class="o">==</span> <span class="mi">8</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>这里，a、b都为10，先看while循环语句，进入while下语句块的条件是a == 8，很明显不成立，所以不执行，结果中没有关于a的结果，然后再看do···while循环语句，先执行一次do后的语句块，输出“b == 10”，然后判断while条件b == 8不成立，循环结束，所以结果只有一个do···while语句中执行的第一步b == 10。</li>
+</ul>
+
+<h4 id="for循环">for循环</h4>
+
+<ul>
+  <li>for循环语句是Java程序设计中最有用的循环语句之一。一个for循环可以用来重复执行某条语句，知道某个条件得到满足。语法格式如下：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span><span class="o">(</span><span class="n">表达式1</span><span class="o">;</span> <span class="n">表达式2</span><span class="o">;</span> <span class="n">表达式3</span><span class="o">)</span>
+<span class="o">{</span>
+    <span class="n">语句序列</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>其中，表达式1为初始化表达式，负责完成变量的初始化；表达式2为循环条件表达式，指定循环条件；表达式3为循环后操作表达式，负责修整变量，改变循环条件。三个表达式间用分号隔开</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Circulate</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="mi">100</span><span class="o">;</span> <span class="n">i</span><span class="o">+=</span><span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">sum</span> <span class="o">+=</span> <span class="n">i</span><span class="o">;</span>
+        <span class="o">}</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">sum</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="cm">/*
+例：用for循环语句求100以内所有偶数的和。
+for循环内，首先定义一个变量并赋初值，表示循环中i从2开始进行，然后条件为i&lt;=100，即i&lt;=100时进行循环并执行语句块中的语句，第三个表达式“i+=2”表示每次循环执行i=i+1，即没循环一次，i的值为在原来的基础上加2后的值。然后循环求sum的值，即2+4+6+8+···+100，当i=102时退出循环，执行输出语句，输出结果为2550。
+*/</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>说到for循环语句就不得提到foreach语句了，它是Java5后新增的for语句的特殊简化版本，并不能完全替代for语句，但所有foreach语句都可以改写为for语句。foreach语句在遍历数组等时为程序员提供了很大的方便。语法格式如下：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span><span class="o">(</span><span class="n">元素变量x</span> <span class="o">:</span> <span class="n">遍历对象obj</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">引用了x的Java语句</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kt">int</span> <span class="n">array</span><span class="o">[]</span> <span class="o">=</span> <span class="o">{</span><span class="mi">7</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">9</span><span class="o">};</span>
+<span class="cm">/*
+array是一个一维数组，其中有7、8、9三个值，现在要将这三个值打印到控制台上，用foreach语句相比for语句会简单很多。其中，在for的条件中，先定义了一个整型变量arr（只要和要遍历的数组名不同即可），冒号后则是要遍历的数组名，那么｛｝间就是要循环的内容了。
+*/</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">arr</span> <span class="o">:</span> <span class="n">array</span><span class="o">)</span> <span class="o">{</span>
+     <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">arr</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="四跳转语句">四跳转语句</h3>
+
+<ul>
+  <li>Java语言提供了三种跳转语句，分别是break语句、continue语句和return语句。</li>
+</ul>
+
+<h4 id="break语句">break语句</h4>
+
+<ul>
+  <li>break语句刚刚在switch中已经见过了，是用来中止case的。实际上break语句在for、while、do···while循环语句中，用于强行退出当前循环，为什么说是当前循环呢，因为break只能跳出离它最近的那个循环的循环体，假设有两个循环嵌套使用，break用在内层循环下，则break只能跳出内层循环，如下：</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>    <span class="c1">// 外层循环</span>
+    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">n</span> <span class="o">;</span><span class="n">j</span><span class="o">++)</span> <span class="o">{</span>    <span class="c1">// 内层循环</span>
+        <span class="k">break</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="continue语句">continue语句</h4>
+
+<ul>
+  <li>continue语句只能用于for、while、do···while循环语句中，用于让程序直接跳过其后面的语句，进行下一次循环。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ContinueDemo</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        
+        <span class="k">while</span><span class="o">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">i</span><span class="o">++;</span>
+            
+            <span class="k">if</span><span class="o">(</span><span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>    <span class="c1">// 能被2整除，是偶数</span>
+                <span class="k">continue</span><span class="o">;</span>    <span class="c1">// 跳过当前循环</span>
+            <span class="o">}</span>
+            
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="s">" "</span><span class="o">);</span>    
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="c1">//例：输出10以内的所有奇数</span>
+  <span class="cm">/*这里if条件判断是否为偶数，如果是偶数则执行continue，直接跳出本次循环，不进行continue后的步骤（即不执行输出语句），然后下一次循环为奇数，输出i*/</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="return语句">return语句</h4>
+
+<ul>
+  <li>return语句可以从一个方法返回，并把控制权交给调用它的语句。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kt">void</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">name</span><span class="o">;</span>
+<span class="o">}</span>
+<span class="c1">//这是一个方法用于获取姓名，当调用这个方法时将返回姓名值。</span>
+</code></pre></div></div>
+
+<h2 id="数组">数组</h2>
+
+<h3 id="数组常用方法">数组常用方法</h3>
+
+<p>本模块参考：https://www.cnblogs.com/chenpi/p/5507806.html,https://blog.csdn.net/goodbye_youth/article/details/81003817</p>
+
+<h4 id="声明一个数组">声明一个数组</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span><span class="o">[]</span> <span class="n">aArray</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">[</span><span class="mi">5</span><span class="o">];</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">bArray</span> <span class="o">=</span> <span class="o">{</span><span class="s">"a"</span><span class="o">,</span><span class="s">"b"</span><span class="o">,</span><span class="s">"c"</span><span class="o">,</span> <span class="s">"d"</span><span class="o">,</span> <span class="s">"e"</span><span class="o">};</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">cArray</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">[]{</span><span class="s">"a"</span><span class="o">,</span><span class="s">"b"</span><span class="o">,</span><span class="s">"c"</span><span class="o">,</span><span class="s">"d"</span><span class="o">,</span><span class="s">"e"</span><span class="o">};</span>
+</code></pre></div></div>
+
+<h4 id="打印一个数组">打印一个数组</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span><span class="o">[]</span> <span class="n">intArray</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">5</span> <span class="o">};</span>
+<span class="nc">String</span> <span class="n">intArrayString</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">intArray</span><span class="o">);</span>
+<span class="c1">// print directly will print reference value</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">intArray</span><span class="o">);</span>
+<span class="c1">// [I@7150bd4d</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">intArrayString</span><span class="o">);</span>
+<span class="c1">// [1, 2, 3, 4, 5]</span>
+</code></pre></div></div>
+
+<h4 id="创建arraylist">创建ArrayList</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span><span class="o">[]</span> <span class="n">stringArray</span> <span class="o">=</span> <span class="o">{</span> <span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span><span class="o">,</span> <span class="s">"d"</span><span class="o">,</span> <span class="s">"e"</span> <span class="o">};</span>
+<span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">arrayList</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">stringArray</span><span class="o">));</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">arrayList</span><span class="o">);</span>
+<span class="c1">// [a, b, c, d, e]</span>
+</code></pre></div></div>
+
+<h4 id="包含某个值">包含某个值</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span><span class="o">[]</span> <span class="n">stringArray</span> <span class="o">=</span> <span class="o">{</span> <span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span><span class="o">,</span> <span class="s">"d"</span><span class="o">,</span> <span class="s">"e"</span> <span class="o">};</span>
+<span class="kt">boolean</span> <span class="n">b</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">stringArray</span><span class="o">).</span><span class="na">contains</span><span class="o">(</span><span class="s">"a"</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">b</span><span class="o">);</span>
+<span class="c1">// true</span>
+</code></pre></div></div>
+
+<h4 id="连接两个数组">连接两个数组</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span><span class="o">[]</span> <span class="n">intArray</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">5</span> <span class="o">};</span>
+<span class="kt">int</span><span class="o">[]</span> <span class="n">intArray2</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">9</span><span class="o">,</span> <span class="mi">10</span> <span class="o">};</span>
+<span class="c1">// Apache Commons Lang library</span>
+<span class="kt">int</span><span class="o">[]</span> <span class="n">combinedIntArray</span> <span class="o">=</span> <span class="nc">ArrayUtils</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">intArray</span><span class="o">,</span> <span class="n">intArray2</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="内联数组">内联数组</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">method</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">[]{</span><span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span><span class="o">,</span> <span class="s">"d"</span><span class="o">,</span> <span class="s">"e"</span><span class="o">});</span>
+</code></pre></div></div>
+
+<h4 id="拼接数组元素">拼接数组元素</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// containing the provided list of elements</span>
+<span class="c1">// Apache common lang</span>
+<span class="nc">String</span> <span class="n">j</span> <span class="o">=</span> <span class="nc">StringUtils</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">[]</span> <span class="o">{</span> <span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span> <span class="o">},</span> <span class="s">", "</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">j</span><span class="o">);</span>
+<span class="c1">// a, b, c</span>
+</code></pre></div></div>
+
+<h4 id="arraylist转数组">ArrayList转数组</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span><span class="o">[]</span> <span class="n">stringArray</span> <span class="o">=</span> <span class="o">{</span> <span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span><span class="o">,</span> <span class="s">"d"</span><span class="o">,</span> <span class="s">"e"</span> <span class="o">};</span>
+<span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">arrayList</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">stringArray</span><span class="o">));</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">stringArr</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">[</span><span class="n">arrayList</span><span class="o">.</span><span class="na">size</span><span class="o">()];</span>
+<span class="n">arrayList</span><span class="o">.</span><span class="na">toArray</span><span class="o">(</span><span class="n">stringArr</span><span class="o">);</span>
+<span class="k">for</span> <span class="o">(</span><span class="nc">String</span> <span class="n">s</span> <span class="o">:</span> <span class="n">stringArr</span><span class="o">)</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="array转set">Array转Set</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Set</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">stringArray</span><span class="o">));</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">set</span><span class="o">);</span>
+<span class="c1">//[d, e, b, c, a]</span>
+</code></pre></div></div>
+
+<h4 id="翻转数组">翻转数组</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span><span class="o">[]</span> <span class="n">intArray</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">5</span> <span class="o">};</span>
+<span class="nc">ArrayUtils</span><span class="o">.</span><span class="na">reverse</span><span class="o">(</span><span class="n">intArray</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">intArray</span><span class="o">));</span>
+<span class="c1">//[5, 4, 3, 2, 1]</span>
+</code></pre></div></div>
+
+<h4 id="删除数组元素">删除数组元素</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span><span class="o">[]</span> <span class="n">intArray</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">5</span> <span class="o">};</span>
+<span class="kt">int</span><span class="o">[]</span> <span class="n">removed</span> <span class="o">=</span> <span class="nc">ArrayUtils</span><span class="o">.</span><span class="na">removeElement</span><span class="o">(</span><span class="n">intArray</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span><span class="c1">//create a new array</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">removed</span><span class="o">));</span>
+</code></pre></div></div>
+
+<h4 id="整形转字节数组">整形转字节数组</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span> <span class="o">=</span> <span class="nc">ByteBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="mi">4</span><span class="o">).</span><span class="na">putInt</span><span class="o">(</span><span class="mi">8</span><span class="o">).</span><span class="na">array</span><span class="o">();</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">byte</span> <span class="n">t</span> <span class="o">:</span> <span class="n">bytes</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"0x%x "</span><span class="o">,</span> <span class="n">t</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="数组填充">数组填充</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//用指定元素填充整个数组（会替换掉数组中原来的元素）</span>
+<span class="c1">//Arrays.fill(Object[] array, Object obj)</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">};</span>
+<span class="nc">Arrays</span><span class="o">.</span><span class="na">fill</span><span class="o">(</span><span class="n">data</span><span class="o">,</span> <span class="mi">9</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [9, 9, 9, 9]</span>
+
+<span class="c1">//用指定元素填充数组，从起始位置到结束位置，取头不取尾（会替换掉数组中原来的元素）</span>
+<span class="c1">//Arrays.fill(Object[] array, int fromIndex, int toIndex, Object obj)</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">};</span>
+<span class="nc">Arrays</span><span class="o">.</span><span class="na">fill</span><span class="o">(</span><span class="n">data</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">9</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [9, 9, 3, 4]</span>
+</code></pre></div></div>
+
+<h4 id="排序">排序</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Arrays.sort(Object[] array)</span>
+<span class="c1">//对数组元素进行排序（串行排序）</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="o">{</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"4"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">};</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [1, 4, 3, 2]</span>
+<span class="nc">Arrays</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">data</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [1, 2, 3, 4]</span>
+
+<span class="c1">//Arrays.sort(T[] array, Comparator&lt;? super T&gt; comparator)</span>
+<span class="c1">//使用自定义比较器，对数组元素进行排序（串行排序）</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="o">{</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"4"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">};</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [1, 4, 3, 2]</span>
+<span class="c1">// 实现降序排序，返回-1放左边，1放右边，0保持不变</span>
+<span class="nc">Arrays</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">data</span><span class="o">,</span> <span class="o">(</span><span class="n">str1</span><span class="o">,</span> <span class="n">str2</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">str1</span><span class="o">.</span><span class="na">compareTo</span><span class="o">(</span><span class="n">str2</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">});</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [4, 3, 2, 1]</span>
+
+
+<span class="c1">//Arrays.sort(Object[] array, int fromIndex, int toIndex)</span>
+<span class="c1">//对数组元素的指定范围进行排序（串行排序）</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="o">{</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"4"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">};</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [1, 4, 3, 2]</span>
+<span class="c1">// 对下标[0, 3)的元素进行排序，即对1，4，3进行排序，2保持不变</span>
+<span class="nc">Arrays</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">data</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [1, 3, 4, 2]</span>
+
+<span class="cm">/*Arrays.sort(T[] array, int fromIndex, int toIndex, Comparator&lt;? super T&gt; c)*/</span>
+<span class="c1">//使用自定义比较器，对数组元素的指定范围进行排序（串行排序）</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="o">{</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"4"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">};</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [1, 4, 3, 2]</span>
+<span class="c1">// 对下标[0, 3)的元素进行降序排序，即对1，4，3进行降序排序，2保持不变</span>
+<span class="nc">Arrays</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">data</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="o">(</span><span class="n">str1</span><span class="o">,</span> <span class="n">str2</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">str1</span><span class="o">.</span><span class="na">compareTo</span><span class="o">(</span><span class="n">str2</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">});</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// [4, 3, 1, 2]</span>
+
+</code></pre></div></div>
+
+<h4 id="数组复制">数组复制</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Arrays.copyOf(T[] original, int newLength)</span>
+<span class="cm">/*拷贝数组，其内部调用了 System.arraycopy() 方法，从下标0开始，如果超过原数组长度，会用null进行填充*/</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data1</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">};</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data2</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">data1</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data2</span><span class="o">));</span> <span class="c1">// [1, 2]</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data2</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">data1</span><span class="o">,</span> <span class="mi">5</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data2</span><span class="o">));</span> <span class="c1">// [1, 2, 3, 4, null]</span>
+
+
+<span class="c1">//Arrays.copyOfRange(T[] original, int from, int to)</span>
+<span class="c1">//拷贝数组，指定起始位置和结束位置，如果超过原数组长度，会用null进行填充</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data1</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">};</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data2</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOfRange</span><span class="o">(</span><span class="n">data1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data2</span><span class="o">));</span> <span class="c1">// [1, 2]</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data2</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOfRange</span><span class="o">(</span><span class="n">data1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">5</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">data2</span><span class="o">));</span> <span class="c1">// [1, 2, 3, 4, null]</span>
+
+</code></pre></div></div>
+
+<h4 id="数组比较">数组比较</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Arrays.equals(Object[] array1, Object[] array2)</span>
+<span class="cm">/*判断两个数组是否相等，实际上比较的是两个数组的哈希值，即 Arrays.hashCode(data1) == Arrays.hashCode(data2)*/</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data1</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">};</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data2</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">};</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">data1</span><span class="o">,</span> <span class="n">data2</span><span class="o">));</span> <span class="c1">// true</span>
+
+</code></pre></div></div>
+
+<h4 id="数组哈希值">数组哈希值</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Arrays.hashCode(Object[] array)</span>
+<span class="c1">//返回数组的哈希值</span>
+<span class="nc">Integer</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">};</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">hashCode</span><span class="o">(</span><span class="n">data</span><span class="o">));</span> <span class="c1">// 30817</span>
+</code></pre></div></div>
+
+<h3 id="arrays">Arrays</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">asList</span><span class="o">(</span><span class="no">T</span><span class="o">...</span> <span class="n">a</span><span class="o">)</span> 
+          <span class="s">"返回一个受指定数组支持的固定大小的列表。"</span> 
+<span class="kd">static</span> <span class="kt">void</span> <span class="nf">fill</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">val</span><span class="o">)</span> 
+         <span class="s">" 将指定的 Object 引用分配给指定 Object 数组的每个元素。 "</span>
+<span class="kd">static</span> <span class="kt">void</span> <span class="nf">fill</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">toIndex</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">val</span><span class="o">)</span> 
+          <span class="s">"将指定的 Object 引用分配给指定 Object 数组指定范围中的每个元素。"</span> 
+<span class="kd">static</span> <span class="kt">void</span> <span class="nf">sort</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">)</span> 
+         <span class="s">" 根据元素的自然顺序对指定对象数组按升序进行排序。"</span> 
+<span class="kd">static</span> <span class="kt">void</span> <span class="nf">sort</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">toIndex</span><span class="o">)</span> 
+          <span class="s">"根据元素的自然顺序对指定对象数组的指定范围按升序进行排序。"</span> 
+<span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">sort</span><span class="o">(</span><span class="no">T</span><span class="o">[]</span> <span class="n">a</span><span class="o">,</span> <span class="nc">Comparator</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="no">T</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> 
+          <span class="s">"根据指定比较器产生的顺序对指定对象数组进行排序。"</span> 
+<span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">sort</span><span class="o">(</span><span class="no">T</span><span class="o">[]</span> <span class="n">a</span><span class="o">,</span> <span class="kt">int</span> <span class="n">fromIndex</span><span class="o">,</span> <span class="kt">int</span> <span class="n">toIndex</span><span class="o">,</span> <span class="nc">Comparator</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="no">T</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> 
+          <span class="s">"根据指定比较器产生的顺序对指定对象数组的指定范围进行排序。"</span> 
+<span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span><span class="o">[]</span> <span class="nf">copyOf</span><span class="o">(</span><span class="no">T</span><span class="o">[]</span> <span class="n">original</span><span class="o">,</span> <span class="kt">int</span> <span class="n">newLength</span><span class="o">)</span> 
+          <span class="s">"复制指定的数组，截取或用 null 填充（如有必要），以使副本具有指定的长度。"</span> 
+<span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span><span class="o">[]</span> <span class="nf">copyOfRange</span><span class="o">(</span><span class="no">T</span><span class="o">[]</span> <span class="n">original</span><span class="o">,</span> <span class="kt">int</span> <span class="n">from</span><span class="o">,</span> <span class="kt">int</span> <span class="n">to</span><span class="o">)</span> 
+         <span class="s">" 将指定数组的指定范围复制到一个新数组。"</span> 
+<span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">,</span> <span class="nc">Object</span><span class="o">[]</span> <span class="n">a2</span><span class="o">)</span> 
+          <span class="s">"如果两个指定的 Objects 数组彼此相等，则返回 true。"</span> 
+<span class="kd">static</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">)</span> 
+          <span class="s">"基于指定数组的内容返回哈希码。"</span> 
+<span class="kd">static</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">)</span> 
+          <span class="s">"返回指定数组内容的字符串表示形式。"</span> 
+<span class="kd">static</span> <span class="kt">int</span> <span class="nf">binarySearch</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">a</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">key</span><span class="o">)</span> 
+          <span class="s">"使用二分搜索法来搜索指定数组，以获得指定对象。但是要先排序 "</span>
+</code></pre></div></div>
+
+<h4 id="排序-1">排序</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// *************排序 sort****************</span>
+		<span class="kt">int</span> <span class="n">a</span><span class="o">[]</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">9</span> <span class="o">};</span>
+		<span class="c1">// sort(int[] a)方法按照数字顺序排列指定的数组。</span>
+		<span class="nc">Arrays</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">a</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.sort(a):"</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">:</span> <span class="n">a</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="c1">// 换行</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+
+		<span class="c1">// sort(int[] a,int fromIndex,int toIndex)按升序排列数组的指定范围</span>
+		<span class="kt">int</span> <span class="n">b</span><span class="o">[]</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">9</span> <span class="o">};</span>
+		<span class="nc">Arrays</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">6</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.sort(b, 2, 6):"</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">:</span> <span class="n">b</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="c1">// 换行</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+
+		<span class="kt">int</span> <span class="n">c</span><span class="o">[]</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">9</span> <span class="o">};</span>
+		<span class="c1">// parallelSort(int[] a) 按照数字顺序排列指定的数组(并行的)。同sort方法一样也有按范围的排序</span>
+		<span class="nc">Arrays</span><span class="o">.</span><span class="na">parallelSort</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.parallelSort(c)："</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">:</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="c1">// 换行</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+
+		<span class="c1">// parallelSort给字符数组排序，sort也可以</span>
+		<span class="kt">char</span> <span class="n">d</span><span class="o">[]</span> <span class="o">=</span> <span class="o">{</span> <span class="sc">'a'</span><span class="o">,</span> <span class="sc">'f'</span><span class="o">,</span> <span class="sc">'b'</span><span class="o">,</span> <span class="sc">'c'</span><span class="o">,</span> <span class="sc">'e'</span><span class="o">,</span> <span class="sc">'A'</span><span class="o">,</span> <span class="sc">'C'</span><span class="o">,</span> <span class="sc">'B'</span> <span class="o">};</span>
+		<span class="nc">Arrays</span><span class="o">.</span><span class="na">parallelSort</span><span class="o">(</span><span class="n">d</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.parallelSort(d)："</span><span class="o">);</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">char</span> <span class="n">d2</span> <span class="o">:</span> <span class="n">d</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">d2</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="c1">// 换行</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+</code></pre></div></div>
+
+<h4 id="查找">查找</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// *************查找 binarySearch()****************</span>
+		<span class="kt">char</span><span class="o">[]</span> <span class="n">e</span> <span class="o">=</span> <span class="o">{</span> <span class="sc">'a'</span><span class="o">,</span> <span class="sc">'f'</span><span class="o">,</span> <span class="sc">'b'</span><span class="o">,</span> <span class="sc">'c'</span><span class="o">,</span> <span class="sc">'e'</span><span class="o">,</span> <span class="sc">'A'</span><span class="o">,</span> <span class="sc">'C'</span><span class="o">,</span> <span class="sc">'B'</span> <span class="o">};</span>
+		<span class="c1">// 排序后再进行二分查找，否则找不到</span>
+		<span class="nc">Arrays</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.sort(e)"</span> <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">e</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.binarySearch(e, 'c')："</span><span class="o">);</span>
+		<span class="kt">int</span> <span class="n">s</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">binarySearch</span><span class="o">(</span><span class="n">e</span><span class="o">,</span> <span class="sc">'c'</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"字符c在数组的位置："</span> <span class="o">+</span> <span class="n">s</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="比较">比较</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// *************比较 equals****************</span>
+		<span class="kt">char</span><span class="o">[]</span> <span class="n">e</span> <span class="o">=</span> <span class="o">{</span> <span class="sc">'a'</span><span class="o">,</span> <span class="sc">'f'</span><span class="o">,</span> <span class="sc">'b'</span><span class="o">,</span> <span class="sc">'c'</span><span class="o">,</span> <span class="sc">'e'</span><span class="o">,</span> <span class="sc">'A'</span><span class="o">,</span> <span class="sc">'C'</span><span class="o">,</span> <span class="sc">'B'</span> <span class="o">};</span>
+		<span class="kt">char</span><span class="o">[]</span> <span class="n">f</span> <span class="o">=</span> <span class="o">{</span> <span class="sc">'a'</span><span class="o">,</span> <span class="sc">'f'</span><span class="o">,</span> <span class="sc">'b'</span><span class="o">,</span> <span class="sc">'c'</span><span class="o">,</span> <span class="sc">'e'</span><span class="o">,</span> <span class="sc">'A'</span><span class="o">,</span> <span class="sc">'C'</span><span class="o">,</span> <span class="sc">'B'</span> <span class="o">};</span>
+		<span class="cm">/*
+		* 元素数量相同，并且相同位置的元素相同。 另外，如果两个数组引用都是null，则它们被认为是相等的 。
+		*/</span>
+		<span class="c1">// 输出true</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.equals(e, f):"</span> <span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">e</span><span class="o">,</span> <span class="n">f</span><span class="o">));</span>
+</code></pre></div></div>
+
+<h4 id="填充">填充</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// *************填充fill(批量初始化)****************</span>
+		<span class="kt">int</span><span class="o">[]</span> <span class="n">g</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">6</span> <span class="o">};</span>
+		<span class="c1">// 数组中所有元素重新分配值</span>
+		<span class="nc">Arrays</span><span class="o">.</span><span class="na">fill</span><span class="o">(</span><span class="n">g</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.fill(g, 3)："</span><span class="o">);</span>
+		<span class="c1">// 输出结果：333333333</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">:</span> <span class="n">g</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="c1">// 换行</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+
+		<span class="kt">int</span><span class="o">[]</span> <span class="n">h</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="o">};</span>
+		<span class="c1">// 数组中指定范围元素重新分配值</span>
+		<span class="nc">Arrays</span><span class="o">.</span><span class="na">fill</span><span class="o">(</span><span class="n">h</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">9</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.fill(h, 0, 2, 9);："</span><span class="o">);</span>
+		<span class="c1">// 输出结果：993333666</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">:</span> <span class="n">h</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+		<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="转列表">转列表</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// *************转列表 asList()****************</span>
+		<span class="cm">/*
+		 * 返回由指定数组支持的固定大小的列表。
+		 * （将返回的列表更改为“写入数组”。）该方法作为基于数组和基于集合的API之间的桥梁，与Collection.toArray()相结合 。
+		 * 返回的列表是可序列化的，并实现RandomAccess 。
+		 * 此方法还提供了一种方便的方式来创建一个初始化为包含几个元素的固定大小的列表如下：
+		 */</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">stooges</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"Larry"</span><span class="o">,</span> <span class="s">"Moe"</span><span class="o">,</span> <span class="s">"Curly"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">stooges</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="转字符串">转字符串</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// *************转字符串 toString()****************</span>
+		<span class="cm">/*
+		* 返回指定数组的内容的字符串表示形式。
+		*/</span>
+		<span class="kt">char</span><span class="o">[]</span> <span class="n">k</span> <span class="o">=</span> <span class="o">{</span> <span class="sc">'a'</span><span class="o">,</span> <span class="sc">'f'</span><span class="o">,</span> <span class="sc">'b'</span><span class="o">,</span> <span class="sc">'c'</span><span class="o">,</span> <span class="sc">'e'</span><span class="o">,</span> <span class="sc">'A'</span><span class="o">,</span> <span class="sc">'C'</span><span class="o">,</span> <span class="sc">'B'</span> <span class="o">};</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">k</span><span class="o">));</span><span class="c1">// [a, f, b, c, e, A, C, B]</span>
+</code></pre></div></div>
+
+<h4 id="复制">复制</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// *************复制 copy****************</span>
+		<span class="c1">// copyOf 方法实现数组复制,h为数组，6为复制的长度</span>
+		<span class="kt">int</span><span class="o">[]</span> <span class="n">h</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="o">};</span>
+		<span class="kt">int</span> <span class="n">i</span><span class="o">[]</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">h</span><span class="o">,</span> <span class="mi">6</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.copyOf(h, 6);："</span><span class="o">);</span>
+		<span class="c1">// 输出结果：123333</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">:</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">j</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="c1">// 换行</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+		<span class="c1">// copyOfRange将指定数组的指定范围复制到新数组中</span>
+		<span class="kt">int</span> <span class="n">j</span><span class="o">[]</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOfRange</span><span class="o">(</span><span class="n">h</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">11</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Arrays.copyOfRange(h, 6, 11)："</span><span class="o">);</span>
+		<span class="c1">// 输出结果66600(h数组只有9个元素这里是从索引6到索引11复制所以不足的就为0)</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j2</span> <span class="o">:</span> <span class="n">j</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">j2</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="c1">// 换行</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+</code></pre></div></div>
+
+<h4 id="注意事项">注意事项</h4>
+
+<ul>
+  <li><strong>传递的数组必须是对象数组，而不是基本类型。</strong></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span><span class="o">[]</span> <span class="n">myArray</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span> <span class="o">};</span>
+<span class="nc">List</span> <span class="n">myList</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">myArray</span><span class="o">);</span><span class="c1">//相当于list中放了一个array数组</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">myList</span><span class="o">.</span><span class="na">size</span><span class="o">());</span><span class="c1">//1，里面只有一个数组</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">myList</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span><span class="c1">//数组地址值</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">myList</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">));</span><span class="c1">//报错：ArrayIndexOutOfBoundsException</span>
+<span class="kt">int</span> <span class="o">[]</span> <span class="n">array</span><span class="o">=(</span><span class="kt">int</span><span class="o">[])</span> <span class="n">myList</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span><span class="c1">//1</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="mi">1</span><span class="o">]);</span><span class="c1">//2</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="mi">2</span><span class="o">]);</span><span class="c1">//3</span>
+
+<span class="c1">//应该使用Integer[] myArray = { 1, 2, 3 };</span>
+</code></pre></div></div>
+
+<ul>
+  <li><strong>使用集合的修改方法:add()、remove()、clear()会抛出异常。</strong></li>
+  <li><code class="language-plaintext highlighter-rouge">Arrays.asList()</code> 方法返回的并不是 <code class="language-plaintext highlighter-rouge">java.util.ArrayList</code> ，而是 <code class="language-plaintext highlighter-rouge">java.util.Arrays</code> 的一个内部类,这个内部类并没有实现集合的修改方法或者说并没有重写这些方法。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">List</span> <span class="n">myList</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+<span class="n">myList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span><span class="c1">//运行时报错：UnsupportedOperationException</span>
+<span class="n">myList</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span><span class="c1">//运行时报错：UnsupportedOperationException</span>
+<span class="n">myList</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span><span class="c1">//运行时报错：UnsupportedOperationException</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">myList</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span><span class="c1">//class java.util.Arrays$ArrayList</span>
+</code></pre></div></div>
+
+<h4 id="正确数组转集合">正确数组转集合</h4>
+
+<ul>
+  <li>自实现方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//JDK1.5+</span>
+<span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">arrayToList</span><span class="o">(</span><span class="kd">final</span> <span class="no">T</span><span class="o">[]</span> <span class="n">array</span><span class="o">)</span> <span class="o">{</span>
+  <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;(</span><span class="n">array</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+
+  <span class="k">for</span> <span class="o">(</span><span class="kd">final</span> <span class="no">T</span> <span class="n">s</span> <span class="o">:</span> <span class="n">array</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">l</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>
+  <span class="o">}</span>
+  <span class="k">return</span> <span class="o">(</span><span class="n">l</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="nc">Integer</span> <span class="o">[]</span> <span class="n">myArray</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span> <span class="o">};</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">arrayToList</span><span class="o">(</span><span class="n">myArray</span><span class="o">).</span><span class="na">getClass</span><span class="o">());</span><span class="c1">//class java.util.ArrayList</span>
+</code></pre></div></div>
+
+<ul>
+  <li>使用ArrayList构造方法(推荐)</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">List</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span><span class="o">));</span>
+</code></pre></div></div>
+
+<ul>
+  <li>使用 Java8 的Stream(推荐)</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Integer</span> <span class="o">[]</span> <span class="n">myArray</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span> <span class="o">};</span>
+<span class="nc">List</span> <span class="n">myList</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">stream</span><span class="o">(</span><span class="n">myArray</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+<span class="c1">//基本类型也可以实现转换（依赖boxed的装箱操作）</span>
+<span class="kt">int</span> <span class="o">[]</span> <span class="n">myArray2</span> <span class="o">=</span> <span class="o">{</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span> <span class="o">};</span>
+<span class="nc">List</span> <span class="n">myList</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">stream</span><span class="o">(</span><span class="n">myArray2</span><span class="o">).</span><span class="na">boxed</span><span class="o">().</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+</code></pre></div></div>
+
+<ul>
+  <li>使用 Guava(推荐)</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+对于不可变集合，你可以使用ImmutableList类及其of()与copyOf()工厂方法：（参数不能为空）
+*/</span>
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">il</span> <span class="o">=</span> <span class="nc">ImmutableList</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"string"</span><span class="o">,</span> <span class="s">"elements"</span><span class="o">);</span>  <span class="c1">// from varargs</span>
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">il</span> <span class="o">=</span> <span class="nc">ImmutableList</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">aStringArray</span><span class="o">);</span>      <span class="c1">// from array</span>
+
+<span class="c1">//对于可变集合，你可以使用Lists类及其newArrayList()工厂方法：</span>
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">l1</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="n">anotherListOrCollection</span><span class="o">);</span>    <span class="c1">// from collection</span>
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">l2</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="n">aStringArray</span><span class="o">);</span>               <span class="c1">// from array</span>
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">l3</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"or"</span><span class="o">,</span> <span class="s">"string"</span><span class="o">,</span> <span class="s">"elements"</span><span class="o">);</span> <span class="c1">// from varargs</span>
+</code></pre></div></div>
+
+<ul>
+  <li>使用 Apache Commons Collections</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;();</span>
+<span class="nc">CollectionUtils</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="n">str</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h3 id="arrayutils">ArrayUtils</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">static</span> <span class="nc">String</span>	<span class="nf">toString</span><span class="o">(</span><span class="nc">Object</span> <span class="n">array</span><span class="o">)</span> 
+          <span class="s">"将数组作为String输出，null视为空数组。"</span>
+<span class="kd">static</span> <span class="nc">Map</span>	<span class="nf">toMap</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">)</span> 
+         <span class="s">" 将给定数组转换为Map。"</span>
+<span class="kd">static</span> <span class="nc">Object</span><span class="o">[]</span>	<span class="nf">clone</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">)</span> 
+         <span class="s">" Shallow克隆返回类型转换结果和处理的数组 null。"</span>
+<span class="kd">static</span> <span class="nc">Object</span><span class="o">[]</span>	<span class="nf">subarray</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startIndexInclusive</span><span class="o">,</span> <span class="kt">int</span> <span class="n">endIndexExclusive</span><span class="o">)</span> 
+          <span class="s">"生成一个包含开始和结束索引之间元素的新数组。"</span>
+<span class="kd">static</span> <span class="kt">boolean</span>	<span class="nf">isSameLength</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array1</span><span class="o">,</span> <span class="nc">Object</span><span class="o">[]</span> <span class="n">array2</span><span class="o">)</span> 
+          <span class="s">"检查两个数组是否长度相同，将 null数组视为长度0。"</span>
+<span class="kd">static</span> <span class="kt">boolean</span>	<span class="nf">isSameType</span><span class="o">(</span><span class="nc">Object</span> <span class="n">array1</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">array2</span><span class="o">)</span> 
+          <span class="s">"考虑多维数组，检查两个数组是否是同一类型。"</span>
+<span class="kd">static</span> <span class="kt">int</span>	<span class="nf">getLength</span><span class="o">(</span><span class="nc">Object</span> <span class="n">array</span><span class="o">)</span> 
+          <span class="s">"返回指定数组的长度。"</span>
+<span class="kd">static</span> <span class="kt">void</span>	<span class="nf">reverse</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">)</span> 
+         <span class="s">" 反转给定数组的顺序。"</span>
+<span class="kd">static</span> <span class="kt">int</span>	<span class="nf">indexOf</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">objectToFind</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startIndex</span><span class="o">)</span> 
+          <span class="s">"从给定索引开始查找数组中给定对象的索引。"</span>
+<span class="kd">static</span> <span class="kt">boolean</span>	<span class="nf">contains</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">objectToFind</span><span class="o">)</span> 
+          <span class="s">"检查对象是否在给定的数组中。"</span>
+<span class="kd">static</span> <span class="nc">Integer</span><span class="o">[]</span>	<span class="nf">toObject</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">array</span><span class="o">)</span> 
+          <span class="s">"将原始int数组转换为对象。"</span>
+<span class="kd">static</span> <span class="kt">boolean</span>	<span class="nf">isEmpty</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">)</span> 
+          <span class="s">"检查对象数组是否为空或null。"</span>
+<span class="kd">static</span> <span class="nc">Object</span><span class="o">[]</span>	<span class="nf">addAll</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array1</span><span class="o">,</span> <span class="nc">Object</span><span class="o">[]</span> <span class="n">array2</span><span class="o">)</span> 
+          <span class="s">"将给定数组的所有元素添加到新数组中。"</span>
+<span class="kd">static</span> <span class="nc">Object</span><span class="o">[]</span>	<span class="nf">add</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">element</span><span class="o">)</span> 
+         <span class="s">" 将指定元素插入数组中的指定位置。"</span>
+<span class="kd">static</span> <span class="nc">Object</span><span class="o">[]</span>	<span class="nf">remove</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="kt">int</span> <span class="n">index</span><span class="o">)</span> 
+          <span class="s">"从指定的数组中删除指定位置的元素。"</span>
+<span class="kd">static</span> <span class="nc">Object</span><span class="o">[]</span>	<span class="nf">removeElement</span><span class="o">(</span><span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">element</span><span class="o">)</span> 
+         <span class="s">" 从指定的数组中删除指定元素的第一个匹配项。"</span>
+</code></pre></div></div>
+
+<p>译文链接：<a href="http://www.programcreek.com/2013/09/top-10-methods-for-java-arrays/">http://www.programcreek.com/2013/09/top-10-methods-for-java-arrays/</a></p>
+
+<p>详细数组讲解请参考：https://www.cnblogs.com/adamjwh/p/8336354.html</p>
+
+<p>如果想了解自实现数组和数组底层，请参考：https://blog.csdn.net/qq_36925536/article/category/8532206</p>
+:ET

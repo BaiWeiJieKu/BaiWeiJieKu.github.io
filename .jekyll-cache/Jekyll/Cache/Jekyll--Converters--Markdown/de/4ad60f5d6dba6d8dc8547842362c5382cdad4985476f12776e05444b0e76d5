@@ -1,0 +1,456 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#what" id="markdown-toc-what">what?</a></li>
+  <li><a href="#分页" id="markdown-toc-分页">分页</a>    <ul>
+      <li><a href="#dao" id="markdown-toc-dao">dao</a></li>
+      <li><a href="#servlet" id="markdown-toc-servlet">servlet</a></li>
+    </ul>
+  </li>
+  <li><a href="#登录" id="markdown-toc-登录">登录</a></li>
+</ul>
+<h2 id="what">what?</h2>
+
+<ul>
+  <li>MVC是一种分层的设计模式,结合Serlvet和JSP进行数据的显示，就是一种MVC的思想。</li>
+  <li>M 代表 模型（Model）
+V 代表 视图（View） 
+C 代表 控制器（controller)</li>
+  <li>模型是什么呢？ 模型就是数据，就是dao,bean</li>
+  <li>视图是什么呢？ 就是网页, JSP，用来展示模型中的数据</li>
+  <li>控制器是什么？ 控制器用来把不同的数据，显示在不同的视图上。</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/1701.png" alt="" /></p>
+
+<h2 id="分页">分页</h2>
+
+<h3 id="dao">dao</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">dao</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.DriverManager</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.PreparedStatement</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.ResultSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Statement</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">bean.Hero</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HeroDAO</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">getTotal</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kt">int</span> <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+
+			<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="s">"jdbc:mysql://127.0.0.1:3306/how2java?characterEncoding=UTF-8"</span><span class="o">,</span>
+					<span class="s">"root"</span><span class="o">,</span> <span class="s">"admin"</span><span class="o">);</span>
+
+			<span class="nc">Statement</span> <span class="n">s</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">createStatement</span><span class="o">();</span>
+
+			<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"select count(*) from hero"</span><span class="o">;</span>
+
+			<span class="nc">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">executeQuery</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+			<span class="k">while</span> <span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">())</span> <span class="o">{</span>
+				<span class="n">total</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+			<span class="o">}</span>
+
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"total:"</span> <span class="o">+</span> <span class="n">total</span><span class="o">);</span>
+
+			<span class="n">s</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+			<span class="n">c</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">total</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">hero</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+
+			<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="s">"jdbc:mysql://127.0.0.1:3306/how2java?characterEncoding=UTF-8"</span><span class="o">,</span>
+					<span class="s">"root"</span><span class="o">,</span> <span class="s">"admin"</span><span class="o">);</span>
+
+			<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"insert into hero values(null,?,?,?)"</span><span class="o">;</span>
+			<span class="nc">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">prepareStatement</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">hero</span><span class="o">.</span><span class="na">name</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setFloat</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">hero</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setInt</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="n">hero</span><span class="o">.</span><span class="na">damage</span><span class="o">);</span>
+
+			<span class="n">ps</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+
+			<span class="nc">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="na">getGeneratedKeys</span><span class="o">();</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">())</span> <span class="o">{</span>
+				<span class="kt">int</span> <span class="n">id</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+			<span class="o">}</span>
+
+			<span class="n">ps</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+			<span class="n">c</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">update</span><span class="o">(</span><span class="nc">Hero</span> <span class="n">hero</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+
+			<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="s">"jdbc:mysql://127.0.0.1:3306/how2java?characterEncoding=UTF-8"</span><span class="o">,</span>
+					<span class="s">"root"</span><span class="o">,</span> <span class="s">"admin"</span><span class="o">);</span>
+
+			<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"update hero set name= ?, hp = ? , damage = ? where id = ?"</span><span class="o">;</span>
+			<span class="nc">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">prepareStatement</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">hero</span><span class="o">.</span><span class="na">name</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setFloat</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">hero</span><span class="o">.</span><span class="na">hp</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setInt</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="n">hero</span><span class="o">.</span><span class="na">damage</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setInt</span><span class="o">(</span><span class="mi">4</span><span class="o">,</span> <span class="n">hero</span><span class="o">.</span><span class="na">id</span><span class="o">);</span>
+
+			<span class="n">ps</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+
+			<span class="n">ps</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+			<span class="n">c</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">delete</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+
+			<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="s">"jdbc:mysql://127.0.0.1:3306/how2java?characterEncoding=UTF-8"</span><span class="o">,</span>
+					<span class="s">"root"</span><span class="o">,</span> <span class="s">"admin"</span><span class="o">);</span>
+
+			<span class="nc">Statement</span> <span class="n">s</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">createStatement</span><span class="o">();</span>
+
+			<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"delete from hero where id = "</span> <span class="o">+</span> <span class="n">id</span><span class="o">;</span>
+
+			<span class="n">s</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+
+			<span class="n">s</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+			<span class="n">c</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">Hero</span> <span class="nf">get</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Hero</span> <span class="n">hero</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+
+			<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="s">"jdbc:mysql://127.0.0.1:3306/how2java?characterEncoding=UTF-8"</span><span class="o">,</span>
+					<span class="s">"root"</span><span class="o">,</span> <span class="s">"admin"</span><span class="o">);</span>
+
+			<span class="nc">Statement</span> <span class="n">s</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">createStatement</span><span class="o">();</span>
+
+			<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"select * from hero where id = "</span> <span class="o">+</span> <span class="n">id</span><span class="o">;</span>
+
+			<span class="nc">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">executeQuery</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+
+			<span class="k">if</span> <span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">())</span> <span class="o">{</span>
+				<span class="n">hero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+				<span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+				<span class="kt">float</span> <span class="n">hp</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getFloat</span><span class="o">(</span><span class="s">"hp"</span><span class="o">);</span>
+				<span class="kt">int</span> <span class="n">damage</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="n">hp</span><span class="o">;</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="n">damage</span><span class="o">;</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+			<span class="o">}</span>
+
+			<span class="n">s</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+			<span class="n">c</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">hero</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="nf">list</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="nf">list</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="nc">Short</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="nf">list</span><span class="o">(</span><span class="kt">int</span> <span class="n">start</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;();</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+
+			<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="s">"jdbc:mysql://127.0.0.1:3306/how2java?characterEncoding=UTF-8"</span><span class="o">,</span>
+					<span class="s">"root"</span><span class="o">,</span> <span class="s">"admin"</span><span class="o">);</span>
+
+			<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"select * from hero order by id desc limit ?,? "</span><span class="o">;</span>
+
+			<span class="nc">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">prepareStatement</span><span class="o">(</span><span class="n">sql</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setInt</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">start</span><span class="o">);</span>
+			<span class="n">ps</span><span class="o">.</span><span class="na">setInt</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">count</span><span class="o">);</span>
+
+			<span class="nc">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="na">executeQuery</span><span class="o">();</span>
+
+			<span class="k">while</span> <span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">())</span> <span class="o">{</span>
+				<span class="nc">Hero</span> <span class="n">hero</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hero</span><span class="o">();</span>
+				<span class="kt">int</span> <span class="n">id</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+				<span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+				<span class="kt">float</span> <span class="n">hp</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getFloat</span><span class="o">(</span><span class="s">"hp"</span><span class="o">);</span>
+				<span class="kt">int</span> <span class="n">damage</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">hp</span> <span class="o">=</span> <span class="n">hp</span><span class="o">;</span>
+				<span class="n">hero</span><span class="o">.</span><span class="na">damage</span> <span class="o">=</span> <span class="n">damage</span><span class="o">;</span>
+				<span class="n">heros</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">hero</span><span class="o">);</span>
+			<span class="o">}</span>
+
+			<span class="n">ps</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+			<span class="n">c</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">SQLException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">heros</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="servlet">servlet</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">servlet</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServlet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">bean.Hero</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">dao.HeroDAO</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HeroListServlet</span> <span class="kd">extends</span> <span class="nc">HttpServlet</span> <span class="o">{</span>
+
+	<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">service</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">ServletException</span><span class="o">,</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html; charset=UTF-8"</span><span class="o">);</span>
+
+		<span class="kt">int</span> <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">start</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"start"</span><span class="o">));</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">NumberFormatException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// 当浏览器没有传参数start时</span>
+		<span class="o">}</span>
+
+		<span class="kt">int</span> <span class="n">next</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">count</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">pre</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">count</span><span class="o">;</span>
+
+		<span class="kt">int</span> <span class="n">total</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HeroDAO</span><span class="o">().</span><span class="na">getTotal</span><span class="o">();</span>
+
+		<span class="kt">int</span> <span class="n">last</span><span class="o">;</span>
+		<span class="k">if</span> <span class="o">(</span><span class="mi">0</span> <span class="o">==</span> <span class="n">total</span> <span class="o">%</span> <span class="n">count</span><span class="o">)</span>
+			<span class="n">last</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">count</span><span class="o">;</span>
+		<span class="k">else</span>
+			<span class="n">last</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">total</span> <span class="o">%</span> <span class="n">count</span><span class="o">;</span>
+
+		<span class="n">pre</span> <span class="o">=</span> <span class="n">pre</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="n">pre</span><span class="o">;</span>
+		<span class="n">next</span> <span class="o">=</span> <span class="n">next</span> <span class="o">&gt;</span> <span class="n">last</span> <span class="o">?</span> <span class="n">last</span> <span class="o">:</span> <span class="n">next</span><span class="o">;</span>
+
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"next"</span><span class="o">,</span> <span class="n">next</span><span class="o">);</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"pre"</span><span class="o">,</span> <span class="n">pre</span><span class="o">);</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"last"</span><span class="o">,</span> <span class="n">last</span><span class="o">);</span>
+
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HeroDAO</span><span class="o">().</span><span class="na">list</span><span class="o">(</span><span class="n">start</span><span class="o">,</span> <span class="n">count</span><span class="o">);</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"heros"</span><span class="o">,</span> <span class="n">heros</span><span class="o">);</span>
+
+		<span class="n">request</span><span class="o">.</span><span class="na">getRequestDispatcher</span><span class="o">(</span><span class="s">"listHero.jsp"</span><span class="o">).</span><span class="na">forward</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+
+<span class="nt">&lt;%@ page </span><span class="na">language=</span><span class="s">"java"</span><span class="na"> contentType=</span><span class="s">"text/html; charset=UTF-8"</span><span class="na">
+	pageEncoding=</span><span class="s">"UTF-8"</span><span class="na"> import=</span><span class="s">"java.util.*"</span><span class="nt">%&gt;</span>
+
+<span class="nt">&lt;%@ taglib </span><span class="na">uri=</span><span class="s">"http://java.sun.com/jsp/jstl/core"</span><span class="na"> prefix=</span><span class="s">"c"</span><span class="nt">%&gt;</span>
+
+<span class="nt">&lt;table</span> <span class="na">align=</span><span class="s">'center'</span> <span class="na">border=</span><span class="s">'1'</span> <span class="na">cellspacing=</span><span class="s">'0'</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;tr&gt;</span>
+		<span class="nt">&lt;td&gt;</span>id<span class="nt">&lt;/td&gt;</span>
+		<span class="nt">&lt;td&gt;</span>name<span class="nt">&lt;/td&gt;</span>
+		<span class="nt">&lt;td&gt;</span>hp<span class="nt">&lt;/td&gt;</span>
+		<span class="nt">&lt;td&gt;</span>damage<span class="nt">&lt;/td&gt;</span>
+		<span class="nt">&lt;td&gt;</span>edit<span class="nt">&lt;/td&gt;</span>
+		<span class="nt">&lt;td&gt;</span>delete<span class="nt">&lt;/td&gt;</span>
+	<span class="nt">&lt;/tr&gt;</span>
+	<span class="nt">&lt;c:forEach </span><span class="na">items=</span><span class="s">"</span><span class="si">${</span><span class="n">heros</span><span class="si">}</span><span class="s">"</span><span class="na"> var=</span><span class="s">"hero"</span><span class="na"> varStatus=</span><span class="s">"st"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;tr&gt;</span>
+			<span class="nt">&lt;td&gt;</span>${hero.id}<span class="nt">&lt;/td&gt;</span>
+			<span class="nt">&lt;td&gt;</span>${hero.name}<span class="nt">&lt;/td&gt;</span>
+			<span class="nt">&lt;td&gt;</span>${hero.hp}<span class="nt">&lt;/td&gt;</span>
+			<span class="nt">&lt;td&gt;</span>${hero.damage}<span class="nt">&lt;/td&gt;</span>
+			<span class="nt">&lt;td&gt;&lt;a</span> <span class="na">href=</span><span class="s">"editHero?id=${hero.id}"</span><span class="nt">&gt;</span>edit<span class="nt">&lt;/a&gt;&lt;/td&gt;</span>
+			<span class="nt">&lt;td&gt;&lt;a</span> <span class="na">href=</span><span class="s">"deleteHero?id=${hero.id}"</span><span class="nt">&gt;</span>delete<span class="nt">&lt;/a&gt;&lt;/td&gt;</span>
+		<span class="nt">&lt;/tr&gt;</span>
+	<span class="nt">&lt;/c:forEach&gt;</span>
+	<span class="nt">&lt;tr&gt;</span>
+		<span class="nt">&lt;td</span> <span class="na">colspan=</span><span class="s">"6"</span> <span class="na">align=</span><span class="s">"center"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"?start=0"</span><span class="nt">&gt;</span>[首  页]<span class="nt">&lt;/a&gt;</span>
+			<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"?start=${pre}"</span><span class="nt">&gt;</span>[上一页]<span class="nt">&lt;/a&gt;</span>
+			<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"?start=${next}"</span><span class="nt">&gt;</span>[下一页]<span class="nt">&lt;/a&gt;</span>
+			<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"?start=${last}"</span><span class="nt">&gt;</span>[末  页]<span class="nt">&lt;/a&gt;</span>
+		<span class="nt">&lt;/td&gt;</span>
+	<span class="nt">&lt;/tr&gt;</span>
+<span class="nt">&lt;/table&gt;</span>
+
+
+</code></pre></div></div>
+
+<p><img src="http://stepimagewm.how2j.cn/3044.png" alt="" /></p>
+
+<h2 id="登录">登录</h2>
+
+<ul>
+  <li>如果用户登陆过了，访问listHero，就让用户正常访问，否则就跳转到登陆界面。</li>
+  <li>这是非常常见的场景，通过使用 session 来实现这个功能。</li>
+  <li>在处理登录的loginServlet 中使用将用户名保存在session中。</li>
+  <li>在HeroListServlet 中查看session中是否为空。如果为空，就表示用户没有登陆过，就跳转到登陆页面</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServlet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LoginServlet</span> <span class="kd">extends</span> <span class="nc">HttpServlet</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+
+	<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">service</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">ServletException</span><span class="o">,</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"name"</span><span class="o">);</span>
+		<span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"password"</span><span class="o">);</span>
+
+		<span class="k">if</span> <span class="o">(</span><span class="s">"admin"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">name</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="s">"123"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">password</span><span class="o">))</span> <span class="o">{</span>
+			<span class="n">request</span><span class="o">.</span><span class="na">getSession</span><span class="o">().</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"userName"</span><span class="o">,</span> <span class="n">name</span><span class="o">);</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">sendRedirect</span><span class="o">(</span><span class="s">"listHero"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">sendRedirect</span><span class="o">(</span><span class="s">"login.html"</span><span class="o">);</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">servlet</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServlet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">bean.Hero</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">dao.HeroDAO</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HeroListServlet</span> <span class="kd">extends</span> <span class="nc">HttpServlet</span> <span class="o">{</span>
+
+	<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">service</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">ServletException</span><span class="o">,</span> <span class="nc">IOException</span> <span class="o">{</span>
+
+		<span class="nc">String</span> <span class="n">userName</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">request</span><span class="o">.</span><span class="na">getSession</span><span class="o">().</span><span class="na">getAttribute</span><span class="o">(</span><span class="s">"userName"</span><span class="o">);</span>
+		<span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">sendRedirect</span><span class="o">(</span><span class="s">"login.html"</span><span class="o">);</span>
+			<span class="k">return</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kt">int</span> <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">start</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"start"</span><span class="o">));</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">NumberFormatException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// 当浏览器没有传参数start时</span>
+		<span class="o">}</span>
+
+		<span class="kt">int</span> <span class="n">next</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">count</span><span class="o">;</span>
+		<span class="kt">int</span> <span class="n">pre</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">count</span><span class="o">;</span>
+
+		<span class="kt">int</span> <span class="n">total</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HeroDAO</span><span class="o">().</span><span class="na">getTotal</span><span class="o">();</span>
+
+		<span class="kt">int</span> <span class="n">last</span><span class="o">;</span>
+		<span class="k">if</span> <span class="o">(</span><span class="mi">0</span> <span class="o">==</span> <span class="n">total</span> <span class="o">%</span> <span class="n">count</span><span class="o">)</span>
+			<span class="n">last</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">count</span><span class="o">;</span>
+		<span class="k">else</span>
+			<span class="n">last</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">total</span> <span class="o">%</span> <span class="n">count</span><span class="o">;</span>
+
+		<span class="n">pre</span> <span class="o">=</span> <span class="n">pre</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="n">pre</span><span class="o">;</span>
+		<span class="n">next</span> <span class="o">=</span> <span class="n">next</span> <span class="o">&gt;</span> <span class="n">last</span> <span class="o">?</span> <span class="n">last</span> <span class="o">:</span> <span class="n">next</span><span class="o">;</span>
+
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"next"</span><span class="o">,</span> <span class="n">next</span><span class="o">);</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"pre"</span><span class="o">,</span> <span class="n">pre</span><span class="o">);</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"last"</span><span class="o">,</span> <span class="n">last</span><span class="o">);</span>
+
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Hero</span><span class="o">&gt;</span> <span class="n">heros</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HeroDAO</span><span class="o">().</span><span class="na">list</span><span class="o">(</span><span class="n">start</span><span class="o">,</span> <span class="n">count</span><span class="o">);</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"heros"</span><span class="o">,</span> <span class="n">heros</span><span class="o">);</span>
+
+		<span class="n">request</span><span class="o">.</span><span class="na">getRequestDispatcher</span><span class="o">(</span><span class="s">"listHero.jsp"</span><span class="o">).</span><span class="na">forward</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>本文章参考自：http://how2j.cn</p>
+:ET

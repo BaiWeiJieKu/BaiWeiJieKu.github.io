@@ -1,0 +1,1477 @@
+I"j<ul id="markdown-toc">
+  <li><a href="#utilities" id="markdown-toc-utilities">utilities</a>    <ul>
+      <li><a href="#joiner" id="markdown-toc-joiner">joiner</a></li>
+      <li><a href="#splitter" id="markdown-toc-splitter">splitter</a></li>
+      <li><a href="#strings" id="markdown-toc-strings">Strings</a></li>
+    </ul>
+  </li>
+  <li><a href="#io" id="markdown-toc-io">IO</a>    <ul>
+      <li><a href="#files" id="markdown-toc-files">Files</a></li>
+    </ul>
+  </li>
+  <li><a href="#collections" id="markdown-toc-collections">collections</a>    <ul>
+      <li><a href="#fluentiterable" id="markdown-toc-fluentiterable">FluentIterable</a></li>
+      <li><a href="#lists" id="markdown-toc-lists">Lists</a></li>
+      <li><a href="#sets" id="markdown-toc-sets">sets</a></li>
+      <li><a href="#maps" id="markdown-toc-maps">Maps</a></li>
+      <li><a href="#multimaps" id="markdown-toc-multimaps">Multimaps</a></li>
+      <li><a href="#bimap" id="markdown-toc-bimap">BiMap</a></li>
+      <li><a href="#table" id="markdown-toc-table">Table</a></li>
+      <li><a href="#range" id="markdown-toc-range">Range</a></li>
+      <li><a href="#ordering" id="markdown-toc-ordering">Ordering</a></li>
+      <li><a href="#immutablecollections" id="markdown-toc-immutablecollections">ImmutableCollections</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="utilities">utilities</h3>
+
+<h4 id="joiner">joiner</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.base.Joiner</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.io.Files</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileWriter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">common</span><span class="o">.</span><span class="na">collect</span><span class="o">.</span><span class="na">ImmutableMap</span><span class="o">.</span><span class="na">of</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">stream</span><span class="o">.</span><span class="na">Collectors</span><span class="o">.</span><span class="na">joining</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsSame</span><span class="o">.</span><span class="na">sameInstance</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">fail</span><span class="o">;</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JoinerTest</span> <span class="o">{</span>
+
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringList</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span>
+            <span class="s">"Google"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">,</span> <span class="s">"Kafka"</span>
+    <span class="o">);</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringListWithNullValue</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span>
+            <span class="s">"Google"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">,</span> <span class="kc">null</span>
+    <span class="o">);</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringMap</span> <span class="o">=</span> <span class="n">of</span><span class="o">(</span><span class="s">"Hello"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">);</span>
+
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">targetFileName</span> <span class="o">=</span> <span class="s">"G:\\Teaching\\汪文君Google Guava实战视频\\guava-joiner.txt"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">targetFileNameToMap</span> <span class="o">=</span> <span class="s">"G:\\Teaching\\汪文君Google Guava实战视频\\guava-joiner-map.txt"</span><span class="o">;</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnJoin</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringList</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#Kafka"</span><span class="o">));</span>
+    <span class="o">}</span>
+	<span class="cm">/**
+    *测试连接list中有null的元素，会抛出NPE异常
+    */</span>
+    <span class="nd">@Test</span><span class="o">(</span><span class="n">expected</span> <span class="o">=</span> <span class="nc">NullPointerException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnJoinWithNullValue</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#Kafka"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素，忽略null
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnJoinWithNullValueButSkip</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">skipNulls</span><span class="o">().</span><span class="na">join</span><span class="o">(</span><span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *测试连接list中的元素，如果有null，设置默认值
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoin_On_Join_WithNullValue_UseDefaultValue</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">useForNull</span><span class="o">(</span><span class="s">"DEFAULT"</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素，并添加到StringBuilder中
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoin_On_Append_To_StringBuilder</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">final</span> <span class="nc">StringBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>
+        <span class="nc">StringBuilder</span> <span class="n">resultBuilder</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">useForNull</span><span class="o">(</span><span class="s">"DEFAULT"</span><span class="o">).</span><span class="na">appendTo</span><span class="o">(</span><span class="n">builder</span><span class="o">,</span> <span class="n">stringListWithNullValue</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">resultBuilder</span><span class="o">,</span> <span class="n">sameInstance</span><span class="o">(</span><span class="n">builder</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">resultBuilder</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">builder</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试连接list中的元素，并把连接后的结果写入到文件中
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoin_On_Append_To_Writer</span><span class="o">()</span> <span class="o">{</span>
+
+        <span class="k">try</span> <span class="o">(</span><span class="nc">FileWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileWriter</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileName</span><span class="o">)))</span> <span class="o">{</span>
+            <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">useForNull</span><span class="o">(</span><span class="s">"DEFAULT"</span><span class="o">).</span><span class="na">appendTo</span><span class="o">(</span><span class="n">writer</span><span class="o">,</span> <span class="n">stringListWithNullValue</span><span class="o">);</span>
+            <span class="n">assertThat</span><span class="o">(</span><span class="nc">Files</span><span class="o">.</span><span class="na">isFile</span><span class="o">().</span><span class="na">test</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileName</span><span class="o">)),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">fail</span><span class="o">(</span><span class="s">"append to the writer occur fetal error."</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *使用java8中的stream流连接list中的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoiningByStreamSkipNullValues</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">stringListWithNullValue</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">item</span> <span class="o">-&gt;</span> <span class="n">item</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">item</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()).</span><span class="na">collect</span><span class="o">(</span><span class="n">joining</span><span class="o">(</span><span class="s">"#"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *使用java8中的stream流连接list中的元素，并且给null元素默认值
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoiningByStreamWithDefaultValue</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">stringListWithNullValue</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">map</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">defaultValue</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="n">joining</span><span class="o">(</span><span class="s">"#"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Google#Guava#Java#Scala#DEFAULT"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">defaultValue</span><span class="o">(</span><span class="kd">final</span> <span class="nc">String</span> <span class="n">item</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">item</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">item</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()</span> <span class="o">?</span> <span class="s">"DEFAULT"</span> <span class="o">:</span> <span class="n">item</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *连接map中的键值对
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnWithMap</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="sc">'#'</span><span class="o">).</span><span class="na">withKeyValueSeparator</span><span class="o">(</span><span class="s">"="</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">stringMap</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Hello=Guava#Java=Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *连接map中的键值对，把结果写入到文件中
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoinOnWithMapToAppendable</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">(</span><span class="nc">FileWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileWriter</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileNameToMap</span><span class="o">)))</span> <span class="o">{</span>
+            <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">withKeyValueSeparator</span><span class="o">(</span><span class="s">"="</span><span class="o">).</span><span class="na">appendTo</span><span class="o">(</span><span class="n">writer</span><span class="o">,</span> <span class="n">stringMap</span><span class="o">);</span>
+            <span class="n">assertThat</span><span class="o">(</span><span class="nc">Files</span><span class="o">.</span><span class="na">isFile</span><span class="o">().</span><span class="na">test</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">targetFileNameToMap</span><span class="o">)),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">fail</span><span class="o">(</span><span class="s">"append to the writer occur fetal error."</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="splitter">splitter</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.base.Splitter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.regex.Pattern</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsNull</span><span class="o">.</span><span class="na">notNullValue</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SplitterTest</span> <span class="o">{</span>
+
+    <span class="cm">/**
+    *测试字符串分割
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplitOnSplit</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"|"</span><span class="o">).</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"hello|world"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">2</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"hello"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"world"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试字符串分割，去除空的部分
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplit_On_Split_OmitEmpty</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"|"</span><span class="o">).</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"hello|world|||"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">5</span><span class="o">));</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"|"</span><span class="o">).</span><span class="na">omitEmptyStrings</span><span class="o">().</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"hello|world|||"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">2</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试字符串分割，去除多余空格和空的部分
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplit_On_Split_OmitEmpty_TrimResult</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"|"</span><span class="o">).</span><span class="na">trimResults</span><span class="o">().</span><span class="na">omitEmptyStrings</span><span class="o">().</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"hello | world|||"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"hello"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"world"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 按照固定长度分割
+     * aaaabbbbccccdddd
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplitFixLength</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">fixedLength</span><span class="o">(</span><span class="mi">4</span><span class="o">).</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"aaaabbbbccccdddd"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">4</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"aaaa"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">3</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"dddd"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *测试字符串分割，并且限制结果数量
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplitOnSplitLimit</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"#"</span><span class="o">).</span><span class="na">limit</span><span class="o">(</span><span class="mi">3</span><span class="o">).</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"hello#world#java#google#scala"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">3</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"hello"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"world"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">2</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"java#google#scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *测试字符串分割，使用正则表达式
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplitOnPatternString</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">onPattern</span><span class="o">(</span><span class="s">"\\|"</span><span class="o">).</span><span class="na">trimResults</span><span class="o">().</span><span class="na">omitEmptyStrings</span><span class="o">().</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"hello | world|||"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">2</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"hello"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"world"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplitOnPattern</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="nc">Pattern</span><span class="o">.</span><span class="na">compile</span><span class="o">(</span><span class="s">"\\|"</span><span class="o">)).</span><span class="na">trimResults</span><span class="o">().</span><span class="na">omitEmptyStrings</span><span class="o">().</span><span class="na">splitToList</span><span class="o">(</span><span class="s">"hello | world|||"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">2</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"hello"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"world"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+    *测试字符串分割，结果转为map
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSplitOnSplitToMap</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Splitter</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="nc">Pattern</span><span class="o">.</span><span class="na">compile</span><span class="o">(</span><span class="s">"\\|"</span><span class="o">)).</span><span class="na">trimResults</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">omitEmptyStrings</span><span class="o">().</span><span class="na">withKeyValueSeparator</span><span class="o">(</span><span class="s">"="</span><span class="o">).</span><span class="na">split</span><span class="o">(</span><span class="s">"hello=HELLO| world=WORLD|||"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">2</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"hello"</span><span class="o">),</span><span class="n">equalTo</span><span class="o">(</span><span class="s">"HELLO"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"world"</span><span class="o">),</span><span class="n">equalTo</span><span class="o">(</span><span class="s">"WORLD"</span><span class="o">));</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="strings">Strings</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.base.CharMatcher</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.base.Charsets</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.base.Strings</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.nio.charset.Charset</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsNull</span><span class="o">.</span><span class="na">nullValue</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StringsTest</span> <span class="o">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testStringsMethod</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//“ ”转null</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">emptyToNull</span><span class="o">(</span><span class="s">""</span><span class="o">),</span> <span class="n">nullValue</span><span class="o">());</span>
+        
+        <span class="c1">//null转“ ”</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">nullToEmpty</span><span class="o">(</span><span class="kc">null</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">""</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">nullToEmpty</span><span class="o">(</span><span class="s">"hello"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"hello"</span><span class="o">));</span>
+        
+        <span class="c1">//获取公共前缀</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">commonPrefix</span><span class="o">(</span><span class="s">"Hello"</span><span class="o">,</span> <span class="s">"Hit"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"H"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">commonPrefix</span><span class="o">(</span><span class="s">"Hello"</span><span class="o">,</span> <span class="s">"Xit"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">""</span><span class="o">));</span>
+        
+        <span class="c1">//获取公共后缀</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">commonSuffix</span><span class="o">(</span><span class="s">"Hello"</span><span class="o">,</span> <span class="s">"Echo"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"o"</span><span class="o">));</span>
+        
+        <span class="c1">//重复字符串</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">repeat</span><span class="o">(</span><span class="s">"Alex"</span><span class="o">,</span> <span class="mi">3</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"AlexAlexAlex"</span><span class="o">));</span>
+        
+        <span class="c1">//判断是否为null或“”</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">isNullOrEmpty</span><span class="o">(</span><span class="kc">null</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">isNullOrEmpty</span><span class="o">(</span><span class="s">""</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        
+		<span class="c1">//向字符串头部或尾部添加内容</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">padStart</span><span class="o">(</span><span class="s">"Alex"</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="sc">'H'</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Alex"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">padStart</span><span class="o">(</span><span class="s">"Alex"</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="sc">'H'</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"HAlex"</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Strings</span><span class="o">.</span><span class="na">padEnd</span><span class="o">(</span><span class="s">"Alex"</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="sc">'H'</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"AlexH"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCharsets</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//获取字符集</span>
+        <span class="nc">Charset</span> <span class="n">charset</span> <span class="o">=</span> <span class="nc">Charset</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="n">charset</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * functor
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCharMatcher</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//判断字符是否为数字</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">javaDigit</span><span class="o">().</span><span class="na">matches</span><span class="o">(</span><span class="sc">'5'</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">javaDigit</span><span class="o">().</span><span class="na">matches</span><span class="o">(</span><span class="sc">'x'</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+        
+		<span class="c1">//获取字符在字符串中的数量</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">is</span><span class="o">(</span><span class="sc">'A'</span><span class="o">).</span><span class="na">countIn</span><span class="o">(</span><span class="s">"Alex Sharing the Google Guava to Us"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">1</span><span class="o">));</span>
+        
+        <span class="c1">//把字符串中的空格替换为指定内容</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">breakingWhitespace</span><span class="o">().</span><span class="na">collapseFrom</span><span class="o">(</span><span class="s">"      hello Guava     "</span><span class="o">,</span> <span class="sc">'*'</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"*hello*Guava*"</span><span class="o">));</span>
+        
+        <span class="c1">//去除字符串中的数字和空格</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">javaDigit</span><span class="o">().</span><span class="na">or</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">whitespace</span><span class="o">()).</span><span class="na">removeFrom</span><span class="o">(</span><span class="s">"hello 234 world"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"helloworld"</span><span class="o">));</span>
+        
+        <span class="c1">//只保留字符串中的数字和空格</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">javaDigit</span><span class="o">().</span><span class="na">or</span><span class="o">(</span><span class="nc">CharMatcher</span><span class="o">.</span><span class="na">whitespace</span><span class="o">()).</span><span class="na">retainFrom</span><span class="o">(</span><span class="s">"hello 234 world"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">" 234 "</span><span class="o">));</span>
+
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">Integer</span> <span class="nf">text</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="io">IO</h3>
+
+<h4 id="files">Files</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.base.Charsets</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.base.Joiner</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.FluentIterable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.hash.HashCode</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.hash.Hashing</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.io.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.After</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.nio.file.Paths</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.nio.file.StandardCopyOption</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FilesTest</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">SOURCE_FILE</span> <span class="o">=</span> <span class="s">"C:\\source.txt"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">TARGET_FILE</span> <span class="o">=</span> <span class="s">"C:\\target.txt"</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * 拷贝文件
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCopyFileWithGuava</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">File</span> <span class="n">targetFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">TARGET_FILE</span><span class="o">);</span>
+        <span class="nc">File</span> <span class="n">sourceFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">SOURCE_FILE</span><span class="o">);</span>
+        <span class="nc">Files</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span><span class="n">sourceFile</span><span class="o">,</span> <span class="n">targetFile</span><span class="o">);</span>
+        <span class="c1">//判断文件是否存在</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">targetFile</span><span class="o">.</span><span class="na">exists</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="c1">//比较源文件和复制后的文件hashcode是否相同</span>
+        <span class="nc">HashCode</span> <span class="n">sourceHashCode</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">asByteSource</span><span class="o">(</span><span class="n">sourceFile</span><span class="o">).</span><span class="na">hash</span><span class="o">(</span><span class="nc">Hashing</span><span class="o">.</span><span class="na">sha256</span><span class="o">());</span>
+        <span class="nc">HashCode</span> <span class="n">targetHashCode</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">asByteSource</span><span class="o">(</span><span class="n">targetFile</span><span class="o">).</span><span class="na">hash</span><span class="o">(</span><span class="nc">Hashing</span><span class="o">.</span><span class="na">sha256</span><span class="o">());</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">sourceHashCode</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="n">targetHashCode</span><span class="o">.</span><span class="na">toString</span><span class="o">()));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 使用jdk的NIO拷贝文件
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCopyFileWithJDKNio2</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="n">java</span><span class="o">.</span><span class="na">nio</span><span class="o">.</span><span class="na">file</span><span class="o">.</span><span class="na">Files</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span>
+                <span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"C:\\resources"</span><span class="o">,</span> <span class="s">"io"</span><span class="o">,</span> <span class="s">"source.txt"</span><span class="o">),</span>
+                <span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"C:\\resources"</span><span class="o">,</span> <span class="s">"io"</span><span class="o">,</span> <span class="s">"target.txt"</span><span class="o">),</span>
+                <span class="nc">StandardCopyOption</span><span class="o">.</span><span class="na">REPLACE_EXISTING</span>
+        <span class="o">);</span>
+        <span class="nc">File</span> <span class="n">targetFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">TARGET_FILE</span><span class="o">);</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">targetFile</span><span class="o">.</span><span class="na">exists</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 移动文件
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testMoveFile</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">//TARGET_FILE若存在,将被删除,重新生成</span>
+            <span class="nc">Files</span><span class="o">.</span><span class="na">move</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">SOURCE_FILE</span><span class="o">),</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">TARGET_FILE</span><span class="o">));</span>
+            <span class="n">assertThat</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">TARGET_FILE</span><span class="o">).</span><span class="na">exists</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+            <span class="n">assertThat</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">SOURCE_FILE</span><span class="o">).</span><span class="na">exists</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="nc">Files</span><span class="o">.</span><span class="na">move</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">TARGET_FILE</span><span class="o">),</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">SOURCE_FILE</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 读取文件内容
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testToString</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+
+        <span class="kd">final</span> <span class="nc">String</span> <span class="n">expectedString</span> <span class="o">=</span> <span class="s">"today we will share the guava io knowledge.\n"</span> <span class="o">+</span>
+                <span class="s">"but only for the basic usage. if you wanted to get the more details information\n"</span> <span class="o">+</span>
+                <span class="s">"please read the guava document or source code.\n"</span> <span class="o">+</span>
+                <span class="s">"\n"</span> <span class="o">+</span>
+                <span class="s">"The guava source code is very cleanly and nice."</span><span class="o">;</span>
+		<span class="c1">//读取文件内容(一行一行读)</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">strings</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">readLines</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">SOURCE_FILE</span><span class="o">),</span> <span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">);</span>
+		<span class="c1">//把读取到的每一行用换行符连接起来</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">"\n"</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">strings</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="n">expectedString</span><span class="o">));</span>
+    <span class="o">}</span>
+	
+    <span class="cm">/**
+     * 读取文件内容(按条件读取)
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testToProcessString</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="cm">/**
+         * [43, 79, 46, 0, 47]
+         */</span>
+        <span class="nc">LineProcessor</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;&gt;</span> <span class="n">lineProcessor</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">LineProcessor</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+
+            <span class="kd">private</span> <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">lengthList</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">processLine</span><span class="o">(</span><span class="nc">String</span> <span class="n">line</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">line</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+                <span class="n">lengthList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">line</span><span class="o">.</span><span class="na">length</span><span class="o">());</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="o">;</span><span class="c1">//return false,不再读取下面内容</span>
+            <span class="o">}</span>
+
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="nf">getResult</span><span class="o">()</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">lengthList</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">asCharSource</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">SOURCE_FILE</span><span class="o">),</span> <span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">).</span><span class="na">readLines</span><span class="o">(</span><span class="n">lineProcessor</span><span class="o">);</span>
+
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+    <span class="o">}</span>
+
+	<span class="cm">/**
+     * 写文件
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testFileWrite</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">testPath</span> <span class="o">=</span> <span class="s">"C:\\testFileWrite.txt"</span><span class="o">;</span>
+        <span class="nc">File</span> <span class="n">testFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">testPath</span><span class="o">);</span>
+        <span class="c1">//如果存在先删除</span>
+        <span class="n">testFile</span><span class="o">.</span><span class="na">deleteOnExit</span><span class="o">();</span>
+        <span class="nc">String</span> <span class="n">content1</span> <span class="o">=</span> <span class="s">"content 1"</span><span class="o">;</span>
+        <span class="c1">//写入</span>
+        <span class="nc">Files</span><span class="o">.</span><span class="na">asCharSink</span><span class="o">(</span><span class="n">testFile</span><span class="o">,</span> <span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">).</span><span class="na">write</span><span class="o">(</span><span class="n">content1</span><span class="o">);</span>
+        <span class="nc">String</span> <span class="n">actully</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">asCharSource</span><span class="o">(</span><span class="n">testFile</span><span class="o">,</span> <span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">).</span><span class="na">read</span><span class="o">();</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">actully</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="n">content1</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 追加内容
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testFileAppend</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">testPath</span> <span class="o">=</span> <span class="s">"C:\\testFileAppend.txt"</span><span class="o">;</span>
+        <span class="nc">File</span> <span class="n">testFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">testPath</span><span class="o">);</span>
+        <span class="n">testFile</span><span class="o">.</span><span class="na">deleteOnExit</span><span class="o">();</span>
+        
+        <span class="nc">CharSink</span> <span class="n">charSink</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">asCharSink</span><span class="o">(</span><span class="n">testFile</span><span class="o">,</span> <span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">,</span> <span class="nc">FileWriteMode</span><span class="o">.</span><span class="na">APPEND</span><span class="o">);</span>
+        <span class="n">charSink</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="s">"content1"</span><span class="o">);</span>
+        
+        <span class="nc">String</span> <span class="n">actullay</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">asCharSource</span><span class="o">(</span><span class="n">testFile</span><span class="o">,</span> <span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">).</span><span class="na">read</span><span class="o">();</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">actullay</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"content1"</span><span class="o">));</span>
+
+        <span class="n">charSink</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="s">"content2"</span><span class="o">);</span>
+        <span class="n">actullay</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">asCharSource</span><span class="o">(</span><span class="n">testFile</span><span class="o">,</span> <span class="nc">Charsets</span><span class="o">.</span><span class="na">UTF_8</span><span class="o">).</span><span class="na">read</span><span class="o">();</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">actullay</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"content1content2"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 递归获取文件树
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testRecursive</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">File</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">recursiveList</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main"</span><span class="o">),</span> <span class="n">list</span><span class="o">);</span>
+        <span class="n">list</span><span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">recursiveList</span><span class="o">(</span><span class="nc">File</span> <span class="n">root</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">File</span><span class="o">&gt;</span> <span class="n">fileList</span><span class="o">)</span> <span class="o">{</span>
+        <span class="cm">/*if (root.isHidden())
+            return;
+        fileList.add(root);
+        if (!root.isFile()) {
+            File[] files = root.listFiles();
+            for (File f : files) {
+                recursiveList(f, fileList);
+            }
+        }*/</span>
+
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">root</span><span class="o">.</span><span class="na">isHidden</span><span class="o">())</span> <span class="k">return</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">root</span><span class="o">.</span><span class="na">isFile</span><span class="o">())</span>
+            <span class="n">fileList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">root</span><span class="o">);</span>
+        <span class="k">else</span> <span class="o">{</span>
+            <span class="nc">File</span><span class="o">[]</span> <span class="n">files</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="na">listFiles</span><span class="o">();</span>
+            <span class="k">for</span> <span class="o">(</span><span class="nc">File</span> <span class="n">f</span> <span class="o">:</span> <span class="n">files</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">recursiveList</span><span class="o">(</span><span class="n">f</span><span class="o">,</span> <span class="n">fileList</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *获取某路径目录
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTreeFilesPreOrderTraversal</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">File</span> <span class="n">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main"</span><span class="o">);</span>
+<span class="c1">//        FluentIterable&lt;File&gt; files = Files.fileTreeTraverser().preOrderTraversal(root);</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">File</span><span class="o">&gt;</span> <span class="n">files</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">fileTreeTraverser</span><span class="o">().</span><span class="na">preOrderTraversal</span><span class="o">(</span><span class="n">root</span><span class="o">).</span><span class="na">filter</span><span class="o">(</span><span class="nl">File:</span><span class="o">:</span><span class="n">isFile</span><span class="o">);</span>
+        <span class="n">files</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//preOrderTraversal postOrderTraversal顺序不一样</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTreeFilesPostOrderTraversal</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">File</span> <span class="n">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main"</span><span class="o">);</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">File</span><span class="o">&gt;</span> <span class="n">files</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">fileTreeTraverser</span><span class="o">().</span><span class="na">postOrderTraversal</span><span class="o">(</span><span class="n">root</span><span class="o">);</span>
+        <span class="n">files</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *获取path下子目录
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTreeFilesChild</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">File</span> <span class="n">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"C:\\Users\\wangwenjun\\IdeaProjects\\guava_programming\\src\\main"</span><span class="o">);</span>
+        <span class="nc">Iterable</span><span class="o">&lt;</span><span class="nc">File</span><span class="o">&gt;</span> <span class="n">children</span> <span class="o">=</span> <span class="nc">Files</span><span class="o">.</span><span class="na">fileTreeTraverser</span><span class="o">().</span><span class="na">children</span><span class="o">(</span><span class="n">root</span><span class="o">);</span>
+
+        <span class="n">children</span><span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@After</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">tearDown</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">File</span> <span class="n">targetFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="no">TARGET_FILE</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">targetFile</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span>
+            <span class="n">targetFile</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="collections">collections</h3>
+
+<h4 id="fluentiterable">FluentIterable</h4>
+
+<ul>
+  <li>主要用于<strong>过滤、转换集合中的数据</strong></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.base.Joiner</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.base.Optional</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.FluentIterable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Lists</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">Is</span><span class="o">.</span><span class="na">is</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.*;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FluentIterableExampleTest</span>
+<span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">build</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"Alex"</span><span class="o">,</span> <span class="s">"Wang"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="nc">FluentIterable</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+    <span class="o">}</span>
+	
+    <span class="cm">/**
+    * 迭代器过滤
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testFilter</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">fit</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">4</span><span class="o">));</span>
+		
+        <span class="c1">//过滤掉集合中为null和长度&lt;=4的元素</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">e</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">2</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 集合追加
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testAppend</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">append</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"APPEND"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">fit</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">4</span><span class="o">));</span>
+        <span class="c1">//把一个集合中的元素全部添加到另一个集合中</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">appendFI</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">append</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">appendFI</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">5</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">appendFI</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="s">"APPEND"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 判断集合里的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testMatch</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        <span class="c1">//如果全部符合条件，返回true</span>
+        <span class="kt">boolean</span> <span class="n">result</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">allMatch</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">e</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+		<span class="c1">//如果有符合条件的任意一个元素，返回true</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">anyMatch</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">e</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">5</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+
+        <span class="c1">//获取第一个满足条件的元素</span>
+        <span class="nc">Optional</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">optional</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">firstMatch</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">e</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">5</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">optional</span><span class="o">.</span><span class="na">isPresent</span><span class="o">(),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">optional</span><span class="o">.</span><span class="na">get</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Guava"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 获取头元素和尾元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">testFirst$Last</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        
+        <span class="c1">//获取头元素</span>
+        <span class="nc">Optional</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">optional</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">first</span><span class="o">();</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">optional</span><span class="o">.</span><span class="na">isPresent</span><span class="o">(),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">optional</span><span class="o">.</span><span class="na">get</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Alex"</span><span class="o">));</span>
+
+        <span class="c1">//获取尾元素</span>
+        <span class="n">optional</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">last</span><span class="o">();</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">optional</span><span class="o">.</span><span class="na">isPresent</span><span class="o">(),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">optional</span><span class="o">.</span><span class="na">get</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 获取集合中指定数量和元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testLimit</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">limit</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">limit</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">limit</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">limit</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="s">"Scala"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">limit</span><span class="o">(</span><span class="mi">300</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">limit</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">limit</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="s">"Scala"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 集合拷贝
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCopyIn</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"Java"</span><span class="o">);</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">copyInto</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">5</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="s">"Scala"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 循环集合中的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCycle</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">cycle</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">cycle</span><span class="o">().</span><span class="na">limit</span><span class="o">(</span><span class="mi">20</span><span class="o">);</span>
+        <span class="n">cycle</span><span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 转化集合中的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTransform</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        <span class="c1">//把集合中的元素转换为对应的长度，是一个List&lt;Integer&gt;</span>
+        <span class="n">fit</span><span class="o">.</span><span class="na">transform</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span><span class="o">.</span><span class="na">length</span><span class="o">()).</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 转化集合中的元素并合并
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTransformAndConcat</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">transformAndConcat</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="o">);</span>
+        <span class="n">result</span><span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span><span class="c1">//1 1 1 1</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     *转化集合中的元素并合并
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTransformAndConcatInAction</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">cTypes</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="c1">//使用1作为查询条件得到一个list，里面有两个对象</span>
+        <span class="c1">//使用2作为查询条件得到一个list2，里面有三个对象</span>
+        <span class="c1">//使用transformAndConcat可以把list1和list2合并为一个list</span>
+        <span class="nc">FluentIterable</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">cTypes</span><span class="o">).</span><span class="na">transformAndConcat</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">search</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     *连接集合中的元素
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJoin</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">FluentIterable</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">fit</span> <span class="o">=</span> <span class="n">build</span><span class="o">();</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="sc">','</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"Alex,Wang,Guava,Scala"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+
+    <span class="kd">private</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Customer</span><span class="o">&gt;</span> <span class="nf">search</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">)</span>
+    <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">type</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span>
+        <span class="o">{</span>
+            <span class="k">return</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="k">new</span> <span class="nc">Customer</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="s">"Alex"</span><span class="o">),</span> <span class="k">new</span> <span class="nc">Customer</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="s">"Tina"</span><span class="o">));</span>
+        <span class="o">}</span> <span class="k">else</span>
+        <span class="o">{</span>
+            <span class="k">return</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="k">new</span> <span class="nc">Customer</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="s">"Wang"</span><span class="o">),</span> <span class="k">new</span> <span class="nc">Customer</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="s">"Wen"</span><span class="o">),</span> <span class="k">new</span> <span class="nc">Customer</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="s">"Jun"</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">class</span> <span class="nc">Customer</span>
+    <span class="o">{</span>
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">type</span><span class="o">;</span>
+        <span class="kd">final</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+        <span class="nc">Customer</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="nc">String</span> <span class="n">name</span><span class="o">)</span>
+        <span class="o">{</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">type</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span>
+        <span class="o">{</span>
+            <span class="k">return</span> <span class="s">"Customer{"</span> <span class="o">+</span>
+                    <span class="s">"type="</span> <span class="o">+</span> <span class="n">type</span> <span class="o">+</span>
+                    <span class="s">", name='"</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="sc">'\''</span> <span class="o">+</span>
+                    <span class="sc">'}'</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="lists">Lists</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.base.Joiner</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.FluentIterable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Lists</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ListsExampleTest</span>
+<span class="o">{</span>
+
+    <span class="cm">/**
+    *求笛卡尔积
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCartesianProduct</span><span class="o">()</span>
+    <span class="o">{</span>
+
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">cartesianProduct</span><span class="o">(</span>
+                <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">),</span>
+                <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"A"</span><span class="o">,</span> <span class="s">"B"</span><span class="o">)</span>
+        <span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span><span class="c1">//1A,1B,2A,2B</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *转换集合中的元素
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTransform</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">sourceList</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"Scala"</span><span class="o">,</span> <span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Lists"</span><span class="o">);</span>
+        <span class="nc">Lists</span><span class="o">.</span><span class="na">transform</span><span class="o">(</span><span class="n">sourceList</span><span class="o">,</span> <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span><span class="o">.</span><span class="na">toUpperCase</span><span class="o">()).</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+
+
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *创建一个指定容积的集合
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testNewArrayListWithCapacity</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayListWithCapacity</span><span class="o">(</span><span class="mi">10</span><span class="o">);</span>
+        <span class="n">result</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"x"</span><span class="o">);</span>
+        <span class="n">result</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"y"</span><span class="o">);</span>
+        <span class="n">result</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"z"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+
+
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *反转集合中元素的顺序
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testReverse</span><span class="o">(){</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">","</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">list</span><span class="o">),</span><span class="n">equalTo</span><span class="o">(</span><span class="s">"1,2,3"</span><span class="o">));</span>
+
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">reverse</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Joiner</span><span class="o">.</span><span class="na">on</span><span class="o">(</span><span class="s">","</span><span class="o">).</span><span class="na">join</span><span class="o">(</span><span class="n">result</span><span class="o">),</span><span class="n">equalTo</span><span class="o">(</span><span class="s">"3,2,1"</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *集合分区
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testPartition</span><span class="o">(){</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">,</span><span class="s">"4"</span><span class="o">);</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">partition</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="mi">30</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="sets">sets</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.collect.Lists</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Sets</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SetsExampleTest</span>
+<span class="o">{</span>
+
+    <span class="cm">/**
+    * 创建set
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCreate</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">set</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">3</span><span class="o">));</span>
+
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">4</span><span class="o">));</span>
+
+        <span class="c1">//把list变为set</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set2</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">set2</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">3</span><span class="o">));</span>
+
+
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 笛卡尔积
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCartesianProduct</span><span class="o">()</span>
+    <span class="o">{</span>
+
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;&gt;</span> <span class="n">set</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">cartesianProduct</span><span class="o">(</span><span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">),</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">),</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="mi">6</span><span class="o">));</span>
+
+        <span class="c1">//[[1,4,5],[1,4,6],[1,3,5],[1,3,6],[2,4,5],[2,4,6],[2,3,5],[2,3,6]]</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">set</span><span class="o">);</span>
+
+
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 返回大小为set的所有子集的集合
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCombinations</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;&gt;</span> <span class="n">combinations</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">combinations</span><span class="o">(</span><span class="n">set</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="n">combinations</span><span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+        <span class="c1">//[1,2],[1,3],[2,3]</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 返回差集
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testDiff</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set1</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set2</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">6</span><span class="o">);</span>
+        <span class="nc">Sets</span><span class="o">.</span><span class="na">SetView</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">diffResult1</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">difference</span><span class="o">(</span><span class="n">set1</span><span class="o">,</span> <span class="n">set2</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">diffResult1</span><span class="o">);</span><span class="c1">//[2,3]</span>
+        <span class="nc">Sets</span><span class="o">.</span><span class="na">SetView</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">diffResult2</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">difference</span><span class="o">(</span><span class="n">set2</span><span class="o">,</span> <span class="n">set1</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">diffResult2</span><span class="o">);</span><span class="c1">//[4,6]</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 返回交集
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testIntersection</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set1</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set2</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">6</span><span class="o">);</span>
+        <span class="nc">Sets</span><span class="o">.</span><span class="na">intersection</span><span class="o">(</span><span class="n">set1</span><span class="o">,</span> <span class="n">set2</span><span class="o">).</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span><span class="c1">//[1]</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 返回并集
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testUnionSection</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set1</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">set2</span> <span class="o">=</span> <span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">6</span><span class="o">);</span>
+        <span class="nc">Sets</span><span class="o">.</span><span class="na">union</span><span class="o">(</span><span class="n">set1</span><span class="o">,</span> <span class="n">set2</span><span class="o">).</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span><span class="c1">//[1,2,3,4,6]</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="maps">Maps</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.collect.ImmutableMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Lists</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Maps</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Sets</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">Is</span><span class="o">.</span><span class="na">is</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MapsExampleTest</span>
+<span class="o">{</span>
+
+    <span class="cm">/**
+    * 创建map
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCreate</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">valueList</span> <span class="o">=</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">);</span>
+        <span class="nc">ImmutableMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">uniqueIndex</span><span class="o">(</span><span class="n">valueList</span><span class="o">,</span> <span class="n">v</span> <span class="o">-&gt;</span> <span class="n">v</span> <span class="o">+</span> <span class="s">"_key"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">map</span><span class="o">);</span><span class="c1">//{1_key=1,2_key=2,3_key=3}</span>
+        
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map2</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">asMap</span><span class="o">(</span><span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">),</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="n">k</span> <span class="o">+</span> <span class="s">"_value"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">map2</span><span class="o">);</span><span class="c1">//{1=1_value,2=2_value,3=3_value}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 转换map的value
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testTransform</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">asMap</span><span class="o">(</span><span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">),</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="n">k</span> <span class="o">+</span> <span class="s">"_value"</span><span class="o">);</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">newMap</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">transformValues</span><span class="o">(</span><span class="n">map</span><span class="o">,</span> <span class="n">v</span> <span class="o">-&gt;</span> <span class="n">v</span> <span class="o">+</span> <span class="s">"_transform"</span><span class="o">);</span>
+        <span class="c1">//{1=1_value_transform,2=2_value_transform,3=3_value_transform}</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">newMap</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">newMap</span><span class="o">.</span><span class="na">containsValue</span><span class="o">(</span><span class="s">"1_value_transform"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 过滤
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testFilter</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">asMap</span><span class="o">(</span><span class="nc">Sets</span><span class="o">.</span><span class="na">newHashSet</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">),</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="n">k</span> <span class="o">+</span> <span class="s">"_value"</span><span class="o">);</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">newMap</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">filterKeys</span><span class="o">(</span><span class="n">map</span><span class="o">,</span> <span class="n">k</span> <span class="o">-&gt;</span> <span class="nc">Lists</span><span class="o">.</span><span class="na">newArrayList</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">).</span><span class="na">contains</span><span class="o">(</span><span class="n">k</span><span class="o">));</span>
+        <span class="c1">//{1=1_value,2=2_value}</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">newMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"3"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="multimaps">Multimaps</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.collect.LinkedListMultimap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Maps</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Multimaps</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.*;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MultimapsExampleTest</span>
+<span class="o">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBasic</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="c1">//允许键重复的map,value存的是一个链表</span>
+        <span class="nc">LinkedListMultimap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">multipleMap</span> <span class="o">=</span> <span class="nc">LinkedListMultimap</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+        <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">hashMap</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">newHashMap</span><span class="o">();</span>
+        <span class="n">hashMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"1"</span><span class="o">);</span>
+        <span class="n">hashMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">hashMap</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">1</span><span class="o">));</span>
+
+
+        <span class="n">multipleMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"1"</span><span class="o">);</span>
+        <span class="n">multipleMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">multipleMap</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">2</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">multipleMap</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"1"</span><span class="o">));</span><span class="c1">//[1,2]</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="bimap">BiMap</h4>
+
+<ul>
+  <li>双向映射</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.collect.BiMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.HashBiMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">Is</span><span class="o">.</span><span class="na">is</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.*;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BiMapExampleTest</span>
+<span class="o">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCreateAndPut</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashBiMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">biMap</span> <span class="o">=</span> <span class="nc">HashBiMap</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+        <span class="n">biMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">);</span>
+        <span class="n">biMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"1"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">1</span><span class="o">));</span>
+		<span class="c1">//要保证键和值都是惟一的</span>
+        <span class="k">try</span>
+        <span class="o">{</span>
+            <span class="n">biMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">);</span>
+            <span class="n">fail</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span>
+        <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 反转键和值
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBiMapInverse</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashBiMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">biMap</span> <span class="o">=</span> <span class="nc">HashBiMap</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+        <span class="n">biMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">);</span>
+        <span class="n">biMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"2"</span><span class="o">,</span> <span class="s">"3"</span><span class="o">);</span>
+        <span class="n">biMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"3"</span><span class="o">,</span> <span class="s">"4"</span><span class="o">);</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"1"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"2"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"3"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">3</span><span class="o">));</span>
+
+        <span class="c1">//反转后的BiMap，即key/value互相切换的映射。</span>
+        <span class="c1">//反转的map并不是一个新的map，而是一个视图，这意味着，你在这个反转后的map中的任何增删改操作都会影响原来的map</span>
+        <span class="nc">BiMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">inverseKey</span> <span class="o">=</span> <span class="n">biMap</span><span class="o">.</span><span class="na">inverse</span><span class="o">();</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">inverseKey</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"2"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">inverseKey</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"3"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">inverseKey</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"4"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">inverseKey</span><span class="o">.</span><span class="na">size</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">3</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    * 覆盖原有值
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCreateAndForcePut</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">HashBiMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">biMap</span> <span class="o">=</span> <span class="nc">HashBiMap</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+        <span class="n">biMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"1"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"1"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">biMap</span><span class="o">.</span><span class="na">forcePut</span><span class="o">(</span><span class="s">"2"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">);</span>
+        <span class="c1">//{2=2}</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"1"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">biMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"2"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="table">Table</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.collect.HashBasedTable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Table</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">Is</span><span class="o">.</span><span class="na">is</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.*;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TableExampleTest</span>
+<span class="o">{</span>
+    <span class="c1">//ArrayTable</span>
+    <span class="c1">//TreeBaseTable</span>
+    <span class="c1">//HashBaseTable</span>
+    <span class="c1">//ImmutableTable</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Table</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">table</span> <span class="o">=</span> <span class="nc">HashBasedTable</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+        <span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Language"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">,</span> <span class="s">"1.8"</span><span class="o">);</span>
+        <span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Language"</span><span class="o">,</span> <span class="s">"Scala"</span><span class="o">,</span> <span class="s">"2.3"</span><span class="o">);</span>
+        <span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Database"</span><span class="o">,</span> <span class="s">"Oracle"</span><span class="o">,</span> <span class="s">"12C"</span><span class="o">);</span>
+        <span class="n">table</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Database"</span><span class="o">,</span> <span class="s">"Mysql"</span><span class="o">,</span> <span class="s">"7.0"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">table</span><span class="o">);</span>
+        <span class="c1">//{Language={java=1.8,Scala=2.3},Database={Oracle=12c,Mysql=7.0}}</span>
+
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">language</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">row</span><span class="o">(</span><span class="s">"Language"</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">language</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="s">"Java"</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="c1">//Map&lt;String,Map&lt;String,String&gt;&gt;</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">table</span><span class="o">.</span><span class="na">row</span><span class="o">(</span><span class="s">"Language"</span><span class="o">).</span><span class="na">get</span><span class="o">(</span><span class="s">"Java"</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"1.8"</span><span class="o">));</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">column</span><span class="o">(</span><span class="s">"Java"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span><span class="c1">//{Language=1.8}</span>
+
+        <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Table</span><span class="o">.</span><span class="na">Cell</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">cells</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">cellSet</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">cells</span><span class="o">);</span>
+        <span class="c1">//[(Language,java)=1.8, (Language,Scala)=2.3,(Database,Oracle)=12c,(Database,Mysql)=7.0]</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="range">Range</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.collect.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.NavigableMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.TreeMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">Is</span><span class="o">.</span><span class="na">is</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsEqual</span><span class="o">.</span><span class="na">equalTo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.*;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RangeExampleTest</span>
+<span class="o">{</span>
+    <span class="cm">/**
+     * {x|a&lt;=x&lt;=b}
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testClosedRange</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">closedRange</span> <span class="o">=</span> <span class="nc">Range</span><span class="o">.</span><span class="na">closed</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">9</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">closedRange</span><span class="o">);</span><span class="c1">//[0..9]</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">5</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="c1">//最小点</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedRange</span><span class="o">.</span><span class="na">lowerEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+        <span class="c1">//最大点</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedRange</span><span class="o">.</span><span class="na">upperEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">9</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * {x|a&lt;x&lt;b}
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOpenRange</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">openRange</span> <span class="o">=</span> <span class="nc">Range</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">9</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">openRange</span><span class="o">);</span><span class="c1">//(0..9)</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">5</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openRange</span><span class="o">.</span><span class="na">lowerEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openRange</span><span class="o">.</span><span class="na">upperEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">9</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">9</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * {x|a&lt;x&lt;=b}
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOpenClosedRange</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">openClosedRange</span> <span class="o">=</span> <span class="nc">Range</span><span class="o">.</span><span class="na">openClosed</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">9</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">openClosedRange</span><span class="o">);</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openClosedRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">5</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openClosedRange</span><span class="o">.</span><span class="na">lowerEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openClosedRange</span><span class="o">.</span><span class="na">upperEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">9</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openClosedRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">openClosedRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">9</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+    <span class="o">}</span>
+
+
+    <span class="cm">/**
+     * {x|a&lt;=x&lt;b}
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testClosedOpenRange</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">closedOpen</span> <span class="o">=</span> <span class="nc">Range</span><span class="o">.</span><span class="na">closedOpen</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">9</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">closedOpen</span><span class="o">);</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedOpen</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">5</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedOpen</span><span class="o">.</span><span class="na">lowerEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedOpen</span><span class="o">.</span><span class="na">upperEndpoint</span><span class="o">(),</span> <span class="n">equalTo</span><span class="o">(</span><span class="mi">9</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedOpen</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">closedOpen</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">9</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * {x|x&gt;a}
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testGreaterThan</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">range</span> <span class="o">=</span> <span class="nc">Range</span><span class="o">.</span><span class="na">greaterThan</span><span class="o">(</span><span class="mi">10</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">range</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">10</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">range</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testMapRange</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">TreeMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">treeMap</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">newTreeMap</span><span class="o">();</span>
+
+        <span class="n">treeMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Scala"</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+        <span class="n">treeMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Guava"</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="n">treeMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Java"</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="n">treeMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Kafka"</span><span class="o">,</span> <span class="mi">4</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">treeMap</span><span class="o">);</span>
+        <span class="c1">//{Guava=2,Java=3,Kafka=4,Scala=1}</span>
+
+        <span class="nc">NavigableMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">Maps</span><span class="o">.</span><span class="na">subMap</span><span class="o">(</span><span class="n">treeMap</span><span class="o">,</span> <span class="nc">Range</span><span class="o">.</span><span class="na">openClosed</span><span class="o">(</span><span class="s">"Guava"</span><span class="o">,</span> <span class="s">"Java"</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+        <span class="c1">//{Java=3}</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOtherMethod</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Range</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">atLeastRange</span> <span class="o">=</span> <span class="nc">Range</span><span class="o">.</span><span class="na">atLeast</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">atLeastRange</span><span class="o">);</span><span class="c1">//[2..+无穷)</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">atLeastRange</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="mi">2</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">lessThan</span><span class="o">(</span><span class="mi">10</span><span class="o">));</span><span class="c1">//(-无穷..10)</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">atMost</span><span class="o">(</span><span class="mi">5</span><span class="o">));</span><span class="c1">//(-无穷..5]</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">all</span><span class="o">());</span><span class="c1">//(-无穷..+无穷)</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">downTo</span><span class="o">(</span><span class="mi">10</span><span class="o">,</span> <span class="nc">BoundType</span><span class="o">.</span><span class="na">CLOSED</span><span class="o">));</span><span class="c1">//10--正无穷</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">upTo</span><span class="o">(</span><span class="mi">10</span><span class="o">,</span> <span class="nc">BoundType</span><span class="o">.</span><span class="na">CLOSED</span><span class="o">));</span><span class="c1">//负无穷到10</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testRangeMap</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">RangeMap</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">gradeScale</span> <span class="o">=</span> <span class="nc">TreeRangeMap</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+        <span class="n">gradeScale</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">closed</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">60</span><span class="o">),</span> <span class="s">"E"</span><span class="o">);</span>
+        <span class="n">gradeScale</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">closed</span><span class="o">(</span><span class="mi">61</span><span class="o">,</span> <span class="mi">70</span><span class="o">),</span> <span class="s">"D"</span><span class="o">);</span>
+        <span class="n">gradeScale</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">closed</span><span class="o">(</span><span class="mi">71</span><span class="o">,</span> <span class="mi">80</span><span class="o">),</span> <span class="s">"C"</span><span class="o">);</span>
+        <span class="n">gradeScale</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">closed</span><span class="o">(</span><span class="mi">81</span><span class="o">,</span> <span class="mi">90</span><span class="o">),</span> <span class="s">"B"</span><span class="o">);</span>
+        <span class="n">gradeScale</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="nc">Range</span><span class="o">.</span><span class="na">closed</span><span class="o">(</span><span class="mi">91</span><span class="o">,</span> <span class="mi">100</span><span class="o">),</span> <span class="s">"A"</span><span class="o">);</span>
+
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">gradeScale</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">77</span><span class="o">),</span> <span class="n">equalTo</span><span class="o">(</span><span class="s">"C"</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="ordering">Ordering</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.wangwenjun.guava.collections</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Ordering</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">Is</span><span class="o">.</span><span class="na">is</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.*;</span>
+
+<span class="cm">/***************************************
+ * @author:Alex Wang
+ * @Date:2018/1/15
+ * QQ: 532500648
+ * QQ群:463962286
+ ***************************************/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OrderingExampleTest</span>
+<span class="o">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJDKOrder</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//list中有null排序会抛出异常</span>
+    <span class="nd">@Test</span><span class="o">(</span><span class="n">expected</span> <span class="o">=</span> <span class="nc">NullPointerException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testJDKOrderIssue</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">list</span><span class="o">);</span><span class="c1">//会抛出异常</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOrderNaturalByNullFirst</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="c1">//如果有null，排序后放在第一位</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="nc">Ordering</span><span class="o">.</span><span class="na">natural</span><span class="o">().</span><span class="na">nullsFirst</span><span class="o">());</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOrderNaturalByNullLast</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="c1">//如果有null，排序后放在最后一位</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="nc">Ordering</span><span class="o">.</span><span class="na">natural</span><span class="o">().</span><span class="na">nullsLast</span><span class="o">());</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOrderNatural</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="nc">Ordering</span><span class="o">.</span><span class="na">natural</span><span class="o">().</span><span class="na">isOrdered</span><span class="o">(</span><span class="n">list</span><span class="o">),</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span><span class="c1">//是否按照自然顺序</span>
+    <span class="o">}</span>
+
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOrderReverse</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+        <span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="nc">Ordering</span><span class="o">.</span><span class="na">natural</span><span class="o">().</span><span class="na">reverse</span><span class="o">());</span><span class="c1">//按自然顺序的倒序排序</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="immutablecollections">ImmutableCollections</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.google.common.collect.ImmutableList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.ImmutableMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">junit</span><span class="o">.</span><span class="na">framework</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">fail</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">Is</span><span class="o">.</span><span class="na">is</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">hamcrest</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">IsNull</span><span class="o">.</span><span class="na">notNullValue</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertThat</span><span class="o">;</span>
+<span class="cm">/**
+*不可变集合工具
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImmutableCollectionsTest</span>
+<span class="o">{</span>
+
+    <span class="nd">@Test</span><span class="o">(</span><span class="n">expected</span> <span class="o">=</span> <span class="nc">UnsupportedOperationException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testOf</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ImmutableList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">ImmutableList</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="n">assertThat</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="n">notNullValue</span><span class="o">());</span>
+        <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+        <span class="n">fail</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCopy</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">Integer</span><span class="o">[]</span> <span class="n">array</span> <span class="o">=</span> <span class="o">{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">5</span><span class="o">};</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">ImmutableList</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">array</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBuilder</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ImmutableList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">ImmutableList</span><span class="o">.&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span><span class="n">builder</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">).</span><span class="na">addAll</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="mi">6</span><span class="o">))</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testImmutableMap</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">ImmutableMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="nc">ImmutableMap</span><span class="o">.&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span><span class="n">builder</span><span class="o">().</span><span class="na">put</span><span class="o">(</span><span class="s">"Oracle"</span><span class="o">,</span> <span class="s">"12c"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Mysql"</span><span class="o">,</span> <span class="s">"7.0"</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">map</span><span class="o">);</span>
+        <span class="k">try</span>
+        <span class="o">{</span>
+            <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"Scala"</span><span class="o">,</span> <span class="s">"2.3.0"</span><span class="o">);</span>
+            <span class="n">fail</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span>
+        <span class="o">{</span>
+            <span class="n">assertThat</span><span class="o">(</span><span class="n">e</span> <span class="k">instanceof</span> <span class="nc">UnsupportedOperationException</span><span class="o">,</span> <span class="n">is</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+:ET

@@ -1,0 +1,630 @@
+I" <ul id="markdown-toc">
+  <li><a href="#简述" id="markdown-toc-简述">简述</a></li>
+  <li><a href="#搭建项目" id="markdown-toc-搭建项目">搭建项目</a>    <ul>
+      <li><a href="#pom" id="markdown-toc-pom">pom</a></li>
+      <li><a href="#富文本配置" id="markdown-toc-富文本配置">富文本配置</a></li>
+      <li><a href="#富文本控制层" id="markdown-toc-富文本控制层">富文本控制层</a></li>
+    </ul>
+  </li>
+  <li><a href="#可修改项" id="markdown-toc-可修改项">可修改项</a>    <ul>
+      <li><a href="#修改配置文件名称" id="markdown-toc-修改配置文件名称">修改配置文件名称</a></li>
+      <li><a href="#修改获取配置文件的路径映射" id="markdown-toc-修改获取配置文件的路径映射">修改获取配置文件的路径映射</a></li>
+      <li><a href="#存储和读取文本" id="markdown-toc-存储和读取文本">存储和读取文本</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="简述">简述</h3>
+
+<ul>
+  <li>UEditor只提供JSP版本的后端入口代码。但提供了项目源码，因此可以根据业务需求修改源代码。</li>
+  <li>此处使用了SpringBoot框架，配备了Thymeleaf模板引擎，所以没有必要再添加jsp来兼容UEditor，可通过修改源码满足需要。</li>
+</ul>
+
+<h3 id="搭建项目">搭建项目</h3>
+
+<h4 id="pom">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+
+	<span class="nt">&lt;groupId&gt;</span>com.example<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>ueditor-test<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;packaging&gt;</span>jar<span class="nt">&lt;/packaging&gt;</span>
+
+	<span class="nt">&lt;name&gt;</span>ueditor-test<span class="nt">&lt;/name&gt;</span>
+	<span class="nt">&lt;description&gt;</span>Demo project for Spring Boot<span class="nt">&lt;/description&gt;</span>
+
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>1.5.2.RELEASE<span class="nt">&lt;/version&gt;</span>
+
+		<span class="nt">&lt;relativePath/&gt;</span> <span class="c">&lt;!-- lookup parent from repository --&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+
+	<span class="nt">&lt;properties&gt;</span>
+		<span class="nt">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.build.sourceEncoding&gt;</span>
+		<span class="nt">&lt;project.reporting.outputEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.reporting.outputEncoding&gt;</span>
+		<span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+		<span class="c">&lt;!--修改thymeleaf版本--&gt;</span>
+		<span class="nt">&lt;thymeleaf.version&gt;</span>3.0.3.RELEASE<span class="nt">&lt;/thymeleaf.version&gt;</span>
+		<span class="nt">&lt;thymeleaf-layout-dialect.version&gt;</span>2.1.0<span class="nt">&lt;/thymeleaf-layout-dialect.version&gt;</span>
+	<span class="nt">&lt;/properties&gt;</span>
+
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-thymeleaf<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.json<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>json<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>commons-fileupload<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>commons-fileupload<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>1.3.2<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>commons-codec<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>commons-codec<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>1.9<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+		    <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+		    <span class="nt">&lt;artifactId&gt;</span>spring-boot-devtools<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+
+	<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+
+
+<span class="nt">&lt;/project&gt;</span>
+
+</code></pre></div></div>
+
+<h4 id="富文本配置">富文本配置</h4>
+
+<ul>
+  <li>从官网下载源代码并解压至项目，注意config.json我拷到了resources根路径下</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">/*</span><span class="w"> </span><span class="err">前后端通信相关的配置,注释只允许使用多行方式</span><span class="w"> </span><span class="err">*/</span><span class="w">
+</span><span class="p">{</span><span class="w">
+
+    </span><span class="nl">"basePath"</span><span class="p">:</span><span class="s2">"C:/"</span><span class="p">,</span><span class="err">/*</span><span class="w"> </span><span class="err">上传文件的基本路径</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="err">/*</span><span class="w"> </span><span class="err">上传图片配置项</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageActionName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"uploadimage"</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">执行上传图片的action名称</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageFieldName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"upfile"</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">提交的图片表单名称</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageMaxSize"</span><span class="p">:</span><span class="w"> </span><span class="mi">2048000</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">上传大小限制，单位B</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageAllowFiles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">".png"</span><span class="p">,</span><span class="w"> </span><span class="s2">".jpg"</span><span class="p">,</span><span class="w"> </span><span class="s2">".jpeg"</span><span class="p">,</span><span class="w"> </span><span class="s2">".gif"</span><span class="p">,</span><span class="w"> </span><span class="s2">".bmp"</span><span class="p">],</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">上传图片格式显示</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageCompressEnable"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">是否压缩图片</span><span class="p">,</span><span class="err">默认是</span><span class="kc">true</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageCompressBorder"</span><span class="p">:</span><span class="w"> </span><span class="mi">1600</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">图片压缩最长边限制</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageInsertAlign"</span><span class="p">:</span><span class="w"> </span><span class="s2">"none"</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">插入的图片浮动方式</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imageUrlPrefix"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8080"</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">图片访问路径前缀</span><span class="w"> </span><span class="err">*/</span><span class="w">
+    </span><span class="nl">"imagePathFormat"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/image/{yyyy}{mm}{dd}/{time}{rand:6}"</span><span class="p">,</span><span class="w"> </span><span class="err">/*</span><span class="w"> </span><span class="err">上传保存路径</span><span class="p">,</span><span class="err">可以自定义保存路径和文件名格式</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">filename</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成原文件名</span><span class="p">,</span><span class="err">配置这项需要注意中文乱码问题</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">rand:</span><span class="mi">6</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成随机数</span><span class="p">,</span><span class="err">后面的数字是随机数的位数</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">time</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成时间戳</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">yyyy</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成四位年份</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">yy</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成两位年份</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">mm</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成两位月份</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">dd</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成两位日期</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">hh</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成两位小时</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">ii</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成两位分钟</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="p">{</span><span class="err">ss</span><span class="p">}</span><span class="w"> </span><span class="err">会替换成两位秒</span><span class="w"> </span><span class="err">*/</span><span class="w">
+                                </span><span class="err">/*</span><span class="w"> </span><span class="err">非法字符</span><span class="w"> </span><span class="err">\</span><span class="w"> </span><span class="err">:</span><span class="w"> </span><span class="err">*</span><span class="w"> </span><span class="err">?</span><span class="w"> </span><span class="s2">" &lt; &gt; | */
+                                /* 具请体看线上文档: fex.baidu.com/ueditor/#use-format_upload_filename */
+
+    /* 涂鸦图片上传配置项 */
+    "</span><span class="err">scrawlActionName</span><span class="s2">": "</span><span class="err">uploadscrawl</span><span class="s2">", /* 执行上传涂鸦的action名称 */
+    "</span><span class="err">scrawlFieldName</span><span class="s2">": "</span><span class="err">upfile</span><span class="s2">", /* 提交的图片表单名称 */
+    "</span><span class="err">scrawlPathFormat</span><span class="s2">": "</span><span class="err">/ueditor/jsp/upload/image/</span><span class="p">{</span><span class="err">yyyy</span><span class="p">}{</span><span class="err">mm</span><span class="p">}{</span><span class="err">dd</span><span class="p">}</span><span class="err">/</span><span class="p">{</span><span class="err">time</span><span class="p">}{</span><span class="err">rand:</span><span class="mi">6</span><span class="p">}</span><span class="s2">", /* 上传保存路径,可以自定义保存路径和文件名格式 */
+    "</span><span class="err">scrawlMaxSize</span><span class="s2">": 2048000, /* 上传大小限制，单位B */
+    "</span><span class="err">scrawlUrlPrefix</span><span class="s2">": "", /* 图片访问路径前缀 */
+    "</span><span class="err">scrawlInsertAlign</span><span class="s2">": "</span><span class="err">none</span><span class="s2">",
+
+    /* 截图工具上传 */
+    "</span><span class="err">snapscreenActionName</span><span class="s2">": "</span><span class="err">uploadimage</span><span class="s2">", /* 执行上传截图的action名称 */
+    "</span><span class="err">snapscreenPathFormat</span><span class="s2">": "</span><span class="err">/ueditor/jsp/upload/image/</span><span class="p">{</span><span class="err">yyyy</span><span class="p">}{</span><span class="err">mm</span><span class="p">}{</span><span class="err">dd</span><span class="p">}</span><span class="err">/</span><span class="p">{</span><span class="err">time</span><span class="p">}{</span><span class="err">rand:</span><span class="mi">6</span><span class="p">}</span><span class="s2">", /* 上传保存路径,可以自定义保存路径和文件名格式 */
+    "</span><span class="err">snapscreenUrlPrefix</span><span class="s2">": "", /* 图片访问路径前缀 */
+    "</span><span class="err">snapscreenInsertAlign</span><span class="s2">": "</span><span class="err">none</span><span class="s2">", /* 插入的图片浮动方式 */
+
+    /* 抓取远程图片配置 */
+    "</span><span class="err">catcherLocalDomain</span><span class="s2">": ["</span><span class="mf">127.0</span><span class="err">.</span><span class="mf">0.1</span><span class="s2">", "</span><span class="err">localhost</span><span class="s2">", "</span><span class="err">img.baidu.com</span><span class="s2">"],
+    "</span><span class="err">catcherActionName</span><span class="s2">": "</span><span class="err">catchimage</span><span class="s2">", /* 执行抓取远程图片的action名称 */
+    "</span><span class="err">catcherFieldName</span><span class="s2">": "</span><span class="err">source</span><span class="s2">", /* 提交的图片列表表单名称 */
+    "</span><span class="err">catcherPathFormat</span><span class="s2">": "</span><span class="err">/ueditor/jsp/upload/image/</span><span class="p">{</span><span class="err">yyyy</span><span class="p">}{</span><span class="err">mm</span><span class="p">}{</span><span class="err">dd</span><span class="p">}</span><span class="err">/</span><span class="p">{</span><span class="err">time</span><span class="p">}{</span><span class="err">rand:</span><span class="mi">6</span><span class="p">}</span><span class="s2">", /* 上传保存路径,可以自定义保存路径和文件名格式 */
+    "</span><span class="err">catcherUrlPrefix</span><span class="s2">": "", /* 图片访问路径前缀 */
+    "</span><span class="err">catcherMaxSize</span><span class="s2">": 2048000, /* 上传大小限制，单位B */
+    "</span><span class="err">catcherAllowFiles</span><span class="s2">": ["</span><span class="err">.png</span><span class="s2">", "</span><span class="err">.jpg</span><span class="s2">", "</span><span class="err">.jpeg</span><span class="s2">", "</span><span class="err">.gif</span><span class="s2">", "</span><span class="err">.bmp</span><span class="s2">"], /* 抓取图片格式显示 */
+
+    /* 上传视频配置 */
+    "</span><span class="err">videoActionName</span><span class="s2">": "</span><span class="err">uploadvideo</span><span class="s2">", /* 执行上传视频的action名称 */
+    "</span><span class="err">videoFieldName</span><span class="s2">": "</span><span class="err">upfile</span><span class="s2">", /* 提交的视频表单名称 */
+    "</span><span class="err">videoPathFormat</span><span class="s2">": "</span><span class="err">/ueditor/jsp/upload/video/</span><span class="p">{</span><span class="err">yyyy</span><span class="p">}{</span><span class="err">mm</span><span class="p">}{</span><span class="err">dd</span><span class="p">}</span><span class="err">/</span><span class="p">{</span><span class="err">time</span><span class="p">}{</span><span class="err">rand:</span><span class="mi">6</span><span class="p">}</span><span class="s2">", /* 上传保存路径,可以自定义保存路径和文件名格式 */
+    "</span><span class="err">videoUrlPrefix</span><span class="s2">": "", /* 视频访问路径前缀 */
+    "</span><span class="err">videoMaxSize</span><span class="s2">": 102400000, /* 上传大小限制，单位B，默认100MB */
+    "</span><span class="err">videoAllowFiles</span><span class="s2">": [
+        "</span><span class="err">.flv</span><span class="s2">", "</span><span class="err">.swf</span><span class="s2">", "</span><span class="err">.mkv</span><span class="s2">", "</span><span class="err">.avi</span><span class="s2">", "</span><span class="err">.rm</span><span class="s2">", "</span><span class="err">.rmvb</span><span class="s2">", "</span><span class="err">.mpeg</span><span class="s2">", "</span><span class="err">.mpg</span><span class="s2">",
+        "</span><span class="err">.ogg</span><span class="s2">", "</span><span class="err">.ogv</span><span class="s2">", "</span><span class="err">.mov</span><span class="s2">", "</span><span class="err">.wmv</span><span class="s2">", "</span><span class="err">.mp</span><span class="mi">4</span><span class="s2">", "</span><span class="err">.webm</span><span class="s2">", "</span><span class="err">.mp</span><span class="mi">3</span><span class="s2">", "</span><span class="err">.wav</span><span class="s2">", "</span><span class="err">.mid</span><span class="s2">"], /* 上传视频格式显示 */
+
+    /* 上传文件配置 */
+    "</span><span class="err">fileActionName</span><span class="s2">": "</span><span class="err">uploadfile</span><span class="s2">", /* controller里,执行上传视频的action名称 */
+    "</span><span class="err">fileFieldName</span><span class="s2">": "</span><span class="err">upfile</span><span class="s2">", /* 提交的文件表单名称 */
+    "</span><span class="err">filePathFormat</span><span class="s2">": "</span><span class="err">/ueditor/jsp/upload/file/</span><span class="p">{</span><span class="err">yyyy</span><span class="p">}{</span><span class="err">mm</span><span class="p">}{</span><span class="err">dd</span><span class="p">}</span><span class="err">/</span><span class="p">{</span><span class="err">time</span><span class="p">}{</span><span class="err">rand:</span><span class="mi">6</span><span class="p">}</span><span class="s2">", /* 上传保存路径,可以自定义保存路径和文件名格式 */
+    "</span><span class="err">fileUrlPrefix</span><span class="s2">": "", /* 文件访问路径前缀 */
+    "</span><span class="err">fileMaxSize</span><span class="s2">": 51200000, /* 上传大小限制，单位B，默认50MB */
+    "</span><span class="err">fileAllowFiles</span><span class="s2">": [
+        "</span><span class="err">.png</span><span class="s2">", "</span><span class="err">.jpg</span><span class="s2">", "</span><span class="err">.jpeg</span><span class="s2">", "</span><span class="err">.gif</span><span class="s2">", "</span><span class="err">.bmp</span><span class="s2">",
+        "</span><span class="err">.flv</span><span class="s2">", "</span><span class="err">.swf</span><span class="s2">", "</span><span class="err">.mkv</span><span class="s2">", "</span><span class="err">.avi</span><span class="s2">", "</span><span class="err">.rm</span><span class="s2">", "</span><span class="err">.rmvb</span><span class="s2">", "</span><span class="err">.mpeg</span><span class="s2">", "</span><span class="err">.mpg</span><span class="s2">",
+        "</span><span class="err">.ogg</span><span class="s2">", "</span><span class="err">.ogv</span><span class="s2">", "</span><span class="err">.mov</span><span class="s2">", "</span><span class="err">.wmv</span><span class="s2">", "</span><span class="err">.mp</span><span class="mi">4</span><span class="s2">", "</span><span class="err">.webm</span><span class="s2">", "</span><span class="err">.mp</span><span class="mi">3</span><span class="s2">", "</span><span class="err">.wav</span><span class="s2">", "</span><span class="err">.mid</span><span class="s2">",
+        "</span><span class="err">.rar</span><span class="s2">", "</span><span class="err">.zip</span><span class="s2">", "</span><span class="err">.tar</span><span class="s2">", "</span><span class="err">.gz</span><span class="s2">", "</span><span class="err">.</span><span class="mi">7</span><span class="err">z</span><span class="s2">", "</span><span class="err">.bz</span><span class="mi">2</span><span class="s2">", "</span><span class="err">.cab</span><span class="s2">", "</span><span class="err">.iso</span><span class="s2">",
+        "</span><span class="err">.doc</span><span class="s2">", "</span><span class="err">.docx</span><span class="s2">", "</span><span class="err">.xls</span><span class="s2">", "</span><span class="err">.xlsx</span><span class="s2">", "</span><span class="err">.ppt</span><span class="s2">", "</span><span class="err">.pptx</span><span class="s2">", "</span><span class="err">.pdf</span><span class="s2">", "</span><span class="err">.txt</span><span class="s2">", "</span><span class="err">.md</span><span class="s2">", "</span><span class="err">.xml</span><span class="s2">"
+    ], /* 上传文件格式显示 */
+
+    /* 列出指定目录下的图片 */
+    "</span><span class="err">imageManagerActionName</span><span class="s2">": "</span><span class="err">listimage</span><span class="s2">", /* 执行图片管理的action名称 */
+    "</span><span class="err">imageManagerListPath</span><span class="s2">": "</span><span class="err">/ueditor/jsp/upload/image/</span><span class="s2">", /* 指定要列出图片的目录 */
+    "</span><span class="err">imageManagerListSize</span><span class="s2">": 20, /* 每次列出文件数量 */
+    "</span><span class="err">imageManagerUrlPrefix</span><span class="s2">": "", /* 图片访问路径前缀 */
+    "</span><span class="err">imageManagerInsertAlign</span><span class="s2">": "</span><span class="err">none</span><span class="s2">", /* 插入的图片浮动方式 */
+    "</span><span class="err">imageManagerAllowFiles</span><span class="s2">": ["</span><span class="err">.png</span><span class="s2">", "</span><span class="err">.jpg</span><span class="s2">", "</span><span class="err">.jpeg</span><span class="s2">", "</span><span class="err">.gif</span><span class="s2">", "</span><span class="err">.bmp</span><span class="s2">"], /* 列出的文件类型 */
+
+    /* 列出指定目录下的文件 */
+    "</span><span class="err">fileManagerActionName</span><span class="s2">": "</span><span class="err">listfile</span><span class="s2">", /* 执行文件管理的action名称 */
+    "</span><span class="err">fileManagerListPath</span><span class="s2">": "</span><span class="err">/ueditor/jsp/upload/file/</span><span class="s2">", /* 指定要列出文件的目录 */
+    "</span><span class="err">fileManagerUrlPrefix</span><span class="s2">": "", /* 文件访问路径前缀 */
+    "</span><span class="err">fileManagerListSize</span><span class="s2">": 20, /* 每次列出文件数量 */
+    "</span><span class="err">fileManagerAllowFiles</span><span class="s2">": [
+        "</span><span class="err">.png</span><span class="s2">", "</span><span class="err">.jpg</span><span class="s2">", "</span><span class="err">.jpeg</span><span class="s2">", "</span><span class="err">.gif</span><span class="s2">", "</span><span class="err">.bmp</span><span class="s2">",
+        "</span><span class="err">.flv</span><span class="s2">", "</span><span class="err">.swf</span><span class="s2">", "</span><span class="err">.mkv</span><span class="s2">", "</span><span class="err">.avi</span><span class="s2">", "</span><span class="err">.rm</span><span class="s2">", "</span><span class="err">.rmvb</span><span class="s2">", "</span><span class="err">.mpeg</span><span class="s2">", "</span><span class="err">.mpg</span><span class="s2">",
+        "</span><span class="err">.ogg</span><span class="s2">", "</span><span class="err">.ogv</span><span class="s2">", "</span><span class="err">.mov</span><span class="s2">", "</span><span class="err">.wmv</span><span class="s2">", "</span><span class="err">.mp</span><span class="mi">4</span><span class="s2">", "</span><span class="err">.webm</span><span class="s2">", "</span><span class="err">.mp</span><span class="mi">3</span><span class="s2">", "</span><span class="err">.wav</span><span class="s2">", "</span><span class="err">.mid</span><span class="s2">",
+        "</span><span class="err">.rar</span><span class="s2">", "</span><span class="err">.zip</span><span class="s2">", "</span><span class="err">.tar</span><span class="s2">", "</span><span class="err">.gz</span><span class="s2">", "</span><span class="err">.</span><span class="mi">7</span><span class="err">z</span><span class="s2">", "</span><span class="err">.bz</span><span class="mi">2</span><span class="s2">", "</span><span class="err">.cab</span><span class="s2">", "</span><span class="err">.iso</span><span class="s2">",
+        "</span><span class="err">.doc</span><span class="s2">", "</span><span class="err">.docx</span><span class="s2">", "</span><span class="err">.xls</span><span class="s2">", "</span><span class="err">.xlsx</span><span class="s2">", "</span><span class="err">.ppt</span><span class="s2">", "</span><span class="err">.pptx</span><span class="s2">", "</span><span class="err">.pdf</span><span class="s2">", "</span><span class="err">.txt</span><span class="s2">", "</span><span class="err">.md</span><span class="s2">", "</span><span class="err">.xml</span><span class="s2">"
+    ] /* 列出的文件类型 */
+
+}
+</span></code></pre></div></div>
+
+<h4 id="富文本控制层">富文本控制层</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.example</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.baidu.ueditor.ActionEnter</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.json.JSONException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Controller</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.ui.Model</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.BufferedReader</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileReader</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.PrintWriter</span><span class="o">;</span>
+
+<span class="cm">/**与富文本界面交互
+ * Created by ldb on 2017/4/9.
+ */</span>
+<span class="nd">@Controller</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UEditorController</span> <span class="o">{</span>
+
+
+	<span class="cm">/**
+	 * 在页面加载完成后读取本地文件内容进行显示
+	 * @param model
+	 * @return
+	 */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">showPage</span><span class="o">(</span><span class="nc">Model</span> <span class="n">model</span><span class="o">){</span>
+    	<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"c:/userNote.txt"</span><span class="o">);</span>
+        <span class="c1">// 创建文件字符流</span>
+        <span class="c1">// 缓存流必须建立在一个存在的流的基础上</span>
+    	<span class="nc">StringBuilder</span> <span class="n">sb</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">(</span>
+        		<span class="nc">FileReader</span> <span class="n">fr</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileReader</span><span class="o">(</span><span class="n">f</span><span class="o">);</span> 
+        		<span class="nc">BufferedReader</span> <span class="n">br</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span><span class="n">fr</span><span class="o">);</span>
+        	<span class="o">)</span> 
+        <span class="o">{</span>
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// 一次读一行</span>
+                <span class="nc">String</span> <span class="n">line</span> <span class="o">=</span> <span class="n">br</span><span class="o">.</span><span class="na">readLine</span><span class="o">();</span>
+                <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">line</span><span class="o">)</span>
+                    <span class="k">break</span><span class="o">;</span>
+                <span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">line</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">model</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"context"</span><span class="o">,</span> <span class="n">sb</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// TODO Auto-generated catch block</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="s">"index"</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *读取Ueditor配置类
+    */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"/config"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">config</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">JSONException</span> <span class="o">{</span>
+        <span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"application/json"</span><span class="o">);</span>
+        <span class="nc">String</span> <span class="n">rootPath</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getSession</span><span class="o">().</span><span class="na">getServletContext</span><span class="o">().</span><span class="na">getRealPath</span><span class="o">(</span><span class="s">"/"</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">String</span> <span class="n">exec</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ActionEnter</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">rootPath</span><span class="o">).</span><span class="na">exec</span><span class="o">();</span>
+            <span class="nc">PrintWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">();</span>
+            <span class="n">writer</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">exec</span><span class="o">);</span>
+            <span class="n">writer</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+            <span class="n">writer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>发现无法加载config.json文件。此时修改ConfigManage类的getConfigPath()方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="nc">String</span> <span class="nf">getConfigPath</span> <span class="o">()</span> <span class="o">{</span>
+		<span class="c1">//源码：return this.parentPath + File.separator + ConfigManager.configFileName;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="c1">//获取classpath下的config.json路径</span>
+            <span class="c1">//此处需要先转为URI再getPath()，否则如果你的项目路径带空格或者带中文则无法读取到文件</span>
+			<span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getClassLoader</span><span class="o">().</span><span class="na">getResource</span><span class="o">(</span><span class="s">"config.json"</span><span class="o">).</span><span class="na">toURI</span><span class="o">().</span><span class="na">getPath</span><span class="o">();</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">URISyntaxException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>运行项目路径http://localhost:8080/config?action=config如果能获取到内容就说明修改成功了</li>
+  <li>现在可以弹出选择上传文件的提示框了，但是提示未找到上传数据,发现在BinaryUploader类竟然无法获取到字节流。因为SpringMVC框架对含字节流的request进行了处理，此处传的是处理过的request，故获取不到字节流。此时采用SpringMVC框架的解析器multipartResolver</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.baidu.ueditor.upload</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.baidu.ueditor.PathFormat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.baidu.ueditor.define.AppInfo</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.baidu.ueditor.define.BaseState</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.baidu.ueditor.define.FileType</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.baidu.ueditor.define.State</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.commons.fileupload.servlet.ServletFileUpload</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.multipart.MultipartFile</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.multipart.MultipartHttpServletRequest</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BinaryUploader</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">State</span> <span class="nf">save</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+			<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">conf</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">if</span> <span class="o">(!</span><span class="nc">ServletFileUpload</span><span class="o">.</span><span class="na">isMultipartContent</span><span class="o">(</span><span class="n">request</span><span class="o">))</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="k">new</span> <span class="nf">BaseState</span><span class="o">(</span><span class="kc">false</span><span class="o">,</span> <span class="nc">AppInfo</span><span class="o">.</span><span class="na">NOT_MULTIPART_CONTENT</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="c1">//此时采用SpringMVC框架的解析器multipartResolver</span>
+			<span class="nc">MultipartHttpServletRequest</span> <span class="n">multipartRequest</span> <span class="o">=</span> <span class="o">(</span><span class="nc">MultipartHttpServletRequest</span><span class="o">)</span> <span class="n">request</span><span class="o">;</span>
+			<span class="nc">MultipartFile</span> <span class="n">multipartFile</span> <span class="o">=</span> <span class="n">multipartRequest</span><span class="o">.</span><span class="na">getFile</span><span class="o">(</span><span class="n">conf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"fieldName"</span><span class="o">).</span><span class="na">toString</span><span class="o">());</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">multipartFile</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+				<span class="k">return</span> <span class="k">new</span> <span class="nf">BaseState</span><span class="o">(</span><span class="kc">false</span><span class="o">,</span> <span class="nc">AppInfo</span><span class="o">.</span><span class="na">NOTFOUND_UPLOAD_DATA</span><span class="o">);</span>
+			<span class="o">}</span>
+
+			<span class="nc">String</span> <span class="n">savePath</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">conf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"savePath"</span><span class="o">);</span>
+			<span class="c1">//String originFileName = fileStream.getName();</span>
+			<span class="nc">String</span> <span class="n">originFileName</span> <span class="o">=</span> <span class="n">multipartFile</span><span class="o">.</span><span class="na">getOriginalFilename</span><span class="o">();</span>
+			<span class="nc">String</span> <span class="n">suffix</span> <span class="o">=</span> <span class="nc">FileType</span><span class="o">.</span><span class="na">getSuffixByFilename</span><span class="o">(</span><span class="n">originFileName</span><span class="o">);</span>
+
+			<span class="n">originFileName</span> <span class="o">=</span> <span class="n">originFileName</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span>
+					<span class="n">originFileName</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="n">suffix</span><span class="o">.</span><span class="na">length</span><span class="o">());</span>
+			<span class="n">savePath</span> <span class="o">=</span> <span class="n">savePath</span> <span class="o">+</span> <span class="n">suffix</span><span class="o">;</span>
+
+			<span class="kt">long</span> <span class="n">maxSize</span> <span class="o">=</span> <span class="o">((</span><span class="nc">Long</span><span class="o">)</span> <span class="n">conf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"maxSize"</span><span class="o">)).</span><span class="na">longValue</span><span class="o">();</span>
+
+			<span class="k">if</span> <span class="o">(!</span><span class="n">validType</span><span class="o">(</span><span class="n">suffix</span><span class="o">,</span> <span class="o">(</span><span class="nc">String</span><span class="o">[])</span> <span class="n">conf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"allowFiles"</span><span class="o">)))</span> <span class="o">{</span>
+				<span class="k">return</span> <span class="k">new</span> <span class="nf">BaseState</span><span class="o">(</span><span class="kc">false</span><span class="o">,</span> <span class="nc">AppInfo</span><span class="o">.</span><span class="na">NOT_ALLOW_FILE_TYPE</span><span class="o">);</span>
+			<span class="o">}</span>
+
+			<span class="n">savePath</span> <span class="o">=</span> <span class="nc">PathFormat</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">savePath</span><span class="o">,</span> <span class="n">originFileName</span><span class="o">);</span>
+
+			<span class="c1">//String physicalPath = (String) conf.get("rootPath") + savePath;</span>
+			<span class="nc">String</span> <span class="n">basePath</span><span class="o">=(</span><span class="nc">String</span><span class="o">)</span> <span class="n">conf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"basePath"</span><span class="o">);</span>
+			<span class="nc">String</span> <span class="n">physicalPath</span> <span class="o">=</span> <span class="n">basePath</span> <span class="o">+</span> <span class="n">savePath</span><span class="o">;</span>
+
+			<span class="c1">//InputStream is = fileStream.openStream();</span>
+			<span class="nc">InputStream</span> <span class="n">is</span> <span class="o">=</span> <span class="n">multipartFile</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">();</span>
+			<span class="nc">State</span> <span class="n">storageState</span> <span class="o">=</span> <span class="nc">StorageManager</span><span class="o">.</span><span class="na">saveFileByInputStream</span><span class="o">(</span><span class="n">is</span><span class="o">,</span>
+					<span class="n">physicalPath</span><span class="o">,</span> <span class="n">maxSize</span><span class="o">);</span>
+			<span class="n">is</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+
+			<span class="k">if</span> <span class="o">(</span><span class="n">storageState</span><span class="o">.</span><span class="na">isSuccess</span><span class="o">())</span> <span class="o">{</span>
+				<span class="n">storageState</span><span class="o">.</span><span class="na">putInfo</span><span class="o">(</span><span class="s">"url"</span><span class="o">,</span> <span class="nc">PathFormat</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="n">savePath</span><span class="o">));</span>
+				<span class="n">storageState</span><span class="o">.</span><span class="na">putInfo</span><span class="o">(</span><span class="s">"type"</span><span class="o">,</span> <span class="n">suffix</span><span class="o">);</span>
+				<span class="n">storageState</span><span class="o">.</span><span class="na">putInfo</span><span class="o">(</span><span class="s">"original"</span><span class="o">,</span> <span class="n">originFileName</span> <span class="o">+</span> <span class="n">suffix</span><span class="o">);</span>
+			<span class="o">}</span>
+
+			<span class="k">return</span> <span class="n">storageState</span><span class="o">;</span>
+		<span class="c1">// } catch (FileUploadException e) {</span>
+		<span class="c1">// 	return new BaseState(false, AppInfo.PARSE_REQUEST_ERROR);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="k">new</span> <span class="nf">BaseState</span><span class="o">(</span><span class="kc">false</span><span class="o">,</span> <span class="nc">AppInfo</span><span class="o">.</span><span class="na">IO_ERROR</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">validType</span><span class="o">(</span><span class="nc">String</span> <span class="n">type</span><span class="o">,</span> <span class="nc">String</span><span class="o">[]</span> <span class="n">allowTypes</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">allowTypes</span><span class="o">);</span>
+
+		<span class="k">return</span> <span class="n">list</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">type</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>此时进行上传图片，已经能够成功上传了。</li>
+  <li>可是图片究竟上传到哪里了呢,路径为tomcat缓存路径，只要重启下tomcat该文件就会被删除。我们需要将其存储到磁盘中。此时修改config.json文件。</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"basePath":"C:/",/* 上传文件的基本路径 */
+</code></pre></div></div>
+
+<ul>
+  <li>此处我多添加了basePath，是想把视频、音乐等静态资源都存储到C盘。由于添加了basePath，需要修改配置ConfigManage类。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//将basePath塞进conf</span>
+<span class="n">conf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"basePath"</span><span class="o">,</span><span class="k">this</span><span class="o">.</span><span class="na">jsonConfig</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span> <span class="s">"basePath"</span> <span class="o">)</span> <span class="o">);</span>
+<span class="n">conf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span> <span class="s">"savePath"</span><span class="o">,</span> <span class="n">savePath</span> <span class="o">);</span>
+<span class="n">conf</span><span class="o">.</span><span class="na">put</span><span class="o">(</span> <span class="s">"rootPath"</span><span class="o">,</span> <span class="k">this</span><span class="o">.</span><span class="na">rootPath</span> <span class="o">);</span>
+</code></pre></div></div>
+
+<ul>
+  <li>之后继续来到上传文件类BinaryUploader类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//String physicalPath = (String) conf.get("rootPath") + savePath;</span>
+<span class="nc">String</span> <span class="n">basePath</span><span class="o">=(</span><span class="nc">String</span><span class="o">)</span> <span class="n">conf</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"basePath"</span><span class="o">);</span>
+<span class="nc">String</span> <span class="n">physicalPath</span> <span class="o">=</span> <span class="n">basePath</span> <span class="o">+</span> <span class="n">savePath</span><span class="o">;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>运行项目，点击添加图片。打开C盘的image目录，如图，成功上传到C盘对应路径</li>
+  <li>打开浏览器，发现页面无法加载图片。这是当然的，因为我们把图片存在C盘了，而spring并没有对C盘目录进行映射。此时我们加入路径映射。打开application.properties文件，添加如下代码</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">web.upload-path</span><span class="p">=</span><span class="s">E:/</span>
+<span class="py">spring.mvc.static-path-pattern</span><span class="p">=</span><span class="s">/**</span>
+<span class="py">spring.resources.static-locations</span><span class="p">=</span><span class="s">classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:${web.upload-path}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>此时重新运行项目，点击上传图片，图片已经能够正常显示了。</li>
+  <li>springboot为什么打成Jar包后就无法上传图片了呢。</li>
+  <li>发现了在Jar包里无法以ClassLoader.getResource().getPath()获得的路径读取文件，得用Class类的getResourceAsStream()来读取。</li>
+  <li>改成getResourceAsStream读取config.json文件吧。打开ConfigManager类，修改initEnv方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kt">void</span> <span class="nf">initEnv</span> <span class="o">()</span> <span class="kd">throws</span> <span class="nc">FileNotFoundException</span><span class="o">,</span> <span class="nc">IOException</span> <span class="o">{</span>
+		
+		<span class="nc">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span> <span class="k">this</span><span class="o">.</span><span class="na">originalPath</span> <span class="o">);</span>
+		
+		<span class="k">if</span> <span class="o">(</span> <span class="o">!</span><span class="n">file</span><span class="o">.</span><span class="na">isAbsolute</span><span class="o">()</span> <span class="o">)</span> <span class="o">{</span>
+			<span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span> <span class="n">file</span><span class="o">.</span><span class="na">getAbsolutePath</span><span class="o">()</span> <span class="o">);</span>
+		<span class="o">}</span>
+		
+		<span class="k">this</span><span class="o">.</span><span class="na">parentPath</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="na">getParent</span><span class="o">();</span>
+		
+		<span class="c1">//String configContent = this.readFile( this.getConfigPath() );</span>
+		<span class="nc">String</span> <span class="n">configContent</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">IOUtils</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getClassLoader</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"config.json"</span><span class="o">)));</span>
+
+		<span class="k">try</span><span class="o">{</span>
+			<span class="nc">JSONObject</span> <span class="n">jsonConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JSONObject</span><span class="o">(</span> <span class="n">configContent</span> <span class="o">);</span>
+			<span class="k">this</span><span class="o">.</span><span class="na">jsonConfig</span> <span class="o">=</span> <span class="n">jsonConfig</span><span class="o">;</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span> <span class="nc">Exception</span> <span class="n">e</span> <span class="o">)</span> <span class="o">{</span>
+			<span class="k">this</span><span class="o">.</span><span class="na">jsonConfig</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="o">}</span>
+		
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>ok了，再次打包，运行项目,上传照片成功</li>
+</ul>
+
+<h3 id="可修改项">可修改项</h3>
+
+<h4 id="修改配置文件名称">修改配置文件名称</h4>
+
+<ul>
+  <li>若修改了config.json文件的名称就需要修改ConfigManager类中initEnv方法</li>
+</ul>
+
+<h4 id="修改获取配置文件的路径映射">修改获取配置文件的路径映射</h4>
+
+<ul>
+  <li>先修改ueditor.config.js中的第33行</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 服务器统一请求接口路径</span>
+<span class="nx">serverUrl</span><span class="p">:</span> <span class="nx">URL</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">ueditorconfig</span><span class="dl">"</span>
+</code></pre></div></div>
+
+<ul>
+  <li>然后修改后台映射路径</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+*读取Ueditor配置类
+*/</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"/ueditorconfig"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">config</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">JSONException</span> <span class="o">{}</span>
+</code></pre></div></div>
+
+<h4 id="存储和读取文本">存储和读取文本</h4>
+
+<ul>
+  <li>编辑完文本后点击获取内容按钮，自动保存内容到本地磁盘</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">getContent</span><span class="p">()</span> <span class="p">{</span>
+        <span class="cm">/* var arr = [];
+        arr.push("使用editor.getContent()方法可以获得编辑器的内容");
+        arr.push("内容为：");
+        arr.push(UE.getEditor('editor').getContent());
+        alert(arr.join("\n")); */</span>
+        <span class="c1">//把内容保存到本地磁盘</span>
+        <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+				<span class="na">url</span><span class="p">:</span><span class="dl">'</span><span class="s1">/saveContextToLocal</span><span class="dl">'</span><span class="p">,</span><span class="c1">//地址</span>
+				<span class="na">dataType</span><span class="p">:</span><span class="dl">'</span><span class="s1">json</span><span class="dl">'</span><span class="p">,</span><span class="c1">//数据类型</span>
+				<span class="na">type</span><span class="p">:</span><span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span><span class="c1">//类型</span>
+				<span class="na">timeout</span><span class="p">:</span><span class="mi">2000</span><span class="p">,</span><span class="c1">//超时</span>
+				<span class="na">data</span><span class="p">:{</span>
+					<span class="na">text</span><span class="p">:</span> <span class="nx">UE</span><span class="p">.</span><span class="nx">getEditor</span><span class="p">(</span><span class="dl">'</span><span class="s1">editor</span><span class="dl">'</span><span class="p">).</span><span class="nx">getContent</span><span class="p">()</span>
+				<span class="p">},</span>
+				<span class="c1">//请求成功</span>
+				<span class="na">success</span><span class="p">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="nx">status</span><span class="p">){</span>
+					<span class="c1">//alert(data);</span>
+					<span class="c1">//alert(status);</span>
+				<span class="p">},</span>
+				<span class="c1">//失败/超时</span>
+				<span class="na">error</span><span class="p">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">XMLHttpRequest</span><span class="p">,</span><span class="nx">textStatus</span><span class="p">,</span><span class="nx">errorThrown</span><span class="p">){</span>
+					<span class="k">if</span><span class="p">(</span><span class="nx">textStatus</span><span class="o">===</span><span class="dl">'</span><span class="s1">timeout</span><span class="dl">'</span><span class="p">){</span>
+						<span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">請求超時</span><span class="dl">'</span><span class="p">);</span>
+						<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+							<span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">重新请求</span><span class="dl">'</span><span class="p">);</span>
+						<span class="p">},</span><span class="mi">2000</span><span class="p">);</span>
+					<span class="p">}</span>
+					<span class="c1">//alert(errorThrown);</span>
+				<span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Controller</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SaveContextController</span> <span class="o">{</span>
+
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/saveContextToLocal"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+	<span class="nd">@ResponseBody</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">saveContextToLocal</span><span class="o">(</span><span class="nc">String</span> <span class="n">text</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"接收到前台文本："</span><span class="o">+</span><span class="n">text</span><span class="o">);</span>
+		<span class="c1">// 向文件userNote.txt中写入</span>
+        <span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"c:/userNote.txt"</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">(</span>
+                <span class="c1">// 创建文件字符流</span>
+                <span class="nc">FileWriter</span> <span class="n">fw</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileWriter</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+                <span class="c1">// 缓存流必须建立在一个存在的流的基础上               </span>
+                <span class="nc">PrintWriter</span> <span class="n">pw</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PrintWriter</span><span class="o">(</span><span class="n">fw</span><span class="o">);</span>               
+        <span class="o">)</span> <span class="o">{</span>
+            <span class="n">pw</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">text</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// TODO Auto-generated catch block</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>加载页面自动读取本地文本内容到编辑器中</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span><span class="p">[[</span><span class="nx">$</span><span class="p">{</span><span class="nx">context</span><span class="p">}]];</span>
+    <span class="c1">//判断ueditor 编辑器是否创建成功</span>
+    <span class="nx">ue</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">ready</span><span class="dl">"</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="err">　　</span><span class="c1">// editor准备好之后才可以使用</span>
+    <span class="err">　　</span><span class="nx">ue</span><span class="p">.</span><span class="nx">setContent</span><span class="p">(</span><span class="nx">content</span><span class="p">);</span>
+
+    <span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+	 * 在页面加载完成后读取本地文件内容进行显示
+	 * @param model
+	 * @return
+	 */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">showPage</span><span class="o">(</span><span class="nc">Model</span> <span class="n">model</span><span class="o">){</span>
+    	<span class="nc">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"c:/userNote.txt"</span><span class="o">);</span>
+    	<span class="k">if</span><span class="o">(</span><span class="n">f</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+    		<span class="c1">// 创建文件字符流</span>
+            <span class="c1">// 缓存流必须建立在一个存在的流的基础上</span>
+        	<span class="nc">StringBuilder</span> <span class="n">sb</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>
+            <span class="k">try</span> <span class="o">(</span>
+            		<span class="nc">FileReader</span> <span class="n">fr</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileReader</span><span class="o">(</span><span class="n">f</span><span class="o">);</span> 
+            		<span class="nc">BufferedReader</span> <span class="n">br</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span><span class="n">fr</span><span class="o">);</span>
+            	<span class="o">)</span> 
+            <span class="o">{</span>
+                <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">// 一次读一行</span>
+                    <span class="nc">String</span> <span class="n">line</span> <span class="o">=</span> <span class="n">br</span><span class="o">.</span><span class="na">readLine</span><span class="o">();</span>
+                    <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">line</span><span class="o">)</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">line</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="n">model</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"context"</span><span class="o">,</span> <span class="n">sb</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// TODO Auto-generated catch block</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+    	<span class="o">}</span>
+        <span class="k">return</span> <span class="s">"index"</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>在js中读取thymeleaf标签的内容参考</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/message"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getMessage</span><span class="o">(</span><span class="nc">Model</span> <span class="n">model</span><span class="o">){</span>
+    <span class="n">model</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"message"</span><span class="o">,</span><span class="s">"This is your message"</span><span class="o">);</span>
+    <span class="k">return</span> <span class="s">"index"</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">th</span><span class="p">:</span><span class="nx">inline</span><span class="o">=</span><span class="dl">"</span><span class="s2">javascript</span><span class="dl">"</span><span class="o">&gt;</span>
+    <span class="kd">var</span> <span class="nx">message</span> <span class="o">=</span> <span class="p">[[</span><span class="nx">$</span><span class="p">{</span><span class="nx">message</span><span class="p">}]];</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+<span class="o">&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span></code></pre></div></div>
+
+<p><a href="https://blog.csdn.net/qq_33745799/article/details/70031641">参考致谢</a></p>
+
+<p><a href="https://github.com/BaiWeiJieKu/springboot-ueditor">项目地址</a></p>
+
+:ET

@@ -1,0 +1,674 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#结果页面配置" id="markdown-toc-结果页面配置">结果页面配置</a>    <ul>
+      <li><a href="#全局页面" id="markdown-toc-全局页面">全局页面</a></li>
+      <li><a href="#局部页面" id="markdown-toc-局部页面">局部页面</a></li>
+      <li><a href="#result的type属性" id="markdown-toc-result的type属性">result的type属性</a></li>
+    </ul>
+  </li>
+  <li><a href="#获取表单数据" id="markdown-toc-获取表单数据">获取表单数据</a>    <ul>
+      <li><a href="#使用actioncontext类" id="markdown-toc-使用actioncontext类">使用ActionContext类</a></li>
+      <li><a href="#servletactioncontext" id="markdown-toc-servletactioncontext">ServletActionContext</a></li>
+      <li><a href="#接口注入" id="markdown-toc-接口注入">接口注入</a></li>
+      <li><a href="#操作域对象" id="markdown-toc-操作域对象">操作域对象</a></li>
+    </ul>
+  </li>
+  <li><a href="#实体类封装" id="markdown-toc-实体类封装">实体类封装</a>    <ul>
+      <li><a href="#属性封装" id="markdown-toc-属性封装">属性封装</a></li>
+      <li><a href="#模型驱动" id="markdown-toc-模型驱动">模型驱动</a></li>
+      <li><a href="#表达式封装" id="markdown-toc-表达式封装">表达式封装</a></li>
+    </ul>
+  </li>
+  <li><a href="#集合封装" id="markdown-toc-集合封装">集合封装</a>    <ul>
+      <li><a href="#list封装" id="markdown-toc-list封装">List封装</a></li>
+      <li><a href="#map封装" id="markdown-toc-map封装">map封装</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="结果页面配置">结果页面配置</h3>
+
+<h4 id="全局页面">全局页面</h4>
+
+<ul>
+  <li>result标签配置action方法的返回值到不同的路径里面</li>
+  <li>创建两个action，执行默认的方法execute方法，让两个action的方法都返回success，返回success之后，配置到同一个页面里面</li>
+  <li>如果多个action，方法里面返回值相同的，到页面也是相同的，这个时候可以使用全局结果页面配置</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="cp">&lt;!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd"&gt;</span>
+<span class="nt">&lt;struts&gt;</span>
+
+	<span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"demo1"</span> <span class="na">extends=</span><span class="s">"struts-default"</span> <span class="na">namespace=</span><span class="s">"/"</span><span class="nt">&gt;</span>
+	
+		<span class="c">&lt;!-- 全局结果页面配置,只在当前package中有效 --&gt;</span>
+		<span class="nt">&lt;global-results&gt;</span>
+			<span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"success"</span><span class="nt">&gt;</span>/hello.jsp<span class="nt">&lt;/result&gt;</span>
+		<span class="nt">&lt;/global-results&gt;</span> 
+		
+		<span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"book"</span> <span class="na">class=</span><span class="s">"cn.itcast.action.BookAction"</span><span class="nt">&gt;</span>
+			
+		<span class="nt">&lt;/action&gt;</span>
+		<span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"orders"</span> <span class="na">class=</span><span class="s">"cn.itcast.action.OrdersAction"</span><span class="nt">&gt;</span>
+			
+		<span class="nt">&lt;/action&gt;</span>
+	<span class="nt">&lt;/package&gt;</span>
+	
+<span class="nt">&lt;/struts&gt;</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="s">"success"</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OrdersAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="s">"success"</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="局部页面">局部页面</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="cp">&lt;!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd"&gt;</span>
+<span class="nt">&lt;struts&gt;</span>
+
+	<span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"demo1"</span> <span class="na">extends=</span><span class="s">"struts-default"</span> <span class="na">namespace=</span><span class="s">"/"</span><span class="nt">&gt;</span>
+	
+		<span class="c">&lt;!-- 全局结果页面配置,只在当前package中有效 --&gt;</span>
+		<span class="nt">&lt;global-results&gt;</span>
+			c
+		<span class="nt">&lt;/global-results&gt;</span> 
+		
+		<span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"book"</span> <span class="na">class=</span><span class="s">"cn.itcast.action.BookAction"</span><span class="nt">&gt;</span>
+			<span class="c">&lt;!--局部页面--&gt;</span>
+			<span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"success"</span><span class="nt">&gt;</span>/world.jsp<span class="nt">&lt;/result&gt;</span>
+		<span class="nt">&lt;/action&gt;</span>
+	<span class="nt">&lt;/package&gt;</span>
+	
+<span class="nt">&lt;/struts&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>配置全局页面，也配置了局部页面，最终<strong>以局部配置为准</strong></li>
+</ul>
+
+<h4 id="result的type属性">result的type属性</h4>
+
+<ul>
+  <li>result标签里面除了name属性之外，还有一个属性 type属性</li>
+  <li>type属性：如何到路径里面（转发还是重定向）</li>
+  <li>默认值，做转发操作，值是 dispatcher</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"success"</span> <span class="na">type=</span><span class="s">"dispatcher"</span><span class="nt">&gt;</span>/hello.jsp<span class="nt">&lt;/result&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>做重定向操作，值是 redirect</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"success"</span> <span class="na">type=</span><span class="s">"redirect"</span><span class="nt">&gt;</span>/hello.jsp<span class="nt">&lt;/result&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>chain：转发到action，一般不用，缓存问题</li>
+  <li>redirectAction：重定向到action</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="cp">&lt;!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd"&gt;</span>
+<span class="nt">&lt;struts&gt;</span>
+
+	<span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"demo1"</span> <span class="na">extends=</span><span class="s">"struts-default"</span> <span class="na">namespace=</span><span class="s">"/"</span><span class="nt">&gt;</span>
+	
+		<span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"book"</span> <span class="na">class=</span><span class="s">"cn.itcast.action.BookAction"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"success"</span> <span class="na">type=</span><span class="s">"redirectAction"</span><span class="nt">&gt;</span>orders<span class="nt">&lt;/result&gt;</span>
+		<span class="nt">&lt;/action&gt;</span>
+		<span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"orders"</span> <span class="na">class=</span><span class="s">"cn.itcast.action.OrdersAction"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;result</span> <span class="na">name=</span><span class="s">"success"</span> <span class="nt">&gt;</span>/hello.jsp<span class="nt">&lt;/result&gt;</span>
+		<span class="nt">&lt;/action&gt;</span>
+	<span class="nt">&lt;/package&gt;</span>
+	
+<span class="nt">&lt;/struts&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>当请求/book时，会先执行book的action标签，然后访问orders标签，最终返回hello页面</li>
+</ul>
+
+<h3 id="获取表单数据">获取表单数据</h3>
+
+<h4 id="使用actioncontext类">使用ActionContext类</h4>
+
+<ul>
+  <li>因为方法不是静态的方法，需要创建ActionContext类的对象</li>
+  <li>这个ActionContext类对象不是new出来的</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;</span><span class="err">%@</span> <span class="na">page</span> <span class="na">language=</span><span class="s">"java"</span> <span class="na">contentType=</span><span class="s">"text/html; charset=UTF-8"</span>
+    <span class="na">pageEncoding=</span><span class="s">"UTF-8"</span><span class="err">%</span><span class="nt">&gt;</span>
+<span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=UTF-8"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;title&gt;</span>Insert title here<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+	<span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"${pageContext.request.contextPath }/form4.action"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+		username:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"username"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		password:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"password"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		address:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"address"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"提交"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="c">&lt;!-- 获取表单提交数据 --&gt;</span>
+	<span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"demo2"</span> <span class="na">extends=</span><span class="s">"struts-default"</span> <span class="na">namespace=</span><span class="s">"/"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;action</span> <span class="na">name=</span><span class="s">"form1"</span> <span class="na">class=</span><span class="s">"cn.itcast.form.Form1DemoAction"</span><span class="nt">&gt;&lt;/action&gt;</span>
+	<span class="nt">&lt;/package&gt;</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.form</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.catalina.tribes.util.Arrays</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Form1DemoAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="c1">//第一种方式 使用ActionContext类获取</span>
+		<span class="c1">//1 获取ActionContext对象</span>
+		<span class="nc">ActionContext</span> <span class="n">context</span> <span class="o">=</span> <span class="nc">ActionContext</span><span class="o">.</span><span class="na">getContext</span><span class="o">();</span>
+		<span class="c1">//2 调用方法得到表单数据</span>
+		<span class="c1">// key是表单输入项name属性值，value是输入的值</span>
+		<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getParameters</span><span class="o">();</span>
+		
+		<span class="nc">Set</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">keys</span> <span class="o">=</span> <span class="n">map</span><span class="o">.</span><span class="na">keySet</span><span class="o">();</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">String</span> <span class="n">key</span> <span class="o">:</span> <span class="n">keys</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">//根据key得到value</span>
+			<span class="c1">//数组形式：因为输入项里面可能有复选框情况</span>
+			<span class="nc">Object</span><span class="o">[]</span> <span class="n">obj</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Object</span><span class="o">[])</span> <span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">obj</span><span class="o">));</span>
+		<span class="o">}</span>
+		<span class="c1">//不返回可以写NONE</span>
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="servletactioncontext">ServletActionContext</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.form</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpSession</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.catalina.tribes.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.struts2.ServletActionContext</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Form2DemoAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="c1">//第一种方式 使用ServletActionContext类获取</span>
+		<span class="c1">//1 使用ServletActionContext获取request对象</span>
+		<span class="nc">HttpServletRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getRequest</span><span class="o">();</span>
+		<span class="c1">//2 调用request里面的方法得到结果</span>
+		<span class="nc">String</span> <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"username"</span><span class="o">);</span>
+		<span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"password"</span><span class="o">);</span>
+		<span class="nc">String</span> <span class="n">address</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"address"</span><span class="o">);</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">username</span><span class="o">+</span><span class="s">":"</span><span class="o">+</span><span class="n">password</span><span class="o">+</span><span class="s">":"</span><span class="o">+</span><span class="n">address</span><span class="o">);</span>
+		
+
+		
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="接口注入">接口注入</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.form</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.catalina.tribes.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.struts2.ServletActionContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.struts2.interceptor.ServletRequestAware</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+<span class="cm">/**
+ * 使用接口注入方式
+ * @author asus
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Form3DemoAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="kd">implements</span> <span class="nc">ServletRequestAware</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">HttpServletRequest</span> <span class="n">request</span> <span class="o">;</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setServletRequest</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">request</span> <span class="o">=</span> <span class="n">request</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">""</span><span class="o">);</span>
+		
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="操作域对象">操作域对象</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.form</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Set</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpSession</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.catalina.tribes.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.struts2.ServletActionContext</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionContext</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Form2DemoAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+
+		<span class="c1">//操作三个域对象</span>
+		<span class="c1">//1 request域</span>
+		<span class="nc">HttpServletRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getRequest</span><span class="o">();</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"req"</span><span class="o">,</span> <span class="s">"reqValue"</span><span class="o">);</span>
+		
+		<span class="c1">//2 session域</span>
+		<span class="nc">HttpSession</span> <span class="n">session</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getSession</span><span class="o">();</span>
+		<span class="n">session</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"sess"</span><span class="o">,</span> <span class="s">"sessValue"</span><span class="o">);</span>
+		
+		<span class="c1">//3 ServletContext域</span>
+		<span class="nc">ServletContext</span> <span class="n">context</span> <span class="o">=</span> <span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getServletContext</span><span class="o">();</span>
+		<span class="n">context</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"contextname"</span><span class="o">,</span> <span class="s">"contextValue"</span><span class="o">);</span>
+		
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="实体类封装">实体类封装</h3>
+
+<h4 id="属性封装">属性封装</h4>
+
+<ul>
+  <li>直接把表单提交属性封装到action的属性里面</li>
+  <li>在action成员变量位置定义变量：变量名称和表单输入项的name属性值一样</li>
+  <li>生成变量的set方法（把set和get方法都写出来）</li>
+  <li>使用属性封装获取表单数据到属性里面，不能把数据直接封装到实体类对象里面</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.data</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+<span class="cm">/**
+ * 使用属性封装获取表单数据
+ * @author asus
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DataDemo1Action</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="c1">//1 定义变量</span>
+	<span class="c1">//变量的名称和表单输入项name属性值一样</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">username</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">password</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">address</span><span class="o">;</span>
+	
+	<span class="c1">//2 生成变量的set和get方法</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getUsername</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">username</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUsername</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">username</span> <span class="o">=</span> <span class="n">username</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getPassword</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">password</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPassword</span><span class="o">(</span><span class="nc">String</span> <span class="n">password</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">password</span> <span class="o">=</span> <span class="n">password</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getAddress</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">address</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setAddress</span><span class="o">(</span><span class="nc">String</span> <span class="n">address</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">address</span> <span class="o">=</span> <span class="n">address</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">username</span><span class="o">+</span><span class="s">":"</span><span class="o">+</span><span class="n">password</span><span class="o">+</span><span class="s">":"</span><span class="o">+</span><span class="n">address</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="模型驱动">模型驱动</h4>
+
+<ul>
+  <li>action实现接口 ModelDriven</li>
+  <li>实现接口里面的方法 getModel方法，把创建对象返回</li>
+  <li>在action里面创建实体类对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.data</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ModelDriven</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">cn.itcast.entity.User</span><span class="o">;</span>
+<span class="cm">/**
+ * 使用模型驱动获取表单数据
+ * @author asus
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DataDemo2Action</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="kd">implements</span> <span class="nc">ModelDriven</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;{</span>
+
+	<span class="c1">//创建对象</span>
+	<span class="c1">//前提要求： 表单输入项name属性值 和 实体类属性名称一样</span>
+	<span class="kd">private</span> <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">User</span><span class="o">();</span>
+	<span class="kd">public</span> <span class="nc">User</span> <span class="nf">getModel</span><span class="o">()</span> <span class="o">{</span>
+		<span class="c1">//返回创建user对象</span>
+		<span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="表达式封装">表达式封装</h4>
+
+<ul>
+  <li>在action里面声明实体类</li>
+  <li>生成实体类变量的set和get方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.data</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">cn.itcast.entity.Book</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">cn.itcast.entity.User</span><span class="o">;</span>
+<span class="cm">/**
+ * 使用表达式封装数据到实体类对象
+ * @author asus
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DataDemo3Action</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="c1">//1 声明实体类</span>
+	<span class="kd">private</span> <span class="nc">User</span> <span class="n">user</span><span class="o">;</span>
+	<span class="c1">//2 生成实体类变量的set和get方法</span>
+	<span class="kd">public</span> <span class="nc">User</span> <span class="nf">getUser</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUser</span><span class="o">(</span><span class="nc">User</span> <span class="n">user</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">user</span> <span class="o">=</span> <span class="n">user</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>在表单输入项的name属性值里面写表达式形式</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;</span><span class="err">%@</span> <span class="na">page</span> <span class="na">language=</span><span class="s">"java"</span> <span class="na">contentType=</span><span class="s">"text/html; charset=UTF-8"</span>
+    <span class="na">pageEncoding=</span><span class="s">"UTF-8"</span><span class="err">%</span><span class="nt">&gt;</span>
+<span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=UTF-8"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;title&gt;</span>Insert title here<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+	<span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"${pageContext.request.contextPath }/data3.action"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+		username:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"user.username"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		password:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"user.password"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		address:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"user.address"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		bname: <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"book.bname"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"提交"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<h3 id="集合封装">集合封装</h3>
+
+<h4 id="list封装">List封装</h4>
+
+<ul>
+  <li>第一步 在action声明List</li>
+  <li>第二步 生成list变量的set和get方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.data</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">cn.itcast.entity.User</span><span class="o">;</span>
+<span class="cm">/**
+ * 封装数据到list集合
+ * @author asus
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ListAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="c1">// 1 声明List变量</span>
+	<span class="kd">private</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="n">list</span><span class="o">;</span>
+	<span class="c1">// 2 生成get和set方法</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="nf">getList</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">list</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setList</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="n">list</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">list</span> <span class="o">=</span> <span class="n">list</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>第三步 在表单输入项里面写表达式</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;</span><span class="err">%@</span> <span class="na">page</span> <span class="na">language=</span><span class="s">"java"</span> <span class="na">contentType=</span><span class="s">"text/html; charset=UTF-8"</span>
+    <span class="na">pageEncoding=</span><span class="s">"UTF-8"</span><span class="err">%</span><span class="nt">&gt;</span>
+<span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=UTF-8"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;title&gt;</span>Insert title here<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+	<span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"${pageContext.request.contextPath }/list.action"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+		<span class="c">&lt;!-- list[0] : 表示list集合中第一个user对象 --&gt;</span>
+		username:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"list[0].username"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		password:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"list[0].password"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		address:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"list[0].address"</span><span class="nt">/&gt;</span>
+		
+		<span class="nt">&lt;br/&gt;&lt;br/&gt;</span>
+		
+		username:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"list[1].username"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		password:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"list[1].password"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		address:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"list[1].address"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"提交"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<h4 id="map封装">map封装</h4>
+
+<ul>
+  <li>第一步 声明map集合</li>
+  <li>第二步 生成get和set方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">cn.itcast.data</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.opensymphony.xwork2.ActionSupport</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">cn.itcast.entity.User</span><span class="o">;</span>
+<span class="cm">/**
+ * 封装数据到map集合
+ * @author asus
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MapAction</span> <span class="kd">extends</span> <span class="nc">ActionSupport</span> <span class="o">{</span>
+
+	<span class="c1">// 1 声明map集合</span>
+	<span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">User</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">;</span>
+	<span class="kd">public</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">User</span><span class="o">&gt;</span> <span class="nf">getMap</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">map</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setMap</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">User</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">map</span> <span class="o">=</span> <span class="n">map</span><span class="o">;</span>
+	<span class="o">}</span>
+
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">map</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">NONE</span><span class="o">;</span>
+	<span class="o">}</span>
+
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>第三步 在表单输入项的name属性值里面写表达式</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;</span><span class="err">%@</span> <span class="na">page</span> <span class="na">language=</span><span class="s">"java"</span> <span class="na">contentType=</span><span class="s">"text/html; charset=UTF-8"</span>
+    <span class="na">pageEncoding=</span><span class="s">"UTF-8"</span><span class="err">%</span><span class="nt">&gt;</span>
+<span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=UTF-8"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;title&gt;</span>Insert title here<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+	<span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"${pageContext.request.contextPath }/map.action"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+		<span class="c">&lt;!-- 设置key值 map['key值']
+			设置value值
+		 --&gt;</span>
+		username:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"map['one'].username"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		password:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"map['one'].password"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		address:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"map['one'].address"</span><span class="nt">/&gt;</span>
+		
+		<span class="nt">&lt;br/&gt;&lt;br/&gt;</span>
+		
+		username:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"map['abcd'].username"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		password:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"map['abcd'].password"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		address:<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"map['abcd'].address"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br/&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"提交"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+:ET

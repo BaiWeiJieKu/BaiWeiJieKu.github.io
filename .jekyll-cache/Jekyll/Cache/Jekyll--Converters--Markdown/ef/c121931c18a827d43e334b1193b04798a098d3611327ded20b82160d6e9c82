@@ -1,0 +1,48 @@
+I"<	<ul id="markdown-toc">
+  <li><a href="#概念" id="markdown-toc-概念">概念</a></li>
+  <li><a href="#执行方式" id="markdown-toc-执行方式">执行方式</a>    <ul>
+      <li><a href="#格式要求" id="markdown-toc-格式要求">格式要求</a></li>
+      <li><a href="#执行方式-1" id="markdown-toc-执行方式-1">执行方式</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="概念">概念</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1)	Linux 运维工程师在进行服务器集群管理时，需要编写Shell 程序来进行服务器管理。
+2)	对于JavaEE 和Python 程序员来说，工作的需要，你的老大会要求你编写一些Shell 脚本进行程序或者是服务器		的维护，比如编写一个定时备份数据库的脚本。
+3)对于大数据程序员来说，需要编写Shell 程序来管理集群。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Shell 是一个命令行解释器，它为用户提供了一个向Linux 内核发送请求以便运行程序的界面系统级程序，用户可以用Shell 来启动、挂起、停止甚至是编写一些程序.
+</code></pre></div></div>
+
+<h2 id="执行方式">执行方式</h2>
+
+<h3 id="格式要求">格式要求</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1) 脚本以#!/bin/bash 开头
+2) 脚本需要有可执行权限
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>创建一个Shell 脚本，输出hello world!
+vim myshell.sh
+
+#!/bin/bash
+echo "hello world!"
+</code></pre></div></div>
+
+<h3 id="执行方式-1">执行方式</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>方式1(输入脚本的绝对路径或相对路径)
+1)	首先要赋予helloworld.sh 脚本的+x 权限
+2)	执行脚本
+
+方式2(sh+脚本)，不推荐
+	说明：不用赋予脚本+x 权限，直接执行即可
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chmod 744 myshell.sh
+./myshell.sh 相对路径
+/root/shell/myshell.sh  绝对路径
+</code></pre></div></div>
+:ET

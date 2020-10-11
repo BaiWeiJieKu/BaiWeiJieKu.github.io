@@ -1,0 +1,61 @@
+I"|<ul id="markdown-toc">
+  <li><a href="#if和where" id="markdown-toc-if和where">if和where</a></li>
+</ul>
+<h3 id="if和where">if和where</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//携带了哪个字段查询条件就带上这个字段的值</span>
+	<span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Employee</span><span class="o">&gt;</span> <span class="nf">getEmpsByConditionIf</span><span class="o">(</span><span class="nc">Employee</span> <span class="n">employee</span><span class="o">);</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 查询员工，要求，携带了哪个字段查询条件就带上这个字段的值 --&gt;</span>
+<span class="c">&lt;!-- public List&lt;Employee&gt; getEmpsByConditionIf(Employee employee); --&gt;</span>
+	 
+	 <span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmpsByConditionIf"</span> <span class="na">resultType=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span><span class="nt">&gt;</span>
+	 	select * from tbl_employee
+	 	<span class="c">&lt;!-- where --&gt;</span>
+	 	<span class="nt">&lt;where&gt;</span>
+		 	<span class="c">&lt;!-- test：判断表达式（OGNL）
+		 	OGNL参照PPT或者官方文档。
+		 	  	 c:if  test
+		 	从参数中取值进行判断
+		 	
+		 	遇见特殊符号应该去写转义字符：
+		 	&amp;&amp;：&amp;amp;&amp;amp;
+		 	--&gt;</span>
+		 	<span class="nt">&lt;if</span> <span class="na">test=</span><span class="s">"id!=null"</span><span class="nt">&gt;</span>
+		 		id=#{id}
+		 	<span class="nt">&lt;/if&gt;</span>
+		 	<span class="nt">&lt;if</span> <span class="na">test=</span><span class="s">"lastName!=null &amp;amp;&amp;amp; lastName!=&amp;quot;&amp;quot;"</span><span class="nt">&gt;</span>
+		 		and last_name like #{lastName}
+		 	<span class="nt">&lt;/if&gt;</span>
+		 	<span class="nt">&lt;if</span> <span class="na">test=</span><span class="s">"email!=null and email.trim()!=&amp;quot;&amp;quot;"</span><span class="nt">&gt;</span>
+		 		and email=#{email}
+		 	<span class="nt">&lt;/if&gt;</span> 
+		 	<span class="c">&lt;!-- ognl会进行字符串与数字的转换判断  "0"==0 --&gt;</span>
+		 	<span class="nt">&lt;if</span> <span class="na">test=</span><span class="s">"gender==0 or gender==1"</span><span class="nt">&gt;</span>
+		 	 	and gender=#{gender}
+		 	<span class="nt">&lt;/if&gt;</span>
+	 	<span class="nt">&lt;/where&gt;</span>
+	 <span class="nt">&lt;/select&gt;</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testDynamicSql</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="nc">SqlSessionFactory</span> <span class="n">sqlSessionFactory</span> <span class="o">=</span> <span class="n">getSqlSessionFactory</span><span class="o">();</span>
+		<span class="nc">SqlSession</span> <span class="n">openSession</span> <span class="o">=</span> <span class="n">sqlSessionFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">();</span>
+		<span class="k">try</span><span class="o">{</span>
+			<span class="nc">EmployeeMapperDynamicSQL</span> <span class="n">mapper</span> <span class="o">=</span> <span class="n">openSession</span><span class="o">.</span><span class="na">getMapper</span><span class="o">(</span><span class="nc">EmployeeMapperDynamicSQL</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+			<span class="c1">//select * from tbl_employee where id=? and last_name like ?</span>
+			<span class="c1">//测试if\where</span>
+			<span class="nc">Employee</span> <span class="n">employee</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Employee</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="s">"Admin"</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+		<span class="cm">/*	List&lt;Employee&gt; emps = mapper.getEmpsByConditionIf(employee );
+			for (Employee emp : emps) {
+				System.out.println(emp);
+			}*/</span>
+			
+			<span class="c1">//查询的时候如果某些条件没带可能sql拼装会有问题</span>
+			<span class="c1">//1、给where后面加上1=1，以后的条件都and xxx.</span>
+			<span class="c1">//2、mybatis使用where标签来将所有的查询条件包括在内。mybatis就会将where标签中拼装的sql，多出来的and或者or去掉</span>
+				<span class="c1">//where只会去掉第一个多出来的and或者or。</span>
+</code></pre></div></div>
+:ET

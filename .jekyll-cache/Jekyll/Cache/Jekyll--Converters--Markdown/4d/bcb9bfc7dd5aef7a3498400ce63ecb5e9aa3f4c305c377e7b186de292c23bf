@@ -1,0 +1,249 @@
+I"�?<ul id="markdown-toc">
+  <li><a href="#入门使用" id="markdown-toc-入门使用">入门使用</a>    <ul>
+      <li><a href="#注解" id="markdown-toc-注解">注解</a></li>
+      <li><a href="#assert" id="markdown-toc-assert">Assert</a></li>
+    </ul>
+  </li>
+  <li><a href="#testsuite" id="markdown-toc-testsuite">TestSuite</a></li>
+  <li><a href="#maven" id="markdown-toc-maven">maven</a></li>
+  <li><a href="#spring" id="markdown-toc-spring">spring</a></li>
+  <li><a href="#springboot" id="markdown-toc-springboot">springboot</a></li>
+</ul>
+<h2 id="入门使用">入门使用</h2>
+
+<ul>
+  <li>为了应付这种测试的需求，我们就需要使用 junit 测试框架来进行测试工作</li>
+  <li>首先下载 jar 包:  junit-4.9.jar， 导入到项目中。</li>
+  <li>它是由 @Test 进行了注解，表示这个方法是一个测试方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">junit</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">junit.framework.Assert</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCase1</span> <span class="o">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSum1</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">SumUtil</span><span class="o">.</span><span class="na">sum1</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+    	<span class="nc">Assert</span><span class="o">.</span><span class="na">assertEquals</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="cm">/*
+        Assert.assertEquals(result, 3); 表示对 result 数值的期待是 3，如果是其他数值，就无法通过		 测试。
+        */</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>与main方法运行不一样，运行测试用例的时候，需要选择 <code class="language-plaintext highlighter-rouge">Run As -&gt; JUnit Test </code>方式</p>
+  </li>
+  <li>新增加的测试，对原来的测试没有影响</li>
+  <li>如果测试失败了，会立即得到通知</li>
+</ul>
+
+<h3 id="注解">注解</h3>
+
+<ul>
+  <li>@Before @After 也是常见的测试框架注解，分别用来在测试开始之前做的事情，和结束之后做的事情。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">junit</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.After</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Before</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">junit.framework.Assert</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCase1</span> <span class="o">{</span>
+
+	<span class="nd">@Before</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">before</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"测试前的准备工作，比如链接数据库等等"</span><span class="o">);</span>
+	<span class="o">}</span>
+	<span class="nd">@After</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">after</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"测试结束后的工作，比如关闭链接等等"</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSum1</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">SumUtil</span><span class="o">.</span><span class="na">sum1</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+    	<span class="nc">Assert</span><span class="o">.</span><span class="na">assertEquals</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSum2</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">SumUtil</span><span class="o">.</span><span class="na">sum2</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">);</span>
+    	<span class="nc">Assert</span><span class="o">.</span><span class="na">assertEquals</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="mi">5</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>@Test：在junit3中，是通过对测试类和测试方法的命名来确定是否是测试，且所有的测试类必须继承junit的测试基类。在junit4中，定义一个测试方法变得简单很多，只需要在方法前加上@Test就行了。</li>
+  <li>@Ignore：有时候我们想暂时不运行某些测试方法\测试类，可以在方法前加上这个注解。在运行结果中，junit会统计忽略的用例数，来提醒你。但是不建议经常这么做</li>
+  <li>@BeforeClass：当我们运行几个有关联的用例时，可能会在数据准备或其它前期准备中执行一些相同的命令，这个时候为了让代码更清晰，更少冗余，可以将公用的部分提取出来，放在一个方法里，并为这个方法注解@BeforeClass。意思是在测试类里所有用例运行之前，运行一次这个方法。</li>
+  <li>@AfterClass：跟@BeforeClass对应，在测试类里所有用例运行之后，运行一次。用于处理一些测试后续工作</li>
+  <li>@Before：与@BeforeClass的区别在于，@Before不止运行一次，它会在每个用例运行之前都运行一次。</li>
+  <li>@After：与@Before对应。</li>
+</ul>
+
+<h3 id="assert">Assert</h3>
+
+<p><img src="http://stepimagewm.how2j.cn/8832.png" alt="" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">assertArrayEquals(expecteds, actuals)</th>
+      <th style="text-align: center">查看两个数组是否相等。</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">assertEquals(expected, actual)</td>
+      <td style="text-align: center">查看两个对象是否相等。类似于字符串比较使用的equals()方法</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertNotEquals(first, second)</td>
+      <td style="text-align: center">查看两个对象是否不相等。</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertNull(object)</td>
+      <td style="text-align: center">查看对象是否为空。</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertNotNull(object)</td>
+      <td style="text-align: center">查看对象是否不为空。</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertSame(expected, actual)</td>
+      <td style="text-align: center">查看两个对象的引用是否相等。类似于使用“==”比较两个对象</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertNotSame(unexpected, actual)</td>
+      <td style="text-align: center">查看两个对象的引用是否不相等。类似于使用“!=”比较两个对象</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertTrue(condition)</td>
+      <td style="text-align: center">查看运行结果是否为true。</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertFalse(condition)</td>
+      <td style="text-align: center">查看运行结果是否为false。</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">assertThat(actual, matcher)</td>
+      <td style="text-align: center">查看实际值是否满足指定的条件</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">fail()</td>
+      <td style="text-align: center">让测试失败</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="testsuite">TestSuite</h2>
+
+<ul>
+  <li>如果有很多工具类需要被测试，那么就会有 TestCase2, TestCase3, TestCase4,</li>
+  <li>如果不得不挨个去执行这些单独的测试类，也是比较麻烦的，所以就有了 TestSuite的概念</li>
+  <li>TestSuite 其实就是一下执行多个测试类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">junit</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runners.Suite</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">Suite</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@Suite</span><span class="o">.</span><span class="na">SuiteClasses</span><span class="o">({</span><span class="nc">TestCase1</span><span class="o">.</span><span class="na">class</span><span class="o">,</span><span class="nc">TestCase2</span><span class="o">.</span><span class="na">class</span><span class="o">})</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestSuite</span> <span class="o">{</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="maven">maven</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;dependency&gt;
+    &lt;groupId&gt;junit&lt;/groupId&gt;
+    &lt;artifactId&gt;junit&lt;/artifactId&gt;
+    &lt;version&gt;4.3.1&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre></div></div>
+
+<h2 id="spring">spring</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.how2java.test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.ContextConfiguration</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringJUnit4ClassRunner</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.how2java.pojo.Category</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringJUnit4ClassRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@ContextConfiguration</span><span class="o">(</span><span class="s">"classpath:applicationContext.xml"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestSpring</span> <span class="o">{</span>
+	<span class="nd">@Autowired</span>
+	<span class="nc">Category</span> <span class="n">c</span><span class="o">;</span>
+
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="o">(){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="springboot">springboot</h2>
+
+<ul>
+  <li>修改junit 版本为 4.12</li>
+  <li>增加 spring-boot-starter-test</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.how2java.springboot.test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.how2java.springboot.Application</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.how2java.springboot.dao.CategoryDAO</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.how2java.springboot.pojo.Category</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span><span class="o">(</span><span class="n">classes</span> <span class="o">=</span> <span class="nc">Application</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestJPA</span> <span class="o">{</span>
+
+	<span class="nd">@Autowired</span> <span class="nc">CategoryDAO</span> <span class="n">dao</span><span class="o">;</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Category</span><span class="o">&gt;</span> <span class="n">cs</span><span class="o">=</span>  <span class="n">dao</span><span class="o">.</span><span class="na">findAll</span><span class="o">();</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">Category</span> <span class="n">c</span> <span class="o">:</span> <span class="n">cs</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"c.getName():"</span><span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+		<span class="o">}</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>本文章参考自：http://how2j.cn</p>
+:ET

@@ -1,0 +1,501 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#使用bean指定初始化和销毁方法" id="markdown-toc-使用bean指定初始化和销毁方法">使用@Bean指定初始化和销毁方法</a>    <ul>
+      <li><a href="#单实例" id="markdown-toc-单实例">单实例</a></li>
+      <li><a href="#多实例" id="markdown-toc-多实例">多实例</a></li>
+    </ul>
+  </li>
+  <li><a href="#initializingbean接口" id="markdown-toc-initializingbean接口">InitializingBean接口</a></li>
+  <li><a href="#disposablebean接口" id="markdown-toc-disposablebean接口">DisposableBean接口</a>    <ul>
+      <li><a href="#使用" id="markdown-toc-使用">使用</a></li>
+    </ul>
+  </li>
+  <li><a href="#postconstruct" id="markdown-toc-postconstruct">@PostConstruct</a></li>
+  <li><a href="#predestroy" id="markdown-toc-predestroy">@PreDestroy</a>    <ul>
+      <li><a href="#使用-1" id="markdown-toc-使用-1">使用</a></li>
+    </ul>
+  </li>
+  <li><a href="#beanpostprocessor接口" id="markdown-toc-beanpostprocessor接口">BeanPostProcessor接口</a>    <ul>
+      <li><a href="#使用-2" id="markdown-toc-使用-2">使用</a></li>
+      <li><a href="#原理" id="markdown-toc-原理">原理</a></li>
+      <li><a href="#底层" id="markdown-toc-底层">底层</a></li>
+      <li><a href="#获取ioc容器" id="markdown-toc-获取ioc容器">获取IOC容器</a></li>
+      <li><a href="#数据校验" id="markdown-toc-数据校验">数据校验</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="使用bean指定初始化和销毁方法">使用@Bean指定初始化和销毁方法</h3>
+
+<ul>
+  <li>使用@Bean指定实例的初始化和销毁方法</li>
+</ul>
+
+<h4 id="单实例">单实例</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Car</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nf">Car</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"car constructor..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"car...init..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"car...destroy..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * bean的生命周期：bean的创建-&gt;初始化-&gt;销毁的过程
+ * 容器管理bean的生命周期：
+ * 我们可以自定义初始化方法和销毁的方法：容器在bean进行到当前的生命周期的时候，来调用我们自定义的初始化方法和销毁方法
+ * 构造（对象创建）：
+ *      单实例：在容器启动的时候创建对象
+ *      多实例：在每次获取的时候来创建对象
+ * 初始化方法：
+ *      对象创建完成，并赋值好，调用初始化方法
+ * 销毁方法：
+ *      单实例的bean:在容器关闭的时候进行销毁
+ *      多实例的bean:容器不会管理这个bean,容器不会调用销毁的方法
+ *
+ * 1)指定初始化方法和销毁方法；
+ *          -我们可以通过@Bean(initMethod = "init",destroyMethod = "destroy")来指定初始化方法和销毁方法
+ *          相当于xml配置文件bean标签里面的 init-method="" 和 destroy-method="" 属性
+ *
+ *
+ *
+ */</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainConfigOfLifeCycle</span> <span class="o">{</span>
+
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">initMethod</span> <span class="o">=</span> <span class="s">"init"</span><span class="o">,</span><span class="n">destroyMethod</span> <span class="o">=</span> <span class="s">"destroy"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Car</span> <span class="nf">car</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Car</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test01</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//1.创建IOC容器</span>
+        <span class="nc">AnnotationConfigApplicationContext</span> <span class="n">applicationContext</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">AnnotationConfigApplicationContext</span><span class="o">(</span><span class="nc">MainConfigOfLifeCycle</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"容器创建完成"</span><span class="o">);</span>
+        <span class="n">applicationContext</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+    <span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">car</span> <span class="err">constructor…</span>
+<span class="err">car…init…</span>
+<span class="err">容器创建完成</span>
+<span class="err">car…destroy…</span>
+</code></pre></div></div>
+
+<h4 id="多实例">多实例</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainConfigOfLifeCycle</span> <span class="o">{</span>
+
+    <span class="nd">@Scope</span><span class="o">(</span><span class="s">"prototype"</span><span class="o">)</span>
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">initMethod</span> <span class="o">=</span> <span class="s">"init"</span><span class="o">,</span><span class="n">destroyMethod</span> <span class="o">=</span> <span class="s">"destroy"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Car</span> <span class="nf">car</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Car</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">容器创建完成</span>
+
+<span class="err">当bean的作用域为多例的时候，只有在获取的时候，才会创建对象，而且在IOC容器关闭的时候，是不进行销毁的</span>
+</code></pre></div></div>
+
+<h3 id="initializingbean接口">InitializingBean接口</h3>
+
+<ul>
+  <li>InitializingBean接口：在BeanFactory设置完bean的属性值之后进行调用，相当于初始化方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">InitializingBean</span> <span class="o">{</span>
+
+	<span class="cm">/**
+	 * Invoked by a BeanFactory after it has set all bean properties supplied
+	 * (and satisfied BeanFactoryAware and ApplicationContextAware).
+	 * &lt;p&gt;This method allows the bean instance to perform initialization only
+	 * possible when all bean properties have been set and to throw an
+	 * exception in the event of misconfiguration.
+	 * @throws Exception in the event of misconfiguration (such
+	 * as failure to set an essential property) or if initialization fails.
+	 */</span>
+	<span class="kt">void</span> <span class="nf">afterPropertiesSet</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="disposablebean接口">DisposableBean接口</h3>
+
+<ul>
+  <li>DisposableBean接口：由bean工厂在销毁单例时调用</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">DisposableBean</span> <span class="o">{</span>
+
+	<span class="cm">/**
+	 * Invoked by a BeanFactory on destruction of a singleton.
+	 * @throws Exception in case of shutdown errors.
+	 * Exceptions will get logged but not rethrown to allow
+	 * other beans to release their resources too.
+	 */</span>
+	<span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="使用">使用</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Cat</span> <span class="kd">implements</span> <span class="nc">InitializingBean</span><span class="o">,</span> <span class="nc">DisposableBean</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nf">Cat</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Cat...Contrustor..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Cat...destroy..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterPropertiesSet</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Cat...afterPropertiesSet..."</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>使用包扫描的方式进行装配</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * bean的生命周期：bean的创建-&gt;初始化-&gt;销毁的过程
+ * 容器管理bean的生命周期：
+ * 我们可以自定义初始化方法和销毁的方法：容器在bean进行到当前的生命周期的时候，来调用我们自定义的初始化方法和销毁方法
+ * 构造（对象创建）：
+ *      单实例：在容器启动的时候创建对象
+ *      多实例：在每次获取的时候来创建对象
+ * 初始化方法：
+ *      对象创建完成，并赋值好，调用初始化方法
+ * 销毁方法：
+ *      单实例的bean:在容器关闭的时候进行销毁
+ *      多实例的bean:容器不会管理这个bean,容器不会调用销毁的方法
+ *
+ * 1)指定初始化方法和销毁方法；
+ *          -我们可以通过@Bean(initMethod = "init",destroyMethod = "destroy")来指定初始化方法和销毁方法
+ *          相当于xml配置文件bean标签里面的 init-method="" 和 destroy-method="" 属性
+ * 2)通过bean实现InitializingBean（定义初始化逻辑）
+ *               DisposableBean（定义销毁逻辑）；
+ *
+ *
+ */</span>
+<span class="nd">@Configuration</span>
+<span class="nd">@ComponentScan</span><span class="o">(</span><span class="s">"com.ldc.bean"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainConfigOfLifeCycle</span> <span class="o">{</span>
+
+    <span class="nd">@Bean</span><span class="o">(</span><span class="n">initMethod</span> <span class="o">=</span> <span class="s">"init"</span><span class="o">,</span><span class="n">destroyMethod</span> <span class="o">=</span> <span class="s">"destroy"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Car</span> <span class="nf">car</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Car</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test01</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//1.创建IOC容器</span>
+        <span class="nc">AnnotationConfigApplicationContext</span> <span class="n">applicationContext</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">AnnotationConfigApplicationContext</span><span class="o">(</span><span class="nc">MainConfigOfLifeCycle</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"容器创建完成"</span><span class="o">);</span>
+        <span class="n">applicationContext</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+    <span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">Cat…Contrustor…</span>
+<span class="err">Cat…afterPropertiesSet…</span>
+<span class="err">car</span> <span class="err">constructor…</span>
+<span class="err">car…init…</span>
+<span class="err">容器创建完成</span>
+<span class="err">car…destroy…</span>
+<span class="err">Cat…destroy…</span>
+</code></pre></div></div>
+
+<h3 id="postconstruct">@PostConstruct</h3>
+
+<h3 id="predestroy">@PreDestroy</h3>
+
+<ul>
+  <li>可以使用JSR250规范里面定义的两个注解：</li>
+  <li>@PostConstruct :在bean创建完成并且属性赋值完成，来执行初始化方法</li>
+  <li>@PreDestroy ：在容器销毁bean之前通知我们来进行清理工作</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Documented</span>
+<span class="nd">@Retention</span> <span class="o">(</span><span class="no">RUNTIME</span><span class="o">)</span>
+<span class="nd">@Target</span><span class="o">(</span><span class="no">METHOD</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="nc">PostConstruct</span> <span class="o">{</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Documented</span>
+<span class="nd">@Retention</span> <span class="o">(</span><span class="no">RUNTIME</span><span class="o">)</span>
+<span class="nd">@Target</span><span class="o">(</span><span class="no">METHOD</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="nc">PreDestroy</span> <span class="o">{</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="使用-1">使用</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Dog</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nf">Dog</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Dog...Contructor..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//在对象创建并赋值之后调用</span>
+    <span class="nd">@PostConstruct</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Dog...@PostConstruct..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//在容器销毁对象之前调用</span>
+    <span class="nd">@PreDestroy</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Dog...@PreDestroy..."</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test01</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//1.创建IOC容器</span>
+        <span class="nc">AnnotationConfigApplicationContext</span> <span class="n">applicationContext</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">AnnotationConfigApplicationContext</span><span class="o">(</span><span class="nc">MainConfigOfLifeCycle</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"容器创建完成"</span><span class="o">);</span>
+        <span class="n">applicationContext</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+    <span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">Cat…Contrustor…</span>
+<span class="err">Cat…afterPropertiesSet…</span>
+<span class="err">Dog…Contructor…</span>
+<span class="err">Dog…@PostConstruct…</span>
+<span class="err">car</span> <span class="err">constructor…</span>
+<span class="err">car…init…</span>
+<span class="err">容器创建完成</span>
+<span class="err">car…destroy…</span>
+<span class="err">Dog…@PreDestroy…</span>
+<span class="err">Cat…destroy…</span>
+</code></pre></div></div>
+
+<h3 id="beanpostprocessor接口">BeanPostProcessor接口</h3>
+
+<ul>
+  <li>BeanPostProcessor接口：bean的后置处理器，在bean初始化前后做一些处理工作，这个接口有两个方法：</li>
+  <li>postProcessBeforeInitialization：在初始化之前工作</li>
+  <li>postProcessAfterInitialization：在初始化之后工作</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BeanPostProcessor</span> <span class="o">{</span>
+
+	<span class="cm">/**
+	 * Apply this BeanPostProcessor to the given new bean instance &lt;i&gt;before&lt;/i&gt; any bean
+	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}
+	 * or a custom init-method). The bean will already be populated with property values.
+	 * The returned bean instance may be a wrapper around the original.
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return the bean instance to use, either the original or a wrapped one;
+	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
+	 * @throws org.springframework.beans.BeansException in case of errors
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
+	 */</span>
+	<span class="nc">Object</span> <span class="nf">postProcessBeforeInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">bean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">BeansException</span><span class="o">;</span>
+
+	<span class="cm">/**
+	 * Apply this BeanPostProcessor to the given new bean instance &lt;i&gt;after&lt;/i&gt; any bean
+	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}
+	 * or a custom init-method). The bean will already be populated with property values.
+	 * The returned bean instance may be a wrapper around the original.
+	 * &lt;p&gt;In case of a FactoryBean, this callback will be invoked for both the FactoryBean
+	 * instance and the objects created by the FactoryBean (as of Spring 2.0). The
+	 * post-processor can decide whether to apply to either the FactoryBean or created
+	 * objects or both through corresponding {@code bean instanceof FactoryBean} checks.
+	 * &lt;p&gt;This callback will also be invoked after a short-circuiting triggered by a
+	 * {@link InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation} method,
+	 * in contrast to all other BeanPostProcessor callbacks.
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return the bean instance to use, either the original or a wrapped one;
+	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
+	 * @throws org.springframework.beans.BeansException in case of errors
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
+	 * @see org.springframework.beans.factory.FactoryBean
+	 */</span>
+	<span class="nc">Object</span> <span class="nf">postProcessAfterInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">bean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">BeansException</span><span class="o">;</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="使用-2">使用</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyBeanPostProcessor</span> <span class="kd">implements</span> <span class="nc">BeanPostProcessor</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">postProcessBeforeInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">bean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">BeansException</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"postProcessBeforeInitialization..."</span><span class="o">+</span><span class="n">beanName</span><span class="o">+</span><span class="s">"=&gt;"</span><span class="o">+</span><span class="n">bean</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">bean</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">postProcessAfterInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">bean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">BeansException</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"postProcessAfterInitialization..."</span><span class="o">+</span><span class="n">beanName</span><span class="o">+</span><span class="s">"=&gt;"</span><span class="o">+</span><span class="n">bean</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">bean</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test01</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//1.创建IOC容器</span>
+        <span class="nc">AnnotationConfigApplicationContext</span> <span class="n">applicationContext</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">AnnotationConfigApplicationContext</span><span class="o">(</span><span class="nc">MainConfigOfLifeCycle</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"容器创建完成"</span><span class="o">);</span>
+        <span class="n">applicationContext</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+    <span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>postProcessBeforeInitialization…org.springframework.context.event.internalEventListenerProcessor=&gt;org.springframework.context.event.EventListenerMethodProcessor@36f0f1be
+postProcessAfterInitialization…org.springframework.context.event.internalEventListenerProcessor=&gt;org.springframework.context.event.EventListenerMethodProcessor@36f0f1be
+
+postProcessBeforeInitialization…org.springframework.context.event.internalEventListenerFactory=&gt;org.springframework.context.event.DefaultEventListenerFactory@6ee12bac
+postProcessAfterInitialization…org.springframework.context.event.internalEventListenerFactory=&gt;org.springframework.context.event.DefaultEventListenerFactory@6ee12bac
+
+postProcessBeforeInitialization…mainConfigOfLifeCycle=&gt;com.ldc.config.MainConfigOfLifeCycleEnhancerBySpringCGLIBEnhancerBySpringCGLIB27d6c7d3@64c87930
+postProcessAfterInitialization…mainConfigOfLifeCycle=&gt;com.ldc.config.MainConfigOfLifeCycleEnhancerBySpringCGLIBEnhancerBySpringCGLIB27d6c7d3@64c87930
+
+Cat…Contrustor…
+postProcessBeforeInitialization…cat=&gt;com.ldc.bean.Cat@525f1e4e
+Cat…afterPropertiesSet…
+postProcessAfterInitialization…cat=&gt;com.ldc.bean.Cat@525f1e4e
+
+Dog…Contructor…
+postProcessBeforeInitialization…dog=&gt;com.ldc.bean.Dog@5ea434c8
+Dog…@PostConstruct…
+postProcessAfterInitialization…dog=&gt;com.ldc.bean.Dog@5ea434c8
+
+car constructor…
+postProcessBeforeInitialization…car=&gt;com.ldc.bean.Car@1d548a08
+car…init…
+postProcessAfterInitialization…car=&gt;com.ldc.bean.Car@1d548a08
+
+容器创建完成
+car…destroy…
+Dog…@PreDestroy…
+Cat…destroy…
+
+</code></pre></div></div>
+
+<h4 id="原理">原理</h4>
+
+<ul>
+  <li>前置处理器调用的方法：调用getBeanPostProcessors()方法找到容器里面的所有的BeanPostProcessor，挨个遍历，调用BeanPostProcessor的postProcessBeforeInitialization方法，一旦调用postProcessBeforeInitialization方法的返回值为null的时候，就直接跳出遍历 ，后面的BeanPostProcessor 的postProcessBeforeInitialization也就不会执行了</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">Object</span> <span class="nf">applyBeanPostProcessorsBeforeInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">existingBean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span><span class="kd">throws</span> <span class="nc">BeansException</span> <span class="o">{</span>
+
+		<span class="nc">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">existingBean</span><span class="o">;</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">BeanPostProcessor</span> <span class="n">beanProcessor</span> <span class="o">:</span> <span class="n">getBeanPostProcessors</span><span class="o">())</span> <span class="o">{</span>
+			<span class="n">result</span> <span class="o">=</span> <span class="n">beanProcessor</span><span class="o">.</span><span class="na">postProcessBeforeInitialization</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">beanName</span><span class="o">);</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">result</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>后置处理器调用的方法：调用getBeanPostProcessors()方法找到容器里面的所有的BeanPostProcessor，挨个遍历，调用BeanPostProcessor的postProcessAfterInitialization方法，一旦调用postProcessAfterInitialization方法的返回值为null的时候，就直接跳出遍历 ，后面的BeanPostProcessor 的postProcessAfterInitialization也就不会执行了</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">Object</span> <span class="nf">applyBeanPostProcessorsAfterInitialization</span><span class="o">(</span><span class="nc">Object</span> <span class="n">existingBean</span><span class="o">,</span> <span class="nc">String</span> <span class="n">beanName</span><span class="o">)</span><span class="kd">throws</span> <span class="nc">BeansException</span> <span class="o">{</span>
+
+		<span class="nc">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">existingBean</span><span class="o">;</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">BeanPostProcessor</span> <span class="n">beanProcessor</span> <span class="o">:</span> <span class="n">getBeanPostProcessors</span><span class="o">())</span> <span class="o">{</span>
+			<span class="n">result</span> <span class="o">=</span> <span class="n">beanProcessor</span><span class="o">.</span><span class="na">postProcessAfterInitialization</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">beanName</span><span class="o">);</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">result</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="底层">底层</h4>
+
+<ul>
+  <li>Spring底层对 BeanPostProcessor 的使用：</li>
+  <li>bean赋值，注入其他组件，<code class="language-plaintext highlighter-rouge">@Autowired</code>,生命周期注解等功能,<code class="language-plaintext highlighter-rouge">@Async</code>等等都是使用<code class="language-plaintext highlighter-rouge">BeanPostProcessor</code>来完成的</li>
+</ul>
+
+<h4 id="获取ioc容器">获取IOC容器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Dog</span> <span class="kd">implements</span> <span class="nc">ApplicationContextAware</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nc">ApplicationContext</span> <span class="n">applicationContext</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Dog</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Dog...Contructor..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//在对象创建并赋值之后调用</span>
+    <span class="nd">@PostConstruct</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Dog...@PostConstruct..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//在对象销毁之前调用</span>
+    <span class="nd">@PreDestroy</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Dog...@PreDestroy..."</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setApplicationContext</span><span class="o">(</span><span class="nc">ApplicationContext</span> <span class="n">applicationContext</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">BeansException</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">applicationContext</span> <span class="o">=</span> <span class="n">applicationContext</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="数据校验">数据校验</h4>
+
+<ul>
+  <li>实际上BeanPostProcessor接口还有很多的实现类，比如说BeanValidationPostProcessor，这个是用来做数据校验的</li>
+</ul>
+:ET

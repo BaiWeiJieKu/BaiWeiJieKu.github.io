@@ -1,0 +1,41 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#数据表" id="markdown-toc-数据表">数据表</a>    <ul>
+      <li><a href="#部门信息表" id="markdown-toc-部门信息表">部门信息表</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="数据表">数据表</h3>
+
+<h4 id="部门信息表">部门信息表</h4>
+
+<ul>
+  <li>dept</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>字段名</th>
+      <th>中文描述</th>
+      <th>类型</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DEPTNO</td>
+      <td>部门编号</td>
+      <td>INT(2)</td>
+    </tr>
+    <tr>
+      <td>DNAME</td>
+      <td>部门名称</td>
+      <td>VARCHAR(14)</td>
+    </tr>
+    <tr>
+      <td>LOC</td>
+      <td>位置</td>
+      <td>VARCHAR(13)</td>
+    </tr>
+  </tbody>
+</table>
+:ET

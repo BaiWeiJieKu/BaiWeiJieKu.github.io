@@ -1,0 +1,453 @@
+I"x�<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+  <li><a href="#helloworld" id="markdown-toc-helloworld">helloWorld</a>    <ul>
+      <li><a href="#实体类" id="markdown-toc-实体类">实体类</a></li>
+      <li><a href="#dao" id="markdown-toc-dao">Dao</a></li>
+      <li><a href="#配置文件" id="markdown-toc-配置文件">配置文件</a></li>
+      <li><a href="#映射文件" id="markdown-toc-映射文件">映射文件</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+    </ul>
+  </li>
+  <li><a href="#配置文件-1" id="markdown-toc-配置文件-1">配置文件</a>    <ul>
+      <li><a href="#properties" id="markdown-toc-properties">properties</a></li>
+      <li><a href="#settings" id="markdown-toc-settings">settings</a></li>
+      <li><a href="#typealiases" id="markdown-toc-typealiases">typeAliases</a></li>
+      <li><a href="#environments" id="markdown-toc-environments">environments</a></li>
+      <li><a href="#databaseidprovider" id="markdown-toc-databaseidprovider">databaseIdProvider</a></li>
+      <li><a href="#mappers" id="markdown-toc-mappers">mappers</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>MyBatis 是支持定制化 SQL、存储过程以及高级映射的优秀的持久层框架</li>
+  <li>MyBatis 避免了几乎所有的 JDBC 代码和手动设置参数以及获取结果集</li>
+  <li>MyBatis可以使用简单的XML或注解用于配置和原始映射，将接口和Java的POJO（Plain Old Java Objects，普通的Java对象）映射成数据库中的记录</li>
+  <li>iBatis提供的持久层框架包括SQL Maps和Data Access Objects （DAO）</li>
+  <li>MyBatis是一个半自动化的持久化层框架</li>
+</ul>
+
+<h3 id="helloworld">helloWorld</h3>
+
+<h4 id="实体类">实体类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.bean</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Employee</span> <span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">lastName</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">email</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">gender</span><span class="o">;</span>
+	
+	
+<span class="c1">//get set</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="s">"Employee [id="</span> <span class="o">+</span> <span class="n">id</span> <span class="o">+</span> <span class="s">", lastName="</span> <span class="o">+</span> <span class="n">lastName</span> <span class="o">+</span> <span class="s">", email="</span>
+				<span class="o">+</span> <span class="n">email</span> <span class="o">+</span> <span class="s">", gender="</span> <span class="o">+</span> <span class="n">gender</span> <span class="o">+</span> <span class="s">"]"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="dao">Dao</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.dao</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.bean.Employee</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">EmployeeMapper</span> <span class="o">{</span>
+	
+	<span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">getEmpById</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">);</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="配置文件">配置文件</h4>
+
+<ul>
+  <li>mybatis-config.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="cp">&lt;!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd"&gt;</span>
+<span class="nt">&lt;configuration&gt;</span>
+	<span class="nt">&lt;environments</span> <span class="na">default=</span><span class="s">"development"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;environment</span> <span class="na">id=</span><span class="s">"development"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;transactionManager</span> <span class="na">type=</span><span class="s">"JDBC"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;dataSource</span> <span class="na">type=</span><span class="s">"POOLED"</span><span class="nt">&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"driver"</span> <span class="na">value=</span><span class="s">"com.mysql.jdbc.Driver"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"url"</span> <span class="na">value=</span><span class="s">"jdbc:mysql://localhost:3306/mybatis"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">value=</span><span class="s">"root"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">value=</span><span class="s">"123456"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;/dataSource&gt;</span>
+		<span class="nt">&lt;/environment&gt;</span>
+	<span class="nt">&lt;/environments&gt;</span>
+	
+	<span class="c">&lt;!-- 将我们写好的sql映射文件（EmployeeMapper.xml）一定要注册到全局配置文件（mybatis-config.xml）中 --&gt;</span>
+	
+	<span class="nt">&lt;mappers&gt;</span>
+		<span class="nt">&lt;mapper</span> <span class="na">resource=</span><span class="s">"EmployeeMapper.xml"</span> <span class="nt">/&gt;</span>
+	<span class="nt">&lt;/mappers&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div></div>
+
+<h4 id="映射文件">映射文件</h4>
+
+<ul>
+  <li>EmployeeMapper.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="cp">&lt;!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd"&gt;</span>
+<span class="nt">&lt;mapper</span> <span class="na">namespace=</span><span class="s">"com.atguigu.mybatis.dao.EmployeeMapper"</span><span class="nt">&gt;</span>
+<span class="c">&lt;!-- 
+namespace:名称空间;指定为接口的全类名
+id：唯一标识
+resultType：返回值类型
+#{id}：从传递过来的参数中取出id值
+
+public Employee getEmpById(Integer id);
+ --&gt;</span>
+	<span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmpById"</span> <span class="na">resultType=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span><span class="nt">&gt;</span>
+		select id,last_name lastName,email,gender from tbl_employee where id = #{id}
+	<span class="nt">&lt;/select&gt;</span>
+<span class="nt">&lt;/mapper&gt;</span>
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.io.Resources</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.session.SqlSession</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.session.SqlSessionFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.session.SqlSessionFactoryBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.dao.EmployeeMapper</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 1、接口式编程
+ * 	原生：		Dao		====&gt;  DaoImpl
+ * 	mybatis：	Mapper	====&gt;  xxMapper.xml
+ * 
+ * 2、SqlSession代表和数据库的一次会话；用完必须关闭；
+ * 3、SqlSession和connection一样她都是非线程安全。每次使用都应该去获取新的对象。
+ * 4、mapper接口没有实现类，但是mybatis会为这个接口生成一个代理对象。
+ * 		（将接口和xml进行绑定）
+ * 		EmployeeMapper empMapper =	sqlSession.getMapper(EmployeeMapper.class);
+ * 5、两个重要的配置文件：
+ * 		mybatis的全局配置文件：包含数据库连接池信息，事务管理器信息等...系统运行环境信息
+ * 		sql映射文件：保存了每一个sql语句的映射信息：
+ * 					将sql抽取出来。	
+ * 
+ * 
+ * @author lfy
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyBatisTest</span> <span class="o">{</span>
+	
+	<span class="cm">/**
+	*获取SqlSessionFactory
+	*/</span>
+	<span class="kd">public</span> <span class="nc">SqlSessionFactory</span> <span class="nf">getSqlSessionFactory</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="nc">String</span> <span class="n">resource</span> <span class="o">=</span> <span class="s">"mybatis-config.xml"</span><span class="o">;</span>
+		<span class="nc">InputStream</span> <span class="n">inputStream</span> <span class="o">=</span> <span class="nc">Resources</span><span class="o">.</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="n">resource</span><span class="o">);</span>
+		<span class="k">return</span> <span class="k">new</span> <span class="nf">SqlSessionFactoryBuilder</span><span class="o">().</span><span class="na">build</span><span class="o">(</span><span class="n">inputStream</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="cm">/**原生方法
+	 * 1、根据xml配置文件（全局配置文件）创建一个SqlSessionFactory对象 有数据源一些运行环境信息
+	 * 2、sql映射文件；配置了每一个sql，以及sql的封装规则等。 
+	 * 3、将sql映射文件注册在全局配置文件中
+	 * 4、写代码：
+	 * 		1）、根据全局配置文件得到SqlSessionFactory；
+	 * 		2）、使用sqlSession工厂，获取到sqlSession对象使用他来执行增删改查
+	 * 			一个sqlSession就是代表和数据库的一次会话，用完关闭
+	 * 		3）、使用sql的唯一标志来告诉MyBatis执行哪个sql。sql都是保存在sql映射文件中的。
+	 * 
+	 * @throws IOException
+	 */</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+
+		<span class="c1">// 2、获取sqlSession实例，能直接执行已经映射的sql语句</span>
+		<span class="c1">// sql的唯一标识：statement Unique identifier matching the statement to use.</span>
+		<span class="c1">// 执行sql要用的参数：parameter A parameter object to pass to the statement.</span>
+		<span class="nc">SqlSessionFactory</span> <span class="n">sqlSessionFactory</span> <span class="o">=</span> <span class="n">getSqlSessionFactory</span><span class="o">();</span>
+
+		<span class="nc">SqlSession</span> <span class="n">openSession</span> <span class="o">=</span> <span class="n">sqlSessionFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">();</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Employee</span> <span class="n">employee</span> <span class="o">=</span> <span class="n">openSession</span><span class="o">.</span><span class="na">selectOne</span><span class="o">(</span>
+					<span class="s">"com.atguigu.mybatis.EmployeeMapper.selectEmp"</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">employee</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+			<span class="n">openSession</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+	<span class="cm">/**
+	*面向接口编程
+	*/</span>
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test01</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="c1">// 1、获取sqlSessionFactory对象</span>
+		<span class="nc">SqlSessionFactory</span> <span class="n">sqlSessionFactory</span> <span class="o">=</span> <span class="n">getSqlSessionFactory</span><span class="o">();</span>
+		<span class="c1">// 2、获取sqlSession对象</span>
+		<span class="nc">SqlSession</span> <span class="n">openSession</span> <span class="o">=</span> <span class="n">sqlSessionFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">();</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="c1">// 3、获取接口的实现类对象</span>
+			<span class="c1">//会为接口自动的创建一个代理对象，代理对象去执行增删改查方法</span>
+			<span class="nc">EmployeeMapper</span> <span class="n">mapper</span> <span class="o">=</span> <span class="n">openSession</span><span class="o">.</span><span class="na">getMapper</span><span class="o">(</span><span class="nc">EmployeeMapper</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+			<span class="nc">Employee</span> <span class="n">employee</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">getEmpById</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">mapper</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span><span class="c1">//会发现是一个代理对象</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">employee</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+			<span class="n">openSession</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="配置文件-1">配置文件</h3>
+
+<h4 id="properties">properties</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--
+		1、mybatis可以使用properties来引入外部properties配置文件的内容；
+		resource：引入类路径下的资源
+		url：引入网络路径或者磁盘路径下的资源
+ --&gt;</span>
+<span class="nt">&lt;properties</span> <span class="na">resource=</span><span class="s">"dbconfig.properties"</span><span class="nt">&gt;&lt;/properties&gt;</span>
+<span class="c">&lt;!--配置数据源--&gt;</span>
+</code></pre></div></div>
+
+<h4 id="settings">settings</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 
+		2、settings包含很多重要的设置项
+		setting:用来设置每一个设置项
+			name：设置项名
+			value：设置项取值
+ --&gt;</span>
+	<span class="nt">&lt;settings&gt;</span>
+		<span class="c">&lt;!--开启驼峰命名法--&gt;</span>
+		<span class="nt">&lt;setting</span> <span class="na">name=</span><span class="s">"mapUnderscoreToCamelCase"</span> <span class="na">value=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/settings&gt;</span>
+</code></pre></div></div>
+
+<h4 id="typealiases">typeAliases</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 3、typeAliases：别名处理器：可以为我们的java类型起别名 
+			别名不区分大小写
+--&gt;</span>
+
+	<span class="nt">&lt;typeAliases&gt;</span>
+		<span class="c">&lt;!-- 1、typeAlias:为某个java类型起别名
+				type:指定要起别名的类型全类名;默认别名就是类名小写；employee
+				alias:指定新的别名
+		 --&gt;</span>
+		<span class="nt">&lt;typeAlias</span> <span class="na">type=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span> <span class="na">alias=</span><span class="s">"emp"</span><span class="nt">/&gt;</span>
+
+	<span class="nt">&lt;/typeAliases&gt;</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmpById"</span> <span class="na">resultType=</span><span class="s">"emp"</span><span class="nt">&gt;</span>
+		select * from tbl_employee where id = #{id}
+<span class="nt">&lt;/select&gt;</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 2、package:为某个包下的所有类批量起别名 
+				name：指定包名（为当前包以及下面所有的后代包的每一个类都起一个默认别名（类名小写），）
+--&gt;</span>
+		<span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"com.atguigu.mybatis.bean"</span><span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//3、批量起别名的情况下，使用@Alias注解为某个类型指定新的别名 </span>
+
+<span class="nd">@Alias</span><span class="o">(</span><span class="s">"emp"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Employee</span> <span class="o">{</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="environments">environments</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 
+4、environments：环境们，mybatis可以配置多种环境 ,default指定使用某种环境。可以达到快速切换环境。
+	environment：配置一个具体的环境信息；必须有两个标签；id代表当前环境的唯一标识
+		transactionManager：事务管理器；
+			type：事务管理器的型;JDBC(JdbcTransactionFactory)|MANAGED(ManagedTransactionFactory)
+		自定义事务管理器：实现TransactionFactory接口.type指定为全类名
+				
+		dataSource：数据源;
+			type:数据源类型;UNPOOLED(UnpooledDataSourceFactory)
+						|POOLED(PooledDataSourceFactory)
+						|JNDI(JndiDataSourceFactory)
+			自定义数据源：实现DataSourceFactory接口，type是全类名
+--&gt;</span>
+		 
+
+		 
+	<span class="nt">&lt;environments</span> <span class="na">default=</span><span class="s">"dev_mysql"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;environment</span> <span class="na">id=</span><span class="s">"dev_mysql"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;transactionManager</span> <span class="na">type=</span><span class="s">"JDBC"</span><span class="nt">&gt;&lt;/transactionManager&gt;</span>
+			<span class="nt">&lt;dataSource</span> <span class="na">type=</span><span class="s">"POOLED"</span><span class="nt">&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"driver"</span> <span class="na">value=</span><span class="s">"${jdbc.driver}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"url"</span> <span class="na">value=</span><span class="s">"${jdbc.url}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">value=</span><span class="s">"${jdbc.username}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">value=</span><span class="s">"${jdbc.password}"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;/dataSource&gt;</span>
+		<span class="nt">&lt;/environment&gt;</span>
+	
+		<span class="nt">&lt;environment</span> <span class="na">id=</span><span class="s">"dev_oracle"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;transactionManager</span> <span class="na">type=</span><span class="s">"JDBC"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;dataSource</span> <span class="na">type=</span><span class="s">"POOLED"</span><span class="nt">&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"driver"</span> <span class="na">value=</span><span class="s">"${orcl.driver}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"url"</span> <span class="na">value=</span><span class="s">"${orcl.url}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">value=</span><span class="s">"${orcl.username}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">value=</span><span class="s">"${orcl.password}"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;/dataSource&gt;</span>
+		<span class="nt">&lt;/environment&gt;</span>
+	<span class="nt">&lt;/environments&gt;</span>
+</code></pre></div></div>
+
+<h4 id="databaseidprovider">databaseIdProvider</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 5、databaseIdProvider：支持多数据库厂商的；
+		 type="DB_VENDOR"：VendorDatabaseIdProvider
+		 	作用就是得到数据库厂商的标识(驱动getDatabaseProductName())，mybatis就能根据数据库厂商标识来执行不同的sql;
+		 	MySQL，Oracle，SQL Server,xxxx
+--&gt;</span>
+	<span class="nt">&lt;databaseIdProvider</span> <span class="na">type=</span><span class="s">"DB_VENDOR"</span><span class="nt">&gt;</span>
+		<span class="c">&lt;!-- 为不同的数据库厂商起别名 --&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"MySQL"</span> <span class="na">value=</span><span class="s">"mysql"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"Oracle"</span> <span class="na">value=</span><span class="s">"oracle"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"SQL Server"</span> <span class="na">value=</span><span class="s">"sqlserver"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/databaseIdProvider&gt;</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;environments</span> <span class="na">default=</span><span class="s">"dev_mysql"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;environment</span> <span class="na">id=</span><span class="s">"dev_mysql"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;transactionManager</span> <span class="na">type=</span><span class="s">"JDBC"</span><span class="nt">&gt;&lt;/transactionManager&gt;</span>
+			<span class="nt">&lt;dataSource</span> <span class="na">type=</span><span class="s">"POOLED"</span><span class="nt">&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"driver"</span> <span class="na">value=</span><span class="s">"${jdbc.driver}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"url"</span> <span class="na">value=</span><span class="s">"${jdbc.url}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">value=</span><span class="s">"${jdbc.username}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">value=</span><span class="s">"${jdbc.password}"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;/dataSource&gt;</span>
+		<span class="nt">&lt;/environment&gt;</span>
+	
+		<span class="nt">&lt;environment</span> <span class="na">id=</span><span class="s">"dev_oracle"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;transactionManager</span> <span class="na">type=</span><span class="s">"JDBC"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;dataSource</span> <span class="na">type=</span><span class="s">"POOLED"</span><span class="nt">&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"driver"</span> <span class="na">value=</span><span class="s">"${orcl.driver}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"url"</span> <span class="na">value=</span><span class="s">"${orcl.url}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">value=</span><span class="s">"${orcl.username}"</span> <span class="nt">/&gt;</span>
+				<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">value=</span><span class="s">"${orcl.password}"</span> <span class="nt">/&gt;</span>
+			<span class="nt">&lt;/dataSource&gt;</span>
+		<span class="nt">&lt;/environment&gt;</span>
+	<span class="nt">&lt;/environments&gt;</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">jdbc.driver</span><span class="p">=</span><span class="s">com.mysql.jdbc.Driver</span>
+<span class="py">jdbc.url</span><span class="p">=</span><span class="s">jdbc:mysql://localhost:3306/mybatis</span>
+<span class="py">jdbc.username</span><span class="p">=</span><span class="s">root</span>
+<span class="py">jdbc.password</span><span class="p">=</span><span class="s">123456</span>
+
+<span class="py">orcl.driver</span><span class="p">=</span><span class="s">oracle.jdbc.OracleDriver</span>
+<span class="py">orcl.url</span><span class="p">=</span><span class="s">jdbc:oracle:thin:@localhost:1521:orcl</span>
+<span class="py">orcl.username</span><span class="p">=</span><span class="s">scott</span>
+<span class="py">orcl.password</span><span class="p">=</span><span class="s">123456</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmpById"</span> <span class="na">resultType=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span><span class="nt">&gt;</span>
+		select * from tbl_employee where id = #{id}
+<span class="nt">&lt;/select&gt;</span>
+
+<span class="c">&lt;!--databaseId指定数据库厂商--&gt;</span>
+<span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmpById"</span> <span class="na">resultType=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span>
+	<span class="na">databaseId=</span><span class="s">"mysql"</span><span class="nt">&gt;</span>
+		select * from tbl_employee where id = #{id}
+<span class="nt">&lt;/select&gt;</span>
+<span class="nt">&lt;select</span> <span class="na">id=</span><span class="s">"getEmpById"</span> <span class="na">resultType=</span><span class="s">"com.atguigu.mybatis.bean.Employee"</span>
+	<span class="na">databaseId=</span><span class="s">"oracle"</span><span class="nt">&gt;</span>
+		select EMPLOYEE_ID id,LAST_NAME	lastName,EMAIL email 
+		from employees where EMPLOYEE_ID=#{id}
+<span class="nt">&lt;/select&gt;</span>
+</code></pre></div></div>
+
+<h4 id="mappers">mappers</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- 6、mappers：将sql映射注册到全局配置中 --&gt;</span>
+	<span class="nt">&lt;mappers&gt;</span>
+<span class="c">&lt;!-- 
+	mapper:注册一个sql映射 
+		注册配置文件
+		resource：引用类路径下的sql映射文件
+			mybatis/mapper/EmployeeMapper.xml
+		url：引用网路路径或者磁盘路径下的sql映射文件
+			file:///var/mappers/AuthorMapper.xml
+					
+		注册接口
+		class：引用（注册）接口，
+			1、有sql映射文件，映射文件名必须和接口同名，并且放在与接口同一目录下；
+			2、没有sql映射文件，所有的sql都是利用注解写在接口上;
+			推荐：
+				比较重要的，复杂的Dao接口我们来写sql映射文件
+				不重要，简单的Dao接口为了开发快速可以使用注解；
+--&gt;</span>
+		<span class="c">&lt;!-- &lt;mapper resource="mybatis/mapper/EmployeeMapper.xml"/&gt; --&gt;</span>
+		<span class="c">&lt;!-- &lt;mapper class="com.atguigu.mybatis.dao.EmployeeMapperAnnotation"/&gt; --&gt;</span>
+		
+		<span class="c">&lt;!-- 批量注册：接口和映射文件要在同一个包下 --&gt;</span>
+		<span class="nt">&lt;package</span> <span class="na">name=</span><span class="s">"com.atguigu.mybatis.dao"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/mappers&gt;</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.mybatis.dao</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.annotations.Select</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.mybatis.bean.Employee</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">EmployeeMapperAnnotation</span> <span class="o">{</span>
+	
+	<span class="nd">@Select</span><span class="o">(</span><span class="s">"select * from tbl_employee where id=#{id}"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">getEmpById</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">);</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">test02</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="nc">SqlSessionFactory</span> <span class="n">sqlSessionFactory</span> <span class="o">=</span> <span class="n">getSqlSessionFactory</span><span class="o">();</span>
+		<span class="nc">SqlSession</span> <span class="n">openSession</span> <span class="o">=</span> <span class="n">sqlSessionFactory</span><span class="o">.</span><span class="na">openSession</span><span class="o">();</span>
+		<span class="k">try</span><span class="o">{</span>
+			<span class="nc">EmployeeMapperAnnotation</span> <span class="n">mapper</span> <span class="o">=</span> <span class="n">openSession</span><span class="o">.</span><span class="na">getMapper</span><span class="o">(</span><span class="nc">EmployeeMapperAnnotation</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+			<span class="nc">Employee</span> <span class="n">empById</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">getEmpById</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">empById</span><span class="o">);</span>
+		<span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+			<span class="n">openSession</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+:ET

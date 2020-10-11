@@ -1,0 +1,284 @@
+I"�\<ul id="markdown-toc">
+  <li><a href="#json" id="markdown-toc-json">JSON</a></li>
+  <li><a href="#文件上传" id="markdown-toc-文件上传">文件上传</a></li>
+  <li><a href="#拦截器" id="markdown-toc-拦截器">拦截器</a></li>
+  <li><a href="#异常处理" id="markdown-toc-异常处理">异常处理</a>    <ul>
+      <li><a href="#映射异常" id="markdown-toc-映射异常">映射异常</a></li>
+    </ul>
+  </li>
+  <li><a href="#工作原理" id="markdown-toc-工作原理">工作原理</a></li>
+  <li><a href="#重要组件" id="markdown-toc-重要组件">重要组件</a>    <ul>
+      <li><a href="#前端控制器" id="markdown-toc-前端控制器">前端控制器</a></li>
+      <li><a href="#处理器映射器" id="markdown-toc-处理器映射器">处理器映射器</a></li>
+      <li><a href="#处理器适配器" id="markdown-toc-处理器适配器">处理器适配器</a></li>
+      <li><a href="#处理器" id="markdown-toc-处理器">处理器</a></li>
+      <li><a href="#视图解析器" id="markdown-toc-视图解析器">视图解析器</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="json">JSON</h3>
+
+<ul>
+  <li>在方法上添加 @ResponseBody 注解</li>
+  <li><code class="language-plaintext highlighter-rouge">HttpMessageConverter&lt;T&gt;</code> 是 Spring3.0新添加的一个接  口，负责将请求信息转换为一个对象（类型为 T），将对象（  类型为 T）输出为响应信息</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/testResponseEntity"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[]&gt;</span> <span class="nf">testResponseEntity</span><span class="o">(</span><span class="nc">HttpSession</span> <span class="n">session</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="kt">byte</span> <span class="o">[]</span> <span class="n">body</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="nc">ServletContext</span> <span class="n">servletContext</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">getServletContext</span><span class="o">();</span>
+		<span class="nc">InputStream</span> <span class="n">in</span> <span class="o">=</span> <span class="n">servletContext</span><span class="o">.</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"/files/abc.txt"</span><span class="o">);</span>
+		<span class="n">body</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">in</span><span class="o">.</span><span class="na">available</span><span class="o">()];</span>
+		<span class="n">in</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">body</span><span class="o">);</span>
+		
+		<span class="nc">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HttpHeaders</span><span class="o">();</span>
+		<span class="n">headers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"Content-Disposition"</span><span class="o">,</span> <span class="s">"attachment;filename=abc.txt"</span><span class="o">);</span>
+		
+		<span class="nc">HttpStatus</span> <span class="n">statusCode</span> <span class="o">=</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">;</span>
+		
+		<span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[]&gt;(</span><span class="n">body</span><span class="o">,</span> <span class="n">headers</span><span class="o">,</span> <span class="n">statusCode</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">response</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="文件上传">文件上传</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/testFileUpload"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">testFileUpload</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="s">"desc"</span><span class="o">)</span> <span class="nc">String</span> <span class="n">desc</span><span class="o">,</span> 
+			<span class="nd">@RequestParam</span><span class="o">(</span><span class="s">"file"</span><span class="o">)</span> <span class="nc">MultipartFile</span> <span class="n">file</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"desc: "</span> <span class="o">+</span> <span class="n">desc</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"OriginalFilename: "</span> <span class="o">+</span> <span class="n">file</span><span class="o">.</span><span class="na">getOriginalFilename</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"InputStream: "</span> <span class="o">+</span> <span class="n">file</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">());</span>
+		<span class="k">return</span> <span class="s">"success"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="拦截器">拦截器</h3>
+
+<ul>
+  <li>自定义的拦截器必  须实现HandlerInterceptor接口</li>
+  <li>
+    <p><strong>preHandle</strong>()：这个方法在业务处理器处理请求之前被调用，在该  方法中对用户请求request进行处理</p>
+  </li>
+  <li>
+    <p>postHandle()：这个方法在业务处理器处理完请求后，但  是DispatcherServlet 向客户端返回响应前被调用，在该方法中对  用户请求request进行处理。</p>
+  </li>
+  <li><strong>afterCompletion</strong>()：这个方法<strong>在</strong> <strong>DispatcherServlet</strong> <strong>完全处理完请  求后被调用</strong>，可以在该方法中进行一些资源清理的操作</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FirstInterceptor</span> <span class="kd">implements</span> <span class="nc">HandlerInterceptor</span><span class="o">{</span>
+
+	<span class="cm">/**
+	 * 该方法在目标方法之前被调用.
+	 * 若返回值为 true, 则继续调用后续的拦截器和目标方法. 
+	 * 若返回值为 false, 则不会再调用后续的拦截器和目标方法. 
+	 * 
+	 * 可以考虑做权限. 日志, 事务等. 
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">preHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+			<span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"[FirstInterceptor] preHandle"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="cm">/**
+	 * 调用目标方法之后, 但渲染视图之前. 
+	 * 可以对请求域中的属性或视图做出修改. 
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">postHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+			<span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span>
+			<span class="nc">ModelAndView</span> <span class="n">modelAndView</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"[FirstInterceptor] postHandle"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="cm">/**
+	 * 渲染视图之后被调用. 释放资源
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterCompletion</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+			<span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span> <span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"[FirstInterceptor] afterCompletion"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<h3 id="异常处理">异常处理</h3>
+
+<ul>
+  <li>Spring MVC 通过 <strong>HandlerExceptionResolver</strong> 处理程序  的异常，包括 Handler 映射、数据绑定以及目标方法执行  时发生的异常</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="cm">/**
+	 * 1. 在 @ExceptionHandler 方法的入参中可以加入 Exception 类型的参数, 该参数即对应发生的异常对象
+	 * 2. @ExceptionHandler 方法的入参中不能传入 Map. 若希望把异常信息传导页面上, 需要使用 ModelAndView 作为返回值
+	 * 3. @ExceptionHandler 方法标记的异常有优先级的问题. 
+	 * 4. @ControllerAdvice: 如果在当前 Handler 中找不到 @ExceptionHandler 方法来出来当前方法出现的异常, 
+	 * 则将去 @ControllerAdvice 标记的类中查找 @ExceptionHandler 标记的方法来处理异常. 
+	 */</span>
+	<span class="nd">@ExceptionHandler</span><span class="o">({</span><span class="nc">ArithmeticException</span><span class="o">.</span><span class="na">class</span><span class="o">})</span>
+	<span class="kd">public</span> <span class="nc">ModelAndView</span> <span class="nf">handleArithmeticException</span><span class="o">(</span><span class="nc">Exception</span> <span class="n">ex</span><span class="o">){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"出异常了: "</span> <span class="o">+</span> <span class="n">ex</span><span class="o">);</span>
+		<span class="nc">ModelAndView</span> <span class="n">mv</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ModelAndView</span><span class="o">(</span><span class="s">"error"</span><span class="o">);</span>
+		<span class="n">mv</span><span class="o">.</span><span class="na">addObject</span><span class="o">(</span><span class="s">"exception"</span><span class="o">,</span> <span class="n">ex</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">mv</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>全局异常处理</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@ControllerAdvice</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SpringMVCTestExceptionHandler</span> <span class="o">{</span>
+
+	<span class="nd">@ExceptionHandler</span><span class="o">({</span><span class="nc">ArithmeticException</span><span class="o">.</span><span class="na">class</span><span class="o">})</span>
+	<span class="kd">public</span> <span class="nc">ModelAndView</span> <span class="nf">handleArithmeticException</span><span class="o">(</span><span class="nc">Exception</span> <span class="n">ex</span><span class="o">){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"----&gt; 出异常了: "</span> <span class="o">+</span> <span class="n">ex</span><span class="o">);</span>
+		<span class="nc">ModelAndView</span> <span class="n">mv</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ModelAndView</span><span class="o">(</span><span class="s">"error"</span><span class="o">);</span>
+		<span class="n">mv</span><span class="o">.</span><span class="na">addObject</span><span class="o">(</span><span class="s">"exception"</span><span class="o">,</span> <span class="n">ex</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">mv</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>@ResponseStatus</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@ResponseStatus</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">FORBIDDEN</span><span class="o">,</span> <span class="n">reason</span><span class="o">=</span><span class="s">"用户名和密码不匹配!"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserNameNotMatchPasswordException</span> <span class="kd">extends</span> <span class="nc">RuntimeException</span><span class="o">{</span>
+
+	<span class="cm">/**
+	 * 
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@ResponseStatus</span><span class="o">(</span><span class="n">reason</span><span class="o">=</span><span class="s">"测试"</span><span class="o">,</span><span class="n">value</span><span class="o">=</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">NOT_FOUND</span><span class="o">)</span>
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/testResponseStatusExceptionResolver"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">testResponseStatusExceptionResolver</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="s">"i"</span><span class="o">)</span> <span class="kt">int</span> <span class="n">i</span><span class="o">){</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">13</span><span class="o">){</span>
+			<span class="k">throw</span> <span class="k">new</span> <span class="nf">UserNameNotMatchPasswordException</span><span class="o">();</span>
+		<span class="o">}</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"testResponseStatusExceptionResolver..."</span><span class="o">);</span>
+		
+		<span class="k">return</span> <span class="s">"success"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="映射异常">映射异常</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="c">&lt;!-- 配置使用 SimpleMappingExceptionResolver 来映射异常 --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">class=</span><span class="s">"org.springframework.web.servlet.handler.SimpleMappingExceptionResolver"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"exceptionAttribute"</span> <span class="na">value=</span><span class="s">"ex"</span><span class="nt">&gt;&lt;/property&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"exceptionMappings"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;props&gt;</span>
+				<span class="nt">&lt;prop</span> <span class="na">key=</span><span class="s">"java.lang.ArrayIndexOutOfBoundsException"</span><span class="nt">&gt;</span>error<span class="nt">&lt;/prop&gt;</span>
+			<span class="nt">&lt;/props&gt;</span>
+		<span class="nt">&lt;/property&gt;</span>
+	<span class="nt">&lt;/bean&gt;</span>	
+
+
+</code></pre></div></div>
+
+<h3 id="工作原理">工作原理</h3>
+
+<ul>
+  <li>客户端发送请求-&gt; 前端控制器 DispatcherServlet 接受客户端请求 -&gt; 找到处理器映射 HandlerMapping 解析请求对应的 Handler-&gt; HandlerAdapter 会根据 Handler 来调用真正的处理器开处理请求，并处理相应的业务逻辑 -&gt; 处理器返回一个模型视图 ModelAndView -&gt; 视图解析器进行解析 -&gt; 返回一个视图对象-&gt;前端控制器 DispatcherServlet 渲染数据（Moder）-&gt;将得到视图对象返回给用户</li>
+</ul>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/mvc.png" alt="" /></p>
+
+<ul>
+  <li>流程
+    <ul>
+      <li>（1）客户端（浏览器）发送请求，直接请求到 DispatcherServlet。</li>
+      <li>（2）DispatcherServlet 根据请求信息调用 HandlerMapping，解析请求对应的 Handler。</li>
+      <li>（3）解析到对应的 Handler（也就是我们平常说的 Controller 控制器）后，开始由 HandlerAdapter 适配器处理。</li>
+      <li>（4）HandlerAdapter 会根据 Handler 来调用真正的处理器开处理请求，并处理相应的业务逻辑。</li>
+      <li>（5）处理器处理完业务后，会返回一个 ModelAndView 对象，Model 是返回的数据对象，View 是个逻辑上的 View。</li>
+      <li>（6）ViewResolver 会根据逻辑 View 查找实际的 View。</li>
+      <li>（7）DispaterServlet 把返回的 Model 传给 View（视图渲染）。</li>
+      <li>（8）把 View 返回给请求者（浏览器）</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="重要组件">重要组件</h3>
+
+<h4 id="前端控制器">前端控制器</h4>
+
+<ul>
+  <li><strong>前端控制器DispatcherServlet（不需要工程师开发）,由框架提供（重要）</strong></li>
+  <li><strong>Spring MVC 的入口函数。接收请求，响应结果，相当于转发器，中央处理器。</strong></li>
+  <li><strong>有了 DispatcherServlet 减少了其它组件之间的耦合度。</strong></li>
+  <li><strong>用户请求到达前端控制器，它就相当于mvc模式中的c，DispatcherServlet是整个流程控制的中心，由它调用其它组件处理用户的请求，DispatcherServlet的存在降低了组件之间的耦合性。</strong></li>
+  <li>DispatcherServlet类中的属性beans：
+    <ul>
+      <li>HandlerMapping：用于handles映射请求和一系列的对于拦截器的前处理和后处理，大部分用@Controller注解</li>
+      <li>HandlerAdapter：帮助DispatcherServlet处理映射请求，处理程序的适配器，而不用考虑实际调用的是哪一个处理程序。</li>
+      <li>ViewResolver：根据实际配置解析实际的View类型。</li>
+      <li>ThemeResolver：解决Web应用程序可以使用的主题，例如提供个性化布局。</li>
+      <li>MultipartResolver：解析多部分请求，以支持从HTML表单上传文件。</li>
+      <li>FlashMapManager：存储并检索可用于将一个请求属性传递到另一个请求的input和output的FlashMap，通常用于重定向。</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="处理器映射器">处理器映射器</h4>
+
+<ul>
+  <li><strong>处理器映射器HandlerMapping(不需要工程师开发),由框架提供</strong></li>
+  <li>根据请求的url查找Handler。</li>
+  <li>HandlerMapping负责根据用户请求找到Handler即处理器（Controller）</li>
+  <li>SpringMVC提供了不同的映射器实现不同的映射方式，例如：配置文件方式，实现接口方式，注解方式等。</li>
+  <li>HandlerMapping接口处理请求的映射HandlerMapping接口的实现类：
+    <ul>
+      <li>SimpleUrlHandlerMapping类通过配置文件把URL映射到Controller类。</li>
+      <li>DefaultAnnotationHandlerMapping类通过注解把URL映射到Controller类。</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="处理器适配器">处理器适配器</h4>
+
+<ul>
+  <li><strong>处理器适配器HandlerAdapter</strong></li>
+  <li>按照特定规则（HandlerAdapter要求的规则）去执行Handler 通过HandlerAdapter对处理器进行执行，这是适配器模式的应用，通过扩展适配器可以对更多类型的处理器进行执行。</li>
+  <li>AnnotationMethodHandlerAdapter：通过注解，把请求URL映射到Controller类的方法上。</li>
+</ul>
+
+<h4 id="处理器">处理器</h4>
+
+<ul>
+  <li><strong>处理器Handler(需要工程师开发，也就是我们平常说的Controller控制器)</strong></li>
+  <li>编写Handler时按照HandlerAdapter的要求去做，这样适配器才可以去正确执行Handler</li>
+  <li>Handler 是继DispatcherServlet前端控制器的后端控制器，在DispatcherServlet的控制下Handler对具体的用户请求进行处理。</li>
+  <li>由于Handler涉及到具体的用户业务请求，所以一般情况需要工程师根据业务需求开发Handler。</li>
+</ul>
+
+<h4 id="视图解析器">视图解析器</h4>
+
+<ul>
+  <li><strong>视图解析器View resolver(不需要工程师开发),由框架提供</strong></li>
+  <li>进行视图解析，根据逻辑视图名解析成真正的视图（view）</li>
+  <li>View Resolver首先根据逻辑视图名解析成物理视图名即具体的页面地址，再生成View视图对象，最后对View进行渲染将处理结果通过页面展示给用户。</li>
+</ul>
+:ET

@@ -1,0 +1,23 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#jedis" id="markdown-toc-jedis">jedis</a></li>
+</ul>
+
+<h3 id="jedis">jedis</h3>
+
+<ul>
+  <li>maven</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>redis.clients<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>jedis<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>2.9.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>jedis直连</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/02/3RDG4S.png" alt="3RDG4S.png" /></p>
+:ET

@@ -1,0 +1,16 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#一级缓存" id="markdown-toc-一级缓存">一级缓存</a></li>
+</ul>
+<h3 id="一级缓存">一级缓存</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">一级缓存：（本地缓存）：sqlSession级别的缓存。一级缓存是一直开启的；SqlSession级别的一个Map</span>
+	 <span class="err">与数据库同一次会话期间查询到的数据会放在本地缓存中。</span>
+	 <span class="err">以后如果需要获取相同的数据，直接从缓存中拿，没必要再去查询数据库；</span>
+
+	 <span class="err">一级缓存失效情况（没有使用到当前一级缓存的情况，效果就是，还需要再向数据库发出查询）：</span>
+	 <span class="err">1、sqlSession不同。</span>
+	 <span class="err">2、sqlSession相同，查询条件不同.(当前一级缓存中还没有这个数据)</span>
+	 <span class="err">3、sqlSession相同，两次查询之间执行了增删改操作(这次增删改可能对当前数据有影响)</span>
+	 <span class="err">4、sqlSession相同，手动清除了一级缓存（缓存清空）</span>
+</code></pre></div></div>
+:ET

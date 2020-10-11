@@ -1,0 +1,1131 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a>    <ul>
+      <li><a href="#应用场景" id="markdown-toc-应用场景">应用场景</a></li>
+      <li><a href="#软件安装" id="markdown-toc-软件安装">软件安装</a></li>
+    </ul>
+  </li>
+  <li><a href="#基础概念" id="markdown-toc-基础概念">基础概念</a></li>
+  <li><a href="#基本用法" id="markdown-toc-基本用法">基本用法</a>    <ul>
+      <li><a href="#创建索引" id="markdown-toc-创建索引">创建索引</a></li>
+      <li><a href="#新增文档" id="markdown-toc-新增文档">新增文档</a></li>
+      <li><a href="#修改文档" id="markdown-toc-修改文档">修改文档</a></li>
+      <li><a href="#删除文档" id="markdown-toc-删除文档">删除文档</a></li>
+      <li><a href="#查询语法" id="markdown-toc-查询语法">查询语法</a></li>
+      <li><a href="#高阶查询" id="markdown-toc-高阶查询">高阶查询</a>        <ul>
+          <li><a href="#query语法" id="markdown-toc-query语法">query语法</a></li>
+          <li><a href="#filter语法" id="markdown-toc-filter语法">filter语法</a></li>
+        </ul>
+      </li>
+      <li><a href="#复合查询" id="markdown-toc-复合查询">复合查询</a></li>
+    </ul>
+  </li>
+  <li><a href="#整合springboot" id="markdown-toc-整合springboot">整合springboot</a></li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>基于Apache Lucene构建的开源搜索引擎</li>
+  <li>采用Java编写，提供简单易用的RESTful API</li>
+  <li>轻松的横向扩展，可支持PB级的结构化和非结构化数据处理</li>
+</ul>
+
+<h4 id="应用场景">应用场景</h4>
+
+<ul>
+  <li>海量数据分析引擎</li>
+  <li>站内搜索引擎</li>
+  <li>数据仓库</li>
+  <li>英国卫报-实时分析公众对文章的回应</li>
+  <li>维基百科、GitHub-站内实时搜索</li>
+  <li>百度-实时日志监控平台</li>
+  <li>阿里巴巴、谷歌、京东、腾讯、小米等等</li>
+</ul>
+
+<h4 id="软件安装">软件安装</h4>
+
+<ul>
+  <li>单机安装</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>单机安装ElasticSearch
+
+安装前，请确保已经安装JDK1.8
+安装前，请确保已经安装nodejs6.0以上
+
+官网：https://www.elastic.co/products/elasticsearch
+下载安装包：https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.0.tar.gz
+解压安装包：tar -vxf elasticsearch-5.6.0.tar.gz
+cd elasticsearch-5.6.0.tar.gz
+
+启动前，检查JDK环境
+java -v
+请确保已经安装JDK1.8
+
+启动elasticsearch
+sh ./bin/elasticsearch
+当日志输出started时，表示启动成功
+
+验证服务
+127.0.0.1:9200
+elasticsearch服务默认监听9200端口
+
+访问：http://127.0.0.1:9200
+如果出现版本信息，则安装成功
+
+</code></pre></div></div>
+
+<ul>
+  <li>插件安装</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>实用插件Head安装
+
+打开github：https://github.com/mobz/elasticsearch-head
+下载插件包：https://codeload.github.com/mobz/elasticsearch-head/zip/master
+unzip elasticsearch-head-master.zip
+
+cd elasticsearch-head-master
+
+检查Node环境
+node -v
+请确保已经安装nodejs6.0以上
+
+安装插件
+npm install
+启动插件
+npm run start
+输出日志表示启动成功
+Started connect web server on http://localhost:9100
+访问
+http://localhost:9100
+
+ElasticSearch整合elasticsearch-head插件
+cd elasticsearch-5.6.0
+
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+允许head插件跨域访问rest接口
+http.cors.allowed: true
+http.cors.allow-origin: "*"
+:wq
+
+后台启动
+./bin/elasticsearch -d
+
+再次重新启动elasticsearch-head插件
+cd elasticsearch-head-master
+启动插件
+npm run start
+访问
+http://localhost:9100
+
+</code></pre></div></div>
+
+<ul>
+  <li>集群安装</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>集群安装
+1个master、2个slave
+
+master节点配置
+
+配置当前节点为主节点
+cd elasticsearch-5.6.0
+修改配置
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+
+# 指定集群的名字
+cluster.name: myes
+# 指定当前节点的名字
+node.name: master
+# 指定当前节点为master
+node.master: true
+# 指定绑定的IP
+network.host: 127.0.0.1
+# 使用默认端口：9200
+:wq
+
+ps -ef | grep 'pwd'
+
+kill pid
+重新启动
+./bin/elasticsearch -d
+检查服务是否正常启动
+http://localhost:9200
+
+slave节点配置
+
+mkdir es_slave
+cp elasticsearch-5.6.0.tar.gz es_slave/
+cd es_slave
+tar -vxf elasticsearch-5.6.0.tar.gz
+cp -r elasticsearch-5.6.0 es_slave1
+cp -r elasticsearch-5.6.0 es_slave2
+
+修改es_slave1配置
+cd es_slave1
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+
+# 指定集群的名字：需要和master节点一致
+cluster.name: myes
+# 指定当前节点的名字
+node.name: slave1
+# 指定绑定的IP
+network.host: 127.0.0.1
+# 指定当前节点绑定端口号8200
+http.port: 8200
+# 该配置主要是为了找到master节点
+discovery.zen.ping.unicast.hosts: ["127.0.0.1"]
+:wq
+
+启动服务
+./bin/elasticsearch -d
+检查服务是否正常启动
+http://localhost:9100
+
+安装之前的步骤配置slave2
+cd es_slave2
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+
+# 指定集群的名字：需要和master节点一致
+cluster.name: myes
+# 指定当前节点的名字
+node.name: slave2
+# 指定绑定的IP
+network.host: 127.0.0.1
+# 指定当前节点绑定端口号8000
+http.port: 8000
+# 该配置主要是为了找到master节点
+discovery.zen.ping.unicast.hosts: ["127.0.0.1"]
+:wq
+
+启动服务
+./bin/elasticsearch -d
+检查服务是否正常启动
+http://localhost:9100
+
+</code></pre></div></div>
+
+<h3 id="基础概念">基础概念</h3>
+
+<ul>
+  <li>集群和节点</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>一个集群是由一个或多个ES组成的集合
+每一个集群都有一个唯一的名字
+每一个节点都是通过集群的名字来加入集群的
+每一个节点都有自己的名字
+节点能够存储数据，参与集群索引数据以及搜索数据的独立服务
+
+</code></pre></div></div>
+
+<ul>
+  <li>基础概念</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>索引：含有相同属性的文档集合
+类型：索引可以定义一个或多个类型，文档必须属于一个类型
+（通常会定义有相同字段的文档作为一个类型）
+文档：文档是可以被索引的基本数据单位
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>索引相当于SQL里的DataBase，也就是数据库
+类型相当于SQL里的Table，也就是表
+文档相当于SQL里的一行记录，也就是一行数据
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>假设有一个信息查询系统，使用ES做存储。那么里面的数据就可以分为各种各样的索引，比如：汽车索引、图书索引、家具索引等等。图书索引又可以细分为各种类型，比如：科普类、小说类、技术类等等。具体到每一本书籍，就是文档，就是整个图书里面最小的存储单位。
+
+</code></pre></div></div>
+
+<ul>
+  <li>索引高级概念</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>分片：每个索引都有多个分片，每个分片是一个Lucene索引
+备份：拷贝一份分片就完成了分片的备份
+ES默认在创建索引时，会创建5个分片、1个备份
+分片的数量只能在创建索引时设置，而不能在后期进行修改
+备份是可以动态修改的
+
+</code></pre></div></div>
+
+<h3 id="基本用法">基本用法</h3>
+
+<h4 id="创建索引">创建索引</h4>
+
+<ul>
+  <li>ES的API组成结构：使用RESTful API风格来命名API</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>API基本格式：http://&lt;ip&gt;:&lt;port&gt;/&lt;索引&gt;/&lt;类型&gt;/&lt;文档id&gt;
+常用HTTP动词：GET/PUT/POST/DELETE
+</code></pre></div></div>
+
+<ul>
+  <li>使用Head插件创建非结构化索引</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>访问：localhost:9100
+路径：索引-&gt;新建索引-&gt;索引名称：book-&gt;点击OK
+索引名称：必须小写，不能有中划线
+</code></pre></div></div>
+
+<ul>
+  <li>如何区分索引是结构化的还是非结构化的</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>结合Head插件查看
+点击索引信息-&gt;索引信息-&gt;mappings节点
+当mappings节点后的内容为空时：非结构化索引
+
+</code></pre></div></div>
+
+<ul>
+  <li>使用Head插件创建结构化索引</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>路径：复合查询-&gt;查询-&gt;book/novel/_mappings
+指定映射：使用JSON结构体
+{
+"novel":{
+"propertise":{
+  "title":{"type":"test"}
+   }
+}
+}
+然后勾选易读-&gt;点击验证JSON-&gt;提交请求
+再次查看mappings节点时，已经不是空的了
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan创建索引</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT：127.0.0.1:9200/people
+Body-&gt;raw-&gt;JSON(application/json)
+编写JSON体
+点击Send，然后到Head插件中查看people索引信息
+具体json如下：
+</code></pre></div></div>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"settings"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"number_of_shards"</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"number_of_replicas"</span><span class="p">:</span><span class="mi">1</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"mappings"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"man"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"properties"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"name"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="nl">"country"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"keyword"</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="nl">"age"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"integer"</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="nl">"date"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"date"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"format"</span><span class="p">:</span><span class="s2">"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"woman"</span><span class="p">:{</span><span class="w">
+
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="新增文档">新增文档</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>指定文档id新增
+自动产生文档id新增
+文档id：唯一索引值指向文档数据
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan工具新增数据-指定文档id新增</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT：127.0.0.1::9200/people/man/1
+Body-&gt;raw-&gt;JSON(application/json)
+{
+"name":"zc",
+"country":"china",
+"age":22,
+"date":"1995-01-01"
+}
+点击Send，可以看到ES响应的信息
+使用Head插件查看索引下的数据，docs字段代表索引下所有文档的数量值
+点击数据浏览，可以看见刚刚新增的数据
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan工具新增数据-自动产生文档id新增</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST：127.0.0.1::9200/people/man/
+Body-&gt;raw-&gt;JSON(application/json)
+{
+"name":"myzc",
+"country":"china",
+"age":22,
+"date":"1995-02-01"
+}
+点击Send，可以看到ES响应的信息
+使用Head插件，点击数据浏览，可以看见刚刚新增的数据
+</code></pre></div></div>
+
+<h4 id="修改文档">修改文档</h4>
+
+<ul>
+  <li>直接修改文档，脚本修改文档</li>
+  <li>使用PostMan工具修改文档-指定文档ID修改</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST：127.0.0.1:9200/people/man/1/_update
+Body-&gt;raw-&gt;JSON(application/json)
+{
+"doc":{
+    "name":"who is zc"
+}
+}
+点击Send，可以看到ES响应的信息
+使用Head插件，点击数据浏览，可以看见刚刚修改的数据
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan工具修改文档-指定文档ID使用脚本修改</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST：127.0.0.1:9200/people/man/1/_update
+Body-&gt;raw-&gt;JSON(application/json)
+{
+"script":{
+    "lang":"painless",
+    "inline":"ctx._sources.age+=10"
+}
+}
+或使用以下格式
+{
+"script":{
+    "lang":"painless",
+    "inline":"ctx._sources.age = params.age",
+    "params":{
+        "age":100
+    }
+}
+}
+点击Send，可以看到ES响应的信息
+使用Head插件，点击数据浏览，可以看见刚刚修改的数据
+</code></pre></div></div>
+
+<h4 id="删除文档">删除文档</h4>
+
+<ul>
+  <li>使用PostMan删除文档-指定文档ID</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE：127.0.0.1:9200/people/man/1
+点击Send，可以看到ES响应的信息
+使用Head插件，点击数据浏览，可以看见数据已经删除
+</code></pre></div></div>
+
+<ul>
+  <li>使用Head插件删除索引</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>路径：概览-&gt;book-&gt;动作-&gt;删除-&gt;输入删除-&gt;确定
+注意：删除操作本身很危险，删除索引时会删除它所有的文档数据
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan删除索引</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE：127.0.0.1:9200/people
+点击Send，可以看到ES响应的信息
+使用Head插件，点击数据浏览，可以看见索引已经删除
+</code></pre></div></div>
+
+<h4 id="查询语法">查询语法</h4>
+
+<ul>
+  <li>ES查询分类：
+    <ul>
+      <li>简单查询</li>
+      <li>条件查询</li>
+      <li>聚合查询</li>
+    </ul>
+  </li>
+  <li>前置条件，创建book索引，并预先新增一些数据</li>
+  <li>使用PostMan简单查询-指定文档ID</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET：127.0.0.1:9200/book/novel/1
+点击Send，可以看到ES响应的信息
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan条件查询</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST：127.0.0.1:9200/book/_search
+Body-&gt;raw-&gt;JSON(application/json)
+编写查询JSON体
+点击Send，可以看到ES响应的信息
+</code></pre></div></div>
+
+<ul>
+  <li>编写查询JSON体如下，查询所有数据</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"match_all"</span><span class="p">:{}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>用from指定从哪里返回，用size指定返回的数据大小</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"match_all"</span><span class="p">:{}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"from"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"size"</span><span class="p">:</span><span class="mi">1</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>使用关键字查询，查询标题含有ElasticSearch的数据</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"ElasticSearch"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>使用sort指定结果集排序-按照出版日期倒序</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"ElasticSearch"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"sort"</span><span class="p">:[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"publish_date"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"order"</span><span class="p">:</span><span class="s2">"desc"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">   
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>按照书籍的字数进行单个聚合查询</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"aggs"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"group_by_word_count"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"terms"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"field"</span><span class="p">:</span><span class="s2">"word_count"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>按照书籍的字数及出版日期进行多个聚合查询</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"aggs"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"group_by_word_count"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"terms"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"field"</span><span class="p">:</span><span class="s2">"word_count"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"group_by_publish_date"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"terms"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"field"</span><span class="p">:</span><span class="s2">"publish_date"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>对书籍字数进行统计计算</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"aggs"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"grades_word_count"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"stats"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"field"</span><span class="p">:</span><span class="s2">"word_count"</span><span class="w">
+            </span><span class="p">}</span><span class="w">   
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="高阶查询">高阶查询</h4>
+
+<h5 id="query语法">query语法</h5>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>子条件查询：特定字段查询所指特定值
+query context
+filter context
+复合条件查询：以一定的逻辑组合子条件查询
+固定分数查询
+布尔查询
+</code></pre></div></div>
+
+<ul>
+  <li>query context介绍</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>在查询过程中，除了判断是否满足查询条件外
+ES还会计算一个_score来标识匹配的程度
+旨在判断目标文档和查询条件匹配的有多好
+</code></pre></div></div>
+
+<ul>
+  <li>query context查询</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>全文本查询：针对文本类型数据
+字段级别查询：针对结构化数据，如数字、日期等
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan进行query context文本查询</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST：127.0.0.1:9200/book/_search
+Body-&gt;raw-&gt;JSON(application/json)
+编写查询JSON体
+点击Send，可以看到ES响应的信息
+</code></pre></div></div>
+
+<ul>
+  <li>使用match关键字模糊匹配</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"author"</span><span class="p">:</span><span class="s2">"wali"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>使用match_phrase关键字习语匹配</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"match_phrase"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"author"</span><span class="p">:</span><span class="s2">"ElasticSearch入门"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>使用multi_match查询作者和标题包含wali的数据</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"multi_match"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"query"</span><span class="p">:</span><span class="s2">"wali"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"fields"</span><span class="p">:[</span><span class="s2">"author"</span><span class="p">,</span><span class="s2">"title"</span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>使用query_string进行语法查询</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+    "query":{
+        "query_string":{
+            "query":"(ElasticSearch AND 大法) OR Python"
+        }
+    }
+}
+</code></pre></div></div>
+
+<ul>
+  <li>使用query_string查询多个字段</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+    "query":{
+        "query_string":{
+            "query":"wali OR ElasticSearch",
+            "field":["title","author"]
+        }
+    }
+}
+</code></pre></div></div>
+
+<ul>
+  <li>使用PostMan进行query context字段查询</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST：127.0.0.1:9200/book/_search
+Body-&gt;raw-&gt;JSON(application/json)
+编写查询JSON体
+点击Send，可以看到ES响应的信息
+
+</code></pre></div></div>
+
+<ul>
+  <li>查询字数在某个特定集（1000）的书籍</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"term"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"word_count"</span><span class="p">:</span><span class="mi">1000</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>查询字符在某个范围（大于等于1000-小于等于2000）的书籍</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"range"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"word_count"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"gte"</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"lte"</span><span class="p">:</span><span class="mi">2000</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>查询出版日期在某个范围（2017-01-01至2017-12-31）的书籍</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"range"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"publish_date"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"gte"</span><span class="p">:</span><span class="s2">"2017-01-01"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"lte"</span><span class="p">:</span><span class="s2">"2017-12-31"</span><span class="err">//或</span><span class="w"> </span><span class="nl">"lte"</span><span class="p">:</span><span class="s2">"now"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h5 id="filter语法">filter语法</h5>
+
+<ul>
+  <li>
+    <p>filter context介绍：在查询过程中，只判断该文档是否满足条件，只有yes或者no</p>
+  </li>
+  <li>
+    <p>使用PostMan进行filter context查询</p>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST：127.0.0.1:9200/book/_search
+Body-&gt;raw-&gt;JSON(application/json)
+点击Send，可以看到ES响应的信息
+</code></pre></div></div>
+
+<ul>
+  <li>查询字数1000的书籍</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"filter"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"word_count"</span><span class="p">:</span><span class="mi">1000</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="复合查询">复合查询</h4>
+
+<ul>
+  <li>常用复合条件查询：固定分数查询，布尔查询</li>
+  <li>使用PostMan进行复合查询</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>127.0.0.1:9200 /_search
+Body-&gt;raw-&gt;JSON(application/json)
+点击Send，可以看到ES响应的信息
+</code></pre></div></div>
+
+<ul>
+  <li>全文搜索-标题含有ElasticSearch的书籍</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"constant_score"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"filter"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ElasticSearch"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"boost"</span><span class="p">:</span><span class="mi">2</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>布尔查询- should满足任意条件</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"should"</span><span class="p">:[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+                        </span><span class="nl">"author"</span><span class="p">:</span><span class="s2">"wali"</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+                        </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"ElasticSearch"</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>布尔查询- must满足全部条件</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"must"</span><span class="p">:[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+                        </span><span class="nl">"author"</span><span class="p">:</span><span class="s2">"wali"</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+                        </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"ElasticSearch"</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>使用must和filter复合查询</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"must"</span><span class="p">:[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+                        </span><span class="nl">"author"</span><span class="p">:</span><span class="s2">"wali"</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"match"</span><span class="p">:{</span><span class="w">
+                        </span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"ElasticSearch"</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"filter"</span><span class="p">:[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"term"</span><span class="p">:{</span><span class="w">
+                        </span><span class="nl">"word_count"</span><span class="p">:</span><span class="mi">1000</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>布尔查询- must_not一定不能满足的条件</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:{</span><span class="w">
+            </span><span class="nl">"must_not"</span><span class="p">:{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:{</span><span class="w">
+                    </span><span class="nl">"author"</span><span class="p">:</span><span class="s2">"wali"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="整合springboot">整合springboot</h3>
+
+<ul>
+  <li>pom</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;properties&gt;</span>
+	<span class="nt">&lt;elasticsearch.version&gt;</span>5.5.2<span class="nt">&lt;/elasticsearch.version&gt;</span>
+<span class="nt">&lt;/properties&gt;</span>
+
+<span class="nt">&lt;dependency&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>org.elasticsearch.client<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>transport<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>${elasticsearch.version}<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>org.apache.logging.log4j<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>log4j-core<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>2.7<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>编写ES配置类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EsConfig</span> <span class="o">{</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">TransportClient</span> <span class="nf">client</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">UnknownHostException</span><span class="o">{</span>
+        <span class="c1">//新建一个服务地址</span>
+        <span class="nc">InetSocketTransportAddress</span> <span class="n">node</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">InetSocketTransportAddress</span><span class="o">(</span><span class="nc">InetAddress</span><span class="o">.</span><span class="na">getByName</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">),</span><span class="mi">9300</span><span class="o">);</span>
+
+        <span class="nc">Settings</span> <span class="n">settings</span> <span class="o">=</span> <span class="nc">Settings</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
+                <span class="c1">// es集群名称</span>
+                <span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"cluster.name"</span><span class="o">,</span> <span class="s">"myes"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+        <span class="nc">TransportClient</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PreBuiltTransportClient</span><span class="o">(</span><span class="n">settings</span><span class="o">);</span>
+        <span class="n">client</span><span class="o">.</span><span class="na">addTransportAddress</span><span class="o">(</span><span class="n">node</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="n">client</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>编写图书接口类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * @title 图书REST接口类
+ * @describe 调ES接口
+ */</span>
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookRest</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">TransportClient</span> <span class="n">client</span><span class="o">;</span>
+
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">index</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="s">"index"</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @describe 查询接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */</span>
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/get/book/novel"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;?&gt;</span> <span class="n">get</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"id"</span><span class="o">,</span><span class="n">defaultValue</span><span class="o">=</span><span class="s">""</span><span class="o">)</span><span class="nc">String</span> <span class="n">id</span><span class="o">){</span>
+
+        <span class="k">if</span><span class="o">(</span><span class="n">id</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">()){</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">NOT_FOUND</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="nc">GetResponse</span> <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">client</span><span class="o">.</span><span class="na">prepareGet</span><span class="o">(</span><span class="s">"book"</span><span class="o">,</span><span class="s">"novel"</span><span class="o">,</span><span class="n">id</span><span class="o">).</span><span class="na">get</span><span class="o">();</span>
+
+        <span class="k">if</span><span class="o">(!</span><span class="n">result</span><span class="o">.</span><span class="na">isExists</span><span class="o">()){</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">NOT_FOUND</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="n">result</span><span class="o">.</span><span class="na">getSource</span><span class="o">(),</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @describe 增加接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */</span>
+    <span class="nd">@PostMapping</span><span class="o">(</span><span class="s">"/add/book/novel"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;?&gt;</span> <span class="n">add</span><span class="o">(</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"title"</span><span class="o">)</span><span class="nc">String</span> <span class="n">title</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"author"</span><span class="o">)</span><span class="nc">String</span> <span class="n">author</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"word_count"</span><span class="o">)</span><span class="kt">int</span> <span class="n">wordCount</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"publish_date"</span><span class="o">)</span> <span class="nd">@DateTimeFormat</span><span class="o">(</span><span class="n">pattern</span><span class="o">=</span><span class="s">"yyyy-MM-dd HH:mm:ss"</span><span class="o">)</span> <span class="nc">Date</span> <span class="n">publishDate</span><span class="o">){</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">//构建一个json</span>
+            <span class="nc">XContentBuilder</span> <span class="n">content</span> <span class="o">=</span> <span class="nc">XContentFactory</span><span class="o">.</span><span class="na">jsonBuilder</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">startObject</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"title"</span><span class="o">,</span><span class="n">title</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"author"</span><span class="o">,</span> <span class="n">author</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"word_count"</span><span class="o">,</span> <span class="n">wordCount</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"publish_date"</span><span class="o">,</span> <span class="n">publishDate</span><span class="o">.</span><span class="na">getTime</span><span class="o">())</span>
+                <span class="o">.</span><span class="na">endObject</span><span class="o">();</span>
+            <span class="c1">//获取返回结果</span>
+            <span class="nc">IndexResponse</span> <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">client</span><span class="o">.</span><span class="na">prepareIndex</span><span class="o">(</span><span class="s">"book"</span><span class="o">,</span><span class="s">"novel"</span><span class="o">).</span><span class="na">setSource</span><span class="o">(</span><span class="n">content</span><span class="o">).</span><span class="na">get</span><span class="o">();</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="n">result</span><span class="o">.</span><span class="na">getId</span><span class="o">(),</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @describe 删除接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */</span>
+    <span class="nd">@DeleteMapping</span><span class="o">(</span><span class="s">"/delete/book/novel"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;?&gt;</span> <span class="n">delete</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"id"</span><span class="o">,</span><span class="n">defaultValue</span><span class="o">=</span><span class="s">""</span><span class="o">)</span><span class="nc">String</span> <span class="n">id</span><span class="o">){</span>
+        <span class="nc">DeleteResponse</span> <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">client</span><span class="o">.</span><span class="na">prepareDelete</span><span class="o">(</span><span class="s">"book"</span><span class="o">,</span> <span class="s">"novel"</span><span class="o">,</span> <span class="n">id</span><span class="o">).</span><span class="na">get</span><span class="o">();</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="n">result</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @describe 修改接口
+     * @author zc
+     * @version 1.0 2017-09-15
+     */</span>
+    <span class="nd">@DeleteMapping</span><span class="o">(</span><span class="s">"/update/book/novel"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;?&gt;</span> <span class="n">update</span><span class="o">(</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"id"</span><span class="o">,</span><span class="n">defaultValue</span><span class="o">=</span><span class="s">""</span><span class="o">)</span><span class="nc">String</span> <span class="n">id</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"title"</span><span class="o">,</span><span class="n">required</span><span class="o">=</span><span class="kc">false</span><span class="o">)</span><span class="nc">String</span> <span class="n">title</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"author"</span><span class="o">,</span><span class="n">required</span><span class="o">=</span><span class="kc">false</span><span class="o">)</span><span class="nc">String</span> <span class="n">author</span><span class="o">){</span>
+
+        <span class="nc">UpdateRequest</span> <span class="n">update</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">UpdateRequest</span><span class="o">(</span><span class="s">"book"</span><span class="o">,</span><span class="s">"novel"</span><span class="o">,</span><span class="n">id</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">XContentBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="nc">XContentFactory</span><span class="o">.</span><span class="na">jsonBuilder</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">startObject</span><span class="o">();</span>
+            <span class="k">if</span><span class="o">(!</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">title</span><span class="o">)){</span>
+                <span class="n">builder</span><span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"title"</span><span class="o">,</span><span class="n">title</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="k">if</span><span class="o">(!</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">author</span><span class="o">)){</span>
+                <span class="n">builder</span><span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"author"</span><span class="o">,</span> <span class="n">author</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">builder</span><span class="o">.</span><span class="na">endObject</span><span class="o">();</span>
+            <span class="n">update</span><span class="o">.</span><span class="na">doc</span><span class="o">(</span><span class="n">builder</span><span class="o">);</span>
+            <span class="nc">UpdateResponse</span> <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">client</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">update</span><span class="o">).</span><span class="na">get</span><span class="o">();</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="n">result</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * @describe 复合查询
+     * @author zc
+     * @version 1.0 2017-09-15
+     */</span>
+    <span class="nd">@DeleteMapping</span><span class="o">(</span><span class="s">"/query/book/novel"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;?&gt;</span> <span class="n">query</span><span class="o">(</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"author"</span><span class="o">,</span><span class="n">required</span><span class="o">=</span><span class="kc">false</span><span class="o">)</span><span class="nc">String</span> <span class="n">author</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"title"</span><span class="o">,</span><span class="n">required</span><span class="o">=</span><span class="kc">false</span><span class="o">)</span><span class="nc">String</span> <span class="n">title</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"gt_word_count"</span><span class="o">,</span><span class="n">defaultValue</span><span class="o">=</span><span class="s">"0"</span><span class="o">)</span> <span class="kt">int</span> <span class="n">gtWordCount</span><span class="o">,</span>
+            <span class="nd">@RequestParam</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"lt_word_count"</span><span class="o">,</span><span class="n">required</span><span class="o">=</span><span class="kc">false</span><span class="o">)</span> <span class="nc">Integer</span> <span class="n">ltWordCount</span><span class="o">){</span>
+
+        <span class="c1">// 构建布尔查询</span>
+        <span class="nc">BoolQueryBuilder</span> <span class="n">boolQuery</span> <span class="o">=</span> <span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">boolQuery</span><span class="o">();</span>
+        <span class="k">if</span><span class="o">(!</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">author</span><span class="o">)){</span>
+            <span class="n">boolQuery</span><span class="o">.</span><span class="na">must</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">matchQuery</span><span class="o">(</span><span class="s">"author"</span><span class="o">,</span> <span class="n">author</span><span class="o">));</span>
+        <span class="o">}</span>
+        <span class="k">if</span><span class="o">(!</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">title</span><span class="o">)){</span>
+            <span class="n">boolQuery</span><span class="o">.</span><span class="na">must</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">matchQuery</span><span class="o">(</span><span class="s">"title"</span><span class="o">,</span> <span class="n">title</span><span class="o">));</span>
+        <span class="o">}</span>
+
+        <span class="c1">// 构建范围查询</span>
+        <span class="nc">RangeQueryBuilder</span> <span class="n">rangeQuery</span> <span class="o">=</span> <span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">rangeQuery</span><span class="o">(</span><span class="s">"word_count"</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">gtWordCount</span><span class="o">);</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">ltWordCount</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">ltWordCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">){</span>
+            <span class="n">rangeQuery</span><span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="n">ltWordCount</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="c1">// 使用filter构建</span>
+        <span class="n">boolQuery</span><span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">rangeQuery</span><span class="o">);</span>
+
+        <span class="nc">SearchRequestBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">client</span><span class="o">.</span><span class="na">prepareSearch</span><span class="o">(</span><span class="s">"book"</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">setTypes</span><span class="o">(</span><span class="s">"novel"</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">setSearchType</span><span class="o">(</span><span class="nc">SearchType</span><span class="o">.</span><span class="na">DFS_QUERY_THEN_FETCH</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">setQuery</span><span class="o">(</span><span class="n">boolQuery</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">setFrom</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">setSize</span><span class="o">(</span><span class="mi">10</span><span class="o">);</span>
+
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"[ES查询请求参数]："</span><span class="o">+</span><span class="n">builder</span><span class="o">);</span>
+
+        <span class="nc">SearchResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Object</span><span class="o">&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Object</span><span class="o">&gt;&gt;();</span>
+
+        <span class="k">for</span><span class="o">(</span><span class="nc">SearchHit</span> <span class="nl">hit:</span><span class="n">response</span><span class="o">.</span><span class="na">getHits</span><span class="o">()){</span>
+            <span class="n">result</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">hit</span><span class="o">.</span><span class="na">getSource</span><span class="o">());</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="n">result</span><span class="o">,</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+:ET

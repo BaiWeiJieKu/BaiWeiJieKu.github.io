@@ -1,0 +1,1790 @@
+I"*e<ul id="markdown-toc">
+  <li><a href="#主模块pom" id="markdown-toc-主模块pom">主模块(pom)</a>    <ul>
+      <li><a href="#pom" id="markdown-toc-pom">pom</a></li>
+    </ul>
+  </li>
+  <li><a href="#核心业务模块corejar" id="markdown-toc-核心业务模块corejar">核心业务模块core(jar)</a>    <ul>
+      <li><a href="#pom-1" id="markdown-toc-pom-1">pom</a></li>
+      <li><a href="#登录返回类型枚举" id="markdown-toc-登录返回类型枚举">登录返回类型枚举</a></li>
+      <li><a href="#系统配置类" id="markdown-toc-系统配置类">系统配置类</a></li>
+      <li><a href="#图片验证码" id="markdown-toc-图片验证码">图片验证码</a></li>
+      <li><a href="#记住我功能" id="markdown-toc-记住我功能">记住我功能</a>        <ul>
+          <li><a href="#基本原理" id="markdown-toc-基本原理">基本原理</a></li>
+        </ul>
+      </li>
+      <li><a href="#短信验证码登录" id="markdown-toc-短信验证码登录">短信验证码登录</a></li>
+      <li><a href="#社交账号登录" id="markdown-toc-社交账号登录">社交账号登录</a>        <ul>
+          <li><a href="#qq登录" id="markdown-toc-qq登录">QQ登录</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#浏览器安全模块jar" id="markdown-toc-浏览器安全模块jar">浏览器安全模块(jar)</a>    <ul>
+      <li><a href="#pom-2" id="markdown-toc-pom-2">pom</a></li>
+      <li><a href="#security基本原理" id="markdown-toc-security基本原理">security基本原理</a></li>
+      <li><a href="#用户认证逻辑" id="markdown-toc-用户认证逻辑">用户认证逻辑</a></li>
+      <li><a href="#用户认证流程" id="markdown-toc-用户认证流程">用户认证流程</a></li>
+      <li><a href="#登录成功处理" id="markdown-toc-登录成功处理">登录成功处理</a></li>
+      <li><a href="#登录失败处理" id="markdown-toc-登录失败处理">登录失败处理</a></li>
+    </ul>
+  </li>
+  <li><a href="#app相关模块jar" id="markdown-toc-app相关模块jar">app相关模块(jar)</a>    <ul>
+      <li><a href="#pom-3" id="markdown-toc-pom-3">pom</a></li>
+    </ul>
+  </li>
+  <li><a href="#样例模块" id="markdown-toc-样例模块">样例模块</a>    <ul>
+      <li><a href="#pom-4" id="markdown-toc-pom-4">pom</a></li>
+      <li><a href="#applicationproperties" id="markdown-toc-applicationproperties">application.properties</a></li>
+      <li><a href="#restful" id="markdown-toc-restful">RestFul</a></li>
+      <li><a href="#常用注解" id="markdown-toc-常用注解">常用注解</a></li>
+      <li><a href="#测试用例" id="markdown-toc-测试用例">测试用例</a>        <ul>
+          <li><a href="#get请求" id="markdown-toc-get请求">GET请求</a></li>
+          <li><a href="#post请求" id="markdown-toc-post请求">POST请求</a></li>
+          <li><a href="#put请求" id="markdown-toc-put请求">PUT请求</a></li>
+          <li><a href="#delete请求" id="markdown-toc-delete请求">DELETE请求</a></li>
+          <li><a href="#upload请求" id="markdown-toc-upload请求">upload请求</a></li>
+        </ul>
+      </li>
+      <li><a href="#jsonview" id="markdown-toc-jsonview">JsonView</a></li>
+      <li><a href="#自定义校验注解" id="markdown-toc-自定义校验注解">自定义校验注解</a></li>
+      <li><a href="#控制器异常处理器" id="markdown-toc-控制器异常处理器">控制器异常处理器</a></li>
+      <li><a href="#restful拦截" id="markdown-toc-restful拦截">RESTful拦截</a>        <ul>
+          <li><a href="#过滤器" id="markdown-toc-过滤器">过滤器</a></li>
+          <li><a href="#拦截器" id="markdown-toc-拦截器">拦截器</a></li>
+          <li><a href="#切面" id="markdown-toc-切面">切面</a></li>
+          <li><a href="#拦截顺序" id="markdown-toc-拦截顺序">拦截顺序</a></li>
+        </ul>
+      </li>
+      <li><a href="#处理异步请求" id="markdown-toc-处理异步请求">处理异步请求</a></li>
+      <li><a href="#swagger生成文档" id="markdown-toc-swagger生成文档">Swagger生成文档</a></li>
+      <li><a href="#wiremock伪造rest服务" id="markdown-toc-wiremock伪造rest服务">WireMock伪造REST服务</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="主模块pom">主模块(pom)</h3>
+
+<h4 id="pom">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>imooc-security<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;packaging&gt;</span>pom<span class="nt">&lt;/packaging&gt;</span>
+	
+	<span class="nt">&lt;properties&gt;</span>
+		<span class="nt">&lt;imooc.security.version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/imooc.security.version&gt;</span>
+	<span class="nt">&lt;/properties&gt;</span>
+
+	<span class="nt">&lt;dependencyManagement&gt;</span>
+		<span class="nt">&lt;dependencies&gt;</span>
+			<span class="nt">&lt;dependency&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>io.spring.platform<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>platform-bom<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>Brussels-SR4<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+				<span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;/dependency&gt;</span>
+			<span class="nt">&lt;dependency&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.cloud<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-cloud-dependencies<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>Dalston.SR2<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+				<span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;/dependencies&gt;</span>
+	<span class="nt">&lt;/dependencyManagement&gt;</span>
+	
+	<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>maven-compiler-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>2.3.2<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;configuration&gt;</span>
+					<span class="nt">&lt;source&gt;</span>1.8<span class="nt">&lt;/source&gt;</span>
+					<span class="nt">&lt;target&gt;</span>1.8<span class="nt">&lt;/target&gt;</span>
+					<span class="nt">&lt;encoding&gt;</span>UTF-8<span class="nt">&lt;/encoding&gt;</span>
+				<span class="nt">&lt;/configuration&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+	
+	<span class="nt">&lt;modules&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-app<span class="nt">&lt;/module&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-browser<span class="nt">&lt;/module&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-core<span class="nt">&lt;/module&gt;</span>
+		<span class="nt">&lt;module&gt;</span>../imooc-security-demo<span class="nt">&lt;/module&gt;</span>
+	<span class="nt">&lt;/modules&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<h3 id="核心业务模块corejar">核心业务模块core(jar)</h3>
+
+<h4 id="pom-1">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>imooc-security-core<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>imooc-security<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;relativePath&gt;</span>../imooc-security<span class="nt">&lt;/relativePath&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.cloud<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-cloud-starter-oauth2<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-data-redis<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-jdbc<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>mysql<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>mysql-connector-java<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.social<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-social-config<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.social<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-social-core<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.social<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-social-security<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.social<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-social-web<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>commons-lang<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>commons-lang<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>commons-collections<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>commons-collections<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>commons-beanutils<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>commons-beanutils<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-configuration-processor<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<h4 id="登录返回类型枚举">登录返回类型枚举</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * @author zhailiang
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">LoginResponseType</span> <span class="o">{</span>
+	
+	<span class="cm">/**
+	 * 跳转
+	 */</span>
+	<span class="no">REDIRECT</span><span class="o">,</span>
+	
+	<span class="cm">/**
+	 * 返回json
+	 */</span>
+	<span class="no">JSON</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="系统配置类">系统配置类</h4>
+
+<ul>
+  <li>读取配置文件，如application.properties中的配置信息，封装为对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//springboot配置类</span>
+<span class="nd">@Configuration</span>
+<span class="c1">//让读取配置文件的类生效</span>
+<span class="nd">@EnableConfigurationProperties</span><span class="o">(</span><span class="nc">SecurityProperties</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SecurityCoreConfig</span> <span class="o">{</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//security配置封装类</span>
+<span class="c1">//指定配置文件中配置项的前缀，参见样例模块的application.properties</span>
+<span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="n">prefix</span> <span class="o">=</span> <span class="s">"imooc.security"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SecurityProperties</span> <span class="o">{</span>
+	<span class="c1">//浏览器安全模块配置封装类</span>
+	<span class="kd">private</span> <span class="nc">BrowserProperties</span> <span class="n">browser</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BrowserProperties</span><span class="o">();</span>
+	
+	<span class="kd">private</span> <span class="nc">ValidateCodeProperties</span> <span class="n">code</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ValidateCodeProperties</span><span class="o">();</span>
+	
+	<span class="kd">private</span> <span class="nc">SocialProperties</span> <span class="n">social</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SocialProperties</span><span class="o">();</span>
+
+	<span class="kd">public</span> <span class="nc">BrowserProperties</span> <span class="nf">getBrowser</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">browser</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setBrowser</span><span class="o">(</span><span class="nc">BrowserProperties</span> <span class="n">browser</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">browser</span> <span class="o">=</span> <span class="n">browser</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">ValidateCodeProperties</span> <span class="nf">getCode</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">code</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setCode</span><span class="o">(</span><span class="nc">ValidateCodeProperties</span> <span class="n">code</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">SocialProperties</span> <span class="nf">getSocial</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">social</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setSocial</span><span class="o">(</span><span class="nc">SocialProperties</span> <span class="n">social</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">social</span> <span class="o">=</span> <span class="n">social</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//浏览器安全模块配置封装类</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BrowserProperties</span> <span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="nc">SessionProperties</span> <span class="n">session</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SessionProperties</span><span class="o">();</span>
+	
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">signUpUrl</span> <span class="o">=</span> <span class="s">"/imooc-signUp.html"</span><span class="o">;</span>
+	<span class="c1">//登录页</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">loginPage</span> <span class="o">=</span> <span class="nc">SecurityConstants</span><span class="o">.</span><span class="na">DEFAULT_LOGIN_PAGE_URL</span><span class="o">;</span>
+	<span class="c1">//登录返回类型（跳转，json）</span>
+	<span class="kd">private</span> <span class="nc">LoginResponseType</span> <span class="n">loginType</span> <span class="o">=</span> <span class="nc">LoginResponseType</span><span class="o">.</span><span class="na">JSON</span><span class="o">;</span>
+	
+	<span class="kd">private</span> <span class="kt">int</span> <span class="n">rememberMeSeconds</span> <span class="o">=</span> <span class="mi">3600</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getLoginPage</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">loginPage</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setLoginPage</span><span class="o">(</span><span class="nc">String</span> <span class="n">loginPage</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">loginPage</span> <span class="o">=</span> <span class="n">loginPage</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">LoginResponseType</span> <span class="nf">getLoginType</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">loginType</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setLoginType</span><span class="o">(</span><span class="nc">LoginResponseType</span> <span class="n">loginType</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">loginType</span> <span class="o">=</span> <span class="n">loginType</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">getRememberMeSeconds</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">rememberMeSeconds</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setRememberMeSeconds</span><span class="o">(</span><span class="kt">int</span> <span class="n">rememberMeSeconds</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">rememberMeSeconds</span> <span class="o">=</span> <span class="n">rememberMeSeconds</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getSignUpUrl</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">signUpUrl</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setSignUpUrl</span><span class="o">(</span><span class="nc">String</span> <span class="n">signUpUrl</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">signUpUrl</span> <span class="o">=</span> <span class="n">signUpUrl</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">SessionProperties</span> <span class="nf">getSession</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">session</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setSession</span><span class="o">(</span><span class="nc">SessionProperties</span> <span class="n">session</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">session</span> <span class="o">=</span> <span class="n">session</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="图片验证码">图片验证码</h4>
+
+<ul>
+  <li>
+    <p>封装图形验证码信息：</p>
+
+    <p>core.validate.code.image.ImageCode(封装图形验证码信息)</p>
+
+    <p>core.validate.code.ValidateCode(封装随机数和过期时间)</p>
+
+    <p>core.validate.code.ValidateCodeController(验证码获取controller)</p>
+
+    <p>core.validate.code.ValidateCodeProcessorHolder(验证码处理器查询)</p>
+
+    <p>core.validate.code.ValidateCodeFilter(验证码验证过滤器)</p>
+
+    <p>browser.BrowserSecurityConfig（浏览器安全配置类）</p>
+
+    <p>core.validate.code.ValidateCodeException(验证码异常)</p>
+
+    <p>core.properties.ValidateCodeProperties(验证码配置类)</p>
+
+    <p>core.properties.ImageCodeProperties(图片验证码默认配置类)</p>
+
+    <p>core.properties.SecurityProperties</p>
+
+    <p>应用级配置application.properties：</p>
+
+    <p><code class="language-plaintext highlighter-rouge">#imooc.security.code.image.length = 6</code></p>
+
+    <p><code class="language-plaintext highlighter-rouge">#imooc.security.code.image.width = 100</code></p>
+
+    <p><code class="language-plaintext highlighter-rouge">#imooc.security.code.image.url = /user/*</code></p>
+
+    <p>core.validate.code.ValidateCodeGenerator(校验码生成器接口)</p>
+
+    <p>core.validate.code.image.ImageCodeGenerator(图片验证码自动生成器)</p>
+
+    <p>core.validate.code.ValidateCodeBeanConfig(验证码容器配置类)</p>
+
+    <p>demo.code.DemoImageCodeGenerator(测试自己自定义的图形验证码生成逻辑)</p>
+
+    <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;tr&gt;</span>
+	<span class="nt">&lt;td&gt;</span>图形验证码:<span class="nt">&lt;/td&gt;</span>
+	<span class="nt">&lt;td&gt;</span>
+	<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"imageCode"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"/code/image?width=200"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;/td&gt;</span>
+<span class="nt">&lt;/tr&gt;</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="记住我功能">记住我功能</h4>
+
+<h5 id="基本原理">基本原理</h5>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">用户名密码认证过滤器：UsernamePasswordAuthenticationFilter</span>
+<span class="err">记住我认证过滤器:RememberMeAuthenticationFilter</span>
+
+<span class="err">浏览器--（认证请求）--用户名密码认证过滤器--（认证成功）--RemeberMeService（TokenRepository）--（将Token写入数据库，将Token写入浏览器Cookie）--数据库</span>
+
+<span class="err">浏览器--（服务请求）--记住我认证过滤器--（读取Cookie中的Token）--RemeberMeService（TokenRepository）--（查找Token）--数据库--UserDetailsService</span>
+</code></pre></div></div>
+
+<ul>
+  <li>browser.BrowserSecurityConfig(配置和数据库交互的PersistentTokenRepository)</li>
+  <li>core.properties.BrowserProperties(设置有效时长)</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;tr&gt;</span>
+<span class="nt">&lt;td</span> <span class="na">colspan=</span><span class="s">'2'</span><span class="nt">&gt;&lt;input</span> <span class="na">name=</span><span class="s">"remember-me"</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">value=</span><span class="s">"true"</span> <span class="nt">/&gt;</span>记住我<span class="nt">&lt;/td&gt;</span>
+<span class="nt">&lt;/tr&gt;</span>
+</code></pre></div></div>
+
+<h4 id="短信验证码登录">短信验证码登录</h4>
+
+<ul>
+  <li>发送手机验证码：</li>
+  <li>core.validate.code.sms.SmsCodeSender(短信验证码发送接口)</li>
+  <li>core.validate.code.sms.DefaultSmsCodeSender(默认手机验证码发送实现类)</li>
+  <li>core.validate.code.ValidateCodeBeanConfig(验证码容器配置类)</li>
+  <li>core.validate.code.sms.SmsCodeGenerator(短信验证码生成器)</li>
+  <li>core.properties.SmsCodeProperties(手机验证码默认配置类)</li>
+  <li>core.properties.ValidateCodeProperties(验证码配置类)</li>
+  <li>验证手机验证码</li>
+  <li>core.authentication.mobile.SmsCodeAuthenticationToken(封装手机验证码登录信息)</li>
+  <li>core.authentication.mobile.SmsCodeAuthenticationFilter(手机验证登录过滤器)</li>
+  <li>core.authentication.mobile.SmsCodeAuthenticationProvider(实现手机登录校验逻辑)</li>
+  <li>core.authentication.mobile.SmsCodeAuthenticationSecurityConfig(手机验证码安全认证配置)</li>
+  <li>browser.BrowserSecurityConfig</li>
+</ul>
+
+<h4 id="社交账号登录">社交账号登录</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/shejiao.png" alt="" /></p>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/oauth.png" alt="" /></p>
+
+<h5 id="qq登录">QQ登录</h5>
+
+<ul>
+  <li>第6步：获取用户信息Api</li>
+  <li>core.social.qq.api.QQ(获取QQ用户消息接口)</li>
+  <li>core.social.qq.api.QQUserInfo(QQ用户信息)</li>
+  <li>core.social.qq.api.QQImpl(获取QQ用户信息实现类)</li>
+  <li>前五步获取连接</li>
+  <li>core.social.qq.connet.QQServiceProvider(QQ服务提供类)</li>
+  <li>core.social.qq.connet.QQAdapter(QQ适配器)</li>
+  <li>core.social.qq.connet.QQConnectionFactory(QQ连接工厂)</li>
+  <li>core.social.SocialConfig(社交配置)</li>
+  <li>demo.security.MyUserDetailsService(用户详情信息Service)</li>
+  <li>core.properties.QQProperties</li>
+  <li>core.properties.SocialProperties</li>
+  <li>core.properties.SecurityProperties</li>
+  <li>core.social.qq.config.QQAutoConfig(QQ认证配置)</li>
+  <li>application.properties中：</li>
+  <li>imooc.security.social.weixin.app-id = wxd99431bbff8305a0
+imooc.security.social.weixin.app-secret = 60f78681d063590a469f1b297feff3c4</li>
+  <li>browser.BrowserSecurityConfig(浏览器安全配置类)</li>
+  <li>core.social.ImoocSpringSocialConfigurer(重写点击QQ登录的URL)</li>
+  <li>core.social.qq.connet.QQOAuth2Template</li>
+  <li>暂停第五章（1）</li>
+</ul>
+
+<h3 id="浏览器安全模块jar">浏览器安全模块(jar)</h3>
+
+<h4 id="pom-2">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>imooc-security-browser<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>imooc-security<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;relativePath&gt;</span>../imooc-security<span class="nt">&lt;/relativePath&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>imooc-security-core<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>${imooc.security.version}<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.session<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-session<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.apache.shiro<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>shiro-core<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>1.2.2<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<h4 id="security基本原理">security基本原理</h4>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">请求----SecurityContextPersistenceFilter----UsernamePasswordAuthenticationFilter(可选)----BasicAuthenticationFilter(可选)------其他过滤器-----ExceptionTranslationFilter（异常处理过滤器，必选）----FilterSecurityInterceptor-----REST</span> <span class="err">API(Controller)</span>
+</code></pre></div></div>
+
+<h4 id="用户认证逻辑">用户认证逻辑</h4>
+
+<ul>
+  <li>
+    <p>处理用户信息获取逻辑（UserDetailsService）</p>
+
+    <p>处理用户校验逻辑（UserDetails）</p>
+
+    <p>处理密码加密解密（PasswordEncoder）</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//自实现用户详情</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyUserDetailsService</span> <span class="kd">implements</span> <span class="nc">UserDetailsService</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">getClass</span><span class="o">());</span>
+    
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">PasswordEncoder</span> <span class="n">passwordEncoder</span><span class="o">;</span>
+    
+    <span class="c1">//处理用户信息获取</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">UserDetail</span> <span class="nf">loadUserByUsername</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UsernameNotFoundException</span> <span class="o">{</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"登录用户名"</span><span class="o">+</span><span class="n">username</span><span class="o">);</span>
+        <span class="c1">//根据表单提交的用户名去数据库中查找用户信息</span>
+        <span class="c1">//根据用户信息判断用户是否被冻结等</span>
+        <span class="c1">//passwordEncoder.encode完成注册功能，返回的字符串是经过加密的</span>
+        <span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="n">passwordEncoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="s">"123456"</span><span class="o">);</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"用户的加密密码是："</span><span class="o">+</span><span class="n">password</span><span class="o">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">User</span><span class="o">(</span><span class="n">username</span><span class="o">,</span><span class="n">password</span><span class="o">,</span>
+                       <span class="kc">true</span><span class="o">,</span><span class="kc">true</span><span class="o">,</span><span class="kc">true</span><span class="o">,</span><span class="kc">true</span><span class="o">,</span>
+                       <span class="nc">AuthorityUtils</span><span class="o">.</span><span class="na">commaSeparatedStringToAuthorityList</span><span class="o">(</span><span class="s">"admin"</span><span class="o">));</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//SecurityConfig配置类</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BrowserSecurityConfig</span> <span class="kd">extends</span> <span class="nc">WebSecurityConfigurerAdapter</span> <span class="o">{</span>
+    <span class="c1">//密码加解密和比对</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">PasswordEncoder</span> <span class="nf">passwordEncoder</span><span class="o">(){</span>
+        <span class="c1">//这是spring自己提供的密码工具类，可以自己写一个密码处理工具类</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">BCryptPasswordEncoder</span><span class="o">();</span>
+    <span class="o">}</span>
+    
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">HttpSecurity</span> <span class="n">http</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+        <span class="c1">//使用表单登录，拦截所有request请求需要认证</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">formLogin</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">and</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">authorizeRequests</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">anyRequest</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">authenticated</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="用户认证流程">用户认证流程</h4>
+
+<ul>
+  <li>
+    <p>自定义登录页面（http.formLogin().loginPage）</p>
+
+    <p>自定义登录成功或失败处理（AuthenticationSuccessHandler，AuthenticationFailureHandler）</p>
+  </li>
+  <li>
+    <p>处理不同类型的请求</p>
+  </li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">接到HTML请求或数据请求----跳转到一个自定义的Controller方法上----判断是否是HTML请求引发的跳转----（是）返回登录页面----（否）返回401状态码和错误信息</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//SecurityConfig配置类</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BrowserSecurityConfig</span> <span class="kd">extends</span> <span class="nc">WebSecurityConfigurerAdapter</span> <span class="o">{</span>
+    
+    <span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">SecurityProperties</span> <span class="n">securityProperties</span><span class="o">;</span>
+    
+    <span class="c1">//密码加解密和比对</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">PasswordEncoder</span> <span class="nf">passwordEncoder</span><span class="o">(){</span>
+        <span class="c1">//这是spring自己提供的密码工具类，可以自己写一个密码处理工具类</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">BCryptPasswordEncoder</span><span class="o">();</span>
+    <span class="o">}</span>
+    
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">HttpSecurity</span> <span class="n">http</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+        <span class="c1">//使用表单登录，拦截所有request请求需要认证</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">formLogin</span><span class="o">()</span>
+            <span class="c1">//.loginPage("signIn.html")//指定登录页面</span>
+            <span class="c1">//换为controller的URL</span>
+            <span class="o">.</span><span class="na">loginPage</span><span class="o">(</span><span class="s">"/authentication/require"</span><span class="o">)</span>
+            <span class="c1">//对过滤器声明登录页面的表单action路径</span>
+            <span class="o">.</span><span class="na">loginProcessingUrl</span><span class="o">(</span><span class="s">"/authentication/form"</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">and</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">authorizeRequests</span><span class="o">()</span>
+            <span class="c1">//登录页面请求不需要认证，放行</span>
+            <span class="o">.</span><span class="na">antMatchers</span><span class="o">(</span><span class="s">"/authentication/require"</span><span class="o">,</span>
+                        <span class="n">securityProperties</span><span class="o">.</span><span class="na">getBrowser</span><span class="o">().</span><span class="na">getLoginPage</span><span class="o">()).</span><span class="na">permitAll</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">anyRequest</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">authenticated</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">and</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">csrf</span><span class="o">().</span><span class="na">disable</span><span class="o">();</span><span class="c1">//security自动开启身份防伪造安全功能，这里先关闭</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//自定义身份认证控制器</span>
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BrowserSecurityController</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">getClass</span><span class="o">());</span>
+	<span class="c1">//拿到引发跳转的请求</span>
+	<span class="kd">private</span> <span class="nc">RequestCache</span> <span class="n">requestCache</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HttpSessionRequestCache</span><span class="o">();</span>
+	<span class="c1">//页面跳转工具</span>
+	<span class="kd">private</span> <span class="nc">RedirectStrategy</span> <span class="n">redirectStrategy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DefaultRedirectStrategy</span><span class="o">();</span>
+	<span class="c1">//注入core模块中的配置文件封装类</span>
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">SecurityProperties</span> <span class="n">securityProperties</span><span class="o">;</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">ProviderSignInUtils</span> <span class="n">providerSignInUtils</span><span class="o">;</span>
+
+	<span class="cm">/**
+	 * 当需要身份认证时，跳转到这里
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws IOException
+	 */</span>
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/authentication/require"</span><span class="o">)</span>
+	<span class="nd">@ResponseStatus</span><span class="o">(</span><span class="n">code</span> <span class="o">=</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">UNAUTHORIZED</span><span class="o">)</span><span class="c1">//返回401状态码</span>
+	<span class="kd">public</span> <span class="nc">SimpleResponse</span> <span class="nf">requireAuthentication</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="c1">//获取到引发跳转的请求</span>
+        <span class="c1">//比如启动项目访问/user,但是这时还没有登录或认证，security就会去执行身份认证逻辑</span>
+		<span class="nc">SavedRequest</span> <span class="n">savedRequest</span> <span class="o">=</span> <span class="n">requestCache</span><span class="o">.</span><span class="na">getRequest</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+
+		<span class="k">if</span> <span class="o">(</span><span class="n">savedRequest</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">//获取到引发跳转的URL，比如：localhost:8080/user</span>
+			<span class="nc">String</span> <span class="n">targetUrl</span> <span class="o">=</span> <span class="n">savedRequest</span><span class="o">.</span><span class="na">getRedirectUrl</span><span class="o">();</span>
+			<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"引发跳转的请求是:"</span> <span class="o">+</span> <span class="n">targetUrl</span><span class="o">);</span>
+            <span class="c1">//如果请求是一个页面请求，就跳转到指定页面</span>
+			<span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">endsWithIgnoreCase</span><span class="o">(</span><span class="n">targetUrl</span><span class="o">,</span> <span class="s">".html"</span><span class="o">))</span> <span class="o">{</span>
+                <span class="c1">//因为security是一个公共的模块，所以不可能每次都跳转到一个写死的页面</span>
+                <span class="c1">//这里的跳转页面应该是调用该模块的用户自己的登录页面</span>
+                <span class="c1">//参见core模块</span>
+				<span class="n">redirectStrategy</span><span class="o">.</span><span class="na">sendRedirect</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">,</span> <span class="n">securityProperties</span><span class="o">.</span><span class="na">getBrowser</span><span class="o">().</span><span class="na">getLoginPage</span><span class="o">());</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="c1">//返回一个包裹错误信息的对象</span>
+		<span class="k">return</span> <span class="k">new</span> <span class="nf">SimpleResponse</span><span class="o">(</span><span class="s">"访问的服务需要身份认证，请引导用户到登录页"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//一个包裹错误信息的对象</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleResponse</span> <span class="o">{</span>
+	
+	<span class="kd">public</span> <span class="nf">SimpleResponse</span><span class="o">(</span><span class="nc">Object</span> <span class="n">content</span><span class="o">){</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="kd">private</span> <span class="nc">Object</span> <span class="n">content</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nc">Object</span> <span class="nf">getContent</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">content</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setContent</span><span class="o">(</span><span class="nc">Object</span> <span class="n">content</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="登录成功处理">登录成功处理</h4>
+
+<ul>
+  <li>
+    <p>根据用户配置来决定是跳转页面还是返回json</p>
+  </li>
+  <li>
+    <p>参见core模块：LoginResponseType，BrowserProperties</p>
+
+    <p>样例模块：application.properties</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 登录成功处理器
+ *
+ */</span>
+<span class="nd">@Component</span><span class="o">(</span><span class="s">"imoocAuthenticationSuccessHandler"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImoocAuthenticationSuccessHandler</span> <span class="kd">extends</span> <span class="nc">SavedRequestAwareAuthenticationSuccessHandler</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">getClass</span><span class="o">());</span>
+	<span class="c1">//spring自带的</span>
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">ObjectMapper</span> <span class="n">objectMapper</span><span class="o">;</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">SecurityProperties</span> <span class="n">securityProperties</span><span class="o">;</span>
+
+	<span class="cm">/*登录成功后会被调用
+	 * (non-Javadoc)
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAuthenticationSuccess</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>
+			<span class="nc">Authentication</span> <span class="n">authentication</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">,</span> <span class="nc">ServletException</span> <span class="o">{</span>
+
+		<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"登录成功"</span><span class="o">);</span>
+        <span class="c1">//根据用户自己的application.properties配置的登录方式决定跳转页面或发送json</span>
+		<span class="k">if</span> <span class="o">(</span><span class="nc">LoginResponseType</span><span class="o">.</span><span class="na">JSON</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">securityProperties</span><span class="o">.</span><span class="na">getBrowser</span><span class="o">().</span><span class="na">getLoginType</span><span class="o">()))</span> <span class="o">{</span>
+            <span class="c1">//响应形式为json</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"application/json;charset=UTF-8"</span><span class="o">);</span>
+            <span class="c1">//把authentication信息以json形式返回</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">().</span><span class="na">write</span><span class="o">(</span><span class="n">objectMapper</span><span class="o">.</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="n">authentication</span><span class="o">));</span>
+		<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="c1">//跳转页面</span>
+			<span class="kd">super</span><span class="o">.</span><span class="na">onAuthenticationSuccess</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">,</span> <span class="n">authentication</span><span class="o">);</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>让spring使用我们自己写的登录成功处理器，修改BrowserSecurityConfig</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//SecurityConfig配置类</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BrowserSecurityConfig</span> <span class="kd">extends</span> <span class="nc">WebSecurityConfigurerAdapter</span> <span class="o">{</span>
+    
+    <span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">SecurityProperties</span> <span class="n">securityProperties</span><span class="o">;</span>
+    <span class="c1">//把自己的登录成功处理器注入进来</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">AuthenticationSuccessHandler</span> <span class="n">imoocAuthenticationSuccessHandler</span><span class="o">;</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">AuthenticationFailureHandler</span> <span class="n">imoocAuthenctiationFailureHandler</span><span class="o">;</span>
+    
+    <span class="c1">//密码加解密和比对</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">PasswordEncoder</span> <span class="nf">passwordEncoder</span><span class="o">(){</span>
+        <span class="c1">//这是spring自己提供的密码工具类，可以自己写一个密码处理工具类</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">BCryptPasswordEncoder</span><span class="o">();</span>
+    <span class="o">}</span>
+    
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">HttpSecurity</span> <span class="n">http</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+        <span class="c1">//使用表单登录，拦截所有request请求需要认证</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">formLogin</span><span class="o">()</span>
+            <span class="c1">//.loginPage("signIn.html")//指定登录页面</span>
+            <span class="c1">//换为controller的URL</span>
+            <span class="o">.</span><span class="na">loginPage</span><span class="o">(</span><span class="s">"/authentication/require"</span><span class="o">)</span>
+            <span class="c1">//对过滤器声明登录页面的表单action路径</span>
+            <span class="o">.</span><span class="na">loginProcessingUrl</span><span class="o">(</span><span class="s">"/authentication/form"</span><span class="o">)</span>
+            <span class="c1">//指定自定义的登录成功和登录失败处理器</span>
+            <span class="o">.</span><span class="na">successHandler</span><span class="o">(</span><span class="n">imoocAuthenticationSuccessHandler</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">failureHandler</span><span class="o">(</span><span class="n">imoocAuthenctiationFailureHandler</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">and</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">authorizeRequests</span><span class="o">()</span>
+            <span class="c1">//登录页面请求不需要认证，放行</span>
+            <span class="o">.</span><span class="na">antMatchers</span><span class="o">(</span><span class="s">"/authentication/require"</span><span class="o">,</span>
+                        <span class="n">securityProperties</span><span class="o">.</span><span class="na">getBrowser</span><span class="o">().</span><span class="na">getLoginPage</span><span class="o">()).</span><span class="na">permitAll</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">anyRequest</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">authenticated</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">and</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">csrf</span><span class="o">().</span><span class="na">disable</span><span class="o">();</span><span class="c1">//security自动开启身份防伪造安全功能，这里先关闭</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="登录失败处理">登录失败处理</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//登录失败处理器</span>
+<span class="nd">@Component</span><span class="o">(</span><span class="s">"imoocAuthenctiationFailureHandler"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImoocAuthenctiationFailureHandler</span> <span class="kd">extends</span> <span class="nc">SimpleUrlAuthenticationFailureHandler</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">getClass</span><span class="o">());</span>
+	
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">ObjectMapper</span> <span class="n">objectMapper</span><span class="o">;</span>
+	
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">SecurityProperties</span> <span class="n">securityProperties</span><span class="o">;</span>
+
+	
+	<span class="cm">/* (non-Javadoc)
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAuthenticationFailure</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>
+			<span class="nc">AuthenticationException</span> <span class="n">exception</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">,</span> <span class="nc">ServletException</span> <span class="o">{</span>
+		
+		<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"登录失败"</span><span class="o">);</span>
+        <span class="c1">//根据用户自己的application.properties配置的登录方式决定跳转页面或发送json</span>
+        <span class="k">if</span> <span class="o">(</span><span class="nc">LoginResponseType</span><span class="o">.</span><span class="na">JSON</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">securityProperties</span><span class="o">.</span><span class="na">getBrowser</span><span class="o">().</span><span class="na">getLoginType</span><span class="o">()))</span> <span class="o">{</span>
+			<span class="c1">//设置500错误码</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">setStatus</span><span class="o">(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="o">.</span><span class="na">value</span><span class="o">());</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"application/json;charset=UTF-8"</span><span class="o">);</span>
+        	<span class="c1">//返回异常信息</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">().</span><span class="na">write</span><span class="o">(</span><span class="n">objectMapper</span><span class="o">.</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="k">new</span> <span class="nc">SimpleResponse</span><span class="o">(</span><span class="n">exception</span><span class="o">.</span><span class="na">getMessage</span><span class="o">())));</span>
+        <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+			<span class="kd">super</span><span class="o">.</span><span class="na">onAuthenticationFailure</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">,</span> <span class="n">exception</span><span class="o">);</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>修改BrowserSecurityConfig使处理器生效</li>
+</ul>
+
+<h3 id="app相关模块jar">app相关模块(jar)</h3>
+
+<h4 id="pom-3">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>imooc-security-app<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>imooc-security<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;relativePath&gt;</span>../imooc-security<span class="nt">&lt;/relativePath&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+	
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>imooc-security-core<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>${imooc.security.version}<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<h3 id="样例模块">样例模块</h3>
+
+<h4 id="pom-4">pom</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>imooc-security-demo<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>imooc-security<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>1.0.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;relativePath&gt;</span>../imooc-security<span class="nt">&lt;/relativePath&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.imooc.security<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>imooc-security-browser<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>${imooc.security.version}<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-aop<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>commons-io<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>commons-io<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>io.springfox<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>springfox-swagger2<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>2.7.0<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>io.springfox<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>springfox-swagger-ui<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;version&gt;</span>2.7.0<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>com.github.tomakehurst<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>wiremock<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+
+	<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>1.3.3.RELEASE<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;executions&gt;</span>
+					<span class="nt">&lt;execution&gt;</span>
+						<span class="nt">&lt;goals&gt;</span>
+							<span class="nt">&lt;goal&gt;</span>repackage<span class="nt">&lt;/goal&gt;</span>
+						<span class="nt">&lt;/goals&gt;</span>
+					<span class="nt">&lt;/execution&gt;</span>
+				<span class="nt">&lt;/executions&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+		<span class="nt">&lt;finalName&gt;</span>demo<span class="nt">&lt;/finalName&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<h4 id="applicationproperties">application.properties</h4>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#springboot配置
+</span><span class="py">spring.datasource.driver-class-name</span> <span class="p">=</span> <span class="s">com.mysql.jdbc.Driver</span>
+<span class="py">spring.datasource.url</span><span class="p">=</span> <span class="s">jdbc:mysql://127.0.0.1:3306/imooc-demo?useUnicode=yes&amp;characterEncoding=UTF-8&amp;useSSL=false</span>
+
+<span class="py">spring.datasource.username</span> <span class="p">=</span> <span class="s">root</span>
+<span class="py">spring.datasource.password</span> <span class="p">=</span> <span class="s">123456</span>
+
+<span class="py">spring.session.store-type</span> <span class="p">=</span> <span class="s">none</span>
+<span class="py">server.session.timeout</span> <span class="p">=</span> <span class="s">600</span>
+
+<span class="c">#启用security.basic.enabled = false
+</span>
+<span class="py">server.port</span> <span class="p">=</span> <span class="s">8060</span>
+
+<span class="c">#指定security身份认证时跳转到了登录页面
+</span><span class="py">imooc.security.browser.signUpUrl</span> <span class="p">=</span> <span class="s">/demo-signUp.html</span>
+<span class="c">#指定登录时返回类型是跳转页面还是json
+</span><span class="py">imooc.security.browser.loginType</span> <span class="p">=</span> <span class="s">REDIRECT</span>
+</code></pre></div></div>
+
+<h4 id="restful">RestFul</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/restful.png" alt="" /></p>
+
+<h4 id="常用注解">常用注解</h4>
+
+<ul>
+  <li>
+    <p>@RestController：标明此Controller提供RestAPI</p>
+
+    <p>@RequestMapping：映射HTTP请求URL到java方法</p>
+
+    <p>@RequestParam：映射请求参数到java方法的参数</p>
+
+    <p>@PageableDefault：指定分页参数默认值</p>
+
+    <p>@PathVariable：映射URL片段到java方法的参数</p>
+
+    <p>@JsonView：控制json输出内容</p>
+
+    <p>@RequestBody：映射请求体到java方法的参数</p>
+
+    <p>@Valid+BindingResult：验证请求参数的合法性并处理校验结果</p>
+  </li>
+</ul>
+
+<h4 id="测试用例">测试用例</h4>
+
+<h5 id="get请求">GET请求</h5>
+
+<ul>
+  <li>设计测试用例测试查询</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">request</span><span class="o">.</span><span class="na">MockMvcRequestBuilders</span><span class="o">.</span><span class="na">delete</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">request</span><span class="o">.</span><span class="na">MockMvcRequestBuilders</span><span class="o">.</span><span class="na">fileUpload</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">request</span><span class="o">.</span><span class="na">MockMvcRequestBuilders</span><span class="o">.</span><span class="na">get</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">request</span><span class="o">.</span><span class="na">MockMvcRequestBuilders</span><span class="o">.</span><span class="na">post</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">request</span><span class="o">.</span><span class="na">MockMvcRequestBuilders</span><span class="o">.</span><span class="na">put</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">result</span><span class="o">.</span><span class="na">MockMvcResultMatchers</span><span class="o">.</span><span class="na">jsonPath</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">result</span><span class="o">.</span><span class="na">MockMvcResultMatchers</span><span class="o">.</span><span class="na">status</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserControllerTest</span> <span class="o">{</span>
+	
+    <span class="c1">//web应用上下文</span>
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">WebApplicationContext</span> <span class="n">wac</span><span class="o">;</span>
+	<span class="c1">//模拟MVC环境</span>
+	<span class="kd">private</span> <span class="nc">MockMvc</span> <span class="n">mockMvc</span><span class="o">;</span>
+
+	<span class="nd">@Before</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">//在执行测试方法之前实例化MVC环境</span>
+		<span class="n">mockMvc</span> <span class="o">=</span> <span class="nc">MockMvcBuilders</span><span class="o">.</span><span class="na">webAppContextSetup</span><span class="o">(</span><span class="n">wac</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">whenQuerySuccess</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="c1">//模拟发送RestFul格式请求</span>
+        <span class="c1">//get("/user"):请求URL</span>
+        <span class="c1">//param("username", "jojo")：请求参数</span>
+        <span class="c1">//contentType：类型</span>
+        <span class="c1">//andExpect:期望得到的响应状态</span>
+        <span class="c1">//jsonPath：响应参数的长度为3</span>
+		<span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">mockMvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span>
+				<span class="n">get</span><span class="o">(</span><span class="s">"/user"</span><span class="o">).</span><span class="na">param</span><span class="o">(</span><span class="s">"username"</span><span class="o">,</span> <span class="s">"jojo"</span><span class="o">).</span><span class="na">param</span><span class="o">(</span><span class="s">"age"</span><span class="o">,</span> <span class="s">"18"</span><span class="o">).</span><span class="na">param</span><span class="o">(</span><span class="s">"ageTo"</span><span class="o">,</span> <span class="s">"60"</span><span class="o">).</span><span class="na">param</span><span class="o">(</span><span class="s">"xxx"</span><span class="o">,</span> <span class="s">"yyy"</span><span class="o">)</span>
+						<span class="c1">// .param("size", "15")</span>
+						<span class="c1">// .param("page", "3")</span>
+						<span class="c1">// .param("sort", "age,desc")</span>
+						<span class="o">.</span><span class="na">contentType</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">()).</span><span class="na">andExpect</span><span class="o">(</span><span class="n">jsonPath</span><span class="o">(</span><span class="s">"$.length()"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="mi">3</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">andReturn</span><span class="o">().</span><span class="na">getResponse</span><span class="o">().</span><span class="na">getContentAsString</span><span class="o">();</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>根据id查询详细信息</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">whenGetInfoSuccess</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">mockMvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="n">get</span><span class="o">(</span><span class="s">"/user/1"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">contentType</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">())</span>
+				<span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">jsonPath</span><span class="o">(</span><span class="s">"$.username"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="s">"tom"</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">andReturn</span><span class="o">().</span><span class="na">getResponse</span><span class="o">().</span><span class="na">getContentAsString</span><span class="o">();</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//{id}:id可以是字符串，也可以是数字</span>
+<span class="c1">//@RequestMapping(value = "/user/{id}", method = RequestMethod.GET)</span>
+<span class="c1">//正则表达式,接收的参数必须为数字：</span>
+<span class="c1">//@PathVariable：把URL中｛id｝映射到参数的id上</span>
+<span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/user/{id:\\d+}"</span><span class="o">)</span>
+<span class="nd">@JsonView</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="na">UserDetailView</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">User</span> <span class="nf">getInfo</span><span class="o">(</span><span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">User</span><span class="o">();</span>
+    <span class="n">user</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="s">"tom"</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="post请求">POST请求</h5>
+
+<ul>
+  <li>添加用户</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@Test</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">whenCreateSuccess</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		
+		<span class="nc">Date</span> <span class="n">date</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">date</span><span class="o">.</span><span class="na">getTime</span><span class="o">());</span>
+        <span class="c1">//模拟前台发送的json数据，时间类型用时间戳传递，由前台决定保留哪些部分</span>
+		<span class="nc">String</span> <span class="n">content</span> <span class="o">=</span> <span class="s">"{\"username\":\"tom\",\"password\":null,\"birthday\":"</span><span class="o">+</span><span class="n">date</span><span class="o">.</span><span class="na">getTime</span><span class="o">()+</span><span class="s">"}"</span><span class="o">;</span>
+		<span class="nc">String</span> <span class="n">reuslt</span> <span class="o">=</span> <span class="n">mockMvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="n">post</span><span class="o">(</span><span class="s">"/user"</span><span class="o">).</span><span class="na">contentType</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">content</span><span class="o">(</span><span class="n">content</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">())</span>
+				<span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">jsonPath</span><span class="o">(</span><span class="s">"$.id"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="s">"1"</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">andReturn</span><span class="o">().</span><span class="na">getResponse</span><span class="o">().</span><span class="na">getContentAsString</span><span class="o">();</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">reuslt</span><span class="o">);</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//@RequestBody:把前台传递的json串映射为一个对象</span>
+<span class="c1">//@Valid：使用user对象中的校验参数注解</span>
+<span class="c1">//BindingResult:当参数校验有异常时可以获取到异常信息</span>
+<span class="nd">@PostMapping</span>
+<span class="nd">@ApiOperation</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"创建用户"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">User</span> <span class="nf">create</span><span class="o">(</span><span class="nd">@Valid</span> <span class="nd">@RequestBody</span> <span class="nc">User</span> <span class="n">user</span><span class="o">,</span> <span class="nc">BindingResult</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//如果有异常，打印所有异常</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">errors</span><span class="o">.</span><span class="na">hasErrors</span><span class="o">())</span> <span class="o">{</span>
+        <span class="n">errors</span><span class="o">.</span><span class="na">getAllErrors</span><span class="o">().</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="n">error</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">error</span><span class="o">.</span><span class="na">getDefaultMessage</span><span class="o">()));</span>
+    <span class="o">}</span>
+
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getUsername</span><span class="o">());</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getPassword</span><span class="o">());</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">());</span>
+
+    <span class="n">user</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="s">"1"</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+    
+    <span class="nd">@NotBlank</span><span class="o">(</span><span class="n">message</span> <span class="o">=</span> <span class="s">"密码不能为空"</span><span class="o">)</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">password</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="put请求">PUT请求</h5>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">whenUpdateSuccess</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+	<span class="c1">//用java8获取一年后的时间</span>
+    <span class="nc">Date</span> <span class="n">date</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">(</span><span class="nc">LocalDateTime</span><span class="o">.</span><span class="na">now</span><span class="o">().</span><span class="na">plusYears</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="na">atZone</span><span class="o">(</span><span class="nc">ZoneId</span><span class="o">.</span><span class="na">systemDefault</span><span class="o">()).</span><span class="na">toInstant</span><span class="o">().</span><span class="na">toEpochMilli</span><span class="o">());</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">date</span><span class="o">.</span><span class="na">getTime</span><span class="o">());</span>
+    <span class="nc">String</span> <span class="n">content</span> <span class="o">=</span> <span class="s">"{\"id\":\"1\", \"username\":\"tom\",\"password\":null,\"birthday\":"</span><span class="o">+</span><span class="n">date</span><span class="o">.</span><span class="na">getTime</span><span class="o">()+</span><span class="s">"}"</span><span class="o">;</span>
+    <span class="nc">String</span> <span class="n">reuslt</span> <span class="o">=</span> <span class="n">mockMvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="n">put</span><span class="o">(</span><span class="s">"/user/1"</span><span class="o">).</span><span class="na">contentType</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8</span><span class="o">)</span>
+                                    <span class="o">.</span><span class="na">content</span><span class="o">(</span><span class="n">content</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">())</span>
+        <span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">jsonPath</span><span class="o">(</span><span class="s">"$.id"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="s">"1"</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">andReturn</span><span class="o">().</span><span class="na">getResponse</span><span class="o">().</span><span class="na">getContentAsString</span><span class="o">();</span>
+
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">reuslt</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@PutMapping</span><span class="o">(</span><span class="s">"/{id:\\d+}"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">User</span> <span class="nf">update</span><span class="o">(</span><span class="nd">@Valid</span> <span class="nd">@RequestBody</span> <span class="nc">User</span> <span class="n">user</span><span class="o">,</span> <span class="nc">BindingResult</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//如果有异常，打印所有异常</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">errors</span><span class="o">.</span><span class="na">hasErrors</span><span class="o">())</span> <span class="o">{</span>
+        <span class="n">errors</span><span class="o">.</span><span class="na">getAllErrors</span><span class="o">().</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="n">error</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">error</span><span class="o">.</span><span class="na">getDefaultMessage</span><span class="o">()));</span>
+    <span class="o">}</span>
+
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getUsername</span><span class="o">());</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getPassword</span><span class="o">());</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">());</span>
+
+    <span class="n">user</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="s">"1"</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="delete请求">DELETE请求</h5>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">whenDeleteSuccess</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+    <span class="n">mockMvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="n">delete</span><span class="o">(</span><span class="s">"/user/1"</span><span class="o">)</span>
+                    <span class="o">.</span><span class="na">contentType</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@DeleteMapping</span><span class="o">(</span><span class="s">"/{id:\\d+}"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">delete</span><span class="o">(</span><span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="upload请求">upload请求</h5>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">whenUploadSuccess</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+    <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">mockMvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="n">fileUpload</span><span class="o">(</span><span class="s">"/file"</span><span class="o">)</span>
+                                    <span class="o">.</span><span class="na">file</span><span class="o">(</span><span class="k">new</span> <span class="nc">MockMultipartFile</span><span class="o">(</span><span class="s">"file"</span><span class="o">,</span> <span class="s">"test.txt"</span><span class="o">,</span> <span class="s">"multipart/form-data"</span><span class="o">,</span> <span class="s">"hello upload"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">))))</span>
+        <span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">())</span>
+        <span class="o">.</span><span class="na">andReturn</span><span class="o">().</span><span class="na">getResponse</span><span class="o">().</span><span class="na">getContentAsString</span><span class="o">();</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/file"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FileController</span> <span class="o">{</span>
+	<span class="c1">//文件上传路径</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">folder</span> <span class="o">=</span> <span class="s">"/Users/zhailiang/Documents/my/muke/inaction/java/workspace/github/imooc-security-demo/src/main/java/com/imooc/web/controller"</span><span class="o">;</span>
+	
+    <span class="cm">/**
+    * 文件上传
+    */</span>
+	<span class="nd">@PostMapping</span>
+	<span class="kd">public</span> <span class="nc">FileInfo</span> <span class="nf">upload</span><span class="o">(</span><span class="nc">MultipartFile</span> <span class="n">file</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">file</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">file</span><span class="o">.</span><span class="na">getOriginalFilename</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">file</span><span class="o">.</span><span class="na">getSize</span><span class="o">());</span>
+		<span class="c1">//根据路径和时间戳创建一个文件</span>
+		<span class="nc">File</span> <span class="n">localFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">folder</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">()</span> <span class="o">+</span> <span class="s">".txt"</span><span class="o">);</span>
+		<span class="c1">//把内容写到文件里</span>
+		<span class="n">file</span><span class="o">.</span><span class="na">transferTo</span><span class="o">(</span><span class="n">localFile</span><span class="o">);</span>
+		<span class="c1">//返回上传成功后文件的保存路径</span>
+		<span class="k">return</span> <span class="n">localFile</span><span class="o">.</span><span class="na">getAbsolutePath</span><span class="o">();</span>
+	<span class="o">}</span>
+	<span class="cm">/**
+	* 文件下载
+	*/</span>
+	<span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/{id}"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">download</span><span class="o">(</span><span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">id</span><span class="o">,</span> <span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+
+		<span class="k">try</span> <span class="o">(</span><span class="nc">InputStream</span> <span class="n">inputStream</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">folder</span><span class="o">,</span> <span class="n">id</span> <span class="o">+</span> <span class="s">".txt"</span><span class="o">));</span>
+				<span class="nc">OutputStream</span> <span class="n">outputStream</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">();)</span> <span class="o">{</span>
+			
+			<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"application/x-download"</span><span class="o">);</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">addHeader</span><span class="o">(</span><span class="s">"Content-Disposition"</span><span class="o">,</span> <span class="s">"attachment;filename=test.txt"</span><span class="o">);</span>
+			
+			<span class="nc">IOUtils</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span><span class="n">inputStream</span><span class="o">,</span> <span class="n">outputStream</span><span class="o">);</span>
+			<span class="n">outputStream</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+		<span class="o">}</span> 
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="jsonview">JsonView</h4>
+
+<ul>
+  <li>使用这个注解的场景：当查询多个用户时不希望给前台显示密码，而在查询用户详情时需要展示密码</li>
+  <li>使用步骤：</li>
+  <li>使用接口来声明多个视图</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+	
+	<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">UserSimpleView</span> <span class="o">{};</span>
+	<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">UserDetailView</span> <span class="kd">extends</span> <span class="nc">UserSimpleView</span> <span class="o">{};</span>
+    
+    <span class="nd">@JsonView</span><span class="o">(</span><span class="nc">UserSimpleView</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getUsername</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">username</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUsername</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">username</span> <span class="o">=</span> <span class="n">username</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@JsonView</span><span class="o">(</span><span class="nc">UserDetailView</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getPassword</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">password</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPassword</span><span class="o">(</span><span class="nc">String</span> <span class="n">password</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">password</span> <span class="o">=</span> <span class="n">password</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>在值对象的get方法上指定视图</li>
+  <li>在Controller方法上指定视图</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//{id}:id可以是字符串，也可以是数字</span>
+<span class="c1">//@RequestMapping(value = "/user/{id}", method = RequestMethod.GET)</span>
+<span class="c1">//正则表达式,接收的参数必须为数字：</span>
+<span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/user/{id:\\d+}"</span><span class="o">)</span>
+<span class="nd">@JsonView</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="na">UserDetailView</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">User</span> <span class="nf">getInfo</span><span class="o">(</span><span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">User</span><span class="o">();</span>
+    <span class="n">user</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="s">"tom"</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="自定义校验注解">自定义校验注解</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.lang.annotation.ElementType</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Retention</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.RetentionPolicy</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Target</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.validation.Constraint</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.validation.Payload</span><span class="o">;</span>
+
+<span class="cm">/**
+ * @author zhailiang
+ *
+ */</span>
+<span class="nd">@Target</span><span class="o">({</span><span class="nc">ElementType</span><span class="o">.</span><span class="na">METHOD</span><span class="o">,</span> <span class="nc">ElementType</span><span class="o">.</span><span class="na">FIELD</span><span class="o">})</span>
+<span class="nd">@Retention</span><span class="o">(</span><span class="nc">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+<span class="nd">@Constraint</span><span class="o">(</span><span class="n">validatedBy</span> <span class="o">=</span> <span class="nc">MyConstraintValidator</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="nc">MyConstraint</span> <span class="o">{</span>
+	
+	<span class="nc">String</span> <span class="nf">message</span><span class="o">();</span>
+
+	<span class="nc">Class</span><span class="o">&lt;?&gt;[]</span> <span class="n">groups</span><span class="o">()</span> <span class="k">default</span> <span class="o">{</span> <span class="o">};</span>
+
+	<span class="nc">Class</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="nc">Payload</span><span class="o">&gt;[]</span> <span class="nf">payload</span><span class="o">()</span> <span class="k">default</span> <span class="o">{</span> <span class="o">};</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">javax.validation.ConstraintValidator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.validation.ConstraintValidatorContext</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.imooc.service.HelloService</span><span class="o">;</span>
+
+<span class="cm">/**
+ * @author zhailiang
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyConstraintValidator</span> <span class="kd">implements</span> <span class="nc">ConstraintValidator</span><span class="o">&lt;</span><span class="nc">MyConstraint</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="o">{</span>
+
+	<span class="c1">//@Autowired</span>
+	<span class="c1">//private HelloService helloService;</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">initialize</span><span class="o">(</span><span class="nc">MyConstraint</span> <span class="n">constraintAnnotation</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//初始化</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"my validator init"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isValid</span><span class="o">(</span><span class="nc">Object</span> <span class="n">value</span><span class="o">,</span> <span class="nc">ConstraintValidatorContext</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//helloService.greeting("tom");</span>
+		<span class="c1">//System.out.println(value);</span>
+        <span class="c1">//执行校验逻辑，返回true为校验通过</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@MyConstraint</span><span class="o">(</span><span class="n">message</span> <span class="o">=</span> <span class="s">"这是一个测试"</span><span class="o">)</span>
+<span class="kd">private</span> <span class="nc">String</span> <span class="n">username</span><span class="o">;</span>
+</code></pre></div></div>
+
+<h4 id="控制器异常处理器">控制器异常处理器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserNotExistException</span> <span class="kd">extends</span> <span class="nc">RuntimeException</span> <span class="o">{</span>
+
+	<span class="cm">/**
+	 * 
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="o">-</span><span class="mi">6112780192479692859L</span><span class="o">;</span>
+	
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+	
+	<span class="kd">public</span> <span class="nf">UserNotExistException</span><span class="o">(</span><span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">(</span><span class="s">"user not exist"</span><span class="o">);</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setId</span><span class="o">(</span><span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mport</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">http</span><span class="o">.</span><span class="na">HttpStatus</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.ControllerAdvice</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.ExceptionHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.ResponseBody</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.ResponseStatus</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.imooc.exception.UserNotExistException</span><span class="o">;</span>
+
+<span class="cm">/**
+ * @author zhailiang
+ *
+ */</span>
+<span class="c1">//在springboot的controller层主动抛出自定义异常时会进入这个类寻找处理方法</span>
+<span class="nd">@ControllerAdvice</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ControllerExceptionHandler</span> <span class="o">{</span>
+	<span class="c1">//指定自定义异常类</span>
+	<span class="nd">@ExceptionHandler</span><span class="o">(</span><span class="nc">UserNotExistException</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="c1">//json形式返回</span>
+	<span class="nd">@ResponseBody</span>
+    <span class="c1">//服务器内部错误</span>
+	<span class="nd">@ResponseStatus</span><span class="o">(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="nf">handleUserNotExistException</span><span class="o">(</span><span class="nc">UserNotExistException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+		<span class="n">result</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"id"</span><span class="o">,</span> <span class="n">ex</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+		<span class="n">result</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"message"</span><span class="o">,</span> <span class="n">ex</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+		<span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/{id:\\d+}"</span><span class="o">)</span>
+<span class="nd">@JsonView</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="na">UserDetailView</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">User</span> <span class="nf">getInfo</span><span class="o">(</span><span class="nd">@ApiParam</span><span class="o">(</span><span class="s">"用户id"</span><span class="o">)</span> <span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">"user not exist"</span><span class="o">);</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"进入getInfo服务"</span><span class="o">);</span>
+    <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">User</span><span class="o">();</span>
+    <span class="n">user</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="s">"tom"</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="restful拦截">RESTful拦截</h4>
+
+<h5 id="过滤器">过滤器</h5>
+
+<ul>
+  <li>使用springboot配置类来指定过滤器来拦截哪些URL,缺点是只能拿到request和response</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 
+ */</span>
+<span class="kn">package</span> <span class="nn">com.imooc.web.filter</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.Filter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.FilterChain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.FilterConfig</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletResponse</span><span class="o">;</span>
+
+<span class="cm">/**
+ * @author zhailiang
+ *
+ */</span>
+<span class="c1">//@Component不把过滤器声明为组件，用配置类去加载过滤器</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TimeFilter</span> <span class="kd">implements</span> <span class="nc">Filter</span> <span class="o">{</span>
+
+	<span class="cm">/* (non-Javadoc)
+	 * @see javax.servlet.Filter#destroy()
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time filter destroy"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="cm">/* (non-Javadoc)
+	 * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">doFilter</span><span class="o">(</span><span class="nc">ServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">ServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">FilterChain</span> <span class="n">chain</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">IOException</span><span class="o">,</span> <span class="nc">ServletException</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time filter start"</span><span class="o">);</span>
+		<span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">();</span>
+		<span class="n">chain</span><span class="o">.</span><span class="na">doFilter</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time filter 耗时:"</span><span class="o">+</span> <span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time filter finish"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="cm">/* (non-Javadoc)
+	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="nc">FilterConfig</span> <span class="n">arg0</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">ServletException</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time filter init"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebConfig</span><span class="o">{</span>
+
+	<span class="nd">@Bean</span>
+	<span class="kd">public</span> <span class="nc">FilterRegistrationBean</span> <span class="nf">timeFilter</span><span class="o">()</span> <span class="o">{</span>
+		
+		<span class="nc">FilterRegistrationBean</span> <span class="n">registrationBean</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FilterRegistrationBean</span><span class="o">();</span>
+		
+		<span class="nc">TimeFilter</span> <span class="n">timeFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TimeFilter</span><span class="o">();</span>
+		<span class="n">registrationBean</span><span class="o">.</span><span class="na">setFilter</span><span class="o">(</span><span class="n">timeFilter</span><span class="o">);</span>
+		
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">urls</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+		<span class="n">urls</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"/*"</span><span class="o">);</span>
+		<span class="n">registrationBean</span><span class="o">.</span><span class="na">setUrlPatterns</span><span class="o">(</span><span class="n">urls</span><span class="o">);</span>
+		
+		<span class="k">return</span> <span class="n">registrationBean</span><span class="o">;</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h5 id="拦截器">拦截器</h5>
+
+<ul>
+  <li>缺点是不能获取到拦截方法的参数列表</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TimeInterceptor</span> <span class="kd">implements</span> <span class="nc">HandlerInterceptor</span> <span class="o">{</span>
+
+	<span class="cm">/* (non-Javadoc)
+	 * @see 方法执行前调用
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">preHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"preHandle"</span><span class="o">);</span>
+		<span class="c1">//打印类名和方法名</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(((</span><span class="nc">HandlerMethod</span><span class="o">)</span><span class="n">handler</span><span class="o">).</span><span class="na">getBean</span><span class="o">().</span><span class="na">getClass</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(((</span><span class="nc">HandlerMethod</span><span class="o">)</span><span class="n">handler</span><span class="o">).</span><span class="na">getMethod</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+		
+		<span class="n">request</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="s">"startTime"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">());</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="cm">/* (non-Javadoc)
+	 * 方法执行完成后调用，抛出异常时不调用
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">postHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span>
+			<span class="nc">ModelAndView</span> <span class="n">modelAndView</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"postHandle"</span><span class="o">);</span>
+		<span class="nc">Long</span> <span class="n">start</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Long</span><span class="o">)</span> <span class="n">request</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="s">"startTime"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time interceptor 耗时:"</span><span class="o">+</span> <span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">));</span>
+
+	<span class="o">}</span>
+
+	<span class="cm">/* (non-Javadoc)
+	 * @see 无论方法是否抛出错误都会执行
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterCompletion</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span> <span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"afterCompletion"</span><span class="o">);</span>
+		<span class="nc">Long</span> <span class="n">start</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Long</span><span class="o">)</span> <span class="n">request</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="s">"startTime"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time interceptor 耗时:"</span><span class="o">+</span> <span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">));</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"ex is "</span><span class="o">+</span><span class="n">ex</span><span class="o">);</span>
+
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebConfig</span> <span class="kd">extends</span> <span class="nc">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+	
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">TimeInterceptor</span> <span class="n">timeInterceptor</span><span class="o">;</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">addInterceptors</span><span class="o">(</span><span class="nc">InterceptorRegistry</span> <span class="n">registry</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="n">timeInterceptor</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="切面">切面</h5>
+
+<ul>
+  <li>可以获取到拦截方法的参数列表</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Aspect</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TimeAspect</span> <span class="o">{</span>
+	
+	<span class="nd">@Around</span><span class="o">(</span><span class="s">"execution(* com.imooc.web.controller.UserController.*(..))"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">Object</span> <span class="nf">handleControllerMethod</span><span class="o">(</span><span class="nc">ProceedingJoinPoint</span> <span class="n">pjp</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Throwable</span> <span class="o">{</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time aspect start"</span><span class="o">);</span>
+		<span class="c1">//获取参数列表</span>
+		<span class="nc">Object</span><span class="o">[]</span> <span class="n">args</span> <span class="o">=</span> <span class="n">pjp</span><span class="o">.</span><span class="na">getArgs</span><span class="o">();</span>
+		<span class="k">for</span> <span class="o">(</span><span class="nc">Object</span> <span class="n">arg</span> <span class="o">:</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"arg is "</span><span class="o">+</span><span class="n">arg</span><span class="o">);</span>
+		<span class="o">}</span>
+		
+		<span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">();</span>
+		<span class="c1">//controller中拦截方法的返回值类型</span>
+		<span class="nc">Object</span> <span class="n">object</span> <span class="o">=</span> <span class="n">pjp</span><span class="o">.</span><span class="na">proceed</span><span class="o">();</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time aspect 耗时:"</span><span class="o">+</span> <span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">().</span><span class="na">getTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span><span class="o">));</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"time aspect end"</span><span class="o">);</span>
+		
+		<span class="k">return</span> <span class="n">object</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="拦截顺序">拦截顺序</h5>
+
+<ul>
+  <li>方法进去：filter—&gt;Interceptor—&gt;ControllerAdvice—&gt;Aspect—&gt;Controller</li>
+  <li>方法退出：Controller—&gt;Aspect—&gt;ControllerAdvice—&gt;Interceptor—&gt;filter</li>
+</ul>
+
+<h4 id="处理异步请求">处理异步请求</h4>
+
+<ul>
+  <li>
+    <p>通常我们的程序只有一个主线程，当并发量增大后性能就会下降</p>
+  </li>
+  <li>
+    <p>DeferredResult：处理异步请求，使用多线程提高REST服务性能</p>
+  </li>
+  <li>
+    <p>当一个请求到达API接口，如果该API接口的return返回值是DeferredResult，在没有超时或者DeferredResult对象设置setResult时，接口不会返回，但是Servlet容器线程会结束，DeferredResult另起线程来进行结果处理(即这种操作提升了<strong>服务短时间的吞吐能力</strong>)，并setResult，如此以来这个请求不会占用服务连接池太久，如果超时或设置setResult，接口会立即返回</p>
+  </li>
+  <li>
+    <p>使用DeferredResult的流程：</p>
+
+    <ol>
+      <li>
+        <ol>
+          <li>浏览器发起异步请求</li>
+          <li>请求到达服务端被挂起</li>
+          <li>向浏览器进行响应，分为两种情况：
+3.1 调用<code class="language-plaintext highlighter-rouge">DeferredResult.setResult()</code>，请求被唤醒，返回结果
+3.2 超时，返回一个你设定的结果</li>
+          <li>浏览得到响应，再次重复1，处理此次响应结果</li>
+        </ol>
+      </li>
+    </ol>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">org.springframework.web.context.request.async.DeferredResult</span><span class="o">;</span>
+
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AsyncController</span> <span class="o">{</span>
+	<span class="c1">//消息队列</span>
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">MockQueue</span> <span class="n">mockQueue</span><span class="o">;</span>
+	<span class="c1">//自定义异步请求处理器</span>
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">DeferredResultHolder</span> <span class="n">deferredResultHolder</span><span class="o">;</span>
+	
+	<span class="kd">private</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">getClass</span><span class="o">());</span>
+	
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/order"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">DeferredResult</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">order</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"主线程开始"</span><span class="o">);</span>
+		<span class="c1">//生成一个订单号</span>
+		<span class="nc">String</span> <span class="n">orderNumber</span> <span class="o">=</span> <span class="nc">RandomStringUtils</span><span class="o">.</span><span class="na">randomNumeric</span><span class="o">(</span><span class="mi">8</span><span class="o">);</span>
+        <span class="c1">//放入消息队列</span>
+		<span class="n">mockQueue</span><span class="o">.</span><span class="na">setPlaceOrder</span><span class="o">(</span><span class="n">orderNumber</span><span class="o">);</span>
+		<span class="c1">//创建一个异步请求处理结果</span>
+		<span class="nc">DeferredResult</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DeferredResult</span><span class="o">&lt;&gt;();</span>
+		<span class="n">deferredResultHolder</span><span class="o">.</span><span class="na">getMap</span><span class="o">().</span><span class="na">put</span><span class="o">(</span><span class="n">orderNumber</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+		
+		<span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 
+ */</span>
+<span class="kn">package</span> <span class="nn">com.imooc.web.async</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.slf4j.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.slf4j.LoggerFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
+
+<span class="cm">/**
+ * @author zhailiang
+ *模拟消息队列
+ */</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MockQueue</span> <span class="o">{</span>
+	<span class="c1">//下单消息</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">placeOrder</span><span class="o">;</span>
+	<span class="c1">//完成消息</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">completeOrder</span><span class="o">;</span>
+	
+	<span class="kd">private</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">getClass</span><span class="o">());</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getPlaceOrder</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">placeOrder</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPlaceOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">placeOrder</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+			<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"接到下单请求, "</span> <span class="o">+</span> <span class="n">placeOrder</span><span class="o">);</span>
+			<span class="k">try</span> <span class="o">{</span>
+                <span class="c1">//代表开始处理订单任务</span>
+				<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+			<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+				<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="o">}</span>
+            <span class="c1">//订单任务处理完成</span>
+			<span class="k">this</span><span class="o">.</span><span class="na">completeOrder</span> <span class="o">=</span> <span class="n">placeOrder</span><span class="o">;</span>
+			<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"下单请求处理完毕,"</span> <span class="o">+</span> <span class="n">placeOrder</span><span class="o">);</span>
+		<span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getCompleteOrder</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">completeOrder</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setCompleteOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">completeOrder</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">completeOrder</span> <span class="o">=</span> <span class="n">completeOrder</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 
+ */</span>
+<span class="kn">package</span> <span class="nn">com.imooc.web.async</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.context.request.async.DeferredResult</span><span class="o">;</span>
+
+<span class="cm">/**
+ * @author zhailiang
+ *两个线程之间传递消息
+ */</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DeferredResultHolder</span> <span class="o">{</span>
+	<span class="c1">//key：字符串</span>
+    <span class="c1">//value：异步消息结果</span>
+	<span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">DeferredResult</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">DeferredResult</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;&gt;();</span>
+
+	<span class="kd">public</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">DeferredResult</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="nf">getMap</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">map</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setMap</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">DeferredResult</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">map</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">map</span> <span class="o">=</span> <span class="n">map</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 
+ */</span>
+<span class="kn">package</span> <span class="nn">com.imooc.web.async</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.commons.lang.StringUtils</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.slf4j.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.slf4j.LoggerFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.ApplicationListener</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.event.ContextRefreshedEvent</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
+
+<span class="cm">/**
+ * @author zhailiang
+ *消息队列监听器
+ */</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">QueueListener</span> <span class="kd">implements</span> <span class="nc">ApplicationListener</span><span class="o">&lt;</span><span class="nc">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="o">{</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">MockQueue</span> <span class="n">mockQueue</span><span class="o">;</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">DeferredResultHolder</span> <span class="n">deferredResultHolder</span><span class="o">;</span>
+	
+	<span class="kd">private</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">getClass</span><span class="o">());</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onApplicationEvent</span><span class="o">(</span><span class="nc">ContextRefreshedEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+			<span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+				<span class="c1">//无限循环，消息队列中有值就开始处理，没值等待</span>
+				<span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isNotBlank</span><span class="o">(</span><span class="n">mockQueue</span><span class="o">.</span><span class="na">getCompleteOrder</span><span class="o">()))</span> <span class="o">{</span>
+					
+					<span class="nc">String</span> <span class="n">orderNumber</span> <span class="o">=</span> <span class="n">mockQueue</span><span class="o">.</span><span class="na">getCompleteOrder</span><span class="o">();</span>
+					<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"返回订单处理结果:"</span><span class="o">+</span><span class="n">orderNumber</span><span class="o">);</span>
+                    <span class="c1">//设置异步消息结果</span>
+					<span class="n">deferredResultHolder</span><span class="o">.</span><span class="na">getMap</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="n">orderNumber</span><span class="o">).</span><span class="na">setResult</span><span class="o">(</span><span class="s">"place order success"</span><span class="o">);</span>
+					<span class="n">mockQueue</span><span class="o">.</span><span class="na">setCompleteOrder</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+					
+				<span class="o">}</span><span class="k">else</span><span class="o">{</span>
+					<span class="k">try</span> <span class="o">{</span>
+						<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+					<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+						<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+					<span class="o">}</span>
+				<span class="o">}</span>
+
+			<span class="o">}</span>
+		<span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">访问/order</span>
+
+<span class="err">结果：</span>
+<span class="err">主线程：AsyncController：主线程开始</span>
+<span class="err">Thread-10：MockQueue：接到下单请求，43692617</span>
+<span class="err">主线程：AsyncController：主线程返回</span>
+<span class="err">Thread-10：MockQueue：下单请求处理完毕，43692617</span>
+<span class="err">Thread-7：QueueListener：返回订单处理结果：43692617</span>
+</code></pre></div></div>
+
+<h4 id="swagger生成文档">Swagger生成文档</h4>
+
+<p><a href="https://blog.csdn.net/sanyaoxu_2/article/details/80555328">Swagger</a></p>
+
+<h4 id="wiremock伪造rest服务">WireMock伪造REST服务</h4>
+
+:ET

@@ -1,0 +1,440 @@
+I"�,<ul id="markdown-toc">
+  <li><a href="#sqlplus常用命令" id="markdown-toc-sqlplus常用命令">SqlPlus常用命令</a></li>
+  <li><a href="#文件操作命令" id="markdown-toc-文件操作命令">文件操作命令</a></li>
+  <li><a href="#用户管理" id="markdown-toc-用户管理">用户管理</a>    <ul>
+      <li><a href="#管理用户" id="markdown-toc-管理用户">管理用户</a></li>
+    </ul>
+  </li>
+  <li><a href="#赋予权限" id="markdown-toc-赋予权限">赋予权限</a>    <ul>
+      <li><a href="#访问其他用户表" id="markdown-toc-访问其他用户表">访问其他用户表</a></li>
+    </ul>
+  </li>
+  <li><a href="#常用数据类型" id="markdown-toc-常用数据类型">常用数据类型</a>    <ul>
+      <li><a href="#文本" id="markdown-toc-文本">文本</a></li>
+      <li><a href="#数值" id="markdown-toc-数值">数值</a></li>
+      <li><a href="#日期" id="markdown-toc-日期">日期</a></li>
+    </ul>
+  </li>
+  <li><a href="#修改表字段" id="markdown-toc-修改表字段">修改表字段</a></li>
+  <li><a href="#分页查询" id="markdown-toc-分页查询">分页查询</a></li>
+  <li><a href="#合并查询" id="markdown-toc-合并查询">合并查询</a></li>
+  <li><a href="#函数" id="markdown-toc-函数">函数</a>    <ul>
+      <li><a href="#单行函数" id="markdown-toc-单行函数">单行函数</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="sqlplus常用命令">SqlPlus常用命令</h3>
+
+<ul>
+  <li>Oracle11g 登录 sqlplus 两种方式
+    <ul>
+      <li>Scott@orcl    密码</li>
+      <li>Scott/system@orcl</li>
+    </ul>
+  </li>
+  <li>使用查询、插入、删除、update 等等类似 sql 的语句的时候需要加;结尾。</li>
+  <li>查看登录用户：show user；</li>
+  <li>切换用户：
+    <ul>
+      <li>Conn[ect]</li>
+      <li>Conn system/system@orcl</li>
+      <li>Conn  sys@orcl  as  sysdba(sysoper)</li>
+      <li>使用 conn  sys@orcl  后面一定要跟上 as  角色权限</li>
+    </ul>
+  </li>
+  <li>断开连接：disc[onnect]</li>
+  <li>passw[word]  用户
+    <ul>
+      <li>以高级用户重置低级用户密码</li>
+      <li>普通用户也可以给自己重置密码（前提是得知道自己的密码）</li>
+    </ul>
+  </li>
+  <li>exit：退出，该命令会断开与数据库的连接，同时退出数据库</li>
+</ul>
+
+<h3 id="文件操作命令">文件操作命令</h3>
+
+<ul>
+  <li>start
+    <ul>
+      <li>调用外部的脚本</li>
+      <li>在地盘存放了 select * from dept;的语句，并保存为 dept.sql</li>
+      <li>sql&gt;start   d:\dept.sql</li>
+    </ul>
+  </li>
+  <li>edit
+    <ul>
+      <li>该命令可以编辑指定的脚本</li>
+      <li>Sql&gt;edit   d:\dept.sql</li>
+      <li>在打开的sql脚本中编辑sql</li>
+    </ul>
+  </li>
+  <li>spool
+    <ul>
+      <li>该命令可以将sqlplus屏幕上的内容输出到特定文件里</li>
+      <li>Sql&gt;spool  d:\dept.sql</li>
+      <li>Sql&gt;select * from dept;</li>
+      <li>Sql&gt;spool  off</li>
+      <li>注意：当 spool  off 后，方把所有的输出写入到外部 dept.sql 文件里</li>
+    </ul>
+  </li>
+  <li>&amp;
+    <ul>
+      <li>可以替代变量，变量的值在交互时由用户输入</li>
+      <li>Sql&gt;select * from dept  DNAME=’&amp;DNAME’;</li>
+      <li>Sql&gt;根据提示输入相应的值：例如 SALES</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="用户管理">用户管理</h3>
+
+<ul>
+  <li>创建用户（sys   system用户）
+    <ul>
+      <li>create user username identified by password</li>
+      <li>注意：密码不能以数字开头</li>
+      <li>新创建的用户不能通过conn立刻登录，需要先赋予一定的权限</li>
+      <li>grant create session to username;</li>
+      <li>sql&gt;conn  edu/system@orcl   就可以登录了</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="管理用户">管理用户</h4>
+
+<ul>
+  <li>
+    <p>创建一个用户 software，然后给他分配权限，可以让 software 登录数据库、创建表、可以操作自己创建的表；回收角色，最后删除用户。</p>
+  </li>
+  <li>
+    <p>使用 system 创建 software 用户,密码设置为 system</p>
+
+    <p>create  user  software  identified  system;</p>
+  </li>
+  <li>
+    <p>要想让 software 登录（连接）数据库，需要给其 connect、session 权限（角色）；</p>
+
+    <p>grant  connect    to  software;</p>
+
+    <p>grant  resource  to  software;</p>
+  </li>
+  <li>
+    <p>使用 software 用户登录</p>
+
+    <p>conn  software/system@orcl</p>
+  </li>
+  <li>
+    <p>Software 创建一张表</p>
+
+    <p>create  table  users(id number)</p>
+  </li>
+  <li>
+    <p>删除 software 用户</p>
+
+    <p>drop  user   software  [cascade]</p>
+
+    <p>注意：当 software 拥有自己的数据对象时，加上选项 cascade，一并把该用户拥有数据对象删除</p>
+  </li>
+</ul>
+
+<h3 id="赋予权限">赋予权限</h3>
+
+<h4 id="访问其他用户表">访问其他用户表</h4>
+
+<ul>
+  <li>
+    <p>完成一个功能，让 xiaohong 用户可以查询 scott 的 emp 表</p>
+  </li>
+  <li>
+    <p>Scott登录</p>
+
+    <p>conn scott/system</p>
+  </li>
+  <li>
+    <p>赋予权限</p>
+
+    <p>grant  select[/update/delete/insert/all]  on emp  to  xiaohong</p>
+  </li>
+  <li>
+    <p>xiaohong登录</p>
+
+    <p>conn  xiaohong/system</p>
+  </li>
+  <li>
+    <p>小红查询 scott 的 emp 表</p>
+
+    <p>select * from scott.emp;</p>
+  </li>
+</ul>
+
+<h3 id="常用数据类型">常用数据类型</h3>
+
+<ul>
+  <li>三大类：文本，数值，时间</li>
+</ul>
+
+<h4 id="文本">文本</h4>
+
+<ul>
+  <li>
+    <p>char（size）</p>
+
+    <ul>
+      <li>存放定长的字符串，最大存放2000个字符</li>
+      <li>长度不能超过size，不够size用空格补齐</li>
+      <li>字符串的长度一般是16的倍数，32，64，128</li>
+    </ul>
+  </li>
+  <li>
+    <p>varchar2（size）</p>
+
+    <p>变长，最大可存放4000个字符</p>
+  </li>
+  <li>
+    <p>nchar(size),nvarchar2(size)</p>
+
+    <p>n代表的意思是编码格式为Unicode编码，无论中文还是英文都用一个字符来存放数据</p>
+
+    <p>比如：“a”，占用一个字符，“软”，也是占用一个字符</p>
+  </li>
+  <li>
+    <p>clob（size）</p>
+
+    <p>变长，字符型的大对象，最大8tb</p>
+
+    <p>在varchar2不够用的情况下使用clob</p>
+  </li>
+  <li>
+    <p>blob（size）</p>
+
+    <p>变长，二进制数据，可以存放图片声音等，8tb</p>
+  </li>
+</ul>
+
+<h4 id="数值">数值</h4>
+
+<ul>
+  <li>
+    <p>number（p，s）</p>
+
+    <p>变长，可以存放整数和小数</p>
+
+    <p>p表示有效位（从左开始），s表示小数位；范围：p[1,38],s[-84,127]</p>
+
+    <p>Number 可以表示的数值范围：-1.0e-130 ~~1.0e+126</p>
+
+    <p>占用机器码的空间是 1~22bytes</p>
+  </li>
+</ul>
+
+<h4 id="日期">日期</h4>
+
+<ul>
+  <li>
+    <p>date</p>
+
+    <p>oracle dd-mm-yyyy</p>
+
+    <p>Sql-&gt;insert  into  test1(’01-1 月-14’);</p>
+  </li>
+  <li>
+    <p>timestamp(n)</p>
+
+    <p>邮戳的时间类型</p>
+
+    <p>与 date 区别，邮戳（timestamp）当某条数据更新时，使用邮戳字段也会自动更新。</p>
+  </li>
+</ul>
+
+<h3 id="修改表字段">修改表字段</h3>
+
+<ul>
+  <li>alter table tablename add (colname datatype);</li>
+  <li>alter table tablename modify (colname datatype);</li>
+  <li>alter table tablename drop column colname;</li>
+  <li>rename old_tablename to new_tablename;</li>
+  <li>drop table tablename;</li>
+</ul>
+
+<h3 id="分页查询">分页查询</h3>
+
+<ul>
+  <li>
+    <p>通用模板：查询emp表中第4到6行数据</p>
+
+    <p>select t2.* from
+(select t1.empno,t1.ename,rownum rw from
+(<strong>select * from emp</strong>) t1 where rownum&lt;=<strong>6</strong> )
+t2 where rw &gt;=<strong>4</strong>;</p>
+  </li>
+  <li>
+    <p>请按照入职时间的先后进行排序，查询从 7 行到 10 行的雇员是谁。</p>
+
+    <p>select t2.* from (select
+t1.empno,t1.ename,rownum rw from
+(select * from emp order by hiredate) t1 where rownum&lt;=10 )
+t2 where rw &gt;=7;</p>
+  </li>
+</ul>
+
+<h3 id="合并查询">合并查询</h3>
+
+<ul>
+  <li>
+    <p>Union,union all,intersect,minus</p>
+  </li>
+  <li>
+    <p>Union</p>
+
+    <p>并集：该操作符用于取得两个结果集的并集。当使用该操作符时，会自动去掉结果集中重复的行。</p>
+  </li>
+  <li>
+    <p>Union all</p>
+
+    <p>该操作符不会去掉重复行，而且不排序显示，重复的内容显示 2次。</p>
+
+    <p>select ename,sal,job from emp where
+sal&gt;2500  union all select ename,sal,job from emp where  job=’MANAGER’</p>
+  </li>
+  <li>
+    <p>Intersect</p>
+
+    <p>该操作符用于取得两个结果集的交集</p>
+  </li>
+  <li>
+    <p>Minus</p>
+
+    <p>使用该操作符用于取得两个结果集的差集，它只会显示存在第 1个集合中，而不存在第二个集合中的数据。</p>
+  </li>
+</ul>
+
+<h3 id="函数">函数</h3>
+
+<h4 id="单行函数">单行函数</h4>
+
+<ul>
+  <li>
+    <p>REPLACE(‘string’,’s1’,’s2’)</p>
+
+    <p>string：希望被替换的字符或变量</p>
+
+    <p>s1：被替换的字符串</p>
+
+    <p>s2 ：要替换的字符串</p>
+  </li>
+  <li>
+    <p>INSTR(C1,C2,I,J)</p>
+
+    <p>在一个字符串中搜索指定的字符,返回发现指定的字符的位置;</p>
+
+    <p>C1：被搜索的字符串</p>
+
+    <p>C2：希望搜索的字符串</p>
+
+    <p>I ：搜索的开始位置,默认为 1</p>
+
+    <p>J ：出现的位置,默认为 1</p>
+  </li>
+  <li>
+    <p>ASCII（s）</p>
+
+    <p>返回与指定的字符对应的十进制数;</p>
+  </li>
+  <li>
+    <p>CHR（number）</p>
+
+    <p>给出整数,返回对应的字符;</p>
+  </li>
+  <li>
+    <p>CONCAT</p>
+
+    <p>连接两个字符串;</p>
+  </li>
+  <li>
+    <p>INITCAP</p>
+
+    <p>返回字符串并将字符串的第一个字母变为大写;</p>
+  </li>
+  <li>
+    <p>SUBSTR(string,start,count)</p>
+
+    <p>取子字符串,从 start 开始,取 count 个</p>
+  </li>
+  <li>
+    <p>LENGTH</p>
+
+    <p>返回字符串的长度;</p>
+  </li>
+  <li>
+    <p>LOWER</p>
+
+    <p>返回字符串,并将所有的字符小写</p>
+  </li>
+  <li>
+    <p>UPPER</p>
+
+    <p>返回字符串,并将所有的字符大写</p>
+  </li>
+  <li>
+    <p>Rpad 和 lpad 函数</p>
+
+    <p>RPAD  在列的右边粘贴字符</p>
+
+    <p>LPAD  在列的左边粘贴字符</p>
+
+    <p>不够字符则用*来填满</p>
+  </li>
+  <li>
+    <p>LTRIM 和 RTRIM 函数</p>
+
+    <p>LTRIM  删除左边出现的字符串</p>
+
+    <p>RTRIM  删除右边出现的字符串</p>
+  </li>
+  <li>
+    <p>CEIL（不是四舍五入，向上取整）</p>
+
+    <p>返回大于或等于给出数字的最小整数</p>
+  </li>
+  <li>
+    <p>FLOOR</p>
+
+    <p>对给定的数字取整数</p>
+  </li>
+  <li>
+    <p>MOD(n1,n2)</p>
+
+    <p>返回一个 n1 除以 n2 的余数</p>
+  </li>
+  <li>
+    <p>POWER(n1,n2)</p>
+
+    <p>返回 n1 的 n2 次方根</p>
+  </li>
+  <li>
+    <p>ROUND 和 TRUNC</p>
+
+    <p>按照指定的精度进行舍入</p>
+
+    <p>Round 四舍五入</p>
+
+    <p>Trunc 截取（可以指定截取到哪 1 位，没有指定的话，则默认截取到整数）</p>
+  </li>
+  <li>
+    <p>SYSDATE</p>
+
+    <p>用来得到系统的当前日期</p>
+  </li>
+  <li>
+    <p>TO_DATE(string,’format’)</p>
+
+    <p>将字符串转化为 ORACLE 中的一个日期</p>
+  </li>
+  <li>
+    <p>TO_NUMBER</p>
+
+    <p>将给出的字符转换为数字</p>
+  </li>
+</ul>
+:ET

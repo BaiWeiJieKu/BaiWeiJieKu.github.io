@@ -1,0 +1,849 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#国际化" id="markdown-toc-国际化">国际化</a>    <ul>
+      <li><a href="#配置文件" id="markdown-toc-配置文件">配置文件</a></li>
+      <li><a href="#页面" id="markdown-toc-页面">页面</a></li>
+    </ul>
+  </li>
+  <li><a href="#view-controller" id="markdown-toc-view-controller">view-controller</a></li>
+  <li><a href="#视图" id="markdown-toc-视图">视图</a>    <ul>
+      <li><a href="#自定义视图" id="markdown-toc-自定义视图">自定义视图</a></li>
+    </ul>
+  </li>
+  <li><a href="#重定向" id="markdown-toc-重定向">重定向</a></li>
+  <li><a href="#restful-crud" id="markdown-toc-restful-crud">RESTFUL-CRUD</a>    <ul>
+      <li><a href="#webxml" id="markdown-toc-webxml">web.xml</a></li>
+      <li><a href="#controller" id="markdown-toc-controller">controller</a></li>
+      <li><a href="#jsp" id="markdown-toc-jsp">jsp</a></li>
+      <li><a href="#添加操作" id="markdown-toc-添加操作">添加操作</a></li>
+      <li><a href="#删除操作" id="markdown-toc-删除操作">删除操作</a></li>
+      <li><a href="#修改操作" id="markdown-toc-修改操作">修改操作</a></li>
+    </ul>
+  </li>
+  <li><a href="#静态资源" id="markdown-toc-静态资源">静态资源</a>    <ul>
+      <li><a href="#方式一" id="markdown-toc-方式一">方式一</a></li>
+      <li><a href="#方式二" id="markdown-toc-方式二">方式二</a></li>
+      <li><a href="#路径问题" id="markdown-toc-路径问题">路径问题</a></li>
+    </ul>
+  </li>
+  <li><a href="#数据转换" id="markdown-toc-数据转换">数据转换</a></li>
+  <li><a href="#annotation-driven" id="markdown-toc-annotation-driven">annotation-driven</a></li>
+  <li><a href="#initbinder" id="markdown-toc-initbinder">@initBinder</a></li>
+  <li><a href="#数据格式化" id="markdown-toc-数据格式化">数据格式化</a></li>
+  <li><a href="#数据校验" id="markdown-toc-数据校验">数据校验</a>    <ul>
+      <li><a href="#空检查" id="markdown-toc-空检查">空检查</a></li>
+      <li><a href="#真假检查" id="markdown-toc-真假检查">真假检查</a></li>
+      <li><a href="#长度检查" id="markdown-toc-长度检查">长度检查</a></li>
+      <li><a href="#日期检查" id="markdown-toc-日期检查">日期检查</a></li>
+      <li><a href="#数值检查" id="markdown-toc-数值检查">数值检查</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="国际化">国际化</h3>
+
+<ul>
+  <li>i18n.properties：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>i18n.username=Username
+i18n.password=Password
+</code></pre></div></div>
+
+<ul>
+  <li>i18n_en_US.properties：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>i18n.username=Username
+i18n.password=Password
+</code></pre></div></div>
+
+<ul>
+  <li>i18n_zh_CN.properties：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>i18n.username=\u7528\u6237\u540D
+i18n.password=\u5BC6\u7801
+</code></pre></div></div>
+
+<h4 id="配置文件">配置文件</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="c">&lt;!-- 配置国际化资源文件 --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"messageSource"</span>
+		<span class="na">class=</span><span class="s">"org.springframework.context.support.ResourceBundleMessageSource"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"basename"</span> <span class="na">value=</span><span class="s">"i18n"</span><span class="nt">&gt;&lt;/property&gt;</span>	
+	<span class="nt">&lt;/bean&gt;</span>
+
+</code></pre></div></div>
+
+<h4 id="页面">页面</h4>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nt">&lt;fmt:message</span> <span class="na">key=</span><span class="s">"i18n.username"</span><span class="nt">&gt;&lt;/fmt:message&gt;</span>
+	<span class="nt">&lt;br&gt;&lt;br&gt;</span>
+	
+	<span class="nt">&lt;fmt:message</span> <span class="na">key=</span><span class="s">"i18n.password"</span><span class="nt">&gt;&lt;/fmt:message&gt;</span>
+	<span class="nt">&lt;br&gt;&lt;br&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>这个时候，我们切换浏览器的语言，就有国际化的效果了；</li>
+</ul>
+
+<h3 id="view-controller">view-controller</h3>
+
+<ul>
+  <li>这样配置的话，就直接输入url就可以到指定的页面，而不需要经过Controller的映射</li>
+  <li>果不加<code class="language-plaintext highlighter-rouge">&lt;mvc:annotation-driven&gt;&lt;/mvc:annotation-driven&gt;</code>这个配置，那么以前通过<code class="language-plaintext highlighter-rouge">@RequestMapping("/success")</code>映射的就不好使了</li>
+  <li>通常这两个是需要一起来用的</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="c">&lt;!-- 配置直接转发的页面 --&gt;</span>
+	<span class="c">&lt;!-- 可以直接相应转发的页面, 而无需再经过 Handler 的方法.  --&gt;</span>
+	<span class="nt">&lt;mvc:view-controller</span> <span class="na">path=</span><span class="s">"/success"</span> <span class="na">view-name=</span><span class="s">"success"</span><span class="nt">/&gt;</span>
+	
+	<span class="c">&lt;!-- 在实际开发中通常都需配置 mvc:annotation-driven 标签 --&gt;</span>
+	<span class="nt">&lt;mvc:annotation-driven&gt;&lt;/mvc:annotation-driven&gt;</span>
+
+</code></pre></div></div>
+
+<h3 id="视图">视图</h3>
+
+<ul>
+  <li><strong>视图</strong>的作用是渲染模型数据，将模型里的数据以某种形式呈现给客户</li>
+  <li>为了实现视图模型和具体实现技术的解耦，Spring 在  org.springframework.web.servlet包中定义了一个高度抽象的 <strong>View</strong>  接口</li>
+  <li>视图对象由视图解析器负责实例化。由于视图是无状态的，所以他们不会有线程安全的问题</li>
+</ul>
+
+<h4 id="自定义视图">自定义视图</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloView</span> <span class="kd">implements</span> <span class="nc">View</span><span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getContentType</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="s">"text/html"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">render</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="o">?&gt;</span> <span class="n">model</span><span class="o">,</span> <span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+			<span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">().</span><span class="na">print</span><span class="o">(</span><span class="s">"hello view, time: "</span> <span class="o">+</span> <span class="k">new</span> <span class="nc">Date</span><span class="o">());</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	
+	<span class="c">&lt;!-- 配置视图  BeanNameViewResolver 解析器: 使用视图的名字来解析视图 --&gt;</span>
+	<span class="c">&lt;!-- 通过 order 属性来定义视图解析器的优先级, order 值越小优先级越高 --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">class=</span><span class="s">"org.springframework.web.servlet.view.BeanNameViewResolver"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"order"</span> <span class="na">value=</span><span class="s">"100"</span><span class="nt">&gt;&lt;/property&gt;</span>
+	<span class="nt">&lt;/bean&gt;</span>
+	
+
+</code></pre></div></div>
+
+<h3 id="重定向">重定向</h3>
+
+<ul>
+  <li>
+    <p>如果返回的字符串中带 forward: 或 redirect: 前缀  时，SpringMVC会对他们进行特殊处理：将forward: 和  redirect: 当成指示符，其后的字符串作为 URL 来处理</p>
+  </li>
+  <li>
+    <p>redirect:success.jsp：会完成一个到success.jsp 的重定向的操作</p>
+  </li>
+  <li>
+    <p>forward:success.jsp：会完成一个到success.jsp 的转发操作</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/testRedirect"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">testRedirect</span><span class="o">(){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"testRedirect"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"redirect:/index.jsp"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="restful-crud">RESTFUL-CRUD</h3>
+
+<h4 id="webxml">web.xml</h4>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;web-app</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xmlns=</span><span class="s">"http://java.sun.com/xml/ns/javaee"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"</span>
+	<span class="na">id=</span><span class="s">"WebApp_ID"</span> <span class="na">version=</span><span class="s">"2.5"</span><span class="nt">&gt;</span>
+
+	<span class="c">&lt;!-- 配置 SpringMVC 的 DispatcherServlet --&gt;</span>
+	<span class="c">&lt;!-- The front controller of this Spring Web application, responsible for handling all application requests --&gt;</span>
+	<span class="nt">&lt;servlet&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>springDispatcherServlet<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;servlet-class&gt;</span>org.springframework.web.servlet.DispatcherServlet<span class="nt">&lt;/servlet-class&gt;</span>
+		<span class="nt">&lt;init-param&gt;</span>
+			<span class="nt">&lt;param-name&gt;</span>contextConfigLocation<span class="nt">&lt;/param-name&gt;</span>
+			<span class="nt">&lt;param-value&gt;</span>classpath:springmvc.xml<span class="nt">&lt;/param-value&gt;</span>
+		<span class="nt">&lt;/init-param&gt;</span>
+		<span class="nt">&lt;load-on-startup&gt;</span>1<span class="nt">&lt;/load-on-startup&gt;</span>
+	<span class="nt">&lt;/servlet&gt;</span>
+
+	<span class="c">&lt;!-- Map all requests to the DispatcherServlet for handling --&gt;</span>
+	<span class="nt">&lt;servlet-mapping&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>springDispatcherServlet<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>/<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/servlet-mapping&gt;</span>
+	
+	<span class="c">&lt;!-- 配置 HiddenHttpMethodFilter: 把 POST 请求转为 DELETE、PUT 请求 --&gt;</span>
+	<span class="nt">&lt;filter&gt;</span>
+		<span class="nt">&lt;filter-name&gt;</span>HiddenHttpMethodFilter<span class="nt">&lt;/filter-name&gt;</span>
+		<span class="nt">&lt;filter-class&gt;</span>org.springframework.web.filter.HiddenHttpMethodFilter<span class="nt">&lt;/filter-class&gt;</span>
+	<span class="nt">&lt;/filter&gt;</span>
+	
+	<span class="nt">&lt;filter-mapping&gt;</span>
+		<span class="nt">&lt;filter-name&gt;</span>HiddenHttpMethodFilter<span class="nt">&lt;/filter-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>/*<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/filter-mapping&gt;</span>
+
+<span class="nt">&lt;/web-app&gt;</span>
+
+</code></pre></div></div>
+
+<h4 id="controller">controller</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Controller</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EmployeeHandler</span> <span class="o">{</span>
+
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">EmployeeDao</span> <span class="n">employeeDao</span><span class="o">;</span>
+	
+	<span class="nd">@Autowired</span>
+	<span class="kd">private</span> <span class="nc">DepartmentDao</span> <span class="n">departmentDao</span><span class="o">;</span>
+
+
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/emps"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">list</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">){</span>
+		<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"employees"</span><span class="o">,</span> <span class="n">employeeDao</span><span class="o">.</span><span class="na">getAll</span><span class="o">());</span>
+		<span class="k">return</span> <span class="s">"list"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="jsp">jsp</h4>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;%@ page </span><span class="na">language=</span><span class="s">"java"</span><span class="na"> contentType=</span><span class="s">"text/html; charset=UTF-8"</span><span class="na">
+    pageEncoding=</span><span class="s">"UTF-8"</span><span class="nt">%&gt;</span>
+<span class="nt">&lt;%@ taglib </span><span class="na">prefix=</span><span class="s">"c"</span><span class="na"> uri=</span><span class="s">"http://java.sun.com/jsp/jstl/core"</span> <span class="nt">%&gt;</span>
+    
+<span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=UTF-8"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;title&gt;</span>Insert title here<span class="nt">&lt;/title&gt;</span>
+<span class="c">&lt;!--  
+	SpringMVC 处理静态资源:
+	1. 为什么会有这样的问题:
+	优雅的 REST 风格的资源URL 不希望带 .html 或 .do 等后缀
+	若将 DispatcherServlet 请求映射配置为 /, 
+	则 Spring MVC 将捕获 WEB 容器的所有请求, 包括静态资源的请求, SpringMVC 会将他们当成一个普通请求处理, 
+	因找不到对应处理器将导致错误。
+	2. 解决: 在 SpringMVC 的配置文件中配置 </span><span class="nt">&lt;mvc:default</span><span class="c">-servlet-handler</span><span class="nt">/&gt;</span><span class="c">
+--&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"scripts/jquery-1.9.1.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span><span class="nt">&gt;</span>
+	<span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+		<span class="nx">$</span><span class="p">(</span><span class="dl">"</span><span class="s2">.delete</span><span class="dl">"</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+			<span class="kd">var</span> <span class="nx">href</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="dl">"</span><span class="s2">href</span><span class="dl">"</span><span class="p">);</span>
+			<span class="nx">$</span><span class="p">(</span><span class="dl">"</span><span class="s2">form</span><span class="dl">"</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="dl">"</span><span class="s2">action</span><span class="dl">"</span><span class="p">,</span> <span class="nx">href</span><span class="p">).</span><span class="nx">submit</span><span class="p">();</span>			
+			<span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+		<span class="p">});</span>
+	<span class="p">})</span>
+<span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+	
+	<span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">""</span> <span class="na">method=</span><span class="s">"POST"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"_method"</span> <span class="na">value=</span><span class="s">"DELETE"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form&gt;</span>
+	
+	<span class="nt">&lt;c:if </span><span class="na">test=</span><span class="s">"</span><span class="si">${</span><span class="n">empty</span> <span class="n">requestScope</span><span class="o">.</span><span class="na">employees</span> <span class="si">}</span><span class="s">"</span><span class="nt">&gt;</span>
+		没有任何员工信息.
+	<span class="nt">&lt;/c:if&gt;</span>
+	<span class="nt">&lt;c:if </span><span class="na">test=</span><span class="s">"</span><span class="si">${</span><span class="o">!</span><span class="n">empty</span> <span class="n">requestScope</span><span class="o">.</span><span class="na">employees</span> <span class="si">}</span><span class="s">"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;table</span> <span class="na">border=</span><span class="s">"1"</span> <span class="na">cellpadding=</span><span class="s">"10"</span> <span class="na">cellspacing=</span><span class="s">"0"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;tr&gt;</span>
+				<span class="nt">&lt;th&gt;</span>ID<span class="nt">&lt;/th&gt;</span>
+				<span class="nt">&lt;th&gt;</span>LastName<span class="nt">&lt;/th&gt;</span>
+				<span class="nt">&lt;th&gt;</span>Email<span class="nt">&lt;/th&gt;</span>
+				<span class="nt">&lt;th&gt;</span>Gender<span class="nt">&lt;/th&gt;</span>
+				<span class="nt">&lt;th&gt;</span>Department<span class="nt">&lt;/th&gt;</span>
+				<span class="nt">&lt;th&gt;</span>Edit<span class="nt">&lt;/th&gt;</span>
+				<span class="nt">&lt;th&gt;</span>Delete<span class="nt">&lt;/th&gt;</span>
+			<span class="nt">&lt;/tr&gt;</span>
+			
+			<span class="nt">&lt;c:forEach </span><span class="na">items=</span><span class="s">"</span><span class="si">${</span><span class="n">requestScope</span><span class="o">.</span><span class="na">employees</span> <span class="si">}</span><span class="s">"</span><span class="na"> var=</span><span class="s">"emp"</span><span class="nt">&gt;</span>
+				<span class="nt">&lt;tr&gt;</span>
+					<span class="nt">&lt;td&gt;</span>${emp.id }<span class="nt">&lt;/td&gt;</span>
+					<span class="nt">&lt;td&gt;</span>${emp.lastName }<span class="nt">&lt;/td&gt;</span>
+					<span class="nt">&lt;td&gt;</span>${emp.email }<span class="nt">&lt;/td&gt;</span>
+					<span class="nt">&lt;td&gt;</span>${emp.gender == 0 ? 'Female' : 'Male' }<span class="nt">&lt;/td&gt;</span>
+					<span class="nt">&lt;td&gt;</span>${emp.department.departmentName }<span class="nt">&lt;/td&gt;</span>
+					<span class="nt">&lt;td&gt;&lt;a</span> <span class="na">href=</span><span class="s">"emp/${emp.id}"</span><span class="nt">&gt;</span>Edit<span class="nt">&lt;/a&gt;&lt;/td&gt;</span>
+					<span class="nt">&lt;td&gt;&lt;a</span> <span class="na">class=</span><span class="s">"delete"</span> <span class="na">href=</span><span class="s">"emp/${emp.id}"</span><span class="nt">&gt;</span>Delete<span class="nt">&lt;/a&gt;&lt;/td&gt;</span>
+				<span class="nt">&lt;/tr&gt;</span>
+			<span class="nt">&lt;/c:forEach&gt;</span>
+		<span class="nt">&lt;/table&gt;</span>
+	<span class="nt">&lt;/c:if&gt;</span>
+	
+	<span class="nt">&lt;br&gt;&lt;br&gt;</span>
+	
+	<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"emp"</span><span class="nt">&gt;</span>Add New Employee<span class="nt">&lt;/a&gt;</span>
+	
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+
+</code></pre></div></div>
+
+<h4 id="添加操作">添加操作</h4>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;</span><span class="err">%@</span><span class="na">page</span> <span class="na">import=</span><span class="s">"java.util.HashMap"</span><span class="err">%</span><span class="nt">&gt;</span>
+<span class="nt">&lt;</span><span class="err">%@</span><span class="na">page</span> <span class="na">import=</span><span class="s">"java.util.Map"</span><span class="err">%</span><span class="nt">&gt;</span>
+<span class="nt">&lt;</span><span class="err">%@</span> <span class="na">page</span> <span class="na">language=</span><span class="s">"java"</span> <span class="na">contentType=</span><span class="s">"text/html; charset=UTF-8"</span>
+    <span class="na">pageEncoding=</span><span class="s">"UTF-8"</span><span class="err">%</span><span class="nt">&gt;</span>
+<span class="nt">&lt;</span><span class="err">%@</span> <span class="na">taglib</span> <span class="na">prefix=</span><span class="s">"form"</span> <span class="na">uri=</span><span class="s">"http://www.springframework.org/tags/form"</span> <span class="err">%</span><span class="nt">&gt;</span>
+<span class="nt">&lt;</span><span class="err">%@</span> <span class="na">taglib</span> <span class="na">prefix=</span><span class="s">"c"</span> <span class="na">uri=</span><span class="s">"http://java.sun.com/jsp/jstl/core"</span> <span class="err">%</span><span class="nt">&gt;</span>
+    
+<span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=UTF-8"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;title&gt;</span>Insert title here<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+
+	<span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"testConversionServiceConverer"</span> <span class="na">method=</span><span class="s">"POST"</span><span class="nt">&gt;</span>
+		<span class="c">&lt;!-- lastname-email-gender-department.id 例如: GG-gg@atguigu.com-0-105 --&gt;</span>
+		Employee: <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"employee"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Submit"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form&gt;</span>
+	<span class="nt">&lt;br&gt;&lt;br&gt;</span>
+	
+	<span class="c">&lt;!--  
+		1. WHY 使用 form 标签呢 ?
+		可以更快速的开发出表单页面, 而且可以更方便的进行表单值的回显
+		2. 注意:
+		可以通过 modelAttribute 属性指定绑定的模型属性,
+		若没有指定该属性，则默认从 request 域对象中读取 command 的表单 bean
+		如果该属性值也不存在，则会发生错误。
+	--&gt;</span>
+	<span class="nt">&lt;br&gt;&lt;br&gt;</span>
+	<span class="nt">&lt;form:form</span> <span class="na">action=</span><span class="s">"${pageContext.request.contextPath }/emp"</span> <span class="na">method=</span><span class="s">"POST"</span> 
+		<span class="na">modelAttribute=</span><span class="s">"employee"</span><span class="nt">&gt;</span>
+		
+		<span class="nt">&lt;form:errors</span> <span class="na">path=</span><span class="s">"*"</span><span class="nt">&gt;&lt;/form:errors&gt;</span>
+		<span class="nt">&lt;br&gt;</span>
+		
+		<span class="nt">&lt;c:if</span> <span class="na">test=</span><span class="s">"${employee.id == null }"</span><span class="nt">&gt;</span>
+			<span class="c">&lt;!-- path 属性对应 html 表单标签的 name 属性值 --&gt;</span>
+			LastName: <span class="nt">&lt;form:input</span> <span class="na">path=</span><span class="s">"lastName"</span><span class="nt">/&gt;</span>
+			<span class="nt">&lt;form:errors</span> <span class="na">path=</span><span class="s">"lastName"</span><span class="nt">&gt;&lt;/form:errors&gt;</span>
+		<span class="nt">&lt;/c:if&gt;</span>
+		<span class="nt">&lt;c:if</span> <span class="na">test=</span><span class="s">"${employee.id != null }"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;form:hidden</span> <span class="na">path=</span><span class="s">"id"</span><span class="nt">/&gt;</span>
+			<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"_method"</span> <span class="na">value=</span><span class="s">"PUT"</span><span class="nt">/&gt;</span>
+			<span class="nt">&lt;</span><span class="err">%</span><span class="na">--</span> <span class="na">对于</span> <span class="na">_method</span> <span class="na">不能使用</span> <span class="na">form:hidden</span> <span class="na">标签</span><span class="err">,</span> <span class="na">因为</span> <span class="na">modelAttribute</span> <span class="na">对应的</span> <span class="na">bean</span> <span class="na">中没有</span> <span class="na">_method</span> <span class="na">这个属性</span> <span class="na">--</span><span class="err">%</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;</span><span class="err">%</span><span class="na">--</span> 
+			<span class="err">&lt;</span><span class="na">form:hidden</span> <span class="na">path=</span><span class="s">"_method"</span> <span class="na">value=</span><span class="s">"PUT"</span><span class="nt">/&gt;</span>
+			--%&gt;
+		<span class="nt">&lt;/c:if&gt;</span>
+		
+		<span class="nt">&lt;br&gt;</span>
+		Email: <span class="nt">&lt;form:input</span> <span class="na">path=</span><span class="s">"email"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;form:errors</span> <span class="na">path=</span><span class="s">"email"</span><span class="nt">&gt;&lt;/form:errors&gt;</span>
+		<span class="nt">&lt;br&gt;</span>
+		<span class="nt">&lt;</span><span class="err">%</span> 
+			<span class="na">Map</span><span class="err">&lt;</span><span class="na">String</span><span class="err">,</span> <span class="na">String</span><span class="nt">&gt;</span> genders = new HashMap();
+			genders.put("1", "Male");
+			genders.put("0", "Female");
+			
+			request.setAttribute("genders", genders);
+		%&gt;
+		Gender: 
+		<span class="nt">&lt;br&gt;</span>
+		<span class="nt">&lt;form:radiobuttons</span> <span class="na">path=</span><span class="s">"gender"</span> <span class="na">items=</span><span class="s">"${genders }"</span> <span class="na">delimiter=</span><span class="s">"&lt;br&gt;"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br&gt;</span>
+		Department: <span class="nt">&lt;form:select</span> <span class="na">path=</span><span class="s">"department.id"</span> 
+			<span class="na">items=</span><span class="s">"${departments }"</span> <span class="na">itemLabel=</span><span class="s">"departmentName"</span> <span class="na">itemValue=</span><span class="s">"id"</span><span class="nt">&gt;&lt;/form:select&gt;</span>
+		<span class="nt">&lt;br&gt;</span>
+		<span class="c">&lt;!--  
+			1. 数据类型转换
+			2. 数据类型格式化
+			3. 数据校验. 
+			1). 如何校验 ? 注解 ?
+			①. 使用 JSR 303 验证标准
+			②. 加入 hibernate validator 验证框架的 jar 包
+			③. 在 SpringMVC 配置文件中添加 &lt;mvc:annotation-driven /&gt;
+			④. 需要在 bean 的属性上添加对应的注解
+			⑤. 在目标方法 bean 类型的前面添加 @Valid 注解
+			2). 验证出错转向到哪一个页面 ?
+			注意: 需校验的 Bean 对象和其绑定结果对象或错误对象时成对出现的，它们之间不允许声明其他的入参
+			3). 错误消息 ? 如何显示, 如何把错误消息进行国际化
+		--&gt;</span>
+		Birth: <span class="nt">&lt;form:input</span> <span class="na">path=</span><span class="s">"birth"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;form:errors</span> <span class="na">path=</span><span class="s">"birth"</span><span class="nt">&gt;&lt;/form:errors&gt;</span>
+		<span class="nt">&lt;br&gt;</span>
+		Salary: <span class="nt">&lt;form:input</span> <span class="na">path=</span><span class="s">"salary"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;br&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Submit"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form:form&gt;</span>
+	
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"/emp"</span><span class="o">,</span> <span class="n">method</span><span class="o">=</span><span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">save</span><span class="o">(</span><span class="nd">@Valid</span> <span class="nc">Employee</span> <span class="n">employee</span><span class="o">,</span> <span class="nc">Errors</span> <span class="n">result</span><span class="o">,</span> 
+			<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"save: "</span> <span class="o">+</span> <span class="n">employee</span><span class="o">);</span>
+		
+		<span class="k">if</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">getErrorCount</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">){</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"出错了!"</span><span class="o">);</span>
+			
+			<span class="k">for</span><span class="o">(</span><span class="nc">FieldError</span> <span class="nl">error:</span><span class="n">result</span><span class="o">.</span><span class="na">getFieldErrors</span><span class="o">()){</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">error</span><span class="o">.</span><span class="na">getField</span><span class="o">()</span> <span class="o">+</span> <span class="s">":"</span> <span class="o">+</span> <span class="n">error</span><span class="o">.</span><span class="na">getDefaultMessage</span><span class="o">());</span>
+			<span class="o">}</span>
+			
+			<span class="c1">//若验证出错, 则转向定制的页面</span>
+			<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"departments"</span><span class="o">,</span> <span class="n">departmentDao</span><span class="o">.</span><span class="na">getDepartments</span><span class="o">());</span>
+			<span class="k">return</span> <span class="s">"input"</span><span class="o">;</span>
+		<span class="o">}</span>
+		
+		<span class="n">employeeDao</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">employee</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"redirect:/emps"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="删除操作">删除操作</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"/emp/{id}"</span><span class="o">,</span> <span class="n">method</span><span class="o">=</span><span class="nc">RequestMethod</span><span class="o">.</span><span class="na">DELETE</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">delete</span><span class="o">(</span><span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"id"</span><span class="o">)</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">){</span>
+		<span class="n">employeeDao</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"redirect:/emps"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="修改操作">修改操作</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"/emp"</span><span class="o">,</span> <span class="n">method</span><span class="o">=</span><span class="nc">RequestMethod</span><span class="o">.</span><span class="na">PUT</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">update</span><span class="o">(</span><span class="nc">Employee</span> <span class="n">employee</span><span class="o">){</span>
+		<span class="n">employeeDao</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">employee</span><span class="o">);</span>
+		
+		<span class="k">return</span> <span class="s">"redirect:/emps"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"/emp/{id}"</span><span class="o">,</span> <span class="n">method</span><span class="o">=</span><span class="nc">RequestMethod</span><span class="o">.</span><span class="na">GET</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">input</span><span class="o">(</span><span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"id"</span><span class="o">)</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">,</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">){</span>
+		<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"employee"</span><span class="o">,</span> <span class="n">employeeDao</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">id</span><span class="o">));</span>
+		<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"departments"</span><span class="o">,</span> <span class="n">departmentDao</span><span class="o">.</span><span class="na">getDepartments</span><span class="o">());</span>
+		<span class="k">return</span> <span class="s">"input"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+
+</code></pre></div></div>
+
+<h3 id="静态资源">静态资源</h3>
+
+<ul>
+  <li>优雅的REST风格的资源URL不希望带.html或.do等后缀</li>
+  <li>若将 DispatcherServlet 请求映射配置为/，则Spring MVC将捕获  WEB 容器的所有请求，包括静态资源的请求， SpringMVC 会将他 们当成一个普通请求处理，因找不到对应处理器将导致错误</li>
+  <li>
+    <p>可以在 SpringMVC 的配置文件中配置<code class="language-plaintext highlighter-rouge">&lt;mvc:default-servlet-  handler/&gt; </code>的方式解决静态资源的问题</p>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">&lt;mvc:default-servlet-handler/&gt;</code> 将在SpringMVC
+上下文中定义一个  <strong>DefaultServletHttpRequestHandler</strong>，它会对进入DispatcherServlet的  请求进行筛查，如果发现是没有经过映射的请求，就将该请求交由WEB  应用服务器默认的 Servlet 处理，如果不是静态资源的请求，才由  DispatcherServlet继续处理</li>
+  <li>一般 WEB应用服务器默认的Servlet的名称都是default。若所使用的WEB 服务器(比如Tomcat服务器)的默认 Servlet 名称不是 default，则需要通过default-  servlet-name 属性显式指定</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="c">&lt;!--  
+		default-servlet-handler 将在 SpringMVC 上下文中定义一个 DefaultServletHttpRequestHandler,
+		它会对进入 DispatcherServlet 的请求进行筛查, 如果发现是没有经过映射的请求, 就将该请求交由 WEB 应用服务器默认的 
+		Servlet 处理. 如果不是静态资源的请求，才由 DispatcherServlet 继续处理
+
+		一般 WEB 应用服务器默认的 Servlet 的名称都是 default.
+		若所使用的 WEB 服务器的默认 Servlet 名称不是 default，则需要通过 default-servlet-name 属性显式指定
+		
+	--&gt;</span>
+	<span class="nt">&lt;mvc:default-servlet-handler/&gt;</span>
+	<span class="c">&lt;!-- 注册自定义转换器 --&gt;</span>
+	<span class="nt">&lt;mvc:annotation-driven</span> <span class="na">conversion-service=</span><span class="s">"conversionService"</span><span class="nt">&gt;&lt;/mvc:annotation-driven&gt;</span>
+
+</code></pre></div></div>
+
+<h4 id="方式一">方式一</h4>
+
+<ul>
+  <li>若将 DispatcherServlet 请求映射配置为/，表示拦截静态资源但不拦截动态资源，若想访问静态资源，可在web.xml中直接进行配置，不需要配置springmvc.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="c">&lt;!--servlet静态资源配置在Tomcat的web.xml中，名称默认为default--&gt;</span>
+	<span class="nt">&lt;servlet-mapping&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>default<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>*.jpg<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/servlet-mapping&gt;</span>
+	<span class="nt">&lt;servlet-mapping&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>default<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>*.css<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/servlet-mapping&gt;</span>
+	<span class="nt">&lt;servlet-mapping&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>default<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>*.js<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/servlet-mapping&gt;</span>
+	
+	
+	<span class="nt">&lt;servlet&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>springDispatcherServlet<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;servlet-class&gt;</span>org.springframework.web.servlet.DispatcherServlet<span class="nt">&lt;/servlet-class&gt;</span>
+		<span class="nt">&lt;init-param&gt;</span>
+			<span class="nt">&lt;param-name&gt;</span>contextConfigLocation<span class="nt">&lt;/param-name&gt;</span>
+			<span class="nt">&lt;param-value&gt;</span>classpath:springmvc.xml<span class="nt">&lt;/param-value&gt;</span>
+		<span class="nt">&lt;/init-param&gt;</span>
+		<span class="nt">&lt;load-on-startup&gt;</span>1<span class="nt">&lt;/load-on-startup&gt;</span>
+	<span class="nt">&lt;/servlet&gt;</span>
+
+	<span class="c">&lt;!-- Map all requests to the DispatcherServlet for handling --&gt;</span>
+	<span class="nt">&lt;servlet-mapping&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>springDispatcherServlet<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>/<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/servlet-mapping&gt;</span>
+</code></pre></div></div>
+
+<h4 id="方式二">方式二</h4>
+
+<ul>
+  <li>若将 DispatcherServlet 请求映射配置为/，表示拦截静态资源但不拦截动态资源，若想访问静态资源，可在web.xml中进行配置，并且配合springmvc.xml进行使用</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;servlet&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>springDispatcherServlet<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;servlet-class&gt;</span>org.springframework.web.servlet.DispatcherServlet<span class="nt">&lt;/servlet-class&gt;</span>
+		<span class="nt">&lt;init-param&gt;</span>
+			<span class="nt">&lt;param-name&gt;</span>contextConfigLocation<span class="nt">&lt;/param-name&gt;</span>
+			<span class="nt">&lt;param-value&gt;</span>classpath:springmvc.xml<span class="nt">&lt;/param-value&gt;</span>
+		<span class="nt">&lt;/init-param&gt;</span>
+		<span class="nt">&lt;load-on-startup&gt;</span>1<span class="nt">&lt;/load-on-startup&gt;</span>
+	<span class="nt">&lt;/servlet&gt;</span>
+
+	<span class="c">&lt;!-- Map all requests to the DispatcherServlet for handling --&gt;</span>
+	<span class="nt">&lt;servlet-mapping&gt;</span>
+		<span class="nt">&lt;servlet-name&gt;</span>springDispatcherServlet<span class="nt">&lt;/servlet-name&gt;</span>
+		<span class="nt">&lt;url-pattern&gt;</span>/<span class="nt">&lt;/url-pattern&gt;</span>
+	<span class="nt">&lt;/servlet-mapping&gt;</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--
+location表示静态资源的位置
+mapping表示实际的请求格式
+如果格式对应，他就会把请求交给DefaultServletHttpRequestHandler处理
+这种方式存在局限性，不推荐使用
+--&gt;</span>
+<span class="nt">&lt;mvc:resources</span> <span class="na">location=</span><span class="s">"/images/"</span> <span class="na">mapping=</span><span class="s">"/images/**"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<h4 id="路径问题">路径问题</h4>
+
+<ul>
+  <li>前台路径</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--
+这个路径出现在jsp页面中，所以是前台路径
+前台路径的参考路径为：当前web服务器的根：http://127.0.0.1:8080
+因为绝对路径=参考路径+相对路径
+多以当前超链接提交的请求绝对路径为：
+http://127.0.0.1:8080/hello.do
+这是访问不到资源的
+--&gt;</span>
+<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"/hello.do"</span><span class="nt">&gt;</span>
+
+<span class="c">&lt;!--
+这个路径没有以/开头，所以其参照路径为当前的访问路径：http://127.0.0.1:8080/testDemo/
+因为绝对路径=参考路径+相对路径
+多以当前超链接提交的请求绝对路径为：
+http://127.0.0.1:8080/testDemo/hello.do
+就可以访问到资源了
+--&gt;</span>
+<span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"hello.do"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>后台路径</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+这个路径出现在java文件中，所以是后台路径，后台路径的参照路径是：web应用的根目录
+当前web应用的根路径是：http://127.0.0.1:8080/testDemo
+现在要求的绝对路径是：参照路径+相对路径
+http://127.0.0.1:8080/testDemo/hello.do
+可以访问
+*/</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/hello.do"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="数据转换">数据转换</h3>
+
+<ul>
+  <li>前端传一个字符串</li>
+</ul>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+	<span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"testConversionServiceConverer"</span> <span class="na">method=</span><span class="s">"POST"</span><span class="nt">&gt;</span>
+		<span class="c">&lt;!-- lastname-email-gender-department.id 例如: GG-gg@atguigu.com-0-105 --&gt;</span>
+		Employee: <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"employee"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Submit"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;/form&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>controller</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/testConversionServiceConverer"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">testConverter</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="s">"employee"</span><span class="o">)</span> <span class="nc">Employee</span> <span class="n">employee</span><span class="o">){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"save: "</span> <span class="o">+</span> <span class="n">employee</span><span class="o">);</span>
+		<span class="n">employeeDao</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">employee</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"redirect:/emps"</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>自定义转换器</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EmployeeConverter</span> <span class="kd">implements</span> <span class="nc">Converter</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Employee</span><span class="o">&gt;</span> <span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">convert</span><span class="o">(</span><span class="nc">String</span> <span class="n">source</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">source</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+			<span class="nc">String</span> <span class="o">[]</span> <span class="n">vals</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"-"</span><span class="o">);</span>
+			<span class="c1">//GG-gg@atguigu.com-0-105</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">vals</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">vals</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">4</span><span class="o">){</span>
+				<span class="nc">String</span> <span class="n">lastName</span> <span class="o">=</span> <span class="n">vals</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+				<span class="nc">String</span> <span class="n">email</span> <span class="o">=</span> <span class="n">vals</span><span class="o">[</span><span class="mi">1</span><span class="o">];</span>
+				<span class="nc">Integer</span> <span class="n">gender</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">vals</span><span class="o">[</span><span class="mi">2</span><span class="o">]);</span>
+				<span class="nc">Department</span> <span class="n">department</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Department</span><span class="o">();</span>
+				<span class="n">department</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">vals</span><span class="o">[</span><span class="mi">3</span><span class="o">]));</span>
+				
+				<span class="nc">Employee</span> <span class="n">employee</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Employee</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="n">lastName</span><span class="o">,</span> <span class="n">email</span><span class="o">,</span> <span class="n">gender</span><span class="o">,</span> <span class="n">department</span><span class="o">);</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">source</span> <span class="o">+</span> <span class="s">"--convert--"</span> <span class="o">+</span> <span class="n">employee</span><span class="o">);</span>
+				<span class="k">return</span> <span class="n">employee</span><span class="o">;</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>配置</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+	<span class="nt">&lt;mvc:annotation-driven</span> <span class="na">conversion-service=</span><span class="s">"conversionService"</span><span class="nt">&gt;&lt;/mvc:annotation-driven&gt;</span>
+	
+	<span class="c">&lt;!-- 配置 ConversionService --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"conversionService"</span>
+		<span class="na">class=</span><span class="s">"org.springframework.format.support.FormattingConversionServiceFactoryBean"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"converters"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;set&gt;</span>
+				<span class="nt">&lt;ref</span> <span class="na">bean=</span><span class="s">"employeeConverter"</span><span class="nt">/&gt;</span>
+			<span class="nt">&lt;/set&gt;</span>
+		<span class="nt">&lt;/property&gt;</span>	
+	<span class="nt">&lt;/bean&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>这个时候，我们再来试，就已经把字符串转成了Employee对象了；</li>
+</ul>
+
+<h3 id="annotation-driven">annotation-driven</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">&lt;mvc:annotation-driven /&gt;</code> 会自动注  册RequestMappingHandlerMapping、RequestMappingHandlerAdapter 与ExceptionHandlerExceptionResolver  三个bean</li>
+  <li>支持使用<strong>ConversionService</strong> 实例对表单参数进行类型转换</li>
+  <li>支持使用 @NumberFormat annotation、@DateTimeFormat注解完成数据类型的格式化</li>
+  <li>支持使用 <strong>@Valid</strong> 注解对JavaBean实例进行JSR303验证</li>
+  <li>支持使用<strong>@RequestBody</strong> 和<strong>@ResponseBody</strong> 注解</li>
+</ul>
+
+<h3 id="initbinder">@initBinder</h3>
+
+<ul>
+  <li>由 @InitBinder 标识的方法，可以对 WebDataBinder 对  象进行初始化。WebDataBinder是DataBinder的子类，用  于完成由表单字段到 JavaBean 属性的绑定</li>
+  <li>@InitBinder方法不能有返回值，它必须声明为void</li>
+  <li>@InitBinder方法的参数通常是是 WebDataBinder</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@InitBinder</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">initBinder</span><span class="o">(</span><span class="nc">WebDataBinder</span> <span class="n">binder</span><span class="o">){</span>
+		<span class="n">binder</span><span class="o">.</span><span class="na">setDisallowedFields</span><span class="o">(</span><span class="s">"lastName"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="c1">//这个时候，lastName是不进行赋值的</span>
+</code></pre></div></div>
+
+<h3 id="数据格式化">数据格式化</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Employee</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">;</span>
+	<span class="nd">@NotEmpty</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">lastName</span><span class="o">;</span>
+
+	<span class="nd">@Email</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">email</span><span class="o">;</span>
+	<span class="c1">//1 male, 0 female</span>
+	<span class="kd">private</span> <span class="nc">Integer</span> <span class="n">gender</span><span class="o">;</span>
+	
+	<span class="kd">private</span> <span class="nc">Department</span> <span class="n">department</span><span class="o">;</span>
+	
+	<span class="nd">@Past</span>
+	<span class="nd">@DateTimeFormat</span><span class="o">(</span><span class="n">pattern</span><span class="o">=</span><span class="s">"yyyy-MM-dd"</span><span class="o">)</span>
+	<span class="kd">private</span> <span class="nc">Date</span> <span class="n">birth</span><span class="o">;</span>
+	
+	<span class="nd">@NumberFormat</span><span class="o">(</span><span class="n">pattern</span><span class="o">=</span><span class="s">"#,###,###.#"</span><span class="o">)</span>
+	<span class="kd">private</span> <span class="nc">Float</span> <span class="n">salary</span><span class="o">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nt">&lt;mvc:annotation-driven</span> <span class="na">conversion-service=</span><span class="s">"conversionService"</span><span class="nt">&gt;&lt;/mvc:annotation-driven&gt;</span>	
+	
+	<span class="c">&lt;!-- 配置 ConversionService --&gt;</span>
+	<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"conversionService"</span>
+		<span class="na">class=</span><span class="s">"org.springframework.format.support.FormattingConversionServiceFactoryBean"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"converters"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;set&gt;</span>
+				<span class="nt">&lt;ref</span> <span class="na">bean=</span><span class="s">"employeeConverter"</span><span class="nt">/&gt;</span>
+			<span class="nt">&lt;/set&gt;</span>
+		<span class="nt">&lt;/property&gt;</span>	
+	<span class="nt">&lt;/bean&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>这样写的话，我们即能使用自己定义的类型转换器，又能使用<code class="language-plaintext highlighter-rouge">@DateTimeFormat</code>和<code class="language-plaintext highlighter-rouge">@NumberFormat</code>这两个注解</li>
+</ul>
+
+<h3 id="数据校验">数据校验</h3>
+
+<h4 id="空检查">空检查</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@Null 验证对象是否为null 
+@NotNull 验证对象是否不为null, 无法查检长度为0的字符串 
+@NotBlank 检查约束字符串是不是Null还有被Trim的长度是否大于0,只对字符串,且会去掉前后空格. 
+@NotEmpty 检查约束元素是否为NULL或者是EMPTY
+</code></pre></div></div>
+
+<h4 id="真假检查">真假检查</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@AssertTrue 验证 Boolean 对象是否为 true 
+@AssertFalse 验证 Boolean 对象是否为 false
+</code></pre></div></div>
+
+<h4 id="长度检查">长度检查</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@Size(min=, max=) 验证对象（Array,Collection,Map,String）长度是否在给定的范围之内
+</code></pre></div></div>
+
+<h4 id="日期检查">日期检查</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@Past 验证 Date 和 Calendar 对象是否在当前时间之前，验证成立的话被注释的元素一定是一个过去的日期
+
+@Future 验证 Date 和 Calendar 对象是否在当前时间之后 ，验证成立的话被注释的元素一定是一个将来的日期
+
+@Pattern 验证 String 对象是否符合正则表达式的规则，被注释的元素符合制定的正则表达式，
+regexp:正则表达式 
+flags: 指定 Pattern.Flag 的数组，表示正则表达式的相关选项
+
+</code></pre></div></div>
+
+<h4 id="数值检查">数值检查</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@Min 验证 Number 和 String 对象是否大等于指定的值 
+
+@Max 验证 Number 和 String 对象是否小等于指定的值
+
+@DecimalMax 被标注的值必须不大于约束中指定的最大值. 这个约束的参数是一个通过BigDecimal定义的最大值的字符串表示.小数存在精度
+
+@DecimalMin 被标注的值必须不小于约束中指定的最小值. 这个约束的参数是一个通过BigDecimal定义的最小值的字符串表示.小数存在精度
+
+@Digits 验证 Number 和 String 的构成是否合法
+
+@Digits(integer=,fraction=) 验证字符串是否是符合指定格式的数字，interger指定整数精度，fraction指定小数精度
+
+@Range(min=, max=) 被指定的元素必须在合适的范围内 
+
+@Valid 递归的对关联对象进行校验, 如果关联对象是个集合或者数组,那么对其中的元素进行递归校验,如果是一个map,则对其中的值部分进行校验.(是否进行递归验证) 
+
+@CreditCardNumber信用卡验证 
+
+@Email 验证是否是邮件地址，如果为null,不进行验证，算通过验证。 
+
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Order</span> <span class="o">{</span>
+    <span class="c1">// 必须不为 null, 大小是 10</span>
+    <span class="nd">@NotNull</span>
+    <span class="nd">@Size</span><span class="o">(</span><span class="n">min</span> <span class="o">=</span> <span class="mi">10</span><span class="o">,</span> <span class="n">max</span> <span class="o">=</span> <span class="mi">10</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">orderId</span><span class="o">;</span>
+    <span class="c1">// 必须不为空</span>
+    <span class="nd">@NotEmpty</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">customer</span><span class="o">;</span>
+    <span class="c1">// 必须是一个电子信箱地址</span>
+    <span class="nd">@Email</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">email</span><span class="o">;</span>
+    <span class="c1">// 必须不为空</span>
+    <span class="nd">@NotEmpty</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">address</span><span class="o">;</span>
+    <span class="c1">// 必须不为 null, 必须是下面四个字符串'created', 'paid', 'shipped', 'closed'其中之一</span>
+    <span class="c1">// @Status 是一个定制化的 contraint</span>
+    <span class="nd">@NotNull</span>
+    <span class="nd">@Status</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">status</span><span class="o">;</span>
+    <span class="c1">// 必须不为 null</span>
+    <span class="nd">@NotNull</span>
+    <span class="kd">private</span> <span class="nc">Date</span> <span class="n">createDate</span><span class="o">;</span>
+    <span class="c1">// 嵌套验证</span>
+    <span class="nd">@Valid</span>
+    <span class="kd">private</span> <span class="nc">Product</span> <span class="n">product</span><span class="o">;</span>
+ 
+   <span class="c1">// getter 和setter方法</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@NotNull</span><span class="o">(</span><span class="n">message</span> <span class="o">=</span> <span class="s">"adultTax不能为空"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Integer</span> <span class="n">adultTax</span><span class="o">;</span>
+ 
+    <span class="nd">@NotNull</span><span class="o">(</span><span class="n">message</span> <span class="o">=</span> <span class="s">"adultTaxType不能为空"</span><span class="o">)</span>
+    <span class="nd">@Min</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">message</span> <span class="o">=</span> <span class="s">"adultTaxType 的最小值为0"</span><span class="o">)</span>
+    <span class="nd">@Max</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span> <span class="n">message</span> <span class="o">=</span> <span class="s">"adultTaxType 的最大值为1"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">Integer</span> <span class="n">adultTaxType</span><span class="o">;</span>
+ 
+    <span class="nd">@NotNull</span><span class="o">(</span><span class="n">message</span> <span class="o">=</span> <span class="s">"reason信息不可以为空"</span><span class="o">)</span>
+    <span class="nd">@Pattern</span><span class="o">(</span><span class="n">regexp</span> <span class="o">=</span> <span class="s">"[1-7]{1}"</span><span class="o">,</span> <span class="n">message</span> <span class="o">=</span> <span class="s">"reason的类型值为1-7中的一个类型"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">reason</span><span class="o">;</span><span class="c1">//订单取消原因</span>
+</code></pre></div></div>
+
+:ET

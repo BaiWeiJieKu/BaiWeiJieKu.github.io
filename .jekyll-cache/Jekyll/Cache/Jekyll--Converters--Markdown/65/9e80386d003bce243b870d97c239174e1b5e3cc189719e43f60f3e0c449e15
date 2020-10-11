@@ -1,0 +1,76 @@
+I"v<ul id="markdown-toc">
+  <li><a href="#调度概述" id="markdown-toc-调度概述">调度概述</a></li>
+</ul>
+<h2 id="调度概述">调度概述</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>任务调度：是指系统在某个时间执行的特定的命令或程序。
+
+任务调度分类：
+	1.系统工作：有些重要的工作必须周而复始地执行。如病毒扫描等
+	2.个别用户工作：个别用户可能希望执行某些程序，比如对mysql 数据库的备份。
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>基本语法
+	crontab [选项]
+常用选项
+	-e 编辑crontab定时任务
+	-l 查询crontab任务
+	-r 删除当前用户所有的crontab任务
+	service crond restart [重启任务调度]
+参数细节
+	第一个* 一小时当中的第几分钟  范围0-59
+	第二个* 一天当中的第几小时    范围0-23
+	第三个* 一个月中的第几天      范围1-31
+	第四个* 一年中的第几个月      范围1-12
+	第五个* 一周当中的星期几      范围0-7（0和7都代表星期日）
+符号说明
+	* 代表任何时间，比如第一个*代表一小时中每分钟都执行一次
+	， 代表不连续的事件，比如“0 8，12，16 * * *”代表在每天的八点，十二点，十六点都执行一次命令
+	- 代表连续的时间范围。0 5 * * 1-6代表在周一到周六的凌晨五点执行命令
+	*/n 代表每隔多久执行一次。*/10 * * * * 代表每隔十分钟执行一次
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>设置任务调度文件：/etc/crontab
+设置个人任务调度。执行crontab –e 命令。
+接着输入任务到调度文件
+如：*/1 * * * * ls –l /etc/ &gt; /tmp/to.txt
+意思说每小时的每分钟执行ls –l /etc/ &gt; /tmp/to.txt 命令
+
+1)	cron -e
+2)	*/ 1 * * * * ls -l /etc &gt;&gt; /tmp/to.txt
+3)	当保存退出后就程序。
+4)	在每一分钟都会自动的调用 ls -l /etc &gt;&gt; /tmp/to.txt
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>案例1：每隔 1 分钟，就将当前的日期信息，追加到 /tmp/mydate 文件
+
+1)	先编写一个文件 /home/mytask1.sh 
+	date &gt;&gt; /tmp/mydate
+2)	给mytask1.sh 一个可以执行权限chmod 744 /home/mytask1.sh
+3)	crontab -e
+4)	*/1 * * * * /home/mytask1.sh
+5)	成功
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>案例2：每隔1 分钟， 将当前日期和日历都追加到 /home/mycal 文件
+
+1)	先编写一个文件 /home/mytask2.sh 
+	date &gt;&gt; /tmp/mycal
+	cal &gt;&gt; /tmp/mycal
+2)	给mytask1.sh 一个可以执行权限chmod 744 /home/mytask2.sh
+3)	crontab -e
+4)	*/1 * * * * /home/mytask2.sh
+5)	成功
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>案例3:每天凌晨2:00 将mysql 数据库 testdb ，备份到文件中mydb.bak
+
+1) 先编写一个文件 /home/mytask3.sh
+	/usr/local/mysql/bin/mysqldump -u root -proot testdb &gt; /tmp/mydb.bak
+2) 给mytask3.sh一个执行权限
+	chmod 744 /home/mytask3.sh
+3)	crontab -e
+4)	0 2 * * * /home/mytask3.sh
+5)	成功
+</code></pre></div></div>
+:ET

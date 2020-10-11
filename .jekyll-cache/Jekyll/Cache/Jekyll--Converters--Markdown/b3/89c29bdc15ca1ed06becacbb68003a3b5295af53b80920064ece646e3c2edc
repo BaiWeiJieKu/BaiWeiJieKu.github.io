@@ -1,0 +1,57 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#语法特点" id="markdown-toc-语法特点">语法特点</a>    <ul>
+      <li><a href="#别名" id="markdown-toc-别名">别名</a></li>
+      <li><a href="#去重" id="markdown-toc-去重">去重</a></li>
+      <li><a href="#加号" id="markdown-toc-加号">加号</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="语法特点">语法特点</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>语法：
+SELECT 要查询的东西
+【FROM 表名】;
+
+类似于Java中 :System.out.println(要打印的东西);
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>特点：
+①通过select查询完的结果 ，是一个虚拟的表格，不是真实存在
+② 要查询的东西 可以是常量值、可以是表达式、可以是字段、可以是函数
+select * from table;
+select 100;
+select 'join';
+select 100%98;值为2
+select VERSION();
+</code></pre></div></div>
+
+<h3 id="别名">别名</h3>
+
+<pre><code class="language-mysql">#支持起别名，用as,as可以省略，如果别名中有特殊符号，别名用双引号
+select name as 姓名 from table;
+select name "hello word" from table;
+</code></pre>
+
+<h3 id="去重">去重</h3>
+
+<pre><code class="language-mysql">#去重：查询员工表中涉及到的所有的部门编号
+SELECT DISTINCT department_id FROM employees;
+</code></pre>
+
+<h3 id="加号">加号</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># +号的作用
+仅仅只有一个功能：运算符
+select 100+90; 两个操作数都为数值型，则做加法运算
+select '123'+90;只要其中一方为字符型，试图将字符型数值转换成数值型，如果转换成功，则继续做加法运算，如果				转换失败，则将字符型数值转换成0
+select null+10; 只要其中一方为null，则结果肯定为null
+
+案例：查询员工名和姓连接成一个字段，并显示为 姓名
+SELECT CONCAT('a','b','c') AS 结果;
+SELECT 
+	CONCAT(last_name,first_name) AS 姓名
+FROM
+	employees;
+</code></pre></div></div>
+
+:ET

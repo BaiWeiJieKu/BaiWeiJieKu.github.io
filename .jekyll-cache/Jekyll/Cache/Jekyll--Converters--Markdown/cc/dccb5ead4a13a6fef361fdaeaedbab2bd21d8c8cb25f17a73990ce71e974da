@@ -1,0 +1,61 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#初识redis" id="markdown-toc-初识redis">初识redis</a></li>
+</ul>
+<h3 id="初识redis">初识redis</h3>
+
+<ul>
+  <li>
+    <p>redis是什么：开源的基于键值对的存储服务系统。拥有多种数据结构，高性能，功能丰富</p>
+  </li>
+  <li>
+    <p>redis特性：</p>
+
+    <p>速度快，10w OPS 内存</p>
+
+    <p>持久化，将数据的更新异步的保存在磁盘上</p>
+
+    <p>多种数据结构，字符串、hash、列表、集合、有序集合   延伸到位图</p>
+
+    <p>支持多种编程语言。</p>
+
+    <p>功能丰富，–发布订阅  LUA脚本  事务  pipeline（并发效率）“ 瑞士军刀”</p>
+
+    <p>简单， –不依赖外部库  单线程模型</p>
+
+    <p>主从复制（重要）</p>
+
+    <p>高可用，分布式（重点）</p>
+
+    <p>v2.8开始支持Redis-Sentinel（哨兵）高可用</p>
+
+    <p>v3.0开始支持Redis-Cluster                分布式</p>
+  </li>
+  <li>
+    <p>redis典型应用场景：</p>
+
+    <p>缓存系统</p>
+
+    <p><img src="https://i.loli.net/2020/03/01/f5Rx2BNEWGQeps6.png" alt="image.png" /></p>
+
+    <p>计数器</p>
+
+    <p><img src="https://i.loli.net/2020/03/01/uswm4GZTSegRlVL.png" alt="image.png" /></p>
+
+    <p>消息队列系统</p>
+
+    <p><img src="https://i.loli.net/2020/03/01/aLvBkWcySljVJdn.png" alt="image.png" /></p>
+
+    <p>排行榜</p>
+
+    <p><img src="https://i.loli.net/2020/03/01/WMZAtTKaBps8kEf.png" alt="image.png" /></p>
+
+    <p>社交系统</p>
+
+    <p><img src="https://i.loli.net/2020/03/01/lotILf8d4TM1k7D.png" alt="image.png" /></p>
+
+    <p>实时系统</p>
+
+    <p><img src="https://i.loli.net/2020/03/01/9UCQZNkro74KWxP.png" alt="image.png" /></p>
+  </li>
+</ul>
+:ET

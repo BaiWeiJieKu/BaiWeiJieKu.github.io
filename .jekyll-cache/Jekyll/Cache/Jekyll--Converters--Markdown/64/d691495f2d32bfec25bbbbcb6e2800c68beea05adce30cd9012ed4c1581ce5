@@ -1,0 +1,276 @@
+I"2L<ul id="markdown-toc">
+  <li><a href="#编辑器" id="markdown-toc-编辑器">编辑器</a>    <ul>
+      <li><a href="#介绍" id="markdown-toc-介绍">介绍</a></li>
+      <li><a href="#三种模式" id="markdown-toc-三种模式">三种模式</a></li>
+      <li><a href="#快捷键" id="markdown-toc-快捷键">快捷键</a></li>
+    </ul>
+  </li>
+  <li><a href="#开关机" id="markdown-toc-开关机">开关机</a>    <ul>
+      <li><a href="#关机重启" id="markdown-toc-关机重启">关机重启</a></li>
+      <li><a href="#登录注销" id="markdown-toc-登录注销">登录注销</a></li>
+    </ul>
+  </li>
+  <li><a href="#用户管理" id="markdown-toc-用户管理">用户管理</a>    <ul>
+      <li><a href="#添加用户" id="markdown-toc-添加用户">添加用户</a></li>
+      <li><a href="#修改密码" id="markdown-toc-修改密码">修改密码</a></li>
+      <li><a href="#删除用户" id="markdown-toc-删除用户">删除用户</a></li>
+      <li><a href="#查询用户" id="markdown-toc-查询用户">查询用户</a></li>
+      <li><a href="#切换用户" id="markdown-toc-切换用户">切换用户</a></li>
+    </ul>
+  </li>
+  <li><a href="#用户组" id="markdown-toc-用户组">用户组</a>    <ul>
+      <li><a href="#增加组" id="markdown-toc-增加组">增加组</a></li>
+      <li><a href="#删除组" id="markdown-toc-删除组">删除组</a></li>
+      <li><a href="#用户加组" id="markdown-toc-用户加组">用户加组</a></li>
+      <li><a href="#修改用户组" id="markdown-toc-修改用户组">修改用户组</a></li>
+    </ul>
+  </li>
+  <li><a href="#etc文件" id="markdown-toc-etc文件">etc文件</a>    <ul>
+      <li><a href="#passwd" id="markdown-toc-passwd">passwd</a></li>
+      <li><a href="#shadow" id="markdown-toc-shadow">shadow</a></li>
+      <li><a href="#group" id="markdown-toc-group">group</a></li>
+    </ul>
+  </li>
+  <li><a href="#目录结构" id="markdown-toc-目录结构">目录结构</a>    <ul>
+      <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="编辑器">编辑器</h2>
+
+<h3 id="介绍">介绍</h3>
+
+<ul>
+  <li>所有的 Linux 系统都会内建 vi 文本编辑器。</li>
+  <li>Vim 具有程序编辑的能力，可以看做是 Vi 的增强版本，可以主动的以字体颜色辨别语法的正确性，方便程序设计。代码补完、编译及错误跳转等方便编程的功能特别丰富，在程序员中被广泛使用。</li>
+</ul>
+
+<h3 id="三种模式">三种模式</h3>
+
+<ul>
+  <li>正常模式</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">在正常模式下，我们可以使用快捷键。</span>
+
+<span class="err">以</span> <span class="err">vim</span> <span class="err">打开一个档案就直接进入一般模式了(这是默认的模式)。在这个模式中，你可以使用『上下左右』按键来移动光标，你可以使用『删除字符』或『删除整行』来处理档案内容，</span> <span class="err">也可以使用『复制、贴上』来处理你的文件数据。</span>
+</code></pre></div></div>
+
+<ul>
+  <li>编辑模式</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">在模式下，程序员可以输入内容。</span>
+<span class="err">按下i,</span> <span class="err">I,</span> <span class="err">o,</span> <span class="err">O,</span> <span class="err">a,</span> <span class="err">A,</span> <span class="err">r,</span> <span class="err">R</span> <span class="err">等任何一个字母之后才会进入编辑模式,</span> <span class="err">一般来说按i</span> <span class="err">即可</span>
+</code></pre></div></div>
+
+<ul>
+  <li>命令行模式</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">在这个模式当中，</span> <span class="err">可以提供你相关指令，完成读取、存盘、替换、离开</span> <span class="err">vim</span> <span class="err">、显示行号等的动作则是在此模式中达成的！</span>
+
+<span class="err">:wq</span>  <span class="err">保存并退出</span>
+<span class="err">:q</span>   <span class="err">不保存退出</span>
+<span class="err">:q</span><span class="c">!  强制退出
+</span></code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code>             <span class="err">命令行</span>  <span class="err">vi或vim</span> <span class="err">xxx</span>
+			        	           
+<span class="err">编辑模式&lt;----（i）------正常模式----(：或/)------&gt;命令模式--------&gt;:wq或：q或:q</span><span class="c">!
+</span>       <span class="err">------(esc)-----&gt;</span>       <span class="err">&lt;---(esc)------</span>
+                             
+</code></pre></div></div>
+
+<h3 id="快捷键">快捷键</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1)</span>	<span class="err">正常模式下拷贝当前行</span> <span class="err">yy</span> <span class="err">,</span> <span class="err">拷贝当前行向下的5</span> <span class="err">行</span> <span class="err">5yy，并粘贴（p）。</span>
+<span class="err">2)</span>	<span class="err">正常模式下删除当前行</span> <span class="err">dd</span> <span class="err">,</span> <span class="err">删除当前行向下的5</span> <span class="err">行</span> <span class="err">5dd</span>
+<span class="err">3)</span>	<span class="err">在文件中查找某个单词</span> <span class="err">[命令行下</span> <span class="err">/关键字</span> <span class="err">，</span> <span class="err">回车查找</span> <span class="err">,</span> <span class="err">输入n就是查找下一个]</span>
+<span class="err">4)</span>	<span class="err">设置文件的行号，取消文件的行号.[命令行下</span> <span class="err">:</span> <span class="err">set</span> <span class="err">nu</span> <span class="err">和</span> <span class="err">:set</span> <span class="err">nonu]</span>
+<span class="err">5)</span>	<span class="err">编辑</span> <span class="err">/etc/profile</span> <span class="err">文件，使用快捷键到底文档的最末行[G]和最首行[gg],注意这些都是在正常模式下执行的。</span>
+<span class="err">6)</span>	<span class="err">在一个文件中输入</span> <span class="err">"hello"</span> <span class="err">,然后又撤销这个动作，再正常模式下输入</span> <span class="err">u</span>
+<span class="err">7)编辑</span> <span class="err">/etc/profile</span> <span class="err">文件，并将光标移动到</span> <span class="err">第20</span> <span class="err">行</span> <span class="err">shift+g</span>
+<span class="err">第一步：显示行号</span> <span class="err">:set</span> <span class="err">nu</span>
+<span class="err">第二步：输入20</span> <span class="err">这个数</span>
+<span class="err">第三步:</span> <span class="err">输入shift+g</span>
+</code></pre></div></div>
+
+<h2 id="开关机">开关机</h2>
+
+<h3 id="关机重启">关机重启</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">shutdown</span><span class="p">:</span>
+<span class="err">shutdown</span> <span class="err">-h</span> <span class="py">now</span> <span class="p">:</span> <span class="s">表示立即关机</span>
+<span class="err">shutdown</span> <span class="err">-h</span> <span class="py">1</span> <span class="p">:</span> <span class="s">表示1 分钟后关机</span>
+<span class="err">shutdown</span> <span class="err">-r</span> <span class="py">now</span><span class="p">:</span> <span class="s">立即重启</span>
+
+<span class="py">halt</span><span class="p">:</span><span class="s">就是直接使用，效果等价于关机</span>
+<span class="py">reboot</span><span class="p">:</span><span class="s">就是重启系统。</span>
+<span class="err">syn</span> <span class="err">：</span> <span class="err">把内存的数据同步到磁盘</span>
+
+<span class="err">当我们关机或者重启时，都应该先执行以下sync</span> <span class="err">指令，把内存的数据写入磁盘，防止数据丢失。</span>
+</code></pre></div></div>
+
+<h3 id="登录注销">登录注销</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1)</span> <span class="err">登录时尽量少用</span> <span class="err">root</span> <span class="err">帐号登录，因为它是系统管理员，最大的权限，避免操作失误。可以利用普通用户登录，登录后再用”su</span> <span class="err">-</span> <span class="err">用户名’命令来切换成系统管理员身份.</span>
+<span class="err">2)</span> <span class="err">在提示符下输入</span> <span class="err">logout</span> <span class="err">即可注销用户</span>
+</code></pre></div></div>
+
+<h2 id="用户管理">用户管理</h2>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1)</span> <span class="err">Linux</span> <span class="err">系统是一个多用户多任务的操作系统，任何一个要使用系统资源的用户，都必须首先向系统管理员申请一个账号，然后以这个账号的身份进入系统。</span>
+<span class="err">2)</span> <span class="err">Linux</span> <span class="err">的用户需要至少要属于一个组。</span>
+</code></pre></div></div>
+
+<h3 id="添加用户">添加用户</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">useradd</span> <span class="err">[选项]</span> <span class="err">用户名</span>
+
+<span class="err">例：useradd</span> <span class="err">xm</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1)</span> <span class="err">当创建用户成功后，会自动的创建和用户同名的家目录</span>
+<span class="err">2)</span> <span class="err">也可以通过</span> <span class="err">useradd</span> <span class="err">-d</span> <span class="err">指定目录</span> <span class="err">新的用户名，给新创建的用户指定家目录</span>
+
+<span class="err">例：useradd</span> <span class="err">-d</span> <span class="err">/home/dog</span> <span class="err">xq</span>
+</code></pre></div></div>
+
+<h3 id="修改密码">修改密码</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">passwd</span> <span class="err">用户名</span>
+
+<span class="err">应用案例</span>
+<span class="err">1)</span> <span class="err">给xiaoming</span> <span class="err">指定密码</span>
+<span class="err">passwd</span> <span class="err">xm</span>
+</code></pre></div></div>
+
+<h3 id="删除用户">删除用户</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="err">1)</span> <span class="err">删除用户xm，但是要保留家目录</span>
+   <span class="err">userdel</span> <span class="err">用户名</span>
+<span class="err">2)</span> <span class="err">删除用户xh</span> <span class="err">以及用户主目录</span>
+   <span class="err">userdel</span> <span class="err">-r</span> <span class="err">xq</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">在删除用户时，我们一般不会将家目录删除。</span>
+</code></pre></div></div>
+
+<h3 id="查询用户">查询用户</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">id</span> <span class="err">用户名</span>
+<span class="err">1)</span> <span class="err">当用户不存在时，返回”无此用户”</span>
+
+<span class="err">例：查询root信息</span>
+<span class="err">id</span> <span class="err">root</span>
+
+<span class="py">uid</span><span class="p">=</span><span class="s">0(root) gid=0(root) 组=0（root）</span>
+<span class="err">用户ID</span>       <span class="err">组ID</span>        <span class="err">组名</span>
+</code></pre></div></div>
+
+<h3 id="切换用户">切换用户</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">在操作Linux</span> <span class="err">中，如果当前用户的权限不够，可以通过</span> <span class="err">su</span> <span class="err">-</span> <span class="err">指令，切换到高权限用户，比如root</span>
+
+<span class="err">su</span> <span class="err">–</span> <span class="err">切换用户名</span>
+
+<span class="err">1)</span> <span class="err">创建一个用户zf,</span> <span class="err">，指定密码，然后切换到</span> <span class="err">zf.</span>
+<span class="err">su</span> <span class="err">-zf</span>
+<span class="err">exit</span> <span class="err">返回原来用户</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1)</span>	<span class="err">从权限高的用户切换到权限低的用户，不需要输入密码，反之需要。</span>
+<span class="err">2)</span>	<span class="err">当需要返回到原来用户时，使用exit</span> <span class="err">指令</span>
+</code></pre></div></div>
+
+<h2 id="用户组">用户组</h2>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">类似于角色，系统可以对有共性的多个用户进行统一的管理。</span>
+</code></pre></div></div>
+
+<h3 id="增加组">增加组</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">groupadd</span> <span class="err">组名</span>
+</code></pre></div></div>
+
+<h3 id="删除组">删除组</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">groupdel</span> <span class="err">组名</span>
+</code></pre></div></div>
+
+<h3 id="用户加组">用户加组</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">useradd</span> <span class="err">-g</span> <span class="err">用户组</span> <span class="err">用户名</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">增加一个用户</span> <span class="err">zwj,</span> <span class="err">直接将他指定到</span> <span class="err">wudang</span>
+
+<span class="err">groupadd</span> <span class="err">wudang</span>
+<span class="err">useradd</span> <span class="err">-g</span> <span class="err">wudang(组名)</span> <span class="err">zwj(用户名)</span>
+</code></pre></div></div>
+
+<h3 id="修改用户组">修改用户组</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">usermod</span> <span class="err">-g</span> <span class="err">用户组</span> <span class="err">用户名</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">创建一个shaolin</span> <span class="err">组，让将zwj</span> <span class="err">用户修改到shaolin</span>
+
+<span class="err">groupadd</span> <span class="err">shaolin</span>
+<span class="err">usermod</span> <span class="err">-g</span> <span class="err">shaolin</span> <span class="err">zwj</span>
+</code></pre></div></div>
+
+<h2 id="etc文件">etc文件</h2>
+
+<h3 id="passwd">passwd</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">/etc/passwd</span> <span class="err">文件</span>
+
+<span class="err">用户（user）的配置文件，记录用户的各种信息</span>
+<span class="err">每行的含义：用户名:口令:用户标识号:组标识号:注释性描述:主目录:登录Shell</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">zwj</span><span class="p">:</span><span class="s">x:503:504::/home/zwj:/bin/bash</span>
+
+<span class="py">503</span><span class="p">:</span><span class="s">用户ID</span>
+<span class="err">504：组ID</span>
+<span class="err">/home/zwj</span>  <span class="err">家目录</span>
+
+</code></pre></div></div>
+
+<h3 id="shadow">shadow</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">口令的配置文件</span>
+<span class="err">行的含义：登录名:加密口令:最后一次修改时间:最小时间间隔:最大时间间隔:警告时间:不活动时间:失效时间:标志</span>
+</code></pre></div></div>
+
+<h3 id="group">group</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">组(group)的配置文件，记录Linux</span> <span class="err">包含的组的信息</span>
+<span class="err">每行含义：组名:口令:组标识号:组内用户列表</span>
+</code></pre></div></div>
+
+<h2 id="目录结构">目录结构</h2>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">linux</span> <span class="err">的文件系统是采用级层式的树状目录结构，在此结构中的最上层是根目录“/”，然后在此目录下再创建其他的目录。</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">记住一句经典的话：在Linux</span> <span class="err">世界里，一切皆文件。</span>
+</code></pre></div></div>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/l1.png" alt="" /></p>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/l2.png" alt="" /></p>
+
+<h3 id="总结">总结</h3>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">1)</span> <span class="err">linux</span> <span class="err">的目录中有且只要一个根目录/</span>
+<span class="err">2)</span> <span class="err">linux</span> <span class="err">的各个目录存放的内容是规划好，不用乱放文件。</span>
+<span class="err">3)</span> <span class="err">linux</span> <span class="err">是以文件的形式管理我们的设备，因此linux</span> <span class="err">系统，一切皆为文件。</span>
+<span class="err">4)</span> <span class="err">linux</span> <span class="err">的各个文件目录下存放什么内容，大家必须有一个认识。</span>
+<span class="err">5)</span> <span class="err">学习后，你脑海中应该有一颗linux</span> <span class="err">目录树</span>
+</code></pre></div></div>
+
+:ET

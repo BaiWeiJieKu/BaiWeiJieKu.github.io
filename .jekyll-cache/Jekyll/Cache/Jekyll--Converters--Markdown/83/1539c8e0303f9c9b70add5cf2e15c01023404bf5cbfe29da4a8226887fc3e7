@@ -1,0 +1,40 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#入门使用" id="markdown-toc-入门使用">入门使用</a></li>
+</ul>
+<h2 id="入门使用">入门使用</h2>
+
+<ul>
+  <li>为了应付这种测试的需求，我们就需要使用 junit 测试框架来进行测试工作</li>
+  <li>首先下载 jar 包:  junit-4.9.jar， 导入到项目中。</li>
+  <li>它是由 @Test 进行了注解，表示这个方法是一个测试方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">junit</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">junit.framework.Assert</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestCase1</span> <span class="o">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testSum1</span><span class="o">()</span> <span class="o">{</span>
+    	<span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="nc">SumUtil</span><span class="o">.</span><span class="na">sum1</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+    	<span class="nc">Assert</span><span class="o">.</span><span class="na">assertEquals</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+        <span class="cm">/*
+        Assert.assertEquals(result, 3); 表示对 result 数值的期待是 3，如果是其他数值，就无法通过		 测试。
+        */</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>与main方法运行不一样，运行测试用例的时候，需要选择 <code class="language-plaintext highlighter-rouge">Run As -&gt; JUnit Test </code>方式</p>
+  </li>
+  <li>新增加的测试，对原来的测试没有影响</li>
+  <li>如果测试失败了，会立即得到通知</li>
+</ul>
+:ET

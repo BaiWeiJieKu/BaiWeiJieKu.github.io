@@ -1,0 +1,248 @@
+I"�@<ul id="markdown-toc">
+  <li><a href="#场景" id="markdown-toc-场景">场景</a></li>
+  <li><a href="#核心" id="markdown-toc-核心">核心</a></li>
+  <li><a href="#本质" id="markdown-toc-本质">本质</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a>    <ul>
+      <li><a href="#中介者接口" id="markdown-toc-中介者接口">中介者接口</a></li>
+      <li><a href="#中介者实现类" id="markdown-toc-中介者实现类">中介者实现类</a></li>
+      <li><a href="#同事类接口" id="markdown-toc-同事类接口">同事类接口</a></li>
+      <li><a href="#开发部" id="markdown-toc-开发部">开发部</a></li>
+      <li><a href="#市场部" id="markdown-toc-市场部">市场部</a></li>
+      <li><a href="#财务部" id="markdown-toc-财务部">财务部</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+      <li><a href="#原理" id="markdown-toc-原理">原理</a></li>
+    </ul>
+  </li>
+  <li><a href="#开发场景" id="markdown-toc-开发场景">开发场景</a></li>
+</ul>
+<h3 id="场景">场景</h3>
+
+<ul>
+  <li>假如没有总经理。下面三个部门：财务部、市场部、研发部。财务部要发工资，让大家核对公司需要跟市场部和研发部都通气；市场部要接个新项目，需要研发部处理技术、需要财务部出资金。市场部跟各个部门打交道。  虽然只有三个部门，但是关系非常乱</li>
+  <li>实际上，公司都有总经理。各个部门有什么事情都通报到总经理这里，总经理再通知各个相关部门</li>
+  <li>这就是一个典型的“中介者模式”总经理起到一个中介、协调的作用</li>
+</ul>
+
+<h3 id="核心">核心</h3>
+
+<ul>
+  <li>–如果一个系统中对象之间的联系呈现为网状结构，对象之间存在大量多对多关系，将导致关系及其复杂，<strong>这些对象称为“同事对象”</strong></li>
+  <li>我们可以引入一个<strong>中介者对象</strong>，使各个同事对象只跟中介者对象打交道，将复杂的网络结构化解为如下的星形结构</li>
+</ul>
+
+<h3 id="本质">本质</h3>
+
+<ul>
+  <li>解耦多个同事对象之间的交互关系。每个对象都持有中介者对象的引用，只跟中介者对象打交道。我们通过中介者对象统一管理这些交互关系</li>
+</ul>
+
+<h3 id="案例">案例</h3>
+
+<h4 id="中介者接口">中介者接口</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.mediator</span><span class="o">;</span>
+<span class="cm">/**
+ * 中介者接口
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Mediator</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 注册
+	 * @param dname
+	 * @param d
+	 */</span>
+	<span class="kt">void</span> <span class="nf">register</span><span class="o">(</span><span class="nc">String</span> <span class="n">dname</span><span class="o">,</span><span class="nc">Department</span> <span class="n">d</span><span class="o">);</span>
+	<span class="cm">/**
+	 * 命令
+	 * @param dname
+	 */</span>
+	<span class="kt">void</span> <span class="nf">command</span><span class="o">(</span><span class="nc">String</span> <span class="n">dname</span><span class="o">);</span>
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="中介者实现类">中介者实现类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.mediator</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+<span class="cm">/**
+ * 中介者实现类
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">President</span> <span class="kd">implements</span> <span class="nc">Mediator</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 存储同事类
+	 */</span>
+	<span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Department</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">String</span> <span class="o">,</span> <span class="nc">Department</span><span class="o">&gt;();</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">command</span><span class="o">(</span><span class="nc">String</span> <span class="n">dname</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">dname</span><span class="o">).</span><span class="na">selfAction</span><span class="o">();</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">register</span><span class="o">(</span><span class="nc">String</span> <span class="n">dname</span><span class="o">,</span> <span class="nc">Department</span> <span class="n">d</span><span class="o">)</span> <span class="o">{</span>
+		<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">dname</span><span class="o">,</span> <span class="n">d</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="同事类接口">同事类接口</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.mediator</span><span class="o">;</span>
+
+<span class="c1">//同事类的接口</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Department</span> <span class="o">{</span>
+	<span class="kt">void</span> <span class="nf">selfAction</span><span class="o">();</span> <span class="c1">//做本部门的事情</span>
+	<span class="kt">void</span> <span class="nf">outAction</span><span class="o">();</span>  <span class="c1">//向总经理发出申请</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="开发部">开发部</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.mediator</span><span class="o">;</span>
+<span class="cm">/**
+ * 开发部
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Development</span> <span class="kd">implements</span> <span class="nc">Department</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Mediator</span> <span class="n">m</span><span class="o">;</span>  <span class="c1">//持有中介者(总经理)的引用</span>
+	
+	<span class="kd">public</span> <span class="nf">Development</span><span class="o">(</span><span class="nc">Mediator</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">;</span>
+		<span class="n">m</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"development"</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">outAction</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"汇报工作！没钱了，需要资金支持！"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">selfAction</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"专心科研，开发项目！"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="市场部">市场部</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.mediator</span><span class="o">;</span>
+<span class="cm">/**
+ * 市场部
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Market</span> <span class="kd">implements</span> <span class="nc">Department</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Mediator</span> <span class="n">m</span><span class="o">;</span>  <span class="c1">//持有中介者(总经理)的引用</span>
+	
+	<span class="kd">public</span> <span class="nf">Market</span><span class="o">(</span><span class="nc">Mediator</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">;</span>
+		<span class="n">m</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"market"</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">outAction</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"汇报工作！项目承接的进度，需要资金支持！"</span><span class="o">);</span>
+		
+		<span class="n">m</span><span class="o">.</span><span class="na">command</span><span class="o">(</span><span class="s">"finacial"</span><span class="o">);</span>
+		
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">selfAction</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"跑去接项目！"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="财务部">财务部</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.mediator</span><span class="o">;</span>
+<span class="cm">/**
+ * 财务部
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Finacial</span> <span class="kd">implements</span> <span class="nc">Department</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Mediator</span> <span class="n">m</span><span class="o">;</span>  <span class="c1">//持有中介者(总经理)的引用</span>
+	
+	<span class="kd">public</span> <span class="nf">Finacial</span><span class="o">(</span><span class="nc">Mediator</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">m</span> <span class="o">=</span> <span class="n">m</span><span class="o">;</span>
+		<span class="n">m</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"finacial"</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">outAction</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"汇报工作！没钱了，钱太多了！怎么花?"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">selfAction</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"数钱！"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.mediator</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Client</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Mediator</span> <span class="n">m</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">President</span><span class="o">();</span>
+		
+		<span class="nc">Market</span>   <span class="n">market</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Market</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
+		<span class="nc">Development</span> <span class="n">devp</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Development</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
+		<span class="nc">Finacial</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Finacial</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
+		
+		<span class="n">market</span><span class="o">.</span><span class="na">selfAction</span><span class="o">();</span>
+		<span class="n">market</span><span class="o">.</span><span class="na">outAction</span><span class="o">();</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>跑去接项目！
+汇报工作！项目承接的进度，需要资金支持！
+数钱！
+</code></pre></div></div>
+
+<h4 id="原理">原理</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>总经理（中介者）---&gt;实现中介者接口（包含接收信息和发布命令两个方法）
+同事类---&gt;实现同事接口（包含自己业务需求和向中介者发送请求两个方法）
+市场部---&gt;需要资金支持---&gt;总经理（中介者）接收到请求---&gt;向财务部发布命令---&gt;财务部执行自己方法
+</code></pre></div></div>
+
+<h3 id="开发场景">开发场景</h3>
+
+<ul>
+  <li>MVC模式(其中的C，控制器就是一个中介者对象。M和V都和他打交道)</li>
+  <li>窗口游戏程序，窗口软件开发中窗口对象也是一个中介者对象</li>
+  <li>图形界面开发GUI中，多个组件之间的交互，可以通过引入一个中介者对象来解决，可以是整体的窗口对象或者DOM对象</li>
+  <li>Java.lang.reflect.Method#invoke()</li>
+</ul>
+:ET

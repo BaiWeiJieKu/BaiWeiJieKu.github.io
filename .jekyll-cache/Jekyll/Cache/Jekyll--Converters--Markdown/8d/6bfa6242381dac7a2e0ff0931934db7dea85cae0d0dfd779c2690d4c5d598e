@@ -1,0 +1,772 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#配置文件" id="markdown-toc-配置文件">配置文件</a></li>
+  <li><a href="#内置注解" id="markdown-toc-内置注解">内置注解</a>    <ul>
+      <li><a href="#override" id="markdown-toc-override">@Override</a></li>
+      <li><a href="#deprecated" id="markdown-toc-deprecated">@Deprecated</a></li>
+      <li><a href="#suppresswarnings" id="markdown-toc-suppresswarnings">@SuppressWarnings</a></li>
+      <li><a href="#safevarargs" id="markdown-toc-safevarargs">@SafeVarargs</a></li>
+      <li><a href="#functionalinterface" id="markdown-toc-functionalinterface">@FunctionalInterface</a></li>
+    </ul>
+  </li>
+  <li><a href="#自定义注解" id="markdown-toc-自定义注解">自定义注解</a></li>
+  <li><a href="#元注解" id="markdown-toc-元注解">元注解</a>    <ul>
+      <li><a href="#target" id="markdown-toc-target">@Target</a></li>
+      <li><a href="#retention" id="markdown-toc-retention">@Retention</a></li>
+      <li><a href="#inherited" id="markdown-toc-inherited">@Inherited</a></li>
+      <li><a href="#documented" id="markdown-toc-documented">@Documented</a></li>
+      <li><a href="#repeatable" id="markdown-toc-repeatable">@Repeatable</a></li>
+    </ul>
+  </li>
+  <li><a href="#类级别" id="markdown-toc-类级别">类级别</a>    <ul>
+      <li><a href="#entity" id="markdown-toc-entity">@Entity</a></li>
+      <li><a href="#table" id="markdown-toc-table">@Table</a></li>
+      <li><a href="#embeddable" id="markdown-toc-embeddable">@Embeddable</a></li>
+    </ul>
+  </li>
+  <li><a href="#属性级别" id="markdown-toc-属性级别">属性级别</a>    <ul>
+      <li><a href="#id" id="markdown-toc-id">@Id</a></li>
+      <li><a href="#sequencegenerator" id="markdown-toc-sequencegenerator">@SequenceGenerator</a></li>
+      <li><a href="#generatedvalue" id="markdown-toc-generatedvalue">@GeneratedValue</a></li>
+      <li><a href="#column" id="markdown-toc-column">@Column</a></li>
+      <li><a href="#enbedded" id="markdown-toc-enbedded">@Enbedded</a></li>
+      <li><a href="#enbeddedid" id="markdown-toc-enbeddedid">@EnbeddedId</a></li>
+      <li><a href="#lob" id="markdown-toc-lob">@Lob</a></li>
+      <li><a href="#version" id="markdown-toc-version">@Version</a></li>
+      <li><a href="#basic" id="markdown-toc-basic">@Basic</a></li>
+      <li><a href="#transient" id="markdown-toc-transient">@transient</a></li>
+    </ul>
+  </li>
+  <li><a href="#参数校验" id="markdown-toc-参数校验">参数校验</a>    <ul>
+      <li><a href="#notnull" id="markdown-toc-notnull">@NotNull</a></li>
+      <li><a href="#null" id="markdown-toc-null">@Null</a></li>
+      <li><a href="#pattern" id="markdown-toc-pattern">@Pattern</a></li>
+      <li><a href="#size" id="markdown-toc-size">@Size</a></li>
+      <li><a href="#creditcardnumber" id="markdown-toc-creditcardnumber">@CreditCardNumber</a></li>
+      <li><a href="#email" id="markdown-toc-email">@Email</a></li>
+      <li><a href="#length" id="markdown-toc-length">@Length</a></li>
+      <li><a href="#notblank" id="markdown-toc-notblank">@NotBlank</a></li>
+      <li><a href="#notempty" id="markdown-toc-notempty">@NotEmpty</a></li>
+      <li><a href="#range" id="markdown-toc-range">@Range</a></li>
+      <li><a href="#safehtml" id="markdown-toc-safehtml">@SafeHtml</a></li>
+      <li><a href="#url" id="markdown-toc-url">@URL</a></li>
+      <li><a href="#assertfalse" id="markdown-toc-assertfalse">@AssertFalse</a></li>
+      <li><a href="#asserttrue" id="markdown-toc-asserttrue">@AssertTrue</a></li>
+      <li><a href="#decimalmaxvalue" id="markdown-toc-decimalmaxvalue">@DecimalMax(value)</a></li>
+      <li><a href="#decimalminvalue" id="markdown-toc-decimalminvalue">@DecimalMin(value)</a></li>
+      <li><a href="#digitsintegerfraction" id="markdown-toc-digitsintegerfraction">@Digits(integer,fraction)</a></li>
+      <li><a href="#future" id="markdown-toc-future">@Future</a></li>
+      <li><a href="#past" id="markdown-toc-past">@Past</a></li>
+      <li><a href="#maxvalue" id="markdown-toc-maxvalue">@Max(value)</a></li>
+      <li><a href="#minvalue" id="markdown-toc-minvalue">@Min(value)</a></li>
+      <li><a href="#正负数" id="markdown-toc-正负数">正负数</a></li>
+    </ul>
+  </li>
+  <li><a href="#关联级别" id="markdown-toc-关联级别">关联级别</a>    <ul>
+      <li><a href="#一对一单向外键" id="markdown-toc-一对一单向外键">一对一单向外键</a></li>
+      <li><a href="#一对一双向外键" id="markdown-toc-一对一双向外键">一对一双向外键</a></li>
+      <li><a href="#多对一单向外键" id="markdown-toc-多对一单向外键">多对一单向外键</a></li>
+      <li><a href="#多对一双向外键" id="markdown-toc-多对一双向外键">多对一双向外键</a></li>
+      <li><a href="#多对多单向关联" id="markdown-toc-多对多单向关联">多对多单向关联</a></li>
+      <li><a href="#多对多双向关联" id="markdown-toc-多对多双向关联">多对多双向关联</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="配置文件">配置文件</h3>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version='1.0' encoding='utf-8'?&gt;</span>
+<span class="cp">&lt;!DOCTYPE hibernate-configuration PUBLIC
+       "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd"&gt;</span>
+ 
+<span class="nt">&lt;hibernate-configuration&gt;</span>
+ 
+    <span class="nt">&lt;session-factory&gt;</span>
+        <span class="c">&lt;!-- Database connection settings --&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"connection.driver_class"</span><span class="nt">&gt;</span>com.mysql.jdbc.Driver<span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"connection.url"</span><span class="nt">&gt;</span>jdbc:mysql://localhost:3306/test?characterEncoding=UTF-8<span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"connection.characterEncoding"</span><span class="nt">&gt;</span>utf-8<span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"connection.username"</span><span class="nt">&gt;</span>root<span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"connection.password"</span><span class="nt">&gt;</span>admin<span class="nt">&lt;/property&gt;</span>
+        <span class="c">&lt;!-- SQL dialect --&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"dialect"</span><span class="nt">&gt;</span>org.hibernate.dialect.MySQLDialect<span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"current_session_context_class"</span><span class="nt">&gt;</span>thread<span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"show_sql"</span><span class="nt">&gt;</span>true<span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"hbm2ddl.auto"</span><span class="nt">&gt;</span>update<span class="nt">&lt;/property&gt;</span>
+<span class="c">&lt;!--    &lt;mapping resource="com/how2java/pojo/Product.hbm.xml" /&gt;改为注解开发 --&gt;</span>
+        <span class="nt">&lt;mapping</span> <span class="na">class=</span><span class="s">"com.how2java.pojo.Product"</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;/session-factory&gt;</span>
+ 
+<span class="nt">&lt;/hibernate-configuration&gt;</span>
+
+</code></pre></div></div>
+
+<h3 id="内置注解">内置注解</h3>
+
+<h4 id="override">@Override</h4>
+
+<ul>
+  <li>@Override 用在方法上，表示这个方法重写了父类的方法，如toString()</li>
+  <li>如果父类没有这个方法，那么就无法编译通过</li>
+</ul>
+
+<h4 id="deprecated">@Deprecated</h4>
+
+<ul>
+  <li>@Deprecated 表示这个方法已经过期，不建议开发者使用</li>
+</ul>
+
+<h4 id="suppresswarnings">@SuppressWarnings</h4>
+
+<ul>
+  <li>个注解的用处是忽略警告信息</li>
+</ul>
+
+<h4 id="safevarargs">@SafeVarargs</h4>
+
+<ul>
+  <li>@SafeVarargs注解只能用在参数长度可变的方法或构造方法上，且方法必须声明为static或final，否则会出现编译错误</li>
+  <li>一个方法使用@SafeVarargs注解的前提是，开发人员必须确保这个方法的实现中对泛型类型参数的处理不会引发类型安全问题</li>
+</ul>
+
+<h4 id="functionalinterface">@FunctionalInterface</h4>
+
+<ul>
+  <li>用于约定函数式接口</li>
+  <li>函数式接口概念： 如果接口中只有一个抽象方法（可以包含多个默认方法或多个static方法），该接口称为函数式接口</li>
+</ul>
+
+<h3 id="自定义注解">自定义注解</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">anno</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">annotation</span><span class="o">.</span><span class="na">ElementType</span><span class="o">.</span><span class="na">METHOD</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">annotation</span><span class="o">.</span><span class="na">ElementType</span><span class="o">.</span><span class="na">TYPE</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Documented</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Inherited</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Retention</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.RetentionPolicy</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Target</span><span class="o">;</span>
+
+<span class="nd">@Target</span><span class="o">({</span><span class="no">METHOD</span><span class="o">,</span><span class="no">TYPE</span><span class="o">})</span>
+<span class="nd">@Retention</span><span class="o">(</span><span class="nc">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+<span class="nd">@Inherited</span>
+<span class="nd">@Documented</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="nc">JDBCConfig</span> <span class="o">{</span>
+     <span class="nc">String</span> <span class="nf">ip</span><span class="o">();</span> 
+     <span class="kt">int</span> <span class="nf">port</span><span class="o">()</span> <span class="k">default</span> <span class="mi">3306</span><span class="o">;</span> 
+     <span class="nc">String</span> <span class="nf">database</span><span class="o">();</span> 
+     <span class="nc">String</span> <span class="nf">encoding</span><span class="o">();</span> 
+     <span class="nc">String</span> <span class="nf">loginName</span><span class="o">();</span> 
+     <span class="nc">String</span> <span class="nf">password</span><span class="o">();</span> 
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">util</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">anno.JDBCConfig</span><span class="o">;</span>
+
+<span class="nd">@JDBCConfig</span><span class="o">(</span><span class="n">ip</span> <span class="o">=</span> <span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="n">database</span> <span class="o">=</span> <span class="s">"test"</span><span class="o">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="s">"UTF-8"</span><span class="o">,</span> <span class="n">loginName</span> <span class="o">=</span> <span class="s">"root"</span><span class="o">,</span> <span class="n">password</span> <span class="o">=</span> <span class="s">"admin"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DBUtil</span> <span class="o">{</span>
+	<span class="kd">static</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">util</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.DriverManager</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">anno.JDBCConfig</span><span class="o">;</span>
+
+<span class="nd">@JDBCConfig</span><span class="o">(</span><span class="n">ip</span> <span class="o">=</span> <span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="n">database</span> <span class="o">=</span> <span class="s">"test"</span><span class="o">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="s">"UTF-8"</span><span class="o">,</span> <span class="n">loginName</span> <span class="o">=</span> <span class="s">"root"</span><span class="o">,</span> <span class="n">password</span> <span class="o">=</span> <span class="s">"admin"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DBUtil</span> <span class="o">{</span>
+	<span class="kd">static</span> <span class="o">{</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">Connection</span> <span class="nf">getConnection</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">SQLException</span><span class="o">,</span> <span class="nc">NoSuchMethodException</span><span class="o">,</span> <span class="nc">SecurityException</span> <span class="o">{</span>
+		<span class="nc">JDBCConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="nc">DBUtil</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="nc">JDBCConfig</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+		<span class="nc">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">ip</span><span class="o">();</span>
+		<span class="kt">int</span> <span class="n">port</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">port</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">database</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">database</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">encoding</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">loginName</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">loginName</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">password</span><span class="o">();</span>
+
+		<span class="nc">String</span> <span class="n">url</span> <span class="o">=</span> <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"jdbc:mysql://%s:%d/%s?characterEncoding=%s"</span><span class="o">,</span> <span class="n">ip</span><span class="o">,</span> <span class="n">port</span><span class="o">,</span> <span class="n">database</span><span class="o">,</span> <span class="n">encoding</span><span class="o">);</span>
+		<span class="k">return</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="n">loginName</span><span class="o">,</span> <span class="n">password</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">NoSuchMethodException</span><span class="o">,</span> <span class="nc">SecurityException</span><span class="o">,</span> <span class="nc">SQLException</span> <span class="o">{</span>
+		<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="n">getConnection</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="元注解">元注解</h3>
+
+<ul>
+  <li>元数据在英语中对应单词 metadata，为其他数据提供信息的数据</li>
+  <li>元注解 meta annotation用于注解 自定义注解 的注解</li>
+</ul>
+
+<h4 id="target">@Target</h4>
+
+<ul>
+  <li>@Target 表示这个注解能放在什么位置上，是只能放在类上？还是即可以放在方法上，又可以放在属性上</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">ElementType.TYPE：能修饰类、接口或枚举类型</span>
+
+<span class="err">ElementType.FIELD：能修饰成员变量</span>
+
+<span class="err">ElementType.METHOD：能修饰方法</span>
+
+<span class="err">ElementType.PARAMETER：能修饰参数</span>
+
+<span class="err">ElementType.CONSTRUCTOR：能修饰构造器</span>
+
+<span class="err">ElementType.LOCAL_VARIABLE：能修饰局部变量</span>
+
+<span class="err">ElementType.ANNOTATION_TYPE：能修饰注解</span>
+
+<span class="err">ElementType.PACKAGE：能修饰包</span> 
+</code></pre></div></div>
+
+<h4 id="retention">@Retention</h4>
+
+<ul>
+  <li>@Retention 表示生命周期</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">RetentionPolicy.SOURCE：</span> <span class="err">注解只在源代码中存在，编译成class之后，就没了。@Override</span> <span class="err">就是这种注解。</span>
+
+<span class="err">RetentionPolicy.CLASS：</span> <span class="err">注解在java文件编程成.class文件后，依然存在，但是运行起来后就没了。@Retention的默认值，即当没有显式指定@Retention的时候，就会是这种类型</span>
+
+<span class="err">RetentionPolicy.RUNTIME：</span> <span class="err">注解在运行起来之后依然存在，程序可以通过反射获取这些信息</span>
+</code></pre></div></div>
+
+<h4 id="inherited">@Inherited</h4>
+
+<ul>
+  <li>@Inherited 表示该注解具有继承性</li>
+  <li>如例，设计一个DBUtil的子类，其getConnection2方法，可以获取到父类DBUtil上的注解信息。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">util</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.DriverManager</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">anno.JDBCConfig</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DBUtilChild</span> <span class="kd">extends</span> <span class="nc">DBUtil</span> <span class="o">{</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">Connection</span> <span class="nf">getConnection2</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">SQLException</span><span class="o">,</span> <span class="nc">NoSuchMethodException</span><span class="o">,</span> <span class="nc">SecurityException</span> <span class="o">{</span>
+		<span class="nc">JDBCConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="nc">DBUtilChild</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="nc">JDBCConfig</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+		<span class="nc">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">ip</span><span class="o">();</span>
+		<span class="kt">int</span> <span class="n">port</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">port</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">database</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">database</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">encoding</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">loginName</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">loginName</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">password</span><span class="o">();</span>
+
+		<span class="nc">String</span> <span class="n">url</span> <span class="o">=</span> <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"jdbc:mysql://%s:%d/%s?characterEncoding=%s"</span><span class="o">,</span> <span class="n">ip</span><span class="o">,</span> <span class="n">port</span><span class="o">,</span> <span class="n">database</span><span class="o">,</span> <span class="n">encoding</span><span class="o">);</span>
+		<span class="k">return</span> <span class="nc">DriverManager</span><span class="o">.</span><span class="na">getConnection</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="n">loginName</span><span class="o">,</span> <span class="n">password</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">NoSuchMethodException</span><span class="o">,</span> <span class="nc">SecurityException</span><span class="o">,</span> <span class="nc">SQLException</span> <span class="o">{</span>
+		<span class="nc">Connection</span> <span class="n">c</span> <span class="o">=</span> <span class="n">getConnection2</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="documented">@Documented</h4>
+
+<ul>
+  <li>在用javadoc命令生成API文档后，DBUtil的文档里会出现该注解说明</li>
+</ul>
+
+<h4 id="repeatable">@Repeatable</h4>
+
+<ul>
+  <li>当没有@Repeatable修饰的时候，注解在同一个位置，只能出现一次</li>
+</ul>
+
+<h3 id="类级别">类级别</h3>
+
+<h4 id="entity">@Entity</h4>
+
+<ul>
+  <li>映射实体类</li>
+  <li><code class="language-plaintext highlighter-rouge">@Entity(name="tableName")</code></li>
+  <li>name:可选，对应数据库中的一个表，若表名和实体类名相同，则可以省略</li>
+  <li>使用该注解时必须指定实体类的主键属性</li>
+</ul>
+
+<h4 id="table">@Table</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@Table(name="",catalog="",schema="")</code></li>
+  <li>和@Entity配合使用，只能标注在实体的class定义处，表示实体对应的数据表信息</li>
+  <li>name：可选，映射表的名称，默认表名和实体名称一致，若不一致则需要指定表名</li>
+  <li>catalog：可选，表示Catalog名称，默认为空</li>
+  <li>schema：可选，表示Schema名称，默认为空</li>
+  <li>各种数据库系统对catalog和schema的支持和实现不一样</li>
+</ul>
+
+<h4 id="embeddable">@Embeddable</h4>
+
+<ul>
+  <li>表示一个非Entity类可以嵌入到另一个Entity类中作为属性而存在</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Entity</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Employee</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">Department</span> <span class="n">dp</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="nd">@Embeddable</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Department</span><span class="o">{</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="属性级别">属性级别</h3>
+
+<ul>
+  <li>添加到属性字段上面或者get方法上必须统一</li>
+</ul>
+
+<h4 id="id">@Id</h4>
+
+<ul>
+  <li>必须，定义了映射到数据库表的主键的属性</li>
+  <li>一个实体类可以有一个或者多个属性被映射为主键</li>
+  <li>可置于主键属性或者get方法前，如果有多个属性定义为主键属性，该实体类必须实现serializable接口</li>
+</ul>
+
+<h4 id="sequencegenerator">@SequenceGenerator</h4>
+
+<ul>
+  <li>注解声明了一个数据库序列</li>
+  <li>name： 表示该表主键生成策略名称，它被引用在@GeneratedValue中设置的“gernerator”值中</li>
+  <li>sequenceName： 表示生成策略用到的数据库序列名称</li>
+  <li>initialValue： 表示主键初始值，默认为0</li>
+  <li>allocationSize： 每次主键值增加的大小，例如设置成1，则表示每次创建新记录后自动加1，默认为50</li>
+</ul>
+
+<h4 id="generatedvalue">@GeneratedValue</h4>
+
+<ul>
+  <li>可选，用于定义主键生成策略</li>
+  <li><code class="language-plaintext highlighter-rouge">@GeneratedValue(strategy=GenerationType,generator="")</code></li>
+  <li>strategy:表示主键生成策略，取值有：</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GenerationType.AUTO：根据底层数据库自动选择（默认）</span>
+
+<span class="err">GenerationType.INDENTITY：根据数据库的Identity字段生成</span>
+
+<span class="err">GenerationType.SEQUENCE：使用Sequence来决定主键的取值</span>
+
+<span class="err">GenerationType.TABLE：使用指定表来决定主键取值，结合@TableGenerator使用</span>
+
+</code></pre></div></div>
+
+<h4 id="column">@Column</h4>
+
+<ul>
+  <li>可以将属性映射到列，使用该注解来覆盖默认值</li>
+  <li>该注解描述了数据库中该字段的详细定义，这对于根据JPA注解生成数据库表结构的工具非常有作用</li>
+  <li>name：可选，表示数据库中该字段的名称，默认和属性名一致</li>
+  <li>nullable：可选，表示该字段是否允许为null，默认为true</li>
+  <li>unique：可选，表示该字段是否为唯一标识，默认为false</li>
+  <li>length：可选，标识该字段的大小，仅对String类型的字段有效，默认为255，主键不能使用默认值</li>
+  <li>insertable：可选，表示在ORM框架执行插入操作时，该字段是否应出现insert语句中，默认为true</li>
+  <li>updateable：可选，表示在ORM框架执行更新操作时，该字段是否应该出现在UPDATE语句中，默认为true</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"product_"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Product</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
+    <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+    <span class="kt">float</span> <span class="n">price</span><span class="o">;</span>
+     
+    <span class="nd">@Id</span>
+    <span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="nc">GenerationType</span><span class="o">.</span><span class="na">IDENTITY</span><span class="o">)</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"id"</span><span class="o">)</span>  
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setId</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"name"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setName</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"price"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">float</span> <span class="nf">getPrice</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">price</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPrice</span><span class="o">(</span><span class="kt">float</span> <span class="n">price</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">price</span> <span class="o">=</span> <span class="n">price</span><span class="o">;</span>
+    <span class="o">}</span>
+      
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="enbedded">@Enbedded</h4>
+
+<ul>
+  <li>该注解是注释属性的，表示该属性的类是嵌入类</li>
+  <li>同时嵌入类也必须标注@Embeddable注解</li>
+</ul>
+
+<h4 id="enbeddedid">@EnbeddedId</h4>
+
+<ul>
+  <li>该注解使用嵌入式主键类实现复合主键</li>
+  <li>嵌入式主键类必须实现Serializable接口、必须有默认的public无惨数的构造方法、必须覆盖equals和hashcode方法</li>
+</ul>
+
+<h4 id="lob">@Lob</h4>
+
+<ul>
+  <li>该注解表示属性将被持久化为Blob或者Clob类型，具体取决于属性的类型</li>
+</ul>
+
+<h4 id="version">@Version</h4>
+
+<ul>
+  <li>该注解来发现数据库记录的并发操作，当JPA运行时检测到一个并发操作也在试图更改一条记录，他会抛出一个尝试提交事务异常</li>
+</ul>
+
+<h4 id="basic">@Basic</h4>
+
+<ul>
+  <li>对于一些特殊属性，比如长文本类型text、字节流型blob的数据，在加载Entity时，这些属性对应的数据量比较大，有时创建实体如果也加载的话，可能会严重造成资源的占用。</li>
+  <li>该注解可以设置实体属性的加载方式为懒加载</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">@Basic(fetch=FetchType.LAZY,optional=true)</code></p>
+
+<h4 id="transient">@transient</h4>
+
+<ul>
+  <li>表示该属性并非一个到数据库表的字段映射，ORM框架将忽略该属性，ORM默认为@Basic</li>
+</ul>
+
+<h3 id="参数校验">参数校验</h3>
+
+<h4 id="notnull">@NotNull</h4>
+
+<ul>
+  <li>值不能为空，对象类型</li>
+</ul>
+
+<h4 id="null">@Null</h4>
+
+<ul>
+  <li>值必须为空</li>
+</ul>
+
+<h4 id="pattern">@Pattern</h4>
+
+<ul>
+  <li>@Pattern(regex=)：字符串必须匹配正则表达式</li>
+</ul>
+
+<h4 id="size">@Size</h4>
+
+<ul>
+  <li>@Size(min=,max=)：集合的元素数量必须在min和max之间</li>
+</ul>
+
+<h4 id="creditcardnumber">@CreditCardNumber</h4>
+
+<ul>
+  <li>字符串必须是信用卡号</li>
+</ul>
+
+<h4 id="email">@Email</h4>
+
+<ul>
+  <li>字符串必须是email地址</li>
+</ul>
+
+<h4 id="length">@Length</h4>
+
+<ul>
+  <li>@Length（min=，max=）：检查字符串的长度</li>
+</ul>
+
+<h4 id="notblank">@NotBlank</h4>
+
+<ul>
+  <li>字符串必须有字符，不能为空</li>
+</ul>
+
+<h4 id="notempty">@NotEmpty</h4>
+
+<ul>
+  <li>字符串不为null，集合有元素</li>
+</ul>
+
+<h4 id="range">@Range</h4>
+
+<ul>
+  <li>@Range（min，max）：数字必须大于等于min，小于等于max</li>
+</ul>
+
+<h4 id="safehtml">@SafeHtml</h4>
+
+<ul>
+  <li>字符串是安全的HTML</li>
+</ul>
+
+<h4 id="url">@URL</h4>
+
+<ul>
+  <li>字符串是合法的URL</li>
+</ul>
+
+<h4 id="assertfalse">@AssertFalse</h4>
+
+<ul>
+  <li>用于boolean字段，该字段的值只能为false</li>
+</ul>
+
+<h4 id="asserttrue">@AssertTrue</h4>
+
+<ul>
+  <li>用于boolean字段，该字段只能为true</li>
+</ul>
+
+<h4 id="decimalmaxvalue">@DecimalMax(value)</h4>
+
+<ul>
+  <li>被注释的元素必须是一个数字，只能大于或等于该值</li>
+</ul>
+
+<h4 id="decimalminvalue">@DecimalMin(value)</h4>
+
+<ul>
+  <li>被注释的元素必须是一个数字，只能小于或等于该值</li>
+</ul>
+
+<h4 id="digitsintegerfraction">@Digits(integer,fraction)</h4>
+
+<ul>
+  <li>检查是否是一种数字的(整数,小数)的位数</li>
+</ul>
+
+<h4 id="future">@Future</h4>
+
+<ul>
+  <li>检查该字段的日期是否是属于将来的日期</li>
+</ul>
+
+<h4 id="past">@Past</h4>
+
+<ul>
+  <li>检查该字段的日期是在过去</li>
+</ul>
+
+<h4 id="maxvalue">@Max(value)</h4>
+
+<ul>
+  <li>该字段的值只能小于或等于该值</li>
+</ul>
+
+<h4 id="minvalue">@Min(value)</h4>
+
+<ul>
+  <li>该字段的值只能大于或等于该值</li>
+</ul>
+
+<h4 id="正负数">正负数</h4>
+
+<ul>
+  <li>
+    <p>@Negative：判断负数</p>
+
+    <p>@NegativeOrZero：判断负数或0</p>
+
+    <p>@Positive：判断正数</p>
+
+    <p>@PositiveOrZero：判断正数或0</p>
+  </li>
+</ul>
+
+<h3 id="关联级别">关联级别</h3>
+
+<h4 id="一对一单向外键">一对一单向外键</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Student</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">IdCard</span> <span class="n">idCard</span><span class="o">;</span>
+    <span class="o">...</span>
+    <span class="nd">@OneToOne</span><span class="o">(</span><span class="n">cascade</span><span class="o">=</span><span class="nc">CascadeType</span><span class="o">.</span><span class="na">ALL</span><span class="o">)</span> <span class="c1">// 级联关系（数据同步，删除一边，另一边也删除等）</span>
+    <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"cid"</span><span class="o">,</span><span class="n">unique</span><span class="o">=</span><span class="kc">true</span><span class="o">)</span> <span class="c1">// 外键名称</span>
+    <span class="kd">public</span> <span class="nc">IdCard</span> <span class="nf">setIdCard</span><span class="o">(){</span>
+        	<span class="k">this</span><span class="o">.</span><span class="na">idCard</span> <span class="o">=</span> <span class="n">idCard</span><span class="o">;</span>
+    	<span class="o">}</span>
+    <span class="o">}</span> 
+<span class="o">}</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">IdCard</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">iid</span><span class="o">;</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="一对一双向外键">一对一双向外键</h4>
+
+<ul>
+  <li>双向关联只能交给一方去控制，不可能双方都保存关联关系</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Student</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">IdCard</span> <span class="n">card</span><span class="o">;</span>
+    <span class="o">...</span>
+    <span class="nd">@OneToOne</span><span class="o">(</span><span class="n">cascade</span><span class="o">=</span><span class="nc">CascadeType</span><span class="o">.</span><span class="na">ALL</span><span class="o">)</span> <span class="c1">// 级联关系（数据同步，删除一边，另一边也删除等）</span>
+    <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"cid"</span><span class="o">,</span><span class="n">unique</span><span class="o">=</span><span class="kc">true</span><span class="o">)</span> <span class="c1">// 外键名称</span>
+    <span class="kd">public</span> <span class="nc">IdCard</span> <span class="nf">setCard</span><span class="o">(){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">idCard</span> <span class="o">=</span> <span class="n">idCard</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">IdCard</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">iid</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Student</span> <span class="n">student</span><span class="o">;</span>
+    <span class="nd">@OneToOne</span><span class="o">(</span><span class="n">mappedBy</span><span class="o">(</span><span class="s">"card"</span><span class="o">))</span> <span class="c1">//card是指Student.card</span>
+    <span class="kd">public</span> <span class="nc">Student</span> <span class="nf">setStudent</span><span class="o">(){</span>
+    <span class="o">}</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="多对一单向外键">多对一单向外键</h4>
+
+<ul>
+  <li>一对多单向外键也如此</li>
+  <li>多方持有一方的引用</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Student</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">ClassRoom</span> <span class="n">classRoom</span><span class="o">;</span>
+    <span class="o">...</span>
+    <span class="nd">@ManyToOne</span><span class="o">(</span><span class="n">cascade</span><span class="o">={</span><span class="nc">CascadeType</span><span class="o">.</span><span class="na">ALL</span><span class="o">},</span><span class="n">fetch</span><span class="o">=</span><span class="nc">FetchType</span><span class="o">.</span><span class="na">EAGER</span><span class="o">)</span> <span class="c1">//级联关系，抓取规则</span>
+    <span class="c1">// @JoinColumn中的name为当前类的属性名，（多对一单向，有多方维护）所以，name为student中的cid，而ReferenceColumnName为引用表的列（多对一单向，所以为一方的引用列）即ClassRoom中的主键列</span>
+    <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"cid"</span><span class="o">,</span><span class="n">referencedColumnName</span><span class="o">=</span><span class="s">"CID"</span><span class="o">)</span>  
+    <span class="kd">public</span> <span class="nc">CLassRoom</span> <span class="nf">setClassRoom</span><span class="o">(</span><span class="nc">ClassRoom</span> <span class="n">classRoom</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">classRoom</span> <span class="o">=</span> <span class="n">classRoom</span><span class="o">;</span>
+    <span class="o">}</span> 
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ClassRoom</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">cid</span><span class="o">;</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="多对一双向外键">多对一双向外键</h4>
+
+<ul>
+  <li>一对多双向外键也如此</li>
+  <li>多方持有一方的引用，一方持有多方的集合</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Student</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">id</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">ClassRoom</span> <span class="n">classRoom</span><span class="o">;</span>
+    <span class="o">...</span>
+    <span class="nd">@ManyToOne</span><span class="o">(</span><span class="n">cascade</span><span class="o">={</span><span class="nc">CascadeType</span><span class="o">.</span><span class="na">ALL</span><span class="o">},</span><span class="n">fetch</span><span class="o">=</span><span class="nc">FetchType</span><span class="o">.</span><span class="na">EAGER</span><span class="o">)</span> <span class="c1">//级联关系，抓取规则</span>
+    <span class="c1">// name为ClassRoom.cid</span>
+    <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"cid"</span><span class="o">)</span> 
+    <span class="kd">public</span> <span class="nc">CLassRoom</span> <span class="nf">setClassRoom</span><span class="o">(</span><span class="nc">ClassRoom</span> <span class="n">classRoom</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">classRoom</span> <span class="o">=</span> <span class="n">classRoom</span><span class="o">;</span>
+    <span class="o">}</span> 
+<span class="o">}</span>
+
+<span class="c1">// ClassRoom添加</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ClassRoom</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">cid</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Student</span><span class="o">&gt;</span> <span class="n">student</span><span class="o">;</span>
+
+    <span class="nd">@OneToMany</span><span class="o">(</span><span class="n">cascade</span><span class="o">={</span><span class="nc">CascadeType</span><span class="o">.</span><span class="na">ALL</span><span class="o">},</span><span class="n">fetch</span><span class="o">=</span><span class="nc">FetchType</span><span class="o">.</span><span class="na">LAZY</span><span class="o">)</span> <span class="c1">//级联关系，抓取规则</span>
+    <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"cid"</span><span class="o">)</span> 
+    <span class="kd">public</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Student</span><span class="o">&gt;</span> <span class="nf">getStudent</span><span class="o">(){</span>
+    <span class="o">}</span>
+    <span class="o">...</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="多对多单向关联">多对多单向关联</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Teacher类</span>
+<span class="nd">@ManyToMany</span>
+<span class="nd">@JoinTable</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"student_teacher"</span><span class="o">,</span><span class="c1">//中间表名</span>
+<span class="n">joinColumns</span><span class="o">=</span><span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"teacher_id"</span><span class="o">),</span><span class="c1">//这个类在表中的id</span>
+<span class="n">inverseJoinColumns</span><span class="o">=</span><span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"student_id"</span><span class="o">)</span><span class="c1">//反转的类在联合表中的id</span>
+<span class="o">)</span>
+<span class="kd">public</span> <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Student</span><span class="o">&gt;</span> <span class="nf">getStudentSet</span><span class="o">()</span> <span class="o">{</span>
+<span class="k">return</span> <span class="n">studentSet</span><span class="o">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="多对多双向关联">多对多双向关联</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Teacher类</span>
+<span class="nd">@ManyToMany</span>
+<span class="nd">@JoinTable</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"student_teacher"</span><span class="o">,</span>
+<span class="n">joinColumns</span><span class="o">=</span><span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"teacher_id"</span><span class="o">),</span><span class="c1">//这个类在表中的id</span>
+<span class="n">inverseJoinColumns</span><span class="o">=</span><span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"student_id"</span><span class="o">)</span><span class="c1">//反转的类在联合表中的id</span>
+<span class="o">)</span>
+<span class="kd">public</span> <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Student</span><span class="o">&gt;</span> <span class="nf">getStudentSet</span><span class="o">()</span> <span class="o">{</span>
+	<span class="k">return</span> <span class="n">studentSet</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="c1">//Student类</span>
+<span class="nd">@ManyToMany</span><span class="o">(</span><span class="n">mappedBy</span><span class="o">=</span><span class="s">"studentSet"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Teacher</span><span class="o">&gt;</span> <span class="nf">getSet</span><span class="o">()</span> <span class="o">{</span>
+	<span class="k">return</span> <span class="n">set</span><span class="o">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+:ET

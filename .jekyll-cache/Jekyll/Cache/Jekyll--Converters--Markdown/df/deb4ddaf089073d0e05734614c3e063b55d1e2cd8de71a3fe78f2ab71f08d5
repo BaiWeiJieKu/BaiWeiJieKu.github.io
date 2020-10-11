@@ -1,0 +1,196 @@
+I"W<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a>    <ul>
+      <li><a href="#应用场景" id="markdown-toc-应用场景">应用场景</a></li>
+      <li><a href="#软件安装" id="markdown-toc-软件安装">软件安装</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li>基于Apache Lucene构建的开源搜索引擎</li>
+  <li>采用Java编写，提供简单易用的RESTful API</li>
+  <li>轻松的横向扩展，可支持PB级的结构化和非结构化数据处理</li>
+</ul>
+
+<h4 id="应用场景">应用场景</h4>
+
+<ul>
+  <li>海量数据分析引擎</li>
+  <li>站内搜索引擎</li>
+  <li>数据仓库</li>
+  <li>英国卫报-实时分析公众对文章的回应</li>
+  <li>维基百科、GitHub-站内实时搜索</li>
+  <li>百度-实时日志监控平台</li>
+  <li>阿里巴巴、谷歌、京东、腾讯、小米等等</li>
+</ul>
+
+<h4 id="软件安装">软件安装</h4>
+
+<ul>
+  <li>单机安装</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>单机安装ElasticSearch
+
+安装前，请确保已经安装JDK1.8
+安装前，请确保已经安装nodejs6.0以上
+
+官网：https://www.elastic.co/products/elasticsearch
+下载安装包：https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.0.tar.gz
+解压安装包：tar -vxf elasticsearch-5.6.0.tar.gz
+cd elasticsearch-5.6.0.tar.gz
+
+启动前，检查JDK环境
+java -v
+请确保已经安装JDK1.8
+
+启动elasticsearch
+sh ./bin/elasticsearch
+当日志输出started时，表示启动成功
+
+验证服务
+127.0.0.1:9200
+elasticsearch服务默认监听9200端口
+
+访问：http://127.0.0.1:9200
+如果出现版本信息，则安装成功
+
+</code></pre></div></div>
+
+<ul>
+  <li>插件安装</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>实用插件Head安装
+
+打开github：https://github.com/mobz/elasticsearch-head
+下载插件包：https://codeload.github.com/mobz/elasticsearch-head/zip/master
+unzip elasticsearch-head-master.zip
+
+cd elasticsearch-head-master
+
+检查Node环境
+node -v
+请确保已经安装nodejs6.0以上
+
+安装插件
+npm install
+启动插件
+npm run start
+输出日志表示启动成功
+Started connect web server on http://localhost:9100
+访问
+http://localhost:9100
+
+ElasticSearch整合elasticsearch-head插件
+cd elasticsearch-5.6.0
+
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+允许head插件跨域访问rest接口
+http.cors.allowed: true
+http.cors.allow-origin: "*"
+:wq
+
+后台启动
+./bin/elasticsearch -d
+
+再次重新启动elasticsearch-head插件
+cd elasticsearch-head-master
+启动插件
+npm run start
+访问
+http://localhost:9100
+
+</code></pre></div></div>
+
+<ul>
+  <li>集群安装</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>集群安装
+1个master、2个slave
+
+master节点配置
+
+配置当前节点为主节点
+cd elasticsearch-5.6.0
+修改配置
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+
+# 指定集群的名字
+cluster.name: myes
+# 指定当前节点的名字
+node.name: master
+# 指定当前节点为master
+node.master: true
+# 指定绑定的IP
+network.host: 127.0.0.1
+# 使用默认端口：9200
+:wq
+
+ps -ef | grep 'pwd'
+
+kill pid
+重新启动
+./bin/elasticsearch -d
+检查服务是否正常启动
+http://localhost:9200
+
+slave节点配置
+
+mkdir es_slave
+cp elasticsearch-5.6.0.tar.gz es_slave/
+cd es_slave
+tar -vxf elasticsearch-5.6.0.tar.gz
+cp -r elasticsearch-5.6.0 es_slave1
+cp -r elasticsearch-5.6.0 es_slave2
+
+修改es_slave1配置
+cd es_slave1
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+
+# 指定集群的名字：需要和master节点一致
+cluster.name: myes
+# 指定当前节点的名字
+node.name: slave1
+# 指定绑定的IP
+network.host: 127.0.0.1
+# 指定当前节点绑定端口号8200
+http.port: 8200
+# 该配置主要是为了找到master节点
+discovery.zen.ping.unicast.hosts: ["127.0.0.1"]
+:wq
+
+启动服务
+./bin/elasticsearch -d
+检查服务是否正常启动
+http://localhost:9100
+
+安装之前的步骤配置slave2
+cd es_slave2
+vim config/elasticsearch.yml
+在配置文件的最后面加上
+
+# 指定集群的名字：需要和master节点一致
+cluster.name: myes
+# 指定当前节点的名字
+node.name: slave2
+# 指定绑定的IP
+network.host: 127.0.0.1
+# 指定当前节点绑定端口号8000
+http.port: 8000
+# 该配置主要是为了找到master节点
+discovery.zen.ping.unicast.hosts: ["127.0.0.1"]
+:wq
+
+启动服务
+./bin/elasticsearch -d
+检查服务是否正常启动
+http://localhost:9100
+
+</code></pre></div></div>
+:ET

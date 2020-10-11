@@ -1,0 +1,139 @@
+I"� <ul id="markdown-toc">
+  <li><a href="#介绍" id="markdown-toc-介绍">介绍</a></li>
+  <li><a href="#结构" id="markdown-toc-结构">结构</a></li>
+  <li><a href="#案例" id="markdown-toc-案例">案例</a>    <ul>
+      <li><a href="#命令抽象类" id="markdown-toc-命令抽象类">命令抽象类</a></li>
+      <li><a href="#具体命令类" id="markdown-toc-具体命令类">具体命令类</a></li>
+      <li><a href="#调用者" id="markdown-toc-调用者">调用者</a></li>
+      <li><a href="#命令执行者" id="markdown-toc-命令执行者">命令执行者</a></li>
+      <li><a href="#测试" id="markdown-toc-测试">测试</a></li>
+      <li><a href="#原理" id="markdown-toc-原理">原理</a></li>
+    </ul>
+  </li>
+  <li><a href="#使用场景" id="markdown-toc-使用场景">使用场景</a></li>
+</ul>
+<h3 id="介绍">介绍</h3>
+
+<ul>
+  <li>命令模式：将一个请求封装为一个对象，从而使我们可用不同的请求对客户进行参数化；</li>
+  <li>对请求排队或者记录请求日志，以及支持可撤销的操作。</li>
+  <li>也称之为：动作Action模式、事务transaction模式</li>
+</ul>
+
+<h3 id="结构">结构</h3>
+
+<ul>
+  <li>Command抽象命令类</li>
+  <li>ConcreteCommand具体命令类</li>
+  <li>Invoker调用者/请求者：请求的发送者，它通过命令对象来执行请求。一个调用者并不需要在设计时确定其接收者，因此它只与抽象命令类之间存在关联。在程序运行时，将调用命令对象的execute()，间接调用接收者的相关操作</li>
+  <li>Receiver接收者：接收者执行与请求相关的操作，具体实现对请求的业务处理。未抽象前，实际执行操作内容的对象</li>
+  <li>Client客户类：在客户类中需要创建调用者对象、具体命令类对象，在创建具体命令对象时指定对应的接收者。发送者和接收者之间没有直接关系，都通过命令对象间接调用</li>
+</ul>
+
+<h3 id="案例">案例</h3>
+
+<h4 id="命令抽象类">命令抽象类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.command</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Command</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 这个方法是一个返回结果为空的方法。
+	 * 实际项目中，可以根据需求设计多个不同的方法
+	 */</span>
+	<span class="kt">void</span> <span class="nf">execute</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="具体命令类">具体命令类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">ConcreteCommand</span> <span class="kd">implements</span> <span class="nc">Command</span> <span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="nc">Receiver</span> <span class="n">receiver</span><span class="o">;</span>	<span class="c1">//命令的真正的执行者</span>
+	
+	<span class="kd">public</span> <span class="nf">ConcreteCommand</span><span class="o">(</span><span class="nc">Receiver</span> <span class="n">receiver</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">receiver</span> <span class="o">=</span> <span class="n">receiver</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">()</span> <span class="o">{</span>
+		<span class="c1">//命令真正执行前或后，执行相关的处理！</span>
+		<span class="n">receiver</span><span class="o">.</span><span class="na">action</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="调用者">调用者</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.command</span><span class="o">;</span>
+
+<span class="c1">//调用者/发起者</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Invoke</span> <span class="o">{</span>
+	
+	<span class="kd">private</span> <span class="nc">Command</span> <span class="n">command</span><span class="o">;</span>   <span class="c1">//也可以通过容器List&lt;Command&gt;容纳很多命令对象，进行批处理。数据库底层的事务管理就是类似的结构！</span>
+
+	<span class="kd">public</span> <span class="nf">Invoke</span><span class="o">(</span><span class="nc">Command</span> <span class="n">command</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">command</span> <span class="o">=</span> <span class="n">command</span><span class="o">;</span>
+	<span class="o">}</span> 
+	
+	<span class="c1">//业务方法 ，用于调用命令类的方法</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(){</span>
+		<span class="n">command</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="命令执行者">命令执行者</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.command</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 真正的命令的执行者
+ * @author Administrator
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Receiver</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">action</span><span class="o">(){</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Receiver.action()"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="测试">测试</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.bjsxt.command</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Client</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">//构建命令对象</span>
+		<span class="nc">Command</span> <span class="n">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConcreteCommand</span><span class="o">(</span><span class="k">new</span> <span class="nc">Receiver</span><span class="o">());</span>
+		<span class="nc">Invoke</span> <span class="n">i</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Invoke</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+		<span class="n">i</span><span class="o">.</span><span class="na">call</span><span class="o">();</span>
+	
+<span class="c1">//		new Receiver().action();</span>
+		
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="原理">原理</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>真实命令类---&gt;实现命令接口
+调用者---&gt;调用真实命令类---&gt;真正执行者---&gt;执行命令
+</code></pre></div></div>
+
+<h3 id="使用场景">使用场景</h3>
+
+<ul>
+  <li>Struts2中，action的整个调用过程中就有命令模式</li>
+  <li>数据库事务机制的底层实现</li>
+  <li>命令的撤销和恢复</li>
+</ul>
+:ET

@@ -1,0 +1,29 @@
+I".<ul id="markdown-toc">
+  <li><a href="#国际化" id="markdown-toc-国际化">国际化</a></li>
+</ul>
+<h3 id="国际化">国际化</h3>
+
+<ul>
+  <li>i18n.properties：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>i18n.username=Username
+i18n.password=Password
+</code></pre></div></div>
+
+<ul>
+  <li>i18n_en_US.properties：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>i18n.username=Username
+i18n.password=Password
+</code></pre></div></div>
+
+<ul>
+  <li>i18n_zh_CN.properties：</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>i18n.username=\u7528\u6237\u540D
+i18n.password=\u5BC6\u7801
+</code></pre></div></div>
+:ET

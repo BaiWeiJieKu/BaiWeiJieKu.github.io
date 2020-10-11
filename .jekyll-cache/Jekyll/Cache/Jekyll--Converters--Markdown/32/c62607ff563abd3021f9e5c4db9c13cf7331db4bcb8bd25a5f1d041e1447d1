@@ -1,0 +1,2225 @@
+I"qe<ul id="markdown-toc">
+  <li><a href="#缓存" id="markdown-toc-缓存">缓存</a>    <ul>
+      <li><a href="#jsr107" id="markdown-toc-jsr107">JSR107</a></li>
+      <li><a href="#redis" id="markdown-toc-redis">Redis</a></li>
+    </ul>
+  </li>
+  <li><a href="#消息队列" id="markdown-toc-消息队列">消息队列</a>    <ul>
+      <li><a href="#jms" id="markdown-toc-jms">JMS</a></li>
+      <li><a href="#rabbitmq" id="markdown-toc-rabbitmq">RabbitMQ</a></li>
+      <li><a href="#整合rabbitmq" id="markdown-toc-整合rabbitmq">整合RabbitMQ</a>        <ul>
+          <li><a href="#自动配置" id="markdown-toc-自动配置">自动配置</a></li>
+          <li><a href="#消息转换器" id="markdown-toc-消息转换器">消息转换器</a></li>
+          <li><a href="#消息监听器" id="markdown-toc-消息监听器">消息监听器</a></li>
+          <li><a href="#创建消息队列和交换器" id="markdown-toc-创建消息队列和交换器">创建消息队列和交换器</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#检索" id="markdown-toc-检索">检索</a>    <ul>
+      <li><a href="#elasticsearch" id="markdown-toc-elasticsearch">ElasticSearch</a></li>
+      <li><a href="#docker安装" id="markdown-toc-docker安装">docker安装</a></li>
+      <li><a href="#整合" id="markdown-toc-整合">整合</a></li>
+    </ul>
+  </li>
+  <li><a href="#任务" id="markdown-toc-任务">任务</a>    <ul>
+      <li><a href="#异步任务" id="markdown-toc-异步任务">异步任务</a></li>
+      <li><a href="#定时任务" id="markdown-toc-定时任务">定时任务</a></li>
+      <li><a href="#邮件" id="markdown-toc-邮件">邮件</a></li>
+    </ul>
+  </li>
+  <li><a href="#安全" id="markdown-toc-安全">安全</a>    <ul>
+      <li><a href="#springsecurity" id="markdown-toc-springsecurity">SpringSecurity</a></li>
+    </ul>
+  </li>
+  <li><a href="#分布式" id="markdown-toc-分布式">分布式</a>    <ul>
+      <li><a href="#zookeeperdubbo" id="markdown-toc-zookeeperdubbo">ZooKeeper+Dubbo</a></li>
+      <li><a href="#springcloud" id="markdown-toc-springcloud">springCloud</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="缓存">缓存</h3>
+
+<h4 id="jsr107">JSR107</h4>
+
+<ul>
+  <li>
+    <p>Java Caching定义了5个核心接口，分别是CachingProvider, CacheManager, Cache, Entry和 Expiry。</p>
+
+    <ul>
+      <li><strong>CachingProvider</strong>定义了创建、配置、获取、管理和控制多个CacheManager。一个应用可以在运行期访问多个CachingProvider。</li>
+      <li><strong>CacheManager</strong>定义了创建、配置、获取、管理和控制多个唯一命名的Cache，这些Cache存在于CacheManager的上下文中。一个CacheManager仅被一个CachingProvider所拥有。</li>
+      <li><strong>Cache</strong>是一个类似Map的数据结构并临时存储以Key为索引的值。一个Cache仅被一个CacheManager所拥有。</li>
+      <li><strong>Entry</strong>是一个存储在Cache中的key-value对。</li>
+      <li><strong>Expiry</strong> 每一个存储在Cache中的条目有一个定义的有效期。一旦超过这个时间，条目为过期的状态。一旦过期，条目将不可访问、更新和删除。缓存有效期可以通过ExpiryPolicy设置。</li>
+    </ul>
+  </li>
+  <li>
+    <p>Spring从3.1开始定义了org.springframework.cache.Cache
+和org.springframework.cache.CacheManager接口来统一不同的缓存技术；并支持使用JCache（JSR-107）注解简化我们开发；</p>
+  </li>
+  <li>
+    <p>Cache接口为缓存的组件规范定义，包含缓存的各种操作集合；</p>
+  </li>
+  <li>
+    <p>Cache接口下Spring提供了各种xxxCache的实现；如RedisCache，EhCacheCache , ConcurrentMapCache等；</p>
+  </li>
+  <li>
+    <p>每次调用需要缓存功能的方法时，Spring会检查检查指定参数的指定的目标方法是否已经被调用过；如果有就直接从缓存中获取方法调用后的结果，如果没有就调用方法并缓存结果后返回给用户。下次调用直接从缓存中获取。</p>
+  </li>
+  <li>
+    <p>使用Spring缓存抽象时我们需要关注以下两点；</p>
+
+    <p>1、确定方法需要被缓存以及他们的缓存策略</p>
+
+    <p>2、从缓存中读取之前缓存存储的数据</p>
+  </li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>Cache</th>
+      <th>缓存接口，定义缓存操作。实现有：RedisCache、EhCacheCache、 ConcurrentMapCache等</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CacheManager</td>
+      <td>缓存管理器，管理各种缓存（Cache）组件</td>
+    </tr>
+    <tr>
+      <td>@Cacheable</td>
+      <td>主要针对方法配置，能够根据方法的请求参数对其结果进行缓存</td>
+    </tr>
+    <tr>
+      <td>@CacheEvict</td>
+      <td>清空缓存</td>
+    </tr>
+    <tr>
+      <td>@CachePut</td>
+      <td>保证方法被调用，又希望结果被缓存。</td>
+    </tr>
+    <tr>
+      <td>@EnableCaching</td>
+      <td>开启基于注解的缓存</td>
+    </tr>
+    <tr>
+      <td>keyGenerator</td>
+      <td>缓存数据时key生成策略</td>
+    </tr>
+    <tr>
+      <td>serialize</td>
+      <td>缓存数据时value序列化策略</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/springboot-cache-annotation.png" alt="" /></p>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/springboot-cache-spel.png" alt="" /></p>
+
+<ul>
+  <li>
+    <p>案例</p>
+  </li>
+  <li>
+    <p>启动类</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mikey.cache</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.mybatis.spring.annotation.MapperScan</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.SpringApplication</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.SpringBootApplication</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.cache.annotation.EnableCaching</span><span class="o">;</span>
+
+<span class="nd">@MapperScan</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"com.mikey.cache.mapper"</span><span class="o">)</span>
+<span class="nd">@SpringBootApplication</span>
+<span class="nd">@EnableCaching</span><span class="c1">//开启缓存</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Springboot01CacheApplication</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">Springboot01CacheApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>配置文件</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">spring.datasource.url</span><span class="p">=</span><span class="s">jdbc:mysql://localhost:3306/spring_cache</span>
+<span class="py">spring.datasource.username</span><span class="p">=</span><span class="s">root</span>
+<span class="py">spring.datasource.password</span><span class="p">=</span><span class="s">root</span>
+<span class="c">#spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+# 驼峰命名
+</span><span class="py">mybatis.configuration.multiple-result-sets-enabled</span><span class="p">=</span><span class="s">true</span>
+
+<span class="c"># 日志级别
+</span><span class="py">logging.level.com.mikey.cache.mapper</span><span class="p">=</span><span class="s">debug</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>mapper</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.mikey.cache.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.ibatis.annotations.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
+
+<span class="nd">@Component</span>
+<span class="nd">@Mapper</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">EmployeeMapper</span> <span class="o">{</span>
+    <span class="nd">@Select</span><span class="o">(</span><span class="s">"select * from employee where id=#{id}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">getEmpById</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">);</span>
+
+    <span class="nd">@Update</span><span class="o">(</span><span class="s">"update employee set lastName=#{lastName},email=#{email},gender=#{gender},d_id=#{d_id} where id=#{id}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateEmp</span><span class="o">(</span><span class="nc">Employee</span> <span class="n">employee</span><span class="o">);</span>
+
+    <span class="nd">@Delete</span><span class="o">(</span><span class="s">"Delete from employee where id=#{id}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">deleteEmpById</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">);</span>
+
+    <span class="nd">@Insert</span><span class="o">(</span><span class="s">"insert employee(lastName,email,gender,d_id) values(#{lastName},#{email},#{gender},#{dId}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">insertEmployee</span><span class="o">(</span><span class="nc">Employee</span> <span class="n">employee</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>service</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.mikey.cache.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.mikey.cache.mapper.EmployeeMapper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.cache.annotation.Cacheable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EmployeeService</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="nc">EmployeeMapper</span> <span class="n">employeeMapper</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * 将方法的运行结果进行缓存
+     * @param id
+     * @return
+     */</span>
+<span class="c1">//    @Cacheable(cacheNames = "emp",key = "#id")</span>
+    <span class="nd">@Cacheable</span><span class="o">(</span><span class="n">cacheNames</span> <span class="o">=</span> <span class="s">"emp"</span><span class="o">,</span><span class="n">condition</span> <span class="o">=</span> <span class="s">"#id&gt;0"</span><span class="o">,</span><span class="n">unless</span> <span class="o">=</span> <span class="s">"#result==null"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">getEmp</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"查询"</span><span class="o">+</span><span class="n">id</span><span class="o">+</span><span class="s">"号员工"</span><span class="o">);</span>
+        <span class="nc">Employee</span> <span class="n">employee</span><span class="o">=</span><span class="n">employeeMapper</span><span class="o">.</span><span class="na">getEmpById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">employee</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>controller</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.mikey.cache.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.mikey.cache.service.EmployeeService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Controller</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.PathVariable</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RestController</span><span class="o">;</span>
+
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EmployeeController</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">EmployeeService</span> <span class="n">employeeService</span><span class="o">;</span>
+
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/emp/{id}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">getEmployee</span><span class="o">(</span><span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"id"</span><span class="o">)</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">){</span>
+        <span class="k">return</span> <span class="n">employeeService</span><span class="o">.</span><span class="na">getEmp</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+    <span class="o">}</span>
+
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>原理</p>
+
+    <p>1、自动配置类；CacheAutoConfiguration</p>
+
+    <p>2、缓存的配置类
+  org.springframework.boot.autoconfigure.cache.GenericCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.JCacheCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.EhCacheCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.HazelcastCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.InfinispanCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.CouchbaseCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.CaffeineCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.GuavaCacheConfiguration
+  org.springframework.boot.autoconfigure.cache.SimpleCacheConfiguration【默认】
+  org.springframework.boot.autoconfigure.cache.NoOpCacheConfiguration</p>
+
+    <p>3、哪个配置类默认生效：SimpleCacheConfiguration；</p>
+
+    <p>4、给容器中注册了一个CacheManager：ConcurrentMapCacheManager</p>
+
+    <p>5、可以获取和创建ConcurrentMapCache类型的缓存组件；他的作用将数据保存在ConcurrentMap中；</p>
+  </li>
+  <li>
+    <p>将方法的运行结果进行缓存；以后再要相同的数据，直接从缓存中获取，不用调用方法；
+CacheManager管理多个Cache组件的，对缓存的真正CRUD操作在Cache组件中，每一个缓存组件有自己唯一一个名字；</p>
+  </li>
+  <li>
+    <p>运行流程</p>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>运行流程：
+@Cacheable：
+1、方法运行之前，先去查询Cache（缓存组件），按照cacheNames指定的名字获取；
+   （CacheManager先获取相应的缓存），第一次获取缓存如果没有Cache组件会自动创建。
+2、去Cache中查找缓存的内容，使用一个key，默认就是方法的参数；
+   key是按照某种策略生成的；默认是使用keyGenerator生成的，默认使用SimpleKeyGenerator生成key；
+       SimpleKeyGenerator生成key的默认策略；
+               如果没有参数；key=new SimpleKey()；
+               如果有一个参数：key=参数的值
+               如果有多个参数：key=new SimpleKey(params)；
+3、没有查到缓存就调用目标方法；
+4、将目标方法返回的结果，放进缓存中
+
+@Cacheable标注的方法执行之前先来检查缓存中有没有这个数据，默认按照参数的值作为key去查询缓存，
+如果没有就运行方法并将结果放入缓存；以后再来调用就可以直接使用缓存中的数据；
+
+核心：
+   1）、使用CacheManager【ConcurrentMapCacheManager】按照名字得到Cache【ConcurrentMapCache】组件
+   2）、key使用keyGenerator生成的，默认是SimpleKeyGenerator
+
+
+几个属性：
+   cacheNames/value：指定缓存组件的名字;将方法的返回结果放在哪个缓存中，是数组的方式，可以指定多个缓存；
+
+   key：缓存数据使用的key；可以用它来指定。默认是使用方法参数的值  1-方法的返回值
+           编写SpEL； #i d;参数id的值   #a0  #p0  #root.args[0]
+           getEmp[2]
+
+   keyGenerator：key的生成器；可以自己指定key的生成器的组件id
+           key/keyGenerator：二选一使用;
+
+
+   cacheManager：指定缓存管理器；或者cacheResolver指定获取解析器
+
+   condition：指定符合条件的情况下才缓存；
+           ,condition = "#id&gt;0"
+       condition = "#a0&gt;1"：第一个参数的值》1的时候才进行缓存
+
+   unless:否定缓存；当unless指定的条件为true，方法的返回值就不会被缓存；可以获取到结果进行判断
+           unless = "#result == null"
+           unless = "#a0==2":如果第一个参数的值是2，结果不缓存；
+   sync：是否使用异步模式
+</code></pre></div></div>
+
+<ul>
+  <li>自定义key生成器</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">org.springframework.cache.interceptor.KeyGenerator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Method</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyCacheConfig</span> <span class="o">{</span>
+    <span class="nd">@Bean</span><span class="o">(</span><span class="s">"myKeyGenerator"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">KeyGenerator</span> <span class="nf">keyGenerator</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">KeyGenerator</span><span class="o">(){</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">generate</span><span class="o">(</span><span class="nc">Object</span> <span class="n">target</span><span class="o">,</span> <span class="nc">Method</span> <span class="n">method</span><span class="o">,</span> <span class="nc">Object</span><span class="o">...</span> <span class="n">params</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">method</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span><span class="s">"["</span><span class="o">+</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">params</span><span class="o">).</span><span class="na">toString</span><span class="o">()+</span><span class="s">"]"</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li><strong>注意：使用异步不支持unless</strong></li>
+  <li>@CachePut</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+     * @CachePut：既调用方法，又更新缓存数据；同步更新缓存
+     * 修改了数据库的某个数据，同时更新缓存；
+     * 运行时机：
+     *  1、先调用目标方法
+     *  2、将目标方法的结果缓存起来
+     *
+     * 测试步骤：
+     *  1、查询1号员工；查到的结果会放在缓存中；
+     *          key：1  value：lastName：张三
+     *  2、以后查询还是之前的结果
+     *  3、更新1号员工；【lastName:zhangsan；gender:0】
+     *          将方法的返回值也放进缓存了；
+     *          key：传入的employee对象  值：返回的employee对象；
+     *  4、查询1号员工？
+     *      应该是更新后的员工；
+     *          key = "#employee.id":使用传入的参数的员工id；
+     *          key = "#result.id"：使用返回后的id
+     *             @Cacheable的key是不能用#result
+     *      为什么是没更新前的？【1号员工没有在缓存中更新】
+     *
+     */</span>
+    <span class="nd">@CachePut</span><span class="o">(</span><span class="cm">/*value = "emp",*/</span><span class="n">key</span> <span class="o">=</span> <span class="s">"#result.id"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">updateEmp</span><span class="o">(</span><span class="nc">Employee</span> <span class="n">employee</span><span class="o">){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"updateEmp:"</span><span class="o">+</span><span class="n">employee</span><span class="o">);</span>
+        <span class="n">employeeMapper</span><span class="o">.</span><span class="na">updateEmp</span><span class="o">(</span><span class="n">employee</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">employee</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>@CacheEvict:缓存清除</p>
+
+    <p>key：指定要清除的数据</p>
+
+    <p><strong>allEntries = true：</strong>指定清除这个缓存中所有的数据</p>
+
+    <p>beforeInvocation = false：缓存的清除是否在方法之前执行</p>
+
+    <p>默认代表缓存清除操作是在方法执行之后执行;如果出现异常缓存就不会清除</p>
+
+    <p><strong>beforeInvocation = true：</strong></p>
+
+    <p>代表清除缓存操作是在方法运行之前执行，无论方法是否出现异常，缓存都清除</p>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@CacheEvict</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"emp"</span><span class="o">,</span><span class="n">beforeInvocation</span> <span class="o">=</span> <span class="kc">true</span><span class="cm">/*key = "#id",*/</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">deleteEmp</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"deleteEmp:"</span><span class="o">+</span><span class="n">id</span><span class="o">);</span>
+        <span class="c1">//employeeMapper.deleteEmpById(id);</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">10</span><span class="o">/</span><span class="mi">0</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>@Caching 定义复杂的缓存规则</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// @Caching 定义复杂的缓存规则</span>
+    <span class="nd">@Caching</span><span class="o">(</span>
+         <span class="n">cacheable</span> <span class="o">=</span> <span class="o">{</span>
+             <span class="nd">@Cacheable</span><span class="o">(</span><span class="cm">/*value="emp",*/</span><span class="n">key</span> <span class="o">=</span> <span class="s">"#lastName"</span><span class="o">)</span>
+         <span class="o">},</span>
+         <span class="n">put</span> <span class="o">=</span> <span class="o">{</span>
+             <span class="nd">@CachePut</span><span class="o">(</span><span class="cm">/*value="emp",*/</span><span class="n">key</span> <span class="o">=</span> <span class="s">"#result.id"</span><span class="o">),</span>
+             <span class="nd">@CachePut</span><span class="o">(</span><span class="cm">/*value="emp",*/</span><span class="n">key</span> <span class="o">=</span> <span class="s">"#result.email"</span><span class="o">)</span>
+         <span class="o">}</span>
+    <span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Employee</span> <span class="nf">getEmpByLastName</span><span class="o">(</span><span class="nc">String</span> <span class="n">lastName</span><span class="o">){</span>
+        <span class="k">return</span> <span class="n">employeeMapper</span><span class="o">.</span><span class="na">getEmpByLastName</span><span class="o">(</span><span class="n">lastName</span><span class="o">);</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>@CacheConfig:</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@CacheConfig</span><span class="o">(</span><span class="n">cacheNames</span><span class="o">=</span><span class="s">"emp"</span><span class="cm">/*,cacheManager = "employeeCacheManager"*/</span><span class="o">)</span> <span class="c1">//抽取缓存的公共配置</span>
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EmployeeService</span> <span class="o">{</span>
+</code></pre></div></div>
+
+<h4 id="redis">Redis</h4>
+
+<ul>
+  <li>1:引入spring-boot-starter-data-redis</li>
+  <li>2:application.yml配置redis连接地址</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">spring.redis.host</span><span class="p">=</span><span class="s">localhost</span>
+<span class="py">spring.redis.password</span><span class="p">=</span>
+</code></pre></div></div>
+
+<ul>
+  <li>3:使用RestTemplate操作redis
+    <ul>
+      <li>redisTemplate.opsForValue();//操作字符串</li>
+      <li>redisTemplate.opsForHash();//操作hash</li>
+      <li>redisTemplate.opsForList();//操作list</li>
+      <li>redisTemplate.opsForSet();//操作set</li>
+      <li>redisTemplate.opsForZSet();//操作有序set</li>
+    </ul>
+  </li>
+  <li>4:以json形式存储对象</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.mikey.cache.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.data.redis.connection.RedisConnectionFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.data.redis.core.RedisTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer</span><span class="o">;</span>
+
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyRedisConfig</span> <span class="o">{</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">RedisTemplate</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">,</span> <span class="nc">Employee</span><span class="o">&gt;</span> <span class="nf">empredisTemplate</span><span class="o">(</span>
+            <span class="nc">RedisConnectionFactory</span> <span class="n">redisConnectionFactory</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+        <span class="nc">RedisTemplate</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">,</span><span class="nc">Employee</span><span class="o">&gt;</span> <span class="n">template</span><span class="o">=</span><span class="k">new</span> <span class="nc">RedisTemplate</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">,</span> <span class="nc">Employee</span><span class="o">&gt;();</span>
+        <span class="n">template</span><span class="o">.</span><span class="na">setConnectionFactory</span><span class="o">(</span><span class="n">redisConnectionFactory</span><span class="o">);</span>
+        <span class="nc">Jackson2JsonRedisSerializer</span><span class="o">&lt;</span><span class="nc">Employee</span><span class="o">&gt;</span> <span class="n">ser</span><span class="o">=</span><span class="k">new</span> <span class="nc">Jackson2JsonRedisSerializer</span><span class="o">&lt;</span><span class="nc">Employee</span><span class="o">&gt;(</span><span class="nc">Employee</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="n">template</span><span class="o">.</span><span class="na">setDefaultSerializer</span><span class="o">(</span><span class="n">ser</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">template</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//配置redis的json格式</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">RedisCacheManager</span> <span class="nf">empoyeeCacheManager</span><span class="o">(</span><span class="nc">RedisTemplate</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">,</span><span class="nc">Employee</span><span class="o">&gt;</span> <span class="n">employeeRedisTemplate</span><span class="o">){</span>
+        <span class="nc">RedisCacheManager</span> <span class="n">redisCacheManager</span><span class="o">=</span><span class="k">new</span> <span class="nc">RedisCacheManager</span><span class="o">(</span><span class="n">employeeRedisTemplate</span><span class="o">);</span>
+        <span class="n">redisCacheManager</span><span class="o">.</span><span class="na">setUsePrefix</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">redisCacheManager</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">com.mikey.cache.bean.Employee</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.mikey.cache.mapper.EmployeeMapper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.data.redis.core.RedisTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.data.redis.core.StringRedisTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Springboot01CacheApplicationTests</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">EmployeeMapper</span> <span class="n">employeeMapper</span><span class="o">;</span>
+    <span class="nd">@Autowired</span>
+    <span class="nc">StringRedisTemplate</span> <span class="n">stringRedisTemplate</span><span class="o">;</span><span class="c1">//操作字符串</span>
+    <span class="nd">@Autowired</span>
+    <span class="nc">RedisTemplate</span> <span class="n">redisTemplate</span><span class="o">;</span><span class="c1">//k-v都是对象</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testRedis</span><span class="o">(){</span>
+<span class="c1">//        stringRedisTemplate.opsForValue().append("msg","hello");</span>
+<span class="c1">//        String msg = stringRedisTemplate.opsForValue().get("msg");</span>
+<span class="c1">//        System.out.println("Message="+msg);</span>
+        <span class="n">stringRedisTemplate</span><span class="o">.</span><span class="na">opsForList</span><span class="o">().</span><span class="na">leftPush</span><span class="o">(</span><span class="s">"mylist"</span><span class="o">,</span><span class="s">"1"</span><span class="o">);</span>
+        <span class="n">stringRedisTemplate</span><span class="o">.</span><span class="na">opsForList</span><span class="o">().</span><span class="na">leftPush</span><span class="o">(</span><span class="s">"mylist"</span><span class="o">,</span><span class="s">"2"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testObjectRedis</span><span class="o">(){</span>
+        <span class="nc">Employee</span> <span class="n">employee</span><span class="o">=</span><span class="n">employeeMapper</span><span class="o">.</span><span class="na">getEmpById</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        <span class="n">redisTemplate</span><span class="o">.</span><span class="na">opsForValue</span><span class="o">().</span><span class="na">set</span><span class="o">(</span><span class="s">"emp-01"</span><span class="o">,</span><span class="n">employee</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>直接使用缓存管理器</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DeptController</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"deptCacheManager"</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="nc">RedisCacheManager</span> <span class="n">deptCacheManager</span><span class="o">;</span>
+    
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">DeptService</span> <span class="n">deptService</span><span class="o">;</span>
+
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/depts/{id}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">Department</span> <span class="nf">getDeptByIds</span><span class="o">(</span><span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"id"</span><span class="o">)</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"查询部门"</span><span class="o">);</span>
+        <span class="nc">Department</span> <span class="n">department</span><span class="o">=</span><span class="n">deptService</span><span class="o">.</span><span class="na">getDeptById</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        
+        <span class="nc">Cache</span> <span class="n">dept</span> <span class="o">=</span> <span class="n">deptCacheManager</span><span class="o">.</span><span class="na">getCache</span><span class="o">(</span><span class="s">"dept"</span><span class="o">);</span>
+        <span class="n">dept</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"dept:1"</span><span class="o">,</span><span class="n">department</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">department</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="消息队列">消息队列</h3>
+
+<h4 id="jms">JMS</h4>
+
+<ul>
+  <li>
+    <p>大多应用中，可通过消息服务中间件来提升系统异步通信、扩展解耦能力</p>
+  </li>
+  <li>
+    <p>消息服务中两个重要概念：消息代理（message broker）和目的地（destination）</p>
+  </li>
+  <li>
+    <p>当消息发送者发送消息以后，将由消息代理接管，消息代理保证消息传递到指定目的地。</p>
+  </li>
+  <li>
+    <p>消息队列主要有两种形式的目的地</p>
+
+    <p>队列（queue）：点对点消息通信（point-to-point）</p>
+
+    <p>主题（topic）：发布（publish）/订阅（subscribe）消息通信</p>
+  </li>
+  <li>
+    <p>点对点式：消息发送者发送消息，消息代理将其放入一个队列中，消息接收者从队列中获取消息内容，消息读取后被移出队列，消息只有唯一的发送者和接受者，但并不是说只能有一个接收者</p>
+  </li>
+  <li>
+    <p>发布订阅式：发送者（发布者）发送消息到主题，多个接收者（订阅者）监听（订阅）这个主题，那么就会在消息到达时同时收到消息</p>
+  </li>
+  <li>
+    <p>JMS（Java Message Service）JAVA消息服务：基于JVM消息代理的规范。ActiveMQ、HornetMQ是JMS实现</p>
+  </li>
+  <li>
+    <p>AMQP：高级查询队列协议：高级消息队列协议，也是一个消息代理的规范，兼容JMS。RabbitMQ是AMQP的实现</p>
+  </li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>JMS</th>
+      <th>AMQP</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>定义</td>
+      <td>Java api</td>
+      <td>网络线级协议</td>
+    </tr>
+    <tr>
+      <td>跨语言</td>
+      <td>否</td>
+      <td>是</td>
+    </tr>
+    <tr>
+      <td>跨平台</td>
+      <td>否</td>
+      <td>是</td>
+    </tr>
+    <tr>
+      <td>Model</td>
+      <td>提供两种消息模型：<br />（1）	、Peer-2-Peer<br />（2）	、Pub/sub</td>
+      <td>提供了五种消息模型：<br />（1）	、direct exchange<br />（2）	、fanout exchange<br />（3）	、topic change<br />（4）	、headers exchange<br />（5）	、system exchange<br />本质来讲，后四种和JMS的pub/sub模型没有太大差别，仅是在路由机制上做了更详细的划分；</td>
+    </tr>
+    <tr>
+      <td>支持消息类型</td>
+      <td>多种消息类型：<br />TextMessage<br />MapMessage<br />BytesMessage StreamMessage ObjectMessage<br />Message （只有消息头和属性）</td>
+      <td>byte[]<br />当实际应用时，有复杂的消息，可以将消息序列化后发送。</td>
+    </tr>
+    <tr>
+      <td>综合评价</td>
+      <td>JMS 定义了JAVA API层面的标准；在java体系中，多个client均可以通过JMS进行交互，不需要应用修改代码，但是其对跨平台的支持较差；</td>
+      <td>AMQP定义了wire-level层的协议标准；天然具有跨平台、跨语言特性。</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>
+    <p>Spring支持：</p>
+
+    <p>spring-jms提供了对JMS的支持
+spring-rabbit提供了对AMQP的支持
+需要ConnectionFactory的实现来连接消息代理
+提供JmsTemplate、RabbitTemplate来发送消息
+@JmsListener（JMS）、@RabbitListener（AMQP）注解在方法上监听消息代理发布的消息
+@EnableJms、@EnableRabbit开启支持</p>
+  </li>
+  <li>
+    <p>Spring Boot自动配置</p>
+
+    <p>JmsAutoConfiguration
+RabbitAutoConfiguration</p>
+  </li>
+</ul>
+
+<h4 id="rabbitmq">RabbitMQ</h4>
+
+<ul>
+  <li>RabbitMQ是一个由erlang开发的AMQP(Advanved Message Queue Protocol)的开源实现。</li>
+  <li><strong>Message</strong>：消息，消息是不具名的，它由消息头和消息体组成。消息体是不透明的，而消息头则由一系列的可选属性组成，这些属性包括routing-key（路由键）、priority（相对于其他消息的优先权）、delivery-mode（指出该消息可能需要持久性存储）等。</li>
+  <li><strong>Publisher</strong>：消息的生产者，也是一个向交换器发布消息的客户端应用程序。</li>
+  <li><strong>Exchange</strong>：交换器，用来接收生产者发送的消息并将这些消息路由给服务器中的队列。Exchange有4种类型：direct(默认)，fanout, topic, 和headers，不同类型的Exchange转发消息的策略有所区别</li>
+  <li><strong>Queue</strong>：消息队列，用来保存消息直到发送给消费者。它是消息的容器，也是消息的终点。一个消息可投入一个或多个队列。消息一直在队列里面，等待消费者连接到这个队列将其取走。</li>
+  <li><strong>Binding</strong>：绑定，用于消息队列和交换器之间的关联。一个绑定就是基于路由键将交换器和消息队列连接起来的路由规则，所以可以将交换器理解成一个由绑定构成的路由表。Exchange 和Queue的绑定可以是多对多的关系。</li>
+  <li><strong>Connection</strong>：网络连接，比如一个TCP连接。</li>
+  <li><strong>Channel</strong>：信道，多路复用连接中的一条独立的双向数据流通道。信道是建立在真实的TCP连接内的虚拟连接，AMQP 命令都是通过信道发出去的，不管是发布消息、订阅队列还是接收消息，这些动作都是通过信道完成。因为对于操作系统来说建立和销毁 TCP 都是非常昂贵的开销，所以引入了信道的概念，以复用一条 TCP 连接。</li>
+  <li><strong>Consumer</strong>：消息的消费者，表示一个从消息队列中取得消息的客户端应用程序。</li>
+  <li><strong>Broker</strong>：表示消息队列服务器实体</li>
+</ul>
+
+<h4 id="整合rabbitmq">整合RabbitMQ</h4>
+
+<ul>
+  <li>引入 spring-boot-starter-amqp</li>
+  <li>application.yml配置</li>
+  <li>测试RabbitMQ：账号密码默认为guest</li>
+  <li>AmqpAdmin：管理组件</li>
+  <li>RabbitTemplate：消息发送处理组件</li>
+</ul>
+
+<h5 id="自动配置">自动配置</h5>
+
+<ul>
+  <li>1、RabbitAutoConfiguration
+2、有自动配置了连接工厂ConnectionFactory；
+3、RabbitProperties 封装了 RabbitMQ的配置
+4、 RabbitTemplate ：给RabbitMQ发送和接受消息；
+5、 AmqpAdmin ： RabbitMQ系统管理功能组件;
+    AmqpAdmin：创建和删除 Queue，Exchange，Binding
+6、@EnableRabbit +  @RabbitListener 监听消息队列的内容</li>
+  <li>配置文件</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">spring.rabbitmq.addresses</span><span class="p">=</span><span class="s">47.106.210.183</span>
+<span class="py">spring.rabbitmq.username</span><span class="p">=</span><span class="s">guest</span>
+<span class="py">spring.rabbitmq.password</span><span class="p">=</span><span class="s">guest</span>
+<span class="c">#spring.rabbitmq.port=5672//默认5672
+#spring.rabbitmq.virtual-host=
+</span></code></pre></div></div>
+
+<ul>
+  <li>测试</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mikey.springbootamqp</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.rabbit.core.RabbitTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SpringbootAmqpApplicationTests</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">RabbitTemplate</span> <span class="n">rabbitTemplate</span><span class="o">;</span>
+
+    <span class="cm">/**
+    *发送消息，点对点模式
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">contextLoads</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">=</span><span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+        <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"msg"</span><span class="o">,</span><span class="s">"这是第一个消息"</span><span class="o">);</span>
+        <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"data"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"helloworld"</span><span class="o">,</span><span class="mi">123</span><span class="o">,</span><span class="kc">true</span><span class="o">));</span>
+		<span class="c1">//指定模式，队列名称和数据</span>
+        <span class="n">rabbitTemplate</span><span class="o">.</span><span class="na">convertAndSend</span><span class="o">(</span><span class="s">"exchange.direct"</span><span class="o">,</span><span class="s">"atguigu.news"</span><span class="o">,</span><span class="n">map</span><span class="o">);</span>
+
+    <span class="o">}</span>
+
+    <span class="cm">/**
+    *接收消息，点对点模式
+    */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">receive</span><span class="o">(){</span>
+        <span class="nc">Object</span> <span class="n">o</span> <span class="o">=</span> <span class="n">rabbitTemplate</span><span class="o">.</span><span class="na">receiveAndConvert</span><span class="o">(</span><span class="s">"atguigu.news"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"数据类型="</span><span class="o">+</span><span class="n">o</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"数据="</span><span class="o">+</span><span class="n">o</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="消息转换器">消息转换器</h5>
+
+<ul>
+  <li>自定义messageconveter(json格式）</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mikey.springbootamqp.config</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.support.converter.Jackson2JsonMessageConverter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.support.converter.MessageConverter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="o">;</span>
+
+<span class="cm">/**
+*RabbitMQ配置类
+*/</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyAMQPConfig</span> <span class="o">{</span>
+    <span class="cm">/**
+    *注册消息转换器（json格式）
+    */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">MessageConverter</span> <span class="nf">messageConverter</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Jackson2JsonMessageConverter</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mikey.springbootamqp</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.mikey.springbootamqp.bean.Book</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.rabbit.core.RabbitTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SpringbootAmqpApplicationTests</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">RabbitTemplate</span> <span class="n">rabbitTemplate</span><span class="o">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">contextLoads</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">=</span><span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+        <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"msg"</span><span class="o">,</span><span class="s">"这是第一个消息"</span><span class="o">);</span>
+        <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"data"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"helloworld"</span><span class="o">,</span><span class="mi">123</span><span class="o">,</span><span class="kc">true</span><span class="o">));</span>
+
+        <span class="n">rabbitTemplate</span><span class="o">.</span><span class="na">convertAndSend</span><span class="o">(</span><span class="s">"exchange.direct"</span><span class="o">,</span><span class="s">"atguigu.news"</span><span class="o">,</span><span class="n">map</span><span class="o">);</span>
+
+
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">receive</span><span class="o">(){</span>
+        <span class="nc">Object</span> <span class="n">o</span> <span class="o">=</span> <span class="n">rabbitTemplate</span><span class="o">.</span><span class="na">receiveAndConvert</span><span class="o">(</span><span class="s">"atguigu.news"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"数据类型="</span><span class="o">+</span><span class="n">o</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"数据="</span><span class="o">+</span><span class="n">o</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 发送javaBean
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testBeanSend</span><span class="o">(){</span>
+        <span class="nc">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Book</span><span class="o">(</span><span class="s">"阿姆斯特朗"</span><span class="o">,</span> <span class="s">"回旋喷气式加速炮"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Book="</span><span class="o">+</span><span class="n">book</span><span class="o">);</span>
+        <span class="n">rabbitTemplate</span><span class="o">.</span><span class="na">convertAndSend</span><span class="o">(</span><span class="s">"exchange.direct"</span><span class="o">,</span><span class="s">"atguigu.news"</span><span class="o">,</span><span class="n">book</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 接收对象
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">getBeanSend</span><span class="o">(){</span>
+        <span class="nc">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Book</span><span class="o">)</span> <span class="n">rabbitTemplate</span><span class="o">.</span><span class="na">receiveAndConvert</span><span class="o">(</span><span class="s">"atguigu.news"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"messsage="</span><span class="o">+</span><span class="n">book</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 广播发送
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">sendAll</span><span class="o">(){</span>
+        <span class="n">rabbitTemplate</span><span class="o">.</span><span class="na">convertAndSend</span><span class="o">(</span><span class="s">"exchange.fanout"</span><span class="o">,</span><span class="s">""</span><span class="o">,</span><span class="k">new</span> <span class="nc">Book</span><span class="o">(</span><span class="s">"麦奇"</span><span class="o">,</span><span class="s">"麦奇"</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h5 id="消息监听器">消息监听器</h5>
+
+<ul>
+  <li>在springboot启动类上添加开启Rabbit注解</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@EnableRabbit</span>
+<span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MySpringbootApplication</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span><span class="n">args</span><span class="o">){</span>
+        
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>编写监听方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookService</span><span class="o">{</span>
+    <span class="cm">/**
+    *实时监听，只要消息队列中有消息就取出
+    */</span>
+    <span class="nd">@RabbitListener</span><span class="o">(</span><span class="n">queues</span> <span class="o">=</span> <span class="s">"atguigu.news"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">receive</span><span class="o">(</span><span class="nc">Book</span> <span class="n">book</span><span class="o">){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"收到消息"</span><span class="o">+</span><span class="n">book</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="创建消息队列和交换器">创建消息队列和交换器</h5>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mikey.springbootamqp</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.mikey.springbootamqp.bean.Book</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.core.AmqpAdmin</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.core.Binding</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.core.DirectExchange</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.core.Queue</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.amqp.rabbit.core.RabbitTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SpringbootAmqpApplicationTests</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">RabbitTemplate</span> <span class="n">rabbitTemplate</span><span class="o">;</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">AmqpAdmin</span> <span class="n">amqpAdmin</span><span class="o">;</span><span class="c1">//操作</span>
+
+    <span class="cm">/**
+     * 添加Exchange
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">createExchange</span><span class="o">(){</span>
+        <span class="n">amqpAdmin</span><span class="o">.</span><span class="na">declareExchange</span><span class="o">(</span><span class="k">new</span> <span class="nc">DirectExchange</span><span class="o">(</span><span class="s">"amqpadmin.exchange"</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"创建完成"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 添加队列
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">createQueue</span><span class="o">(){</span>
+        <span class="n">amqpAdmin</span><span class="o">.</span><span class="na">declareQueue</span><span class="o">(</span><span class="k">new</span> <span class="nc">Queue</span><span class="o">(</span><span class="s">"amqpadmin.queue"</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"创建队列成功"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 添加绑定
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">createBinding</span><span class="o">(){</span>
+        <span class="n">amqpAdmin</span><span class="o">.</span><span class="na">declareBinding</span><span class="o">(</span><span class="k">new</span> <span class="nc">Binding</span><span class="o">(</span><span class="s">"amqpadmin.queue"</span><span class="o">,</span><span class="nc">Binding</span><span class="o">.</span><span class="na">DestinationType</span><span class="o">.</span><span class="na">QUEUE</span><span class="o">,</span><span class="s">"amqpadmin.exchange"</span><span class="o">,</span><span class="s">"ampq.haha"</span><span class="o">,</span><span class="kc">null</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="检索">检索</h3>
+
+<h4 id="elasticsearch">ElasticSearch</h4>
+
+<ul>
+  <li>开源的 ElasticSearch 是目前全文搜索引擎的首选。他可以快速的存储、搜索和分析海量数据。</li>
+  <li>Spring Boot通过整合Spring Data ElasticSearch为我们提供了非常便捷的检索功能支持；</li>
+  <li>Elasticsearch是一个分布式搜索服务，提供Restful API，底层基于Lucene，采用多shard（分片）的方式保证数据安全，并且提供自动resharding的功能，github等大型的站点也是采用了ElasticSearch作为其搜索服务</li>
+</ul>
+
+<p><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/query-dsl-intro.html">学习文档</a></p>
+
+<h4 id="docker安装">docker安装</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run -e ES_JAVA_OPTS="-Xms256m -Xmx256m" -d -p 9200:9200 -p 9300:9300 --name ES01 5acf0e8da90b
+限制堆空间内存，elasticSearch默认占用2G
+</code></pre></div></div>
+
+<h4 id="整合">整合</h4>
+
+<ul>
+  <li>引入spring-boot-starter-data-elasticsearch
+安装Spring Data 对应版本的ElasticSearch
+application.yml配置
+Spring Boot自动配置的
+    ElasticsearchRepository、ElasticsearchTemplate、Jest</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * SpringBoot默认支持两种技术来和ES交互；
+ * 1、Jest（默认不生效）
+ *     需要导入jest的工具包（io.searchbox.client.JestClient）
+ * 2、SpringData ElasticSearch【ES版本有可能不合适】
+ *         版本适配说明：https://github.com/spring-projects/spring-data-elasticsearch
+ *        如果版本不适配：2.4.6
+ *            1）、升级SpringBoot版本
+ *            2）、安装对应版本的ES
+ *
+ *         1）、Client 节点信息clusterNodes；clusterName
+ *         2）、ElasticsearchTemplate 操作es
+ *        3）、编写一个 ElasticsearchRepository 的子接口来操作ES；
+ *    两种用法：https://github.com/spring-projects/spring-data-elasticsearch
+ *    1）、编写一个 ElasticsearchRepository
+ */</span>
+</code></pre></div></div>
+
+<ul>
+  <li>第一种方式：jest</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">spring.elasticsearch.jest.uris</span><span class="p">=</span><span class="s">localhsot:9200</span>
+</code></pre></div></div>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>io.searchbox<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>jest<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>5.3.4<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mikey.springbootelasticsearch</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.mikey.springbootelasticsearch.bean.Article</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.searchbox.client.JestClient</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.searchbox.core.Index</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.searchbox.core.Search</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.searchbox.core.SearchResult</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SpringbootelasticsearchApplicationTests</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">JestClient</span> <span class="n">jestClient</span><span class="o">;</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">contextLoads</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">Article</span> <span class="n">article</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Article</span><span class="o">();</span>
+        <span class="n">article</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        <span class="n">article</span><span class="o">.</span><span class="na">setTitle</span><span class="o">(</span><span class="s">"ElasticSearch"</span><span class="o">);</span>
+        <span class="n">article</span><span class="o">.</span><span class="na">setAuthor</span><span class="o">(</span><span class="s">"阿姆斯特朗炮"</span><span class="o">);</span>
+        <span class="n">article</span><span class="o">.</span><span class="na">setContent</span><span class="o">(</span><span class="s">"Hello world"</span><span class="o">);</span>
+        <span class="nc">Index</span> <span class="n">build</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Index</span><span class="o">.</span><span class="na">Builder</span><span class="o">(</span><span class="n">article</span><span class="o">).</span><span class="na">index</span><span class="o">(</span><span class="s">"atguigu"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="s">"news"</span><span class="o">).</span><span class="na">build</span><span class="o">();</span><span class="c1">//构建一个索引功能</span>
+        <span class="n">jestClient</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">build</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 测试搜索
+     */</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">search</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">json</span><span class="o">=</span><span class="s">"{\n"</span><span class="o">+</span>
+                <span class="s">"  \"query\" :{\n"</span><span class="o">+</span>
+                <span class="s">"    \"match\" :{\n"</span><span class="o">+</span>
+                <span class="s">"      \"content\" : \"hello\"\n"</span><span class="o">+</span>
+                <span class="s">"       }\n"</span><span class="o">+</span>
+                <span class="s">"      }\n"</span><span class="o">+</span>
+                <span class="s">"}"</span><span class="o">;</span>
+        <span class="nc">Search</span> <span class="n">build</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Search</span><span class="o">.</span><span class="na">Builder</span><span class="o">(</span><span class="n">json</span><span class="o">).</span><span class="na">addIndex</span><span class="o">(</span><span class="s">"atguigu"</span><span class="o">).</span><span class="na">addType</span><span class="o">(</span><span class="s">"news"</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+        <span class="nc">SearchResult</span> <span class="n">execute</span> <span class="o">=</span> <span class="n">jestClient</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">build</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Message="</span><span class="o">+</span><span class="n">execute</span><span class="o">.</span><span class="na">getJsonString</span><span class="o">());</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><a href="https://github.com/searchbox-io/Jest/tree/master/jest">学习地址</a></p>
+
+<ul>
+  <li>
+    <p>第二种方式：springData</p>
+  </li>
+  <li>
+    <p>在pom文件中spring-boot-starter-data-elasticsearch</p>
+  </li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">spring.data.elasticsearch.cluster-name</span><span class="p">=</span><span class="s">elasticsearch</span>
+<span class="py">spring.data.elasticsearch.cluster-nodes</span><span class="p">=</span><span class="s">localhost:9300</span>
+</code></pre></div></div>
+
+<ul>
+  <li>编写bean</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.mikey.springbootelasticsearch.bean</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.data.elasticsearch.annotations.Document</span><span class="o">;</span>
+
+<span class="nd">@Document</span><span class="o">(</span><span class="n">indexName</span> <span class="o">=</span> <span class="s">"atguigu"</span><span class="o">,</span><span class="n">type</span> <span class="o">=</span> <span class="s">"book"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Book</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">Integer</span> <span class="n">id</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">bookName</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">author</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nc">Integer</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setId</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getBookName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">bookName</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setBookName</span><span class="o">(</span><span class="nc">String</span> <span class="n">bookName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">bookName</span> <span class="o">=</span> <span class="n">bookName</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getAuthor</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">author</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setAuthor</span><span class="o">(</span><span class="nc">String</span> <span class="n">author</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">author</span> <span class="o">=</span> <span class="n">author</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"Book{"</span> <span class="o">+</span>
+                <span class="s">"id="</span> <span class="o">+</span> <span class="n">id</span> <span class="o">+</span>
+                <span class="s">", bookName='"</span> <span class="o">+</span> <span class="n">bookName</span> <span class="o">+</span> <span class="sc">'\''</span> <span class="o">+</span>
+                <span class="s">", author='"</span> <span class="o">+</span> <span class="n">author</span> <span class="o">+</span> <span class="sc">'\''</span> <span class="o">+</span>
+                <span class="sc">'}'</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>编写接口</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.elastic.repository</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.elastic.bean.Book</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.data.elasticsearch.repository.ElasticsearchRepository</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BookRepository</span> <span class="kd">extends</span> <span class="nc">ElasticsearchRepository</span><span class="o">&lt;</span><span class="nc">Book</span><span class="o">,</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="c1">//参照</span>
+    <span class="c1">// https://docs.spring.io/spring-data/elasticsearch/docs/3.0.6.RELEASE/reference/html/</span>
+   <span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Book</span><span class="o">&gt;</span> <span class="nf">findByBookNameLike</span><span class="o">(</span><span class="nc">String</span> <span class="n">bookName</span><span class="o">);</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>测试</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Springboot03ElasticApplicationTests</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">JestClient</span> <span class="n">jestClient</span><span class="o">;</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">BookRepository</span> <span class="n">bookRepository</span><span class="o">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test02</span><span class="o">(){</span>
+<span class="c1">//        Book book = new Book();</span>
+<span class="c1">//        book.setId(1);</span>
+<span class="c1">//        book.setBookName("西游记");</span>
+<span class="c1">//        book.setAuthor("吴承恩");</span>
+<span class="c1">//        bookRepository.index(book);</span>
+
+
+        <span class="k">for</span> <span class="o">(</span><span class="nc">Book</span> <span class="n">book</span> <span class="o">:</span> <span class="n">bookRepository</span><span class="o">.</span><span class="na">findByBookNameLike</span><span class="o">(</span><span class="s">"游"</span><span class="o">))</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">book</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="o">;</span>
+
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>注意：要选择对应的版本不然会报连接超时异常：<a href="https://docs.spring.io/spring-data/elasticsearch/docs/3.0.6.RELEASE/reference/html/">参考文档</a></li>
+</ul>
+
+<h3 id="任务">任务</h3>
+
+<h4 id="异步任务">异步任务</h4>
+
+<ul>
+  <li>在Java应用中，绝大多数情况下都是通过同步的方式来实现交互处理的；但是在处理与第三方系统交互的时候，容易造成响应迟缓的情况，之前大部分都是使用多线程来完成此类任务，其实，在Spring 3.x之后，就已经内置了@Async来完美解决这个问题。</li>
+  <li>两个注解：@EnableAysnc、@Aysnc</li>
+  <li>首先给springboot启动类添加@EnableAysnc注解，开启异步</li>
+  <li>然后给需要进行异步调用的方法上添加@Aysnc注解就可以了</li>
+</ul>
+
+<h4 id="定时任务">定时任务</h4>
+
+<ul>
+  <li>项目开发中经常需要执行一些定时任务，比如需要在每天凌晨时候，分析一次前一天的日志信息。</li>
+  <li>Spring为我们提供了异步执行任务调度的方式，提供<strong>TaskExecutor</strong> 、<strong>TaskScheduler</strong> 接口。</li>
+  <li>两个注解：@EnableScheduling、@Scheduled</li>
+  <li>cron表达式：</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>字段</th>
+      <th>允许值</th>
+      <th>允许的特殊字符</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>秒</td>
+      <td>0-59</td>
+      <td>, - * /</td>
+    </tr>
+    <tr>
+      <td>分</td>
+      <td>0-59</td>
+      <td>, - * /</td>
+    </tr>
+    <tr>
+      <td>小时</td>
+      <td>0-23</td>
+      <td>, - * /</td>
+    </tr>
+    <tr>
+      <td>日期</td>
+      <td>1-31</td>
+      <td>, - * ? / L W C</td>
+    </tr>
+    <tr>
+      <td>月份</td>
+      <td>1-12</td>
+      <td>, - * /</td>
+    </tr>
+    <tr>
+      <td>星期</td>
+      <td>0-7或SUN-SAT 0,7是SUN</td>
+      <td>, - * ? / L C #</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>特殊字符</th>
+      <th>代表含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>,</td>
+      <td>枚举</td>
+    </tr>
+    <tr>
+      <td>-</td>
+      <td>区间</td>
+    </tr>
+    <tr>
+      <td>*</td>
+      <td>任意</td>
+    </tr>
+    <tr>
+      <td>/</td>
+      <td>步长</td>
+    </tr>
+    <tr>
+      <td>?</td>
+      <td>日/星期冲突匹配</td>
+    </tr>
+    <tr>
+      <td>L</td>
+      <td>最后</td>
+    </tr>
+    <tr>
+      <td>W</td>
+      <td>工作日</td>
+    </tr>
+    <tr>
+      <td>C</td>
+      <td>和calendar联系后计算过的值</td>
+    </tr>
+    <tr>
+      <td>#</td>
+      <td>星期，4#2，第2个星期四</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>首先启动类加入@EnableScheduling注解</li>
+  <li>编写需要定时执行的方法</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">org.springframework.scheduling.annotation.Scheduled</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ScheduledService</span> <span class="o">{</span>
+
+    <span class="cm">/**
+     * second(秒), minute（分）, hour（时）, day of month（日）, month（月）, day of week（周几）.
+     * 0 * * * * MON-FRI
+     *  【0 0/5 14,18 * * ?】 每天14点整，和18点整，每隔5分钟执行一次
+     *  【0 15 10 ? * 1-6】 每个月的周一至周六10:15分执行一次
+     *  【0 0 2 ? * 6L】每个月的最后一个周六凌晨2点执行一次
+     *  【0 0 2 LW * ?】每个月的最后一个工作日凌晨2点执行一次
+     *  【0 0 2-4 ? * 1#1】每个月的第一个周一凌晨2点到4点期间，每个整点都执行一次；
+     */</span>
+   <span class="c1">// @Scheduled(cron = "0 * * * * MON-SAT")</span>
+    <span class="c1">//@Scheduled(cron = "0,1,2,3,4 * * * * MON-SAT")</span>
+   <span class="c1">// @Scheduled(cron = "0-4 * * * * MON-SAT")</span>
+    <span class="nd">@Scheduled</span><span class="o">(</span><span class="n">cron</span> <span class="o">=</span> <span class="s">"0/4 * * * * MON-SAT"</span><span class="o">)</span>  <span class="c1">//每4秒执行一次</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">hello</span><span class="o">(){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"hello ... "</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="邮件">邮件</h4>
+
+<ul>
+  <li>邮件发送需要引入spring-boot-starter-mail</li>
+  <li>Spring Boot 自动配置MailSenderAutoConfiguration</li>
+  <li>定义MailProperties内容，配置在application.yml中</li>
+  <li>自动装配JavaMailSender</li>
+  <li>添加依赖</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-mail<span class="nt">&lt;/artifactId&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>添加配置</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">spring.mail.username</span><span class="p">=</span><span class="s">xxxxx@qq.com</span>
+<span class="py">spring.mail.password</span><span class="p">=</span><span class="s">xxxx</span>
+<span class="py">spring.mail.host</span><span class="p">=</span><span class="s">smtp.qq.com</span>
+<span class="py">spring.mail.properties.mail.smtp.ssl.enable</span><span class="p">=</span><span class="s">true</span>
+</code></pre></div></div>
+
+<ul>
+  <li>测试</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.task</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.mail.SimpleMailMessage</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.mail.javamail.JavaMailSenderImpl</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.mail.javamail.MimeMessageHelper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.mail.internet.MimeMessage</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Springboot04TaskApplicationTests</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">JavaMailSenderImpl</span> <span class="n">mailSender</span><span class="o">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">contextLoads</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">SimpleMailMessage</span> <span class="n">message</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleMailMessage</span><span class="o">();</span>
+        <span class="c1">//邮件设置</span>
+        <span class="n">message</span><span class="o">.</span><span class="na">setSubject</span><span class="o">(</span><span class="s">"通知-今晚开会"</span><span class="o">);</span>
+        <span class="n">message</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">"今晚7:30开会"</span><span class="o">);</span>
+
+        <span class="n">message</span><span class="o">.</span><span class="na">setTo</span><span class="o">(</span><span class="s">"17512080612@163.com"</span><span class="o">);</span>
+        <span class="n">message</span><span class="o">.</span><span class="na">setFrom</span><span class="o">(</span><span class="s">"534096094@qq.com"</span><span class="o">);</span>
+
+        <span class="n">mailSender</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test02</span><span class="o">()</span> <span class="kd">throws</span>  <span class="nc">Exception</span><span class="o">{</span>
+        <span class="c1">//1、创建一个复杂的消息邮件</span>
+        <span class="nc">MimeMessage</span> <span class="n">mimeMessage</span> <span class="o">=</span> <span class="n">mailSender</span><span class="o">.</span><span class="na">createMimeMessage</span><span class="o">();</span>
+        <span class="nc">MimeMessageHelper</span> <span class="n">helper</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MimeMessageHelper</span><span class="o">(</span><span class="n">mimeMessage</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+
+        <span class="c1">//邮件设置</span>
+        <span class="n">helper</span><span class="o">.</span><span class="na">setSubject</span><span class="o">(</span><span class="s">"通知-今晚开会"</span><span class="o">);</span>
+        <span class="n">helper</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">"&lt;b style='color:red'&gt;今天 7:30 开会&lt;/b&gt;"</span><span class="o">,</span><span class="kc">true</span><span class="o">);</span>
+
+        <span class="n">helper</span><span class="o">.</span><span class="na">setTo</span><span class="o">(</span><span class="s">"17512080612@163.com"</span><span class="o">);</span>
+        <span class="n">helper</span><span class="o">.</span><span class="na">setFrom</span><span class="o">(</span><span class="s">"534096094@qq.com"</span><span class="o">);</span>
+
+        <span class="c1">//上传文件</span>
+        <span class="n">helper</span><span class="o">.</span><span class="na">addAttachment</span><span class="o">(</span><span class="s">"1.jpg"</span><span class="o">,</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"C:\\Users\\lfy\\Pictures\\Saved Pictures\\1.jpg"</span><span class="o">));</span>
+        <span class="n">helper</span><span class="o">.</span><span class="na">addAttachment</span><span class="o">(</span><span class="s">"2.jpg"</span><span class="o">,</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">"C:\\Users\\lfy\\Pictures\\Saved Pictures\\2.jpg"</span><span class="o">));</span>
+
+        <span class="n">mailSender</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">mimeMessage</span><span class="o">);</span>
+
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="安全">安全</h3>
+
+<ul>
+  <li>两大安全框架：shiro,SpringSecutity</li>
+</ul>
+
+<h4 id="springsecurity">SpringSecurity</h4>
+
+<ul>
+  <li>
+    <p>Spring Security是针对Spring项目的安全框架，也是Spring Boot底层安全模块默认的技术选型。他可以实现强大的web安全控制。对于安全控制，我们仅需引入spring-boot-starter-security模块，进行少量的配置，即可实现强大的安全管理。</p>
+  </li>
+  <li>
+    <p>WebSecurityConfigurerAdapter：自定义Security策略</p>
+
+    <p>AuthenticationManagerBuilder：自定义认证策略</p>
+
+    <p>@EnableWebSecurity：开启WebSecurity模式</p>
+  </li>
+  <li>
+    <p>应用程序的两个主要区域是“认证”和“授权”（或者访问控制）。这两个主要区域是Spring Security 的两个目标。</p>
+  </li>
+  <li>
+    <p>“认证”（Authentication），是建立一个他声明的主体的过程（一个“主体”一般是指用户，设备或一些可以在你的应用程序中执行动作的其他系统）。</p>
+  </li>
+  <li>
+    <p>“授权”（Authorization）指确定一个主体是否允许在你的应用程序执行一个动作的过程。为了抵达需要授权的店，主体的身份已经有认证过程建立。</p>
+  </li>
+  <li>
+    <p>Web&amp;安全</p>
+
+    <ul>
+      <li>登陆/注销</li>
+      <li>HttpSecurity配置登陆、注销功能</li>
+      <li>Thymeleaf提供的SpringSecurity标签支持</li>
+      <li>需要引入thymeleaf-extras-springsecurity4</li>
+      <li>sec:authentication=“name”获得当前用户的用户名</li>
+      <li>sec:authorize=“hasRole(‘ADMIN’)”当前用户必须拥有ADMIN权限时才会显示标签内容</li>
+      <li>记住我功能</li>
+      <li>表单添加remember-me的checkbox</li>
+      <li>配置启用remember-me功能</li>
+      <li>CSRF（Cross-site request forgery）跨站请求伪造</li>
+      <li>HttpSecurity启用csrf功能，会为表单添加_csrf的值，提交携带来预防CSRF；</li>
+    </ul>
+  </li>
+  <li>
+    <p>初始化向导创建项目</p>
+  </li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+         <span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+
+    <span class="nt">&lt;groupId&gt;</span>com.mikey<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>springboot-security<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>jar<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;name&gt;</span>springboot-security<span class="nt">&lt;/name&gt;</span>
+    <span class="nt">&lt;description&gt;</span>Demo project for Spring Boot<span class="nt">&lt;/description&gt;</span>
+
+    <span class="nt">&lt;parent&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.5.17.RELEASE<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;relativePath/&gt;</span> <span class="c">&lt;!-- lookup parent from repository --&gt;</span>
+    <span class="nt">&lt;/parent&gt;</span>
+
+    <span class="nt">&lt;properties&gt;</span>
+        <span class="nt">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.build.sourceEncoding&gt;</span>
+        <span class="nt">&lt;project.reporting.outputEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.reporting.outputEncoding&gt;</span>
+        <span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+        <span class="nt">&lt;thymeleaf.version&gt;</span>3.0.9.RELEASE<span class="nt">&lt;/thymeleaf.version&gt;</span>
+        <span class="nt">&lt;thymeleaf-layout-dialect.version&gt;</span>2.3.0<span class="nt">&lt;/thymeleaf-layout-dialect.version&gt;</span>
+        <span class="nt">&lt;thymeleaf-extras-springsecurity4.version&gt;</span>3.0.2.RELEASE<span class="nt">&lt;/thymeleaf-extras-springsecurity4.version&gt;</span>
+    <span class="nt">&lt;/properties&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.thymeleaf.extras<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>thymeleaf-extras-springsecurity4<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-security<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-thymeleaf<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+
+
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>编写配置类</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1、引入SpringSecurity；
+2、编写SpringSecurity的配置类；
+        @EnableWebSecurity   extends WebSecurityConfigurerAdapter
+3、控制请求的访问权限：
+        configure(HttpSecurity http) {
+             http.authorizeRequests().antMatchers("/").permitAll()
+                 .antMatchers("/level1/**").hasRole("VIP1")
+        }
+4、定义认证规则：
+        configure(AuthenticationManagerBuilder auth){
+             auth.inMemoryAuthentication()
+                 .withUser("zhangsan").password("123456").roles("VIP1","VIP2")
+        }
+5、开启自动配置的登陆功能：
+        configure(HttpSecurity http){
+             http.formLogin();
+        }
+6、注销：http.logout();
+7、记住我：Remeberme()；
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.security.config.annotation.web.builders.HttpSecurity</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.security.config.annotation.web.configuration.EnableWebSecurity</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter</span><span class="o">;</span>
+
+<span class="nd">@EnableWebSecurity</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MySecurityConfig</span> <span class="kd">extends</span> <span class="nc">WebSecurityConfigurerAdapter</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">HttpSecurity</span> <span class="n">http</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="c1">//super.configure(http);</span>
+        <span class="c1">//定制请求的授权规则</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">authorizeRequests</span><span class="o">().</span><span class="na">antMatchers</span><span class="o">(</span><span class="s">"/"</span><span class="o">).</span><span class="na">permitAll</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">antMatchers</span><span class="o">(</span><span class="s">"/level1/**"</span><span class="o">).</span><span class="na">hasRole</span><span class="o">(</span><span class="s">"VIP1"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">antMatchers</span><span class="o">(</span><span class="s">"/level2/**"</span><span class="o">).</span><span class="na">hasRole</span><span class="o">(</span><span class="s">"VIP2"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">antMatchers</span><span class="o">(</span><span class="s">"/level3/**"</span><span class="o">).</span><span class="na">hasRole</span><span class="o">(</span><span class="s">"VIP3"</span><span class="o">);</span>
+
+        <span class="c1">//开启自动配置的登陆功能，效果，如果没有登陆，没有权限就会来到登陆页面</span>
+        <span class="c1">//指定登录界面的访问路径为/userlogin，用户名输入框名字为user，密码输入框名字为pwd</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">formLogin</span><span class="o">().</span><span class="na">usernameParameter</span><span class="o">(</span><span class="s">"user"</span><span class="o">).</span><span class="na">passwordParameter</span><span class="o">(</span><span class="s">"pwd"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">loginPage</span><span class="o">(</span><span class="s">"/userlogin"</span><span class="o">);</span>
+        <span class="c1">//1、/login来到登陆页</span>
+        <span class="c1">//2、重定向到/login?error表示登陆失败</span>
+        <span class="c1">//3、更多详细规定</span>
+        <span class="c1">//4、默认post形式的 /login代表处理登陆</span>
+        <span class="c1">//5、一但定制loginPage；那么 loginPage的post请求就是登陆。比如这里我们自定义的访问登录界面的路径是/userlogin，那么在form表单中发送的action请求就是post的/userlogin请求</span>
+
+
+        <span class="c1">//开启自动配置的注销功能。</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">logout</span><span class="o">().</span><span class="na">logoutSuccessUrl</span><span class="o">(</span><span class="s">"/"</span><span class="o">);</span><span class="c1">//注销成功以后来到首页</span>
+        <span class="c1">//1、访问 /logout 表示用户注销，清空session</span>
+        <span class="c1">//2、注销成功会返回 /login?logout 页面；</span>
+
+        <span class="c1">//开启记住我功能</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">rememberMe</span><span class="o">().</span><span class="na">rememberMeParameter</span><span class="o">(</span><span class="s">"remeber"</span><span class="o">);</span>
+        <span class="c1">//登陆成功以后，将cookie发给浏览器保存，以后访问页面带上这个cookie，只要通过检查就可以免登录</span>
+        <span class="c1">//点击注销会删除cookie</span>
+
+    <span class="o">}</span>
+
+    <span class="c1">//定义认证规则</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">AuthenticationManagerBuilder</span> <span class="n">auth</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="c1">//super.configure(auth);</span>
+        <span class="n">auth</span><span class="o">.</span><span class="na">inMemoryAuthentication</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">withUser</span><span class="o">(</span><span class="s">"zhangsan"</span><span class="o">).</span><span class="na">password</span><span class="o">(</span><span class="s">"123456"</span><span class="o">).</span><span class="na">roles</span><span class="o">(</span><span class="s">"VIP1"</span><span class="o">,</span><span class="s">"VIP2"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">and</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">withUser</span><span class="o">(</span><span class="s">"lisi"</span><span class="o">).</span><span class="na">password</span><span class="o">(</span><span class="s">"123456"</span><span class="o">).</span><span class="na">roles</span><span class="o">(</span><span class="s">"VIP2"</span><span class="o">,</span><span class="s">"VIP3"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">and</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">withUser</span><span class="o">(</span><span class="s">"wangwu"</span><span class="o">).</span><span class="na">password</span><span class="o">(</span><span class="s">"123456"</span><span class="o">).</span><span class="na">roles</span><span class="o">(</span><span class="s">"VIP1"</span><span class="o">,</span><span class="s">"VIP3"</span><span class="o">);</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>视图页面</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">xmlns:th=</span><span class="s">"http://www.thymeleaf.org"</span>
+      <span class="na">xmlns:sec=</span><span class="s">"http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=UTF-8"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;title&gt;</span>Insert title here<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+<span class="nt">&lt;h1</span> <span class="na">align=</span><span class="s">"center"</span><span class="nt">&gt;</span>欢迎光临武林秘籍管理系统<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">sec:authorize=</span><span class="s">"!isAuthenticated()"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h2</span> <span class="na">align=</span><span class="s">"center"</span><span class="nt">&gt;</span>游客您好，如果想查看武林秘籍 <span class="nt">&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/userlogin}"</span><span class="nt">&gt;</span>请登录<span class="nt">&lt;/a&gt;&lt;/h2&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">sec:authorize=</span><span class="s">"isAuthenticated()"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h2&gt;&lt;span</span> <span class="na">sec:authentication=</span><span class="s">"name"</span><span class="nt">&gt;&lt;/span&gt;</span>，您好,您的角色有：
+        <span class="nt">&lt;span</span> <span class="na">sec:authentication=</span><span class="s">"principal.authorities"</span><span class="nt">&gt;&lt;/span&gt;&lt;/h2&gt;</span>
+    <span class="nt">&lt;form</span> <span class="na">th:action=</span><span class="s">"@{/logout}"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"注销"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+
+<span class="nt">&lt;hr&gt;</span>
+
+<span class="nt">&lt;div</span> <span class="na">sec:authorize=</span><span class="s">"hasRole('VIP1')"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h3&gt;</span>普通武功秘籍<span class="nt">&lt;/h3&gt;</span>
+    <span class="nt">&lt;ul&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level1/1}"</span><span class="nt">&gt;</span>罗汉拳<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level1/2}"</span><span class="nt">&gt;</span>武当长拳<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level1/3}"</span><span class="nt">&gt;</span>全真剑法<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="nt">&lt;/ul&gt;</span>
+
+<span class="nt">&lt;/div&gt;</span>
+
+<span class="nt">&lt;div</span> <span class="na">sec:authorize=</span><span class="s">"hasRole('VIP2')"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h3&gt;</span>高级武功秘籍<span class="nt">&lt;/h3&gt;</span>
+    <span class="nt">&lt;ul&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level2/1}"</span><span class="nt">&gt;</span>太极拳<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level2/2}"</span><span class="nt">&gt;</span>七伤拳<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level2/3}"</span><span class="nt">&gt;</span>梯云纵<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="nt">&lt;/ul&gt;</span>
+
+<span class="nt">&lt;/div&gt;</span>
+
+<span class="nt">&lt;div</span> <span class="na">sec:authorize=</span><span class="s">"hasRole('VIP3')"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h3&gt;</span>绝世武功秘籍<span class="nt">&lt;/h3&gt;</span>
+    <span class="nt">&lt;ul&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level3/1}"</span><span class="nt">&gt;</span>葵花宝典<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level3/2}"</span><span class="nt">&gt;</span>龟派气功<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">th:href=</span><span class="s">"@{/level3/3}"</span><span class="nt">&gt;</span>独孤九剑<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="nt">&lt;/ul&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+
+
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>注意：记住我功能出现报错：org.xml.sax.SAXParseException原因是模板引擎版本过低，解决办法是更换新版本的themleaf。</li>
+</ul>
+
+<h3 id="分布式">分布式</h3>
+
+<ul>
+  <li>在分布式系统中，国内常用zookeeper+dubbo组合，而Spring Boot推荐使用全栈的Spring，Spring Boot+Spring Cloud。</li>
+  <li>当网站流量很小时，只需一个应用，将所有功能都部署在一起，以减少部署节点和成本。此时，用于简化增删改查工作量的数据访问框架(ORM)是关键。</li>
+  <li>当访问量逐渐增大，单一应用增加机器带来的加速度越来越小，将应用拆成互不相干的几个应用，以提升效率。此时，用于加速前端页面开发的Web框架(MVC)是关键。</li>
+  <li>当垂直应用越来越多，应用之间交互不可避免，将核心业务抽取出来，作为独立的服务，逐渐形成稳定的服务中心，使前端应用能更快速的响应多变的市场需求。此时，用于提高业务复用及整合的分布式服务框架(RPC)是关键。</li>
+  <li>当服务越来越多，容量的评估，小服务资源的浪费等问题逐渐显现，此时需增加一个调度中心基于访问压力实时管理集群容量，提高集群利用率。此时，用于提高机器利用率的资源调度和治理中心(SOA)是关键</li>
+  <li><strong>ZooKeeper</strong> 是一个分布式的，开放源码的分布式应用程序协调服务。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、域名服务、分布式同步、组服务等。</li>
+  <li><strong>Dubbo</strong>是Alibaba开源的分布式服务框架，它最大的特点是按照分层的方式来架构，使用这种方式可以使各个层之间解耦合（或者最大限度地松耦合）。从服务模型的角度来看，Dubbo采用的是一种非常简单的模型，要么是提供方提供服务，要么是消费方消费服务，所以基于这一点可以抽象出服务提供方（Provider）和服务消费方（Consumer）两个角色。</li>
+</ul>
+
+<h4 id="zookeeperdubbo">ZooKeeper+Dubbo</h4>
+
+<ul>
+  <li>实现步骤：
+    <ul>
+      <li>1、安装zookeeper作为注册中心</li>
+      <li>2、编写服务提供者</li>
+      <li>3、编写服务消费者</li>
+      <li>4、整合dubbo</li>
+    </ul>
+  </li>
+  <li>消费者实现：</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+
+    <span class="nt">&lt;groupId&gt;</span>com.atguigu<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>consumer-user<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;packaging&gt;</span>jar<span class="nt">&lt;/packaging&gt;</span>
+
+    <span class="nt">&lt;name&gt;</span>consumer-user<span class="nt">&lt;/name&gt;</span>
+    <span class="nt">&lt;description&gt;</span>Demo project for Spring Boot<span class="nt">&lt;/description&gt;</span>
+
+    <span class="nt">&lt;parent&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.5.12.RELEASE<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;relativePath/&gt;</span> <span class="c">&lt;!-- lookup parent from repository --&gt;</span>
+    <span class="nt">&lt;/parent&gt;</span>
+
+    <span class="nt">&lt;properties&gt;</span>
+        <span class="nt">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.build.sourceEncoding&gt;</span>
+        <span class="nt">&lt;project.reporting.outputEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.reporting.outputEncoding&gt;</span>
+        <span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+    <span class="nt">&lt;/properties&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.alibaba.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>dubbo-spring-boot-starter<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>0.1.0<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+
+        <span class="c">&lt;!--引入zookeeper的客户端工具--&gt;</span>
+        <span class="c">&lt;!-- https://mvnrepository.com/artifact/com.github.sgroschupf/zkclient --&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.github.sgroschupf<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>zkclient<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>0.1<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+
+
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+
+
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">dubbo.application.name</span><span class="p">=</span><span class="s">consumer-user</span>
+
+<span class="py">dubbo.registry.address</span><span class="p">=</span><span class="s">zookeeper://118.24.44.169:2181</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.user</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.boot.SpringApplication</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.SpringBootApplication</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 1、引入依赖‘
+ * 2、配置dubbo的注册中心地址
+ * 3、引用服务
+ */</span>
+<span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsumerUserApplication</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">ConsumerUserApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.user.service</span><span class="o">;</span>
+
+
+<span class="kn">import</span> <span class="nn">com.alibaba.dubbo.config.annotation.Reference</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.atguigu.ticket.service.TicketService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+
+<span class="nd">@Service</span><span class="c1">//Spring的service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserService</span><span class="o">{</span>
+
+    <span class="nd">@Reference</span><span class="c1">//注意两个工程的全类名相同</span>
+    <span class="nc">TicketService</span> <span class="n">ticketService</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">hello</span><span class="o">(){</span>
+        <span class="nc">String</span> <span class="n">ticket</span> <span class="o">=</span> <span class="n">ticketService</span><span class="o">.</span><span class="na">getTicket</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"买到票了："</span><span class="o">+</span><span class="n">ticket</span><span class="o">);</span>
+    <span class="o">}</span>
+
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.ticket.service</span><span class="o">;</span>
+<span class="cm">/**
+*传递接口
+*/</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">TicketService</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTicket</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.user</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.user.service.UserService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit4.SpringRunner</span><span class="o">;</span>
+
+<span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsumerUserApplicationTests</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">UserService</span> <span class="n">userService</span><span class="o">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">contextLoads</span><span class="o">()</span> <span class="o">{</span>
+
+        <span class="n">userService</span><span class="o">.</span><span class="na">hello</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>提供者编写,pom文件同消费者</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">dubbo.application.name</span><span class="p">=</span><span class="s">provider-ticket</span>
+
+<span class="py">dubbo.registry.address</span><span class="p">=</span><span class="s">zookeeper://118.24.44.169:2181</span>
+<span class="c"># 指明提供服务的类所在的包
+</span><span class="py">dubbo.scan.base-packages</span><span class="p">=</span><span class="s">com.atguigu.ticket.service</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.ticket</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.boot.SpringApplication</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.SpringBootApplication</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 1、将服务提供者注册到注册中心
+ *         1、引入dubbo和zkclient相关依赖
+ *         2、配置dubbo的扫描包和注册中心地址
+ *         3、使用@Service发布服务
+ */</span>
+<span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ProviderTicketApplication</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">ProviderTicketApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.ticket.service</span><span class="o">;</span>
+<span class="cm">/**
+*服务接口
+*/</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">TicketService</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTicket</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.ticket.service</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.alibaba.dubbo.config.annotation.Service</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
+
+<span class="cm">/**
+*提供服务的类
+*/</span>
+<span class="nd">@Component</span>
+<span class="nd">@Service</span> <span class="c1">//将服务发布出去，是dubbo的service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TicketServiceImpl</span> <span class="kd">implements</span> <span class="nc">TicketService</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTicket</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"《厉害了，我的国》"</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="springcloud">springCloud</h4>
+
+<ul>
+  <li>
+    <p>Spring Cloud是一个分布式的整体解决方案。Spring Cloud 为开发者提供了在分布式系统（配置管理，服务发现，熔断，路由，微代理，控制总线，一次性token，全局琐，leader选举，分布式session，集群状态）中快速构建的工具，使用Spring Cloud的开发者可以快速的启动服务或构建应用、同时能够快速和云平台资源进行对接。</p>
+  </li>
+  <li>
+    <p>SpringCloud分布式开发五大常用组件：</p>
+
+    <ul>
+      <li>服务发现——Netflix Eureka</li>
+      <li>客服端负载均衡——Netflix Ribbon</li>
+      <li>断路器——Netflix Hystrix</li>
+      <li>服务网关——Netflix Zuul</li>
+      <li>分布式配置——Spring Cloud Config</li>
+    </ul>
+  </li>
+  <li>
+    <p>Spring Cloud 入门
+1、创建provider
+2、创建consumer
+3、引入Spring Cloud
+4、引入Eureka注册中心
+5、引入Ribbon进行客户端负载均衡</p>
+  </li>
+  <li>
+    <p>目录结构：</p>
+
+    <p>consumer-user</p>
+
+    <p>eureka-server</p>
+
+    <p>provide-ticket</p>
+  </li>
+  <li>
+    <p>1.创建服务中心：eureka-server    选择服务模块cloud Discovery—》Eureka Server</p>
+  </li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+
+	<span class="nt">&lt;groupId&gt;</span>com.atguigu<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>eureka-server<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;packaging&gt;</span>jar<span class="nt">&lt;/packaging&gt;</span>
+
+	<span class="nt">&lt;name&gt;</span>eureka-server<span class="nt">&lt;/name&gt;</span>
+	<span class="nt">&lt;description&gt;</span>Demo project for Spring Boot<span class="nt">&lt;/description&gt;</span>
+
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>1.5.12.RELEASE<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;relativePath/&gt;</span> <span class="c">&lt;!-- lookup parent from repository --&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+
+	<span class="nt">&lt;properties&gt;</span>
+		<span class="nt">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.build.sourceEncoding&gt;</span>
+		<span class="nt">&lt;project.reporting.outputEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.reporting.outputEncoding&gt;</span>
+		<span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+		<span class="nt">&lt;spring-cloud.version&gt;</span>Edgware.SR3<span class="nt">&lt;/spring-cloud.version&gt;</span>
+	<span class="nt">&lt;/properties&gt;</span>
+
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.cloud<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-cloud-starter-eureka-server<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+
+	<span class="nt">&lt;dependencyManagement&gt;</span>
+		<span class="nt">&lt;dependencies&gt;</span>
+			<span class="nt">&lt;dependency&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.cloud<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-cloud-dependencies<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>${spring-cloud.version}<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+				<span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;/dependencies&gt;</span>
+	<span class="nt">&lt;/dependencyManagement&gt;</span>
+
+	<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+
+
+<span class="nt">&lt;/project&gt;</span>
+
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">server</span><span class="pi">:</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">8761</span>
+<span class="na">eureka</span><span class="pi">:</span>
+  <span class="na">instance</span><span class="pi">:</span>
+    <span class="na">hostname</span><span class="pi">:</span> <span class="s">eureka-server</span>  <span class="c1"># eureka实例的主机名</span>
+  <span class="na">client</span><span class="pi">:</span>
+    <span class="na">register-with-eureka</span><span class="pi">:</span> <span class="no">false</span> <span class="c1">#不把自己注册到eureka上</span>
+    <span class="na">fetch-registry</span><span class="pi">:</span> <span class="no">false</span> <span class="c1">#不从eureka上来获取服务的注册信息</span>
+    <span class="na">service-url</span><span class="pi">:</span>
+      <span class="na">defaultZone</span><span class="pi">:</span> <span class="s">http://localhost:8761/eureka/</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+*注册中心
+*1.配置Eureka信息
+*2.使用@EnableEurekaServer
+*/</span>
+<span class="nd">@EnableEurekaServer</span>
+<span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EurekaServerApplication</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">EurekaServerApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>2.新建provider-ticket 的model</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+
+	<span class="nt">&lt;groupId&gt;</span>com.atguigu<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>provider-ticket<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;packaging&gt;</span>jar<span class="nt">&lt;/packaging&gt;</span>
+
+	<span class="nt">&lt;name&gt;</span>provider-ticket<span class="nt">&lt;/name&gt;</span>
+	<span class="nt">&lt;description&gt;</span>Demo project for Spring Boot<span class="nt">&lt;/description&gt;</span>
+
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>1.5.12.RELEASE<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;relativePath/&gt;</span> <span class="c">&lt;!-- lookup parent from repository --&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+
+	<span class="nt">&lt;properties&gt;</span>
+		<span class="nt">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.build.sourceEncoding&gt;</span>
+		<span class="nt">&lt;project.reporting.outputEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.reporting.outputEncoding&gt;</span>
+		<span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+		<span class="nt">&lt;spring-cloud.version&gt;</span>Edgware.SR3<span class="nt">&lt;/spring-cloud.version&gt;</span>
+	<span class="nt">&lt;/properties&gt;</span>
+
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.cloud<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-cloud-starter-eureka<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+
+	<span class="nt">&lt;dependencyManagement&gt;</span>
+		<span class="nt">&lt;dependencies&gt;</span>
+			<span class="nt">&lt;dependency&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.cloud<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-cloud-dependencies<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>${spring-cloud.version}<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+				<span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;/dependencies&gt;</span>
+	<span class="nt">&lt;/dependencyManagement&gt;</span>
+
+	<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+
+
+<span class="nt">&lt;/project&gt;</span>
+
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">server</span><span class="pi">:</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">8002</span>
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">application</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">provider-ticket</span>
+
+
+<span class="na">eureka</span><span class="pi">:</span>
+  <span class="na">instance</span><span class="pi">:</span>
+    <span class="na">prefer-ip-address</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 注册服务的时候使用服务的ip地址</span>
+  <span class="na">client</span><span class="pi">:</span>
+    <span class="na">service-url</span><span class="pi">:</span>
+      <span class="na">defaultZone</span><span class="pi">:</span> <span class="s">http://localhost:8761/eureka/</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.providerticket</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.boot.SpringApplication</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.SpringBootApplication</span><span class="o">;</span>
+
+<span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ProviderTicketApplication</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">ProviderTicketApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.providerticket.service</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TicketService</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTicket</span><span class="o">(){</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"8002"</span><span class="o">);</span>
+        <span class="k">return</span> <span class="s">"《厉害了，我的国》"</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.providerticket.controller</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.atguigu.providerticket.service.TicketService</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.GetMapping</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RestController</span><span class="o">;</span>
+
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TicketController</span> <span class="o">{</span>
+
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">TicketService</span> <span class="n">ticketService</span><span class="o">;</span>
+
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/ticket"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTicket</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="n">ticketService</span><span class="o">.</span><span class="na">getTicket</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>3.新建model  consumer-user</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">spring</span><span class="pi">:</span>
+  <span class="na">application</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">consumer-user</span>
+<span class="na">server</span><span class="pi">:</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">8200</span>
+
+<span class="na">eureka</span><span class="pi">:</span>
+  <span class="na">instance</span><span class="pi">:</span>
+    <span class="na">prefer-ip-address</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 注册服务的时候使用服务的ip地址</span>
+  <span class="na">client</span><span class="pi">:</span>
+    <span class="na">service-url</span><span class="pi">:</span>
+      <span class="na">defaultZone</span><span class="pi">:</span> <span class="s">http://localhost:8761/eureka/</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.consumeruser</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.boot.SpringApplication</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.SpringBootApplication</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.cloud.client.discovery.EnableDiscoveryClient</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.cloud.client.loadbalancer.LoadBalanced</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.client.RestTemplate</span><span class="o">;</span>
+
+<span class="nd">@EnableDiscoveryClient</span> <span class="c1">//开启发现服务功能</span>
+<span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsumerUserApplication</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">ConsumerUserApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//注册模板来访问其他服务器</span>
+    <span class="nd">@LoadBalanced</span> <span class="c1">//使用负载均衡机制</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">RestTemplate</span> <span class="nf">restTemplate</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">RestTemplate</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.atguigu.consumeruser.controller</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.GetMapping</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RestController</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.client.RestTemplate</span><span class="o">;</span>
+
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserController</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">RestTemplate</span> <span class="n">restTemplate</span><span class="o">;</span>
+
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/buy"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">buyTicket</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">){</span>
+        <span class="c1">//通过RestTemplate来调用远程服务器PROVIDER-TICKET的/ticket接口来获取数据</span>
+        <span class="nc">String</span> <span class="n">s</span> <span class="o">=</span> <span class="n">restTemplate</span><span class="o">.</span><span class="na">getForObject</span><span class="o">(</span><span class="s">"http://PROVIDER-TICKET/ticket"</span><span class="o">,</span> <span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">name</span><span class="o">+</span><span class="s">"购买了"</span><span class="o">+</span><span class="n">s</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+:ET

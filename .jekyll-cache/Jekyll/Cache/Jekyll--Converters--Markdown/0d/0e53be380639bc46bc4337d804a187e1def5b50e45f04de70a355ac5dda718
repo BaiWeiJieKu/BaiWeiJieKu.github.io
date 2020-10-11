@@ -1,0 +1,1329 @@
+I"u<ul id="markdown-toc">
+  <li><a href="#jedis" id="markdown-toc-jedis">jedis</a>    <ul>
+      <li><a href="#通用操作" id="markdown-toc-通用操作">通用操作</a></li>
+      <li><a href="#字符串操作" id="markdown-toc-字符串操作">字符串操作</a></li>
+      <li><a href="#数字操作" id="markdown-toc-数字操作">数字操作</a></li>
+      <li><a href="#hash操作" id="markdown-toc-hash操作">Hash操作</a></li>
+      <li><a href="#list操作" id="markdown-toc-list操作">list操作</a></li>
+      <li><a href="#set操作" id="markdown-toc-set操作">set操作</a></li>
+      <li><a href="#zset操作" id="markdown-toc-zset操作">zset操作</a></li>
+      <li><a href="#排序操作" id="markdown-toc-排序操作">排序操作</a></li>
+      <li><a href="#jedis连接池" id="markdown-toc-jedis连接池">jedis连接池</a></li>
+      <li><a href="#连接池配置优化" id="markdown-toc-连接池配置优化">连接池配置优化</a></li>
+      <li><a href="#线程安全问题" id="markdown-toc-线程安全问题">线程安全问题</a></li>
+    </ul>
+  </li>
+  <li><a href="#redis序列化对象" id="markdown-toc-redis序列化对象">Redis序列化对象</a></li>
+  <li><a href="#redis常用操作封装" id="markdown-toc-redis常用操作封装">Redis常用操作封装</a></li>
+  <li><a href="#redis慢查询" id="markdown-toc-redis慢查询">Redis慢查询</a>    <ul>
+      <li><a href="#生命周期" id="markdown-toc-生命周期">生命周期</a></li>
+      <li><a href="#两个配置" id="markdown-toc-两个配置">两个配置</a></li>
+      <li><a href="#慢查询命令" id="markdown-toc-慢查询命令">慢查询命令</a></li>
+      <li><a href="#运维经验" id="markdown-toc-运维经验">运维经验</a></li>
+    </ul>
+  </li>
+  <li><a href="#流水线" id="markdown-toc-流水线">流水线</a></li>
+  <li><a href="#发布订阅" id="markdown-toc-发布订阅">发布订阅</a>    <ul>
+      <li><a href="#api" id="markdown-toc-api">API</a></li>
+    </ul>
+  </li>
+  <li><a href="#位图" id="markdown-toc-位图">位图</a>    <ul>
+      <li><a href="#api-1" id="markdown-toc-api-1">API</a></li>
+    </ul>
+  </li>
+  <li><a href="#hyperloglog" id="markdown-toc-hyperloglog">HyperLogLog</a></li>
+  <li><a href="#geo" id="markdown-toc-geo">GEO</a></li>
+</ul>
+
+<h3 id="jedis">jedis</h3>
+
+<ul>
+  <li>maven</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>redis.clients<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>jedis<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>2.9.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>jedis直连</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/02/3RDG4S.png" alt="3RDG4S.png" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1:生成一个jedis对象，这个对象负责和指定redis节点进行通信
+jedis构造函数：Jedis(String host,int port,int connectionTimeout,int soTimeout);
+host:Redis节点所在的机器IP
+port:端口号
+connectionTimeout:客户端连接超时时间
+soTimeout:客户端读写超时时间
+
+Jedis jedis = new Jedis("127.0.0.1",6379);
+
+2:jedis执行set操作
+jedis.set("hello","world");
+
+3:jedis执行get操作,值为world
+String value = jedis.get("hello")
+</code></pre></div></div>
+
+<h4 id="通用操作">通用操作</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">方法</th>
+      <th style="text-align: center">描述</th>
+      <th style="text-align: center">返回值 /补充说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.flush</td>
+      <td style="text-align: center"> </td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.flushDB</td>
+      <td style="text-align: center">清空数据</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">boolean jedis.exists(String key)</td>
+      <td style="text-align: center">判断某个键是否存在</td>
+      <td style="text-align: center">true = 存在，false= 不存在</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.set(String key,String value)</td>
+      <td style="text-align: center">新增键值对（key,value）</td>
+      <td style="text-align: center">返回String类型的OK代表成功</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Set<String> jedis.keys(*)</String></td>
+      <td style="text-align: center">获取所有key</td>
+      <td style="text-align: center">返回set 无序集合</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.del(String key)</td>
+      <td style="text-align: center">删除键为key的数据项</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.expire(String key,int i)</td>
+      <td style="text-align: center">设置键为key的过期时间为i秒</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">int jedis.ttl(String key)</td>
+      <td style="text-align: center">获取建委key数据项的剩余时间（秒）</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.persist(String key)</td>
+      <td style="text-align: center">移除键为key属性项的生存时间限制</td>
+      <td style="text-align: center"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.type(String key)</td>
+      <td style="text-align: center">查看键为key所对应value的数据类型</td>
+      <td style="text-align: center"> </td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="字符串操作">字符串操作</h4>
+
+<ul>
+  <li>字符串类型是Redis中最为基础的数据存储类型，它在Redis中是二进制安全的，这 便意味着该类型可以接受任何格式的数据，如JPEG图像数据或Json对象描述信息等。 在Redis中字符串类型的Value最多可以容纳的数据长度是512M。</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">语法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.set(String key,String value)</td>
+      <td style="text-align: center">增加（或覆盖）数据项</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.setnx(String key,String value)</td>
+      <td style="text-align: center">不覆盖增加数据项（重复的不插入）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.setex(String ,int t,String value)</td>
+      <td style="text-align: center">增加数据项并设置有效时间</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.del(String key)</td>
+      <td style="text-align: center">删除键为key的数据项</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.get(String key)</td>
+      <td style="text-align: center">获取键为key对应的value</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.append(String key, String s)</td>
+      <td style="text-align: center">在key对应value 后边扩展字符串 s</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.mset(String k1,String V1,String K2,String V2,…)</td>
+      <td style="text-align: center">增加多个键值对</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">String[] jedis.mget(String K1,String K2,…)</td>
+      <td style="text-align: center">获取多个key对应的value</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.del(new String<a href="String K1,String K2,...."></a>)</td>
+      <td style="text-align: center">删除多个key对应的数据项</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">String jedis.getSet(String key,String value)</td>
+      <td style="text-align: center">获取key对应value并更新value</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">String jedis.getrang(String key , int i, int j)</td>
+      <td style="text-align: center">获取key对应value第i到j字符 ，从0开始，包头包尾</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//String类型</span>
+
+<span class="c1">//输出结果：OK</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">"hello"</span><span class="o">,</span><span class="s">"world"</span><span class="o">);</span>
+
+<span class="c1">//输出结果：world</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"hello"</span><span class="o">);</span>
+
+<span class="c1">//输出结果：1</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">incr</span><span class="o">(</span><span class="s">"counter"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="数字操作">数字操作</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">语法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.incr(String key)</td>
+      <td style="text-align: center">将key对应的value 加1</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.incrBy(String key,int n)</td>
+      <td style="text-align: center">将key对应的value 加 n</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.decr(String key)</td>
+      <td style="text-align: center">将key对应的value 减1</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.decrBy(String key , int n)</td>
+      <td style="text-align: center">将key对应的value 减 n</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="hash操作">Hash操作</h4>
+
+<ul>
+  <li>Redis中的Hashes类型可以看成具有String Key和String Value的map容器。所以该类型非常适合于存储值对象的信息。如Username、Password和Age等。如果Hash中包含很少的字段，那么该类型的数据也将仅占用很少的磁盘空间。每一个Hash可以存储4294967295个键值对。</li>
+  <li>规律： 哈希的 方法 都以 h 开头，含有m字符的一般是多个的， （multiple： 多个的）</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">语法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.hmset(String key,Map map)</td>
+      <td style="text-align: center">添加一个Hash</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hset(String key , String key, String value)</td>
+      <td style="text-align: center">向Hash中插入一个元素（K-V）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hgetAll(String key)</td>
+      <td style="text-align: center">获取Hash的所有（K-V） 元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hkeys（String key）</td>
+      <td style="text-align: center">获取Hash所有元素的key</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hvals(String key)</td>
+      <td style="text-align: center">获取Hash所有元素 的value</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hincrBy(String key , String k, int i)</td>
+      <td style="text-align: center">把Hash中对应的k元素的值 val+=i</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hdecrBy(String key,String k, int i)</td>
+      <td style="text-align: center">把Hash中对应的k元素的值 val-=i</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hdel(String key , String k1, String k2,…)</td>
+      <td style="text-align: center">从Hash中删除一个或多个元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hlen(String key)</td>
+      <td style="text-align: center">获取Hash中元素的个数</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hexists(String key,String K1)</td>
+      <td style="text-align: center">判断Hash中是否存在K1对应的元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hmget(String key,String K1,String K2)</td>
+      <td style="text-align: center">获取Hash中一个或多个元素value</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//hash类型</span>
+
+<span class="n">jedis</span><span class="o">.</span><span class="na">hset</span><span class="o">(</span><span class="s">"myhash"</span><span class="o">,</span><span class="s">"f1"</span><span class="o">,</span><span class="s">"v1"</span><span class="o">);</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">hset</span><span class="o">(</span><span class="s">"myhash"</span><span class="o">,</span><span class="s">"f2"</span><span class="o">,</span><span class="s">"v2"</span><span class="o">);</span>
+
+<span class="c1">//输出结果：{f1=v1,f2=v2}</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">hgetAll</span><span class="o">(</span><span class="s">"myhash"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="list操作">list操作</h4>
+
+<ul>
+  <li>在Redis中，List类型是按照插入顺序排序的字符串链表。和数据结构中的普通链表 一样，我们可以在其头部(left)和尾部(right)添加新的元素。在插入时，如果该键并不存在，Redis将为该键创建一个新的链表。如果链表中所有的元素均被移除，那么该键也将会被从数据库中删除。List中可以包含的最大元素数量是 4294967295。</li>
+  <li>从元素插入和删除的效率视角来看，如果我们是在链表的两头插入或删除元素，这将 会是非常高效的操作，即使链表中已经存储了百万条记录，该操作也可以在常量时间内完成。然而需要说明的是，如果元素插入或删除操作是作用于链表中间，那将会是非常低效的。</li>
+  <li>list 元素的下标从0开始</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">语法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.lpush(String key, String v1, String v2,….)</td>
+      <td style="text-align: center">添加一个List , 注意：如果已经有该List对应的key, 则按顺序在左边追加 一个或多个</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.rpush(String key , String vn)</td>
+      <td style="text-align: center">key对应list右边插入元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.lrange(String key,int i,int j)</td>
+      <td style="text-align: center">获取key对应list区间[i,j]的元素，注：从左边0开始，包头包尾</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.lrem(String key,int n , String val)</td>
+      <td style="text-align: center">删除list中 n个元素val</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.ltrim(String key,int i,int j)</td>
+      <td style="text-align: center">删除list区间[i,j] 之外的元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.lpop(String key)</td>
+      <td style="text-align: center">key对应list ,左弹出栈一个元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.rpop(String key)</td>
+      <td style="text-align: center">key对应list ,右弹出栈一个元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.lset(String key,int index,String val)</td>
+      <td style="text-align: center">修改key对应的list指定下标index的元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.llen(String key)</td>
+      <td style="text-align: center">获取key对应list的长度</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.lindex(String key,int index)</td>
+      <td style="text-align: center">获取key对应list下标为index的元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.sort(String key)</td>
+      <td style="text-align: center">把key对应list里边的元素从小到大排序 （后边详细介绍）</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//list类型</span>
+
+<span class="n">jedis</span><span class="o">.</span><span class="na">rpush</span><span class="o">(</span><span class="s">"mylist"</span><span class="o">,</span><span class="s">"1"</span><span class="o">);</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">rpush</span><span class="o">(</span><span class="s">"mylist"</span><span class="o">,</span><span class="s">"2"</span><span class="o">);</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">rpush</span><span class="o">(</span><span class="s">"mylist"</span><span class="o">,</span><span class="s">"3"</span><span class="o">);</span>
+
+<span class="c1">//输出结果：[1,2,3]</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">lrange</span><span class="o">(</span><span class="s">"mylist"</span><span class="o">,</span><span class="mi">0</span><span class="o">,-</span><span class="mi">1</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="set操作">set操作</h4>
+
+<ul>
+  <li>在Redis中，我们可以将Set类型看作为<strong>没有排序的字符集合</strong>，和List类型一样，也可以在该类型的数据值上执行添加、删除或判断某一元素是否存在等操作。需要 说明的是，这些操作的时间是常量时间。Set可包含的最大元素数是4294967295。</li>
+  <li>和List类型不同的是，<strong>Set集合中不允许出现重复的元素</strong>。和List类型相比，Set类型在功能上还存在着一个非常重要的特性，即在服务器端完成多个Sets之间的聚合计 算操作，如unions、intersections和differences（就是交集并集那些了）。由于这些操作均在服务端完成， 因此效率极高，而且也节省了大量的网络IO开销</li>
+  <li>set 的方法都以s开头</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">语法</th>
+      <th style="text-align: center">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.sadd(String key,String v1,String v2,…)</td>
+      <td style="text-align: center">添加一个set</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.smenbers(String key)</td>
+      <td style="text-align: center">获取key对应set的所有元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.srem(String key,String val)</td>
+      <td style="text-align: center">删除集合key中值为val的元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.srem(String key, Sting v1, String v2,…)</td>
+      <td style="text-align: center">删除值为v1, v2 , …的元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.spop(String key)</td>
+      <td style="text-align: center">随机弹出栈set里的一个元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.scared(String key)</td>
+      <td style="text-align: center">获取set元素个数</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.smove(String key1, String key2, String val)</td>
+      <td style="text-align: center">将元素val从集合key1中移到key2中</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.sinter(String key1, String key2)</td>
+      <td style="text-align: center">获取集合key1和集合key2的交集</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.sunion(String key1, String key2)</td>
+      <td style="text-align: center">获取集合key1和集合key2的并集</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.sdiff(String key1, String key2)</td>
+      <td style="text-align: center">获取集合key1和集合key2的差集</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//set类型</span>
+
+<span class="n">jedis</span><span class="o">.</span><span class="na">sadd</span><span class="o">(</span><span class="s">"myset"</span><span class="o">,</span><span class="s">"a"</span><span class="o">);</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">sadd</span><span class="o">(</span><span class="s">"myset"</span><span class="o">,</span><span class="s">"b"</span><span class="o">);</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">sadd</span><span class="o">(</span><span class="s">"myset"</span><span class="o">,</span><span class="s">"a"</span><span class="o">);</span>
+
+<span class="c1">//输出结果：[b,a]</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">smembers</span><span class="o">(</span><span class="s">"myset"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="zset操作">zset操作</h4>
+
+<ul>
+  <li>Sorted-Sets和Sets类型极为相似，它们都是字符串的集合，都<strong>不允许重复的成员出现在一个Set中</strong>。它们之间的<strong>主要差别是Sorted-Sets中的每一个成员都会有一个分数(score)与之关联</strong></li>
+  <li>Redis正是通过分数来为集合中的成员进行从小到大的排序。然 而需要额外指出的是，尽管Sorted-Sets中的成员必须是唯一的，但是分数(score) 却是可以重复的。</li>
+  <li>在Sorted-Set中添加、删除或更新一个成员都是非常快速的操作，其时间复杂度为集合中成员数量的对数。由于Sorted-Sets中的成员在集合中的位置是有序的，因此，即便是访问位于集合中部的成员也仍然是非常高效的。</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">语法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.zadd(String key,Map map)</td>
+      <td style="text-align: center">添加一个ZSet</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.hset(String key,int score , int val)</td>
+      <td style="text-align: center">往 ZSet插入一个元素（Score-Val）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.zrange(String key, int i , int j)</td>
+      <td style="text-align: center">获取ZSet 里下表[i,j] 区间元素Val</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis. zrangeWithScore(String key,int i , int j)</td>
+      <td style="text-align: center">获取ZSet 里下表[i,j] 区间元素Score - Val</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.zrangeByScore(String , int i , int j)</td>
+      <td style="text-align: center">获取ZSet里score[i,j]分数区间的元素（Score-Val）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jeids.zscore(String key,String value)</td>
+      <td style="text-align: center">获取ZSet里value元素的Score</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.zrank(String key,String value)</td>
+      <td style="text-align: center">获取ZSet里value元素的score的排名</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.zrem(String key,String value)</td>
+      <td style="text-align: center">删除ZSet里的value元素</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.zcard(String key)</td>
+      <td style="text-align: center">获取ZSet的元素个数</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.zcount(String key , int i ,int j)</td>
+      <td style="text-align: center">获取ZSet总score在[i,j]区间的元素个数</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.zincrby(String key,int n , String value)</td>
+      <td style="text-align: center">把ZSet中value元素的score+=n</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//zset类型</span>
+
+<span class="n">jedis</span><span class="o">.</span><span class="na">zadd</span><span class="o">(</span><span class="s">"myzset"</span><span class="o">,</span><span class="mi">99</span><span class="o">,</span><span class="s">"tom"</span><span class="o">);</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">zadd</span><span class="o">(</span><span class="s">"myzset"</span><span class="o">,</span><span class="mi">66</span><span class="o">,</span><span class="s">"peter"</span><span class="o">);</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">zadd</span><span class="o">(</span><span class="s">"myzset"</span><span class="o">,</span><span class="mi">33</span><span class="o">,</span><span class="s">"james"</span><span class="o">);</span>
+
+<span class="c1">//输出结果：[[["james"],33.0],[["peter"],66.0],[["tom"],99.0]]</span>
+<span class="n">jedis</span><span class="o">.</span><span class="na">zrangeWithScores</span><span class="o">(</span><span class="s">"myzset"</span><span class="o">,</span><span class="mi">0</span><span class="o">,-</span><span class="mi">1</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="排序操作">排序操作</h4>
+
+<ul>
+  <li>使用排序， 首先需要生成一个排序对象</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">SortingParams  sortingParams =  new SortingParams();</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">语法</th>
+      <th style="text-align: center">描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">jedis.sort(String key,sortingParams.alpha())</td>
+      <td style="text-align: center">队列按首字母a-z 排序</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.sort(String key, sortingParams.asc() )</td>
+      <td style="text-align: center">队列按数字升序排列</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">jedis.sort(String key , sortingParams.desc())</td>
+      <td style="text-align: center">队列按数字降序排列</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="nc">JedisPoolUtils</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+ <span class="nc">SortingParams</span> <span class="n">sortingParams</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SortingParams</span><span class="o">();</span>
+ <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">sort</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="s">"list02"</span><span class="o">,</span> <span class="n">sortingParams</span><span class="o">.</span><span class="na">desc</span><span class="o">());</span>
+</code></pre></div></div>
+
+<ul>
+  <li>这里排序指的是返回的sort是有序的，而之前的list02 依然是以前的顺序。</li>
+</ul>
+
+<h4 id="jedis连接池">jedis连接池</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/02/3RDfD1.png" alt="3RDfD1.png" /></p>
+
+<p><img src="https://s2.ax1x.com/2020/03/02/3Rr9PS.png" alt="3Rr9PS.png" /></p>
+
+<ul>
+  <li>使用连接池</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//初始化jedis连接池，通常来说，jedisPool是单例的</span>
+<span class="nc">GenericObjectPoolConfig</span> <span class="n">poolConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GenericObjectPoolConfig</span><span class="o">();</span>
+<span class="nc">JedisPool</span> <span class="n">jedisPool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPool</span><span class="o">(</span><span class="n">poolConfig</span><span class="o">,</span><span class="s">"127.0.0.1"</span><span class="o">,</span><span class="mi">6379</span><span class="o">);</span>
+
+<span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="k">try</span><span class="o">{</span>
+  <span class="c1">//1.从连接池获取jedis对象</span>
+  <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+  <span class="c1">//2.执行操作</span>
+  <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">"hello"</span><span class="o">,</span><span class="s">"world"</span><span class="o">);</span>
+  
+<span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">){</span>
+  <span class="n">e</span><span class="o">.</span><span class="na">printStackTrance</span><span class="o">();</span>
+<span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+  <span class="k">if</span><span class="o">(</span><span class="n">jedis</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+    <span class="c1">//如果使用jedisPool，close操作不是关闭连接，而是代表归还给连接池</span>
+    <span class="n">jedis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="连接池配置优化">连接池配置优化</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/02/3R6BM4.png" alt="3R6BM4.png" /></p>
+
+<p><img src="https://s2.ax1x.com/2020/03/02/3R6cIx.png" alt="3R6cIx.png" /></p>
+
+<ul>
+  <li>适合的maxTotal</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1.命令平均执行时间：0.1ms = 0.001s
+2.业务需要50000QPS
+3.maxTotal = 0.001*50000 = 50。实际值要偏大一些
+</code></pre></div></div>
+
+<h4 id="线程安全问题">线程安全问题</h4>
+
+<ul>
+  <li>
+    <p>直接在多线程环境下复用一个连接会产生什么问题，以及如何用最佳实践来修复这个问题。</p>
+  </li>
+  <li>
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"jedismisreuse"</span><span class="o">)</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JedisMisreuseController</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">JedisPool</span> <span class="n">jedisPool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPool</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">6379</span><span class="o">);</span>
+
+    <span class="c1">//向 Redis 初始化 2 组数据，Key=a、Value=1，Key=b、Value=2</span>
+    <span class="nd">@PostConstruct</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">(</span><span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Jedis</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">6379</span><span class="o">))</span> <span class="o">{</span>
+            <span class="nc">Assert</span><span class="o">.</span><span class="na">isTrue</span><span class="o">(</span><span class="s">"OK"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">"a"</span><span class="o">,</span> <span class="s">"1"</span><span class="o">)),</span> <span class="s">"set a = 1 return OK"</span><span class="o">);</span>
+            <span class="nc">Assert</span><span class="o">.</span><span class="na">isTrue</span><span class="o">(</span><span class="s">"OK"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">"b"</span><span class="o">,</span> <span class="s">"2"</span><span class="o">)),</span> <span class="s">"set b = 2 return OK"</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="c1">//我们最好通过 shutdownhook，在程序退出之前关闭 JedisPool</span>
+        <span class="nc">Runtime</span><span class="o">.</span><span class="na">getRuntime</span><span class="o">().</span><span class="na">addShutdownHook</span><span class="o">(</span><span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="n">jedisPool</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+        <span class="o">}));</span>
+    <span class="o">}</span>
+
+  <span class="cm">/*
+  启动两个线程，共享操作同一个 Jedis 实例，每一个线程循环 1000 次，分别读取
+  Key 为 a 和 b 的 Value，判断是否分别为 1 和 2
+  */</span>
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/wrong"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">wrong</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Jedis</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">6379</span><span class="o">);</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"a"</span><span class="o">);</span>
+                <span class="k">if</span> <span class="o">(!</span><span class="s">"1"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">result</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"Expect a to be 1 but found {}"</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+                    <span class="k">return</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"b"</span><span class="o">);</span>
+                <span class="k">if</span> <span class="o">(!</span><span class="s">"2"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">result</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"Expect b to be 2 but found {}"</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+                    <span class="k">return</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+        <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">5</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="cm">/*
+    执行程序多次，可以看到日志中出现了各种奇怪的异常信息，有的是读取 Key 为 b 的
+Value 读取到了 1，有的是流非正常结束，还有的是连接关闭异常
+Jedis 继承了 BinaryJedis，BinaryJedis 中保存了单个 Client 的实例，Client
+最终继承了 Connection，Connection 中保存了单个 Socket 的实例，和 Socket 对应的
+两个读写流。因此，一个 Jedis 对应一个 Socket 连接。
+Jedis 继承了 BinaryJedis，BinaryJedis 中保存了单个 Client 的实例，Client
+最终继承了 Connection，Connection 中保存了单个 Socket 的实例，和 Socket 对应的
+两个读写流。因此，一个 Jedis 对应一个 Socket 连接。
+我们在多线程环境下复用 Jedis 对象，其实就是在复用 RedisOutputStream。如果多个线
+程在执行操作，那么既无法确保整条命令以一个原子操作写入 Socket，也无法确保写入
+后、读取前没有其他数据写到远端
+我们在多线程环境下复用 Jedis 对象，其实就是在复用 RedisOutputStream。如果多个线
+程在执行操作，那么既无法确保整条命令以一个原子操作写入 Socket，也无法确保写入
+后、读取前没有其他数据写到远端
+    */</span>
+
+    
+    <span class="cm">/*
+    使用 Jedis 提供的另一个线程安全的类 JedisPool 来获得 Jedis 的实例。
+JedisPool 可以声明为 static 在多个线程之间共享，扮演连接池的角色。使用时，按需使用
+try-with-resources 模式从 JedisPool 获得和归还 Jedis 实例。
+    */</span>
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/right"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">right</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span> <span class="o">{</span>
+
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">(</span><span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">())</span> <span class="o">{</span>
+                <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                    <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"a"</span><span class="o">);</span>
+                    <span class="k">if</span> <span class="o">(!</span><span class="s">"1"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">result</span><span class="o">))</span> <span class="o">{</span>
+                        <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"Expect a to be 1 but found {}"</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+                        <span class="k">return</span><span class="o">;</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">(</span><span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">())</span> <span class="o">{</span>
+                <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                    <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"b"</span><span class="o">);</span>
+                    <span class="k">if</span> <span class="o">(!</span><span class="s">"2"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">result</span><span class="o">))</span> <span class="o">{</span>
+                        <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"Expect b to be 2 but found {}"</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+                        <span class="k">return</span><span class="o">;</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+        <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">5</span><span class="o">);</span>
+
+    <span class="o">}</span>
+
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"timeout"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">timeout</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="s">"waittimeout"</span><span class="o">)</span> <span class="kt">int</span> <span class="n">waittimeout</span><span class="o">,</span>
+                          <span class="nd">@RequestParam</span><span class="o">(</span><span class="s">"conntimeout"</span><span class="o">)</span> <span class="kt">int</span> <span class="n">conntimeout</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">JedisPoolConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPoolConfig</span><span class="o">();</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setMaxTotal</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setMaxWaitMillis</span><span class="o">(</span><span class="n">waittimeout</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">(</span><span class="nc">JedisPool</span> <span class="n">jedisPool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPool</span><span class="o">(</span><span class="n">config</span><span class="o">,</span> <span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="mi">6379</span><span class="o">,</span> <span class="n">conntimeout</span><span class="o">);</span>
+             <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">"test"</span><span class="o">,</span> <span class="s">"test"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Jedis 的 API 实现是我们说的三种类型中的第一种，也就是连接池和连接分离的 API，JedisPool 是线程安全的连接池，Jedis 是非线程安全的单一连接。</li>
+</ul>
+
+<h3 id="redis序列化对象">Redis序列化对象</h3>
+
+<ul>
+  <li>采用性能最好的protostuff来自定义序列化对象，使对象占用最少的空间</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--配置RedisDao,使用构造器注入--&gt;</span>
+<span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"redisDao"</span> <span class="na">class=</span><span class="s">"com.qinfen.dao.cache.RedisDao"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;constructor-arg</span> <span class="na">index=</span><span class="s">"0"</span> <span class="na">value=</span><span class="s">"localhost"</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;constructor-arg</span> <span class="na">index=</span><span class="s">"1"</span> <span class="na">value=</span><span class="s">"6379"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/bean&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>RedisDao</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.qinfen.dao.cache</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.dyuproject.protostuff.LinkedBuffer</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.dyuproject.protostuff.ProtostuffIOUtil</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.dyuproject.protostuff.runtime.RuntimeSchema</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.qinfen.entity.Seckill</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.slf4j.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.slf4j.LoggerFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.Jedis</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.JedisPool</span><span class="o">;</span>
+
+<span class="cm">/**
+ * Redis缓存
+ *
+ * @author QinFen
+ * @date 2019/11/6 0006 10:00
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisDao</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">JedisPool</span> <span class="n">jedisPool</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">RuntimeSchema</span><span class="o">&lt;</span><span class="nc">Seckill</span><span class="o">&gt;</span> <span class="n">schema</span> <span class="o">=</span> <span class="nc">RuntimeSchema</span><span class="o">.</span><span class="na">createFrom</span><span class="o">(</span><span class="nc">Seckill</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+    <span class="kd">public</span> <span class="nf">RedisDao</span><span class="o">(</span><span class="nc">String</span> <span class="n">ip</span><span class="o">,</span> <span class="kt">int</span> <span class="n">port</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">jedisPool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPool</span><span class="o">(</span><span class="n">ip</span><span class="o">,</span> <span class="n">port</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 从Redis中取出一个秒杀商品对象
+     *
+     * @param seckillId
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="nc">Seckill</span> <span class="nf">getSeckill</span><span class="o">(</span><span class="kt">long</span> <span class="n">seckillId</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//Redis操作逻辑</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">//获取jedis</span>
+            <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">key</span> <span class="o">=</span> <span class="s">"seckill:"</span> <span class="o">+</span> <span class="n">seckillId</span><span class="o">;</span>
+                <span class="c1">//Redis没有实现内部序列化操作</span>
+                <span class="c1">// get -&gt; byte[] -&gt;　反序列化　-&gt; Object(Seckill)</span>
+                <span class="c1">//采用性能最好的protostuff来自定义序列化,比用jdk的序列化好</span>
+                <span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+                <span class="c1">//缓存重新获取到</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">bytes</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="c1">//空对象</span>
+                    <span class="nc">Seckill</span> <span class="n">seckill</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="na">newMessage</span><span class="o">();</span>
+                    <span class="nc">ProtostuffIOUtil</span><span class="o">.</span><span class="na">mergeFrom</span><span class="o">(</span><span class="n">bytes</span><span class="o">,</span> <span class="n">seckill</span><span class="o">,</span> <span class="n">schema</span><span class="o">);</span>
+                    <span class="c1">//seckill 被反序列化，属性填充完成</span>
+                    <span class="k">return</span> <span class="n">seckill</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                <span class="n">jedis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 向Redis中缓存一个秒杀商品对象
+     *
+     * @param seckill
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">putSeckill</span><span class="o">(</span><span class="nc">Seckill</span> <span class="n">seckill</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// set Object(Seckill) -&gt; 序列化 -&gt; byte[]</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="nc">String</span> <span class="n">key</span> <span class="o">=</span> <span class="s">"seckill:"</span> <span class="o">+</span> <span class="n">seckill</span><span class="o">.</span><span class="na">getSeckillId</span><span class="o">();</span>
+                <span class="kt">byte</span><span class="o">[]</span> <span class="n">bytes</span> <span class="o">=</span> <span class="nc">ProtostuffIOUtil</span><span class="o">.</span><span class="na">toByteArray</span><span class="o">(</span><span class="n">seckill</span><span class="o">,</span> <span class="n">schema</span><span class="o">,</span>
+                        <span class="nc">LinkedBuffer</span><span class="o">.</span><span class="na">allocate</span><span class="o">(</span><span class="nc">LinkedBuffer</span><span class="o">.</span><span class="na">DEFAULT_BUFFER_SIZE</span><span class="o">));</span>
+                <span class="c1">//超时缓存</span>
+                <span class="kt">int</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="o">;</span><span class="c1">//一小时</span>
+                <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">setex</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(),</span> <span class="n">timeout</span><span class="o">,</span> <span class="n">bytes</span><span class="o">);</span>
+                <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+            <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+                <span class="n">jedis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="redis常用操作封装">Redis常用操作封装</h3>
+
+<ul>
+  <li>配置</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.imooc.miaosha.redis</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.boot.context.properties.ConfigurationProperties</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.PropertySource</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
+
+<span class="cm">/**
+ * Redis配置类,从配置文件中读取以redis为前缀的数据
+ *
+ * @author Administrator
+ */</span>
+<span class="nd">@Component</span>
+<span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="n">prefix</span> <span class="o">=</span> <span class="s">"redis"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisConfig</span> <span class="o">{</span>
+    <span class="cm">/**
+     * 主机号
+     */</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">host</span><span class="o">;</span>
+    <span class="cm">/**
+     * 端口号
+     */</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">port</span><span class="o">;</span>
+    <span class="cm">/**
+     * 过期时间，秒
+     */</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">timeout</span><span class="o">;</span>
+    <span class="cm">/**
+     * 密码
+     */</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">password</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">poolMaxTotal</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">poolMaxIdle</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">poolMaxWait</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getHost</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">host</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setHost</span><span class="o">(</span><span class="nc">String</span> <span class="n">host</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">host</span> <span class="o">=</span> <span class="n">host</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPort</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">port</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPort</span><span class="o">(</span><span class="kt">int</span> <span class="n">port</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">port</span> <span class="o">=</span> <span class="n">port</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getTimeout</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">timeout</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setTimeout</span><span class="o">(</span><span class="kt">int</span> <span class="n">timeout</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">timeout</span> <span class="o">=</span> <span class="n">timeout</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getPassword</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">password</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPassword</span><span class="o">(</span><span class="nc">String</span> <span class="n">password</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">password</span> <span class="o">=</span> <span class="n">password</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPoolMaxTotal</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">poolMaxTotal</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPoolMaxTotal</span><span class="o">(</span><span class="kt">int</span> <span class="n">poolMaxTotal</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">poolMaxTotal</span> <span class="o">=</span> <span class="n">poolMaxTotal</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPoolMaxIdle</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">poolMaxIdle</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPoolMaxIdle</span><span class="o">(</span><span class="kt">int</span> <span class="n">poolMaxIdle</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">poolMaxIdle</span> <span class="o">=</span> <span class="n">poolMaxIdle</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPoolMaxWait</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">poolMaxWait</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPoolMaxWait</span><span class="o">(</span><span class="kt">int</span> <span class="n">poolMaxWait</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">poolMaxWait</span> <span class="o">=</span> <span class="n">poolMaxWait</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.imooc.miaosha.redis</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.JedisPool</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.JedisPoolConfig</span><span class="o">;</span>
+
+<span class="cm">/**
+ * Redis连接工厂
+ *
+ * @author Administrator
+ */</span>
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisPoolFactory</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">RedisConfig</span> <span class="n">redisConfig</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * 向spring容器中注入jedis连接池
+     *
+     * @return
+     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">JedisPool</span> <span class="nf">JedisPoolFactory</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">JedisPoolConfig</span> <span class="n">poolConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPoolConfig</span><span class="o">();</span>
+        <span class="n">poolConfig</span><span class="o">.</span><span class="na">setMaxIdle</span><span class="o">(</span><span class="n">redisConfig</span><span class="o">.</span><span class="na">getPoolMaxIdle</span><span class="o">());</span>
+        <span class="n">poolConfig</span><span class="o">.</span><span class="na">setMaxTotal</span><span class="o">(</span><span class="n">redisConfig</span><span class="o">.</span><span class="na">getPoolMaxTotal</span><span class="o">());</span>
+        <span class="n">poolConfig</span><span class="o">.</span><span class="na">setMaxWaitMillis</span><span class="o">(</span><span class="n">redisConfig</span><span class="o">.</span><span class="na">getPoolMaxWait</span><span class="o">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">);</span>
+        <span class="nc">JedisPool</span> <span class="n">jp</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPool</span><span class="o">(</span><span class="n">poolConfig</span><span class="o">,</span> <span class="n">redisConfig</span><span class="o">.</span><span class="na">getHost</span><span class="o">(),</span> <span class="n">redisConfig</span><span class="o">.</span><span class="na">getPort</span><span class="o">(),</span>
+                <span class="n">redisConfig</span><span class="o">.</span><span class="na">getTimeout</span><span class="o">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">,</span> <span class="n">redisConfig</span><span class="o">.</span><span class="na">getPassword</span><span class="o">(),</span> <span class="mi">0</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">jp</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.imooc.miaosha.redis</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Service</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.alibaba.fastjson.JSON</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.Jedis</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">redis.clients.jedis.JedisPool</span><span class="o">;</span>
+
+<span class="cm">/**
+ * Redis常用操作封装
+ *
+ * @author Administrator
+ */</span>
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisService</span> <span class="o">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="nc">JedisPool</span> <span class="n">jedisPool</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * 获取当个对象
+     */</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span> <span class="nf">get</span><span class="o">(</span><span class="nc">KeyPrefix</span> <span class="n">prefix</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="c1">//生成真正的key</span>
+            <span class="nc">String</span> <span class="n">realKey</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">getPrefix</span><span class="o">()</span> <span class="o">+</span> <span class="n">key</span><span class="o">;</span>
+            <span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">realKey</span><span class="o">);</span>
+            <span class="no">T</span> <span class="n">t</span> <span class="o">=</span> <span class="n">stringToBean</span><span class="o">(</span><span class="n">str</span><span class="o">,</span> <span class="n">clazz</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">t</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">returnToPool</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 设置对象
+     */</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="kt">boolean</span> <span class="nf">set</span><span class="o">(</span><span class="nc">KeyPrefix</span> <span class="n">prefix</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="no">T</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="nc">String</span> <span class="n">str</span> <span class="o">=</span> <span class="n">beanToString</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">str</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="c1">//生成真正的key</span>
+            <span class="nc">String</span> <span class="n">realKey</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">getPrefix</span><span class="o">()</span> <span class="o">+</span> <span class="n">key</span><span class="o">;</span>
+            <span class="c1">//过期时间</span>
+            <span class="kt">int</span> <span class="n">seconds</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">expireSeconds</span><span class="o">();</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">seconds</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">realKey</span><span class="o">,</span> <span class="n">str</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                <span class="n">jedis</span><span class="o">.</span><span class="na">setex</span><span class="o">(</span><span class="n">realKey</span><span class="o">,</span> <span class="n">seconds</span><span class="o">,</span> <span class="n">str</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">returnToPool</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 判断key是否存在
+     */</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="kt">boolean</span> <span class="nf">exists</span><span class="o">(</span><span class="nc">KeyPrefix</span> <span class="n">prefix</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="c1">//生成真正的key</span>
+            <span class="nc">String</span> <span class="n">realKey</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">getPrefix</span><span class="o">()</span> <span class="o">+</span> <span class="n">key</span><span class="o">;</span>
+            <span class="k">return</span> <span class="n">jedis</span><span class="o">.</span><span class="na">exists</span><span class="o">(</span><span class="n">realKey</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">returnToPool</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 删除
+     */</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">delete</span><span class="o">(</span><span class="nc">KeyPrefix</span> <span class="n">prefix</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="c1">//生成真正的key</span>
+            <span class="nc">String</span> <span class="n">realKey</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">getPrefix</span><span class="o">()</span> <span class="o">+</span> <span class="n">key</span><span class="o">;</span>
+            <span class="kt">long</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">del</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">ret</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">returnToPool</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 增加值
+     */</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">Long</span> <span class="nf">incr</span><span class="o">(</span><span class="nc">KeyPrefix</span> <span class="n">prefix</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="c1">//生成真正的key</span>
+            <span class="nc">String</span> <span class="n">realKey</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">getPrefix</span><span class="o">()</span> <span class="o">+</span> <span class="n">key</span><span class="o">;</span>
+            <span class="k">return</span> <span class="n">jedis</span><span class="o">.</span><span class="na">incr</span><span class="o">(</span><span class="n">realKey</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">returnToPool</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 减少值
+     */</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">Long</span> <span class="nf">decr</span><span class="o">(</span><span class="nc">KeyPrefix</span> <span class="n">prefix</span><span class="o">,</span> <span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="n">jedisPool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+            <span class="c1">//生成真正的key</span>
+            <span class="nc">String</span> <span class="n">realKey</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="na">getPrefix</span><span class="o">()</span> <span class="o">+</span> <span class="n">key</span><span class="o">;</span>
+            <span class="k">return</span> <span class="n">jedis</span><span class="o">.</span><span class="na">decr</span><span class="o">(</span><span class="n">realKey</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">returnToPool</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 把对象转换为字符串
+     *
+     * @param value
+     * @param &lt;T&gt;
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">String</span> <span class="nf">beanToString</span><span class="o">(</span><span class="no">T</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">value</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">clazz</span> <span class="o">==</span> <span class="kt">int</span><span class="o">.</span><span class="na">class</span> <span class="o">||</span> <span class="n">clazz</span> <span class="o">==</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="s">""</span> <span class="o">+</span> <span class="n">value</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">clazz</span> <span class="o">==</span> <span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">value</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">clazz</span> <span class="o">==</span> <span class="kt">long</span><span class="o">.</span><span class="na">class</span> <span class="o">||</span> <span class="n">clazz</span> <span class="o">==</span> <span class="nc">Long</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="s">""</span> <span class="o">+</span> <span class="n">value</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="no">JSON</span><span class="o">.</span><span class="na">toJSONString</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 字符串转换为对象
+     *
+     * @param str
+     * @param clazz
+     * @param &lt;T&gt;
+     * @return
+     */</span>
+    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"unchecked"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span> <span class="nf">stringToBean</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">str</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">clazz</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">clazz</span> <span class="o">==</span> <span class="kt">int</span><span class="o">.</span><span class="na">class</span> <span class="o">||</span> <span class="n">clazz</span> <span class="o">==</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">(</span><span class="no">T</span><span class="o">)</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">str</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">clazz</span> <span class="o">==</span> <span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">(</span><span class="no">T</span><span class="o">)</span> <span class="n">str</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">clazz</span> <span class="o">==</span> <span class="kt">long</span><span class="o">.</span><span class="na">class</span> <span class="o">||</span> <span class="n">clazz</span> <span class="o">==</span> <span class="nc">Long</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">(</span><span class="no">T</span><span class="o">)</span> <span class="nc">Long</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">str</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="no">JSON</span><span class="o">.</span><span class="na">toJavaObject</span><span class="o">(</span><span class="no">JSON</span><span class="o">.</span><span class="na">parseObject</span><span class="o">(</span><span class="n">str</span><span class="o">),</span> <span class="n">clazz</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 把Redis连接返回到连接池中
+     *
+     * @param jedis
+     */</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">returnToPool</span><span class="o">(</span><span class="nc">Jedis</span> <span class="n">jedis</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">jedis</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">jedis</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="redis慢查询">Redis慢查询</h3>
+
+<h4 id="生命周期">生命周期</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34rNz8.png" alt="34rNz8.png" /></p>
+
+<h4 id="两个配置">两个配置</h4>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34sX90.png" alt="34sX90.png" /></p>
+
+<h4 id="慢查询命令">慢查询命令</h4>
+
+<ul>
+  <li>slowlog get [n]：获取慢查询队列</li>
+  <li>slowlog len ：获取慢查询队列长度</li>
+  <li>slowlog reset ：清空慢查询队列</li>
+</ul>
+
+<h4 id="运维经验">运维经验</h4>
+
+<ul>
+  <li>slowlog-max-len 不要设置过大，默认10ms，通常设置1ms</li>
+  <li>slowlog-log-slower-than 不要设置过小，通常设置1000左右</li>
+  <li>理解命令生命周期</li>
+  <li>定期持久化慢查询</li>
+</ul>
+
+<h3 id="流水线">流水线</h3>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/346aQK.png" alt="346aQK.png" /></p>
+
+<ul>
+  <li>流水线作用：</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34c9YR.png" alt="34c9YR.png" /></p>
+
+<ul>
+  <li>在jedis中的使用</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Jedis</span><span class="o">(</span><span class="s">"127.0.0.1"</span><span class="o">,</span><span class="mi">6379</span><span class="o">);</span>
+<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">100</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+  <span class="nc">Pipeline</span> <span class="n">pipeline</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">pipelined</span><span class="o">();</span>
+  <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="n">i</span><span class="o">*</span><span class="mi">100</span><span class="o">;</span><span class="n">j</span><span class="o">&lt;(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">)*</span><span class="mi">100</span><span class="o">;</span><span class="n">j</span><span class="o">++){</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="na">hset</span><span class="o">(</span><span class="s">"hashkey"</span><span class="o">+</span><span class="n">j</span><span class="o">,</span><span class="s">"field"</span><span class="o">+</span><span class="n">j</span><span class="o">,</span><span class="s">"value"</span><span class="o">+</span><span class="n">j</span><span class="o">);</span>
+  <span class="o">}</span>
+  <span class="n">pipeline</span><span class="o">.</span><span class="na">syncAndReturnAll</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>使用建议：
+    <ul>
+      <li>注意每次pipeline携带数据量</li>
+      <li>pipeline只能作用在一个Redis节点上</li>
+      <li>M操作（原子操作）和pipeline（非原子操作）区别</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="发布订阅">发布订阅</h3>
+
+<ul>
+  <li>模型</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34R01I.png" alt="34R01I.png" /></p>
+
+<h4 id="api">API</h4>
+
+<ul>
+  <li>publish发布命令</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34RouV.png" alt="34RouV.png" /></p>
+
+<ul>
+  <li>subcribe订阅命令</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34RqN4.png" alt="34RqN4.png" /></p>
+
+<ul>
+  <li>unsubcribe取消订阅</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34WF4H.png" alt="34WF4H.png" /></p>
+
+<ul>
+  <li>其他</li>
+</ul>
+
+<h3 id="位图">位图</h3>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34fRln.png" alt="34fRln.png" /></p>
+
+<h4 id="api-1">API</h4>
+
+<ul>
+  <li>setbit</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34fvm6.png" alt="34fvm6.png" /></p>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34h9te.png" alt="34h9te.png" /></p>
+
+<ul>
+  <li>getbit</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34hVnP.png" alt="34hVnP.png" /></p>
+
+<ul>
+  <li>bitcount</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34hUNF.png" alt="34hUNF.png" /></p>
+
+<ul>
+  <li>bitop</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34h6HK.png" alt="34h6HK.png" /></p>
+
+<ul>
+  <li>bitpos</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34h5jI.png" alt="34h5jI.png" /></p>
+
+<h3 id="hyperloglog">HyperLogLog</h3>
+
+<ul>
+  <li>基于HyperLogLog算法，极小空间完成独立数量统计</li>
+  <li>本质是字符串</li>
+  <li>三个命令
+    <ul>
+      <li>pfakeydd key element [element] ：向hyperloglog中添加元素</li>
+      <li>pfcount key [key…]：计算hyperloglog的独立总数</li>
+      <li>pfmerge destkey sourcekey [sourcekey…]：合并多个hyperloglog</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="geo">GEO</h3>
+
+<ul>
+  <li>GEO(地理信息定位)：存储经纬度，计算两地距离，范围计算等</li>
+  <li>geoadd</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34ozJU.png" alt="34ozJU.png" /></p>
+
+<ul>
+  <li>geopos</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34TiLR.png" alt="34TiLR.png" /></p>
+
+<ul>
+  <li>geodist</li>
+</ul>
+
+<p><img src="https://s2.ax1x.com/2020/03/03/34TeJO.png" alt="34TeJO.png" /></p>
+
+:ET

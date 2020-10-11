@@ -1,0 +1,17 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#what" id="markdown-toc-what">what?</a></li>
+</ul>
+<h2 id="what">what?</h2>
+
+<ul>
+  <li>MVC是一种分层的设计模式,结合Serlvet和JSP进行数据的显示，就是一种MVC的思想。</li>
+  <li>M 代表 模型（Model）
+V 代表 视图（View） 
+C 代表 控制器（controller)</li>
+  <li>模型是什么呢？ 模型就是数据，就是dao,bean</li>
+  <li>视图是什么呢？ 就是网页, JSP，用来展示模型中的数据</li>
+  <li>控制器是什么？ 控制器用来把不同的数据，显示在不同的视图上。</li>
+</ul>
+
+<p><img src="http://stepimagewm.how2j.cn/1701.png" alt="" /></p>
+:ET

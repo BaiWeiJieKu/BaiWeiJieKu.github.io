@@ -1,0 +1,13 @@
+I"8<ul id="markdown-toc">
+  <li><a href="#aop" id="markdown-toc-aop">AOP</a></li>
+</ul>
+<h3 id="aop">AOP</h3>
+
+<ul>
+  <li>AOP(Aspect-Oriented Programming, 面向切面编程):是一种新的方法论, 是对传统 OOP(Object-Oriented Programming, 面向对象编程) 的补充</li>
+  <li>AOP 的主要编程对象是<strong>切面</strong>(aspect), 而<strong>切面模块化横切关注点</strong></li>
+  <li>在应用 AOP 编程时, 仍然需要<strong>定义</strong>公共功能**, 但可以明确的定义这个功能在哪里, 以什么方式应用, **并且不必修改受影响的类. 这样一来横切关注点就被模块化到特殊的对象(切面)里</li>
+  <li>每个事物逻辑位于一个位置, 代码不分散, 便于维护和升级</li>
+  <li>业务模块更简洁, 只包含核心业务代码</li>
+</ul>
+:ET

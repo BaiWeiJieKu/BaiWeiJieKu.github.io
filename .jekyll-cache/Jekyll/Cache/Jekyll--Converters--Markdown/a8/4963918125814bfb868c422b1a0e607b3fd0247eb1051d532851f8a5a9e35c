@@ -1,0 +1,92 @@
+I"H<ul id="markdown-toc">
+  <li><a href="#什么是juc" id="markdown-toc-什么是juc">什么是JUC</a>    <ul>
+      <li><a href="#进程与线程" id="markdown-toc-进程与线程">进程与线程</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="什么是juc">什么是JUC</h3>
+
+<ul>
+  <li>java.util.concurrent在并发编程中使用的工具类</li>
+</ul>
+
+<h4 id="进程与线程">进程与线程</h4>
+
+<ul>
+  <li><strong>进程</strong>：进程是一个具有一定<strong>独立功能</strong>的程序关于某个数据集合的一次运行活动。它是操作系统动态执行的基本单元，在传统的操作系统中，进程既是基本的分配单元，也是基本的执行单元。</li>
+  <li>大四的时候写论文，用word写论文，同时用QQ音乐放音乐，同时用QQ聊天，多个进程。</li>
+  <li><strong>线程</strong>：通常在一个进程中可以包含若干个线程，当然一个进程中至少有一个线程，不然没有存在的意义。线程可以利用进程所拥有的资源，在引入线程的操作系统中，通常都是把进程作为分配资源的基本单位，而把线程作为独立运行和独立调度的基本单位，由于线程比进程更小，基本上不拥有系统资源，故对它的调度所付出的开销就会小得多，能更高效的提高系统多个程序间并发执行的程度。</li>
+  <li>word如没有保存，停电关机，再通电后打开word可以恢复之前未保存的文档，word也会检查你的拼写，两个线程：容灾备份，语法检查</li>
+  <li>线程的几种状态</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Thread</span><span class="o">.</span><span class="na">State</span>
+ 
+ 
+ 
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">State</span> <span class="o">{</span>
+    <span class="cm">/**
+     * Thread state for a thread which has not yet started.
+     */</span>
+    <span class="no">NEW</span><span class="o">,(</span><span class="n">新建</span><span class="o">)</span>
+
+    <span class="cm">/**
+     * Thread state for a runnable thread.  A thread in the runnable
+     * state is executing in the Java virtual machine but it may
+     * be waiting for other resources from the operating system
+     * such as processor.
+     */</span>
+    <span class="no">RUNNABLE</span><span class="o">,</span><span class="err">（</span><span class="n">准备就绪</span><span class="err">）</span>
+
+    <span class="cm">/**
+     * Thread state for a thread blocked waiting for a monitor lock.
+     * A thread in the blocked state is waiting for a monitor lock
+     * to enter a synchronized block/method or
+     * reenter a synchronized block/method after calling
+     * {@link Object#wait() Object.wait}.
+     */</span>
+    <span class="no">BLOCKED</span><span class="o">,</span><span class="err">（</span><span class="n">阻塞</span><span class="err">）</span>
+
+    <span class="cm">/**
+     * Thread state for a waiting thread.
+     * A thread is in the waiting state due to calling one of the
+     * following methods:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@link Object#wait() Object.wait} with no timeout&lt;/li&gt;
+     *   &lt;li&gt;{@link #join() Thread.join} with no timeout&lt;/li&gt;
+     *   &lt;li&gt;{@link LockSupport#park() LockSupport.park}&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * &lt;p&gt;A thread in the waiting state is waiting for another thread to
+     * perform a particular action.
+     *
+     * For example, a thread that has called &lt;tt&gt;Object.wait()&lt;/tt&gt;
+     * on an object is waiting for another thread to call
+     * &lt;tt&gt;Object.notify()&lt;/tt&gt; or &lt;tt&gt;Object.notifyAll()&lt;/tt&gt; on
+     * that object. A thread that has called &lt;tt&gt;Thread.join()&lt;/tt&gt;
+     * is waiting for a specified thread to terminate.
+     */</span>
+    <span class="no">WAITING</span><span class="o">,</span><span class="err">（</span><span class="n">不见不散</span><span class="err">）</span>
+
+    <span class="cm">/**
+     * Thread state for a waiting thread with a specified waiting time.
+     * A thread is in the timed waiting state due to calling one of
+     * the following methods with a specified positive waiting time:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@link #sleep Thread.sleep}&lt;/li&gt;
+     *   &lt;li&gt;{@link Object#wait(long) Object.wait} with timeout&lt;/li&gt;
+     *   &lt;li&gt;{@link #join(long) Thread.join} with timeout&lt;/li&gt;
+     *   &lt;li&gt;{@link LockSupport#parkNanos LockSupport.parkNanos}&lt;/li&gt;
+     *   &lt;li&gt;{@link LockSupport#parkUntil LockSupport.parkUntil}&lt;/li&gt;
+     * &lt;/ul&gt;
+     */</span>
+    <span class="no">TIMED_WAITING</span><span class="o">,</span><span class="err">（</span><span class="n">过时不候</span><span class="err">）</span>
+
+    <span class="cm">/**
+     * Thread state for a terminated thread.
+     * The thread has completed execution.
+     */</span>
+    <span class="no">TERMINATED</span><span class="o">;(</span><span class="n">终结</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET

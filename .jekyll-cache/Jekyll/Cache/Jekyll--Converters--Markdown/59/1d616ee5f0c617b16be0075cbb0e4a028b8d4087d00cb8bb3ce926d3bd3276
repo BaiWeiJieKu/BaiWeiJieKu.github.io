@@ -1,0 +1,29 @@
+I"_<ul id="markdown-toc">
+  <li><a href="#json" id="markdown-toc-json">JSON</a></li>
+</ul>
+<h3 id="json">JSON</h3>
+
+<ul>
+  <li>在方法上添加 @ResponseBody 注解</li>
+  <li><code class="language-plaintext highlighter-rouge">HttpMessageConverter&lt;T&gt;</code> 是 Spring3.0新添加的一个接  口，负责将请求信息转换为一个对象（类型为 T），将对象（  类型为 T）输出为响应信息</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/testResponseEntity"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[]&gt;</span> <span class="nf">testResponseEntity</span><span class="o">(</span><span class="nc">HttpSession</span> <span class="n">session</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">{</span>
+		<span class="kt">byte</span> <span class="o">[]</span> <span class="n">body</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="nc">ServletContext</span> <span class="n">servletContext</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">getServletContext</span><span class="o">();</span>
+		<span class="nc">InputStream</span> <span class="n">in</span> <span class="o">=</span> <span class="n">servletContext</span><span class="o">.</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"/files/abc.txt"</span><span class="o">);</span>
+		<span class="n">body</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">in</span><span class="o">.</span><span class="na">available</span><span class="o">()];</span>
+		<span class="n">in</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">body</span><span class="o">);</span>
+		
+		<span class="nc">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HttpHeaders</span><span class="o">();</span>
+		<span class="n">headers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"Content-Disposition"</span><span class="o">,</span> <span class="s">"attachment;filename=abc.txt"</span><span class="o">);</span>
+		
+		<span class="nc">HttpStatus</span> <span class="n">statusCode</span> <span class="o">=</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">;</span>
+		
+		<span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[]&gt;(</span><span class="n">body</span><span class="o">,</span> <span class="n">headers</span><span class="o">,</span> <span class="n">statusCode</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">response</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+:ET

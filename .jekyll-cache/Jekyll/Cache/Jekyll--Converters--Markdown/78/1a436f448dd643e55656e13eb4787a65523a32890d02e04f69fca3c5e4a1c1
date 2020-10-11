@@ -1,0 +1,124 @@
+I"�#<ul id="markdown-toc">
+  <li><a href="#基本数据类型" id="markdown-toc-基本数据类型">基本数据类型</a></li>
+  <li><a href="#引用传递" id="markdown-toc-引用传递">引用传递</a></li>
+  <li><a href="#string" id="markdown-toc-string">String</a></li>
+  <li><a href="#内存结构图" id="markdown-toc-内存结构图">内存结构图</a></li>
+</ul>
+<h3 id="基本数据类型">基本数据类型</h3>
+
+<ul>
+  <li><strong>byte,short,int,long,char,float,double,Boolean,returnAddress。</strong></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ValueDemo</span>
+<span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+		<span class="n">method</span><span class="o">(</span><span class="n">x</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"x = "</span> <span class="o">+</span> <span class="n">x</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">method</span><span class="o">(</span><span class="kt">int</span> <span class="n">mx</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="n">mx</span> <span class="o">=</span> <span class="mi">20</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*结果：
+x = 10
+*/</span>
+</code></pre></div></div>
+
+<ul>
+  <li>这边是这样的，主函数x==1，在method中只是把x==10“复制”了一份给了method方法，在方法里，mx一开始是10，在方法里又给mx赋了20（是数，不是地址），此时mx是20，但主函数的x依然是10，所以主函数后面输出的x就是10了。（这些东西都是在栈内存里发生的）</li>
+</ul>
+
+<h3 id="引用传递">引用传递</h3>
+
+<ul>
+  <li><strong>类类型，接口类型和数组</strong>。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RefDemo1</span>
+<span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="nc">Duck</span> <span class="n">d</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Duck</span><span class="o">();</span>
+		<span class="n">method</span><span class="o">(</span><span class="n">d</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Duck age ="</span> <span class="o">+</span> <span class="n">d</span><span class="o">.</span><span class="na">age</span><span class="o">);</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">method</span><span class="o">(</span><span class="nc">Duck</span> <span class="n">duck</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="n">duck</span><span class="o">.</span><span class="na">age</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+ 
+<span class="kd">class</span> <span class="nc">Duck</span>
+<span class="o">{</span>
+	<span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span><span class="c1">//省略封装</span>
+<span class="o">}</span>
+<span class="cm">/*结果：
+Duck age =5
+*/</span>
+</code></pre></div></div>
+
+<ul>
+  <li>这个首先建立了d，d是一个地址，指向了Duck，此时Duck里面只有一个age，为2。是d指向了age=2，d这时是个地址。此时给method传参为d（d时地址），那么method（Duck duck）中的duck是一个地址，地址的指向为age，age是一个int基本类型，是在堆内存里。这里method(Duck duck)的duck和d指的都是age这个基本类型，此时把duck.age改为5，那么d.age就也等于5了。</li>
+</ul>
+
+<h3 id="string">String</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+	String字符串本身就是一个对象，跟引用传递不同，引用传递给了函数一个地址，地址指向一个值，String本
+	身是一个对象，就是String也是一个“类”，当给外面name小飞时，进入method，又给了sname一个小备，此时给
+	小备的时新给小备创建了一个地址。若name = "小飞"的地址时0x0001，函数（方法）里的name就不等于0x0001
+	了
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RefDemo2</span>
+<span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="s">"小飞"</span><span class="o">;</span>
+		<span class="n">method</span><span class="o">(</span><span class="n">name</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"name = "</span> <span class="o">+</span> <span class="n">name</span><span class="o">);</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">method</span><span class="o">(</span><span class="nc">String</span> <span class="n">sname</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="n">sname</span> <span class="o">=</span> <span class="s">"小备"</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+ 
+<span class="cm">/*结果：
+name = 小飞
+*/</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RefDemo3</span>
+<span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="nc">Person</span> <span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+		<span class="n">method</span><span class="o">(</span><span class="n">p</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Person name = "</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="na">name</span><span class="o">);</span>
+	<span class="o">}</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">method</span><span class="o">(</span><span class="nc">Person</span> <span class="n">per</span><span class="o">)</span>
+	<span class="o">{</span>
+		<span class="n">per</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"备备"</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+ 
+<span class="kd">class</span> <span class="nc">Person</span>
+<span class="o">{</span>
+	<span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="s">"飞飞"</span><span class="o">;</span>	<span class="c1">//省略封装</span>
+<span class="o">}</span>
+<span class="cm">/*结果：
+Person name = 备备
+*/</span>
+</code></pre></div></div>
+
+<p><a href="https://blog.csdn.net/bntX2jSQfEHy7/article/details/83508006">详细解释</a></p>
+
+<h3 id="内存结构图">内存结构图</h3>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/yinyong.png" alt="" /></p>
+:ET

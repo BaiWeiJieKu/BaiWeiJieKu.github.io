@@ -1,0 +1,54 @@
+I"><ul id="markdown-toc">
+  <li><a href="#入门" id="markdown-toc-入门">入门</a>    <ul>
+      <li><a href="#日志级别" id="markdown-toc-日志级别">日志级别</a></li>
+    </ul>
+  </li>
+</ul>
+<h2 id="入门">入门</h2>
+
+<ul>
+  <li>知道是log4j.TestLog4j这个类里的日志</li>
+  <li>是在[main]线程里的日志</li>
+  <li>日志级别可观察，一共有6个级别 TRACE DEBUG INFO WARN ERROR FATAL</li>
+  <li>日志输出级别范围可控制， 如代码所示，只输出高于DEBUG级别的，那么TRACE级别的日志自动不输出</li>
+  <li>每句日志消耗的毫秒数(最前面的数字)，可观察，这样就可以进行性能计算</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">log4j</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.log4j.BasicConfigurator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.log4j.Level</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.log4j.Logger</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestLog4j</span> <span class="o">{</span>
+    <span class="c1">//基于类的名称获取日志对象</span>
+	<span class="kd">static</span> <span class="nc">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="nc">TestLog4j</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span> <span class="o">{</span>
+        <span class="c1">//进行默认配置</span>
+		<span class="nc">BasicConfigurator</span><span class="o">.</span><span class="na">configure</span><span class="o">();</span>
+        <span class="c1">//设置日志输出级别</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">setLevel</span><span class="o">(</span><span class="nc">Level</span><span class="o">.</span><span class="na">DEBUG</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">trace</span><span class="o">(</span><span class="s">"跟踪信息"</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"调试信息"</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"输出信息"</span><span class="o">);</span>
+		<span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"警告信息"</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"错误信息"</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">fatal</span><span class="o">(</span><span class="s">"致命信息"</span><span class="o">);</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="日志级别">日志级别</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>logger.trace("跟踪信息");
+logger.debug("调试信息");
+logger.info("输出信息");
+Thread.sleep(1000);
+logger.warn("警告信息");
+logger.error("错误信息");
+logger.fatal("致命信息");
+</code></pre></div></div>
+:ET

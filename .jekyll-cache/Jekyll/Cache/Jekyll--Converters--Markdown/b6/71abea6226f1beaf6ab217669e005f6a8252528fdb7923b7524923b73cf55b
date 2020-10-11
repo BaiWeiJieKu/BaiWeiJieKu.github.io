@@ -1,0 +1,117 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#数据库设计" id="markdown-toc-数据库设计">数据库设计</a>    <ul>
+      <li><a href="#用户表" id="markdown-toc-用户表">用户表</a></li>
+      <li><a href="#分类表" id="markdown-toc-分类表">分类表</a></li>
+      <li><a href="#产品表" id="markdown-toc-产品表">产品表</a></li>
+      <li><a href="#购物车表" id="markdown-toc-购物车表">购物车表</a></li>
+      <li><a href="#支付信息表" id="markdown-toc-支付信息表">支付信息表</a></li>
+      <li><a href="#订单明细表" id="markdown-toc-订单明细表">订单明细表</a></li>
+      <li><a href="#收货地址表" id="markdown-toc-收货地址表">收货地址表</a></li>
+    </ul>
+  </li>
+  <li><a href="#项目和git初始化" id="markdown-toc-项目和git初始化">项目和Git初始化</a>    <ul>
+      <li><a href="#项目初始化" id="markdown-toc-项目初始化">项目初始化</a></li>
+      <li><a href="#git初始化" id="markdown-toc-git初始化">Git初始化</a></li>
+    </ul>
+  </li>
+</ul>
+<h3 id="数据库设计">数据库设计</h3>
+
+<ul>
+  <li><a href="https://github.com/BaiWeiJieKu/MK_mall_back">项目源码</a></li>
+</ul>
+
+<h4 id="用户表">用户表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao1.png" alt="" /></p>
+
+<h4 id="分类表">分类表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao2.png" alt="" /></p>
+
+<h4 id="产品表">产品表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao3.png" alt="" /></p>
+
+<h4 id="购物车表">购物车表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao4.png" alt="" /></p>
+
+<h4 id="支付信息表">支付信息表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao5.png" alt="" /></p>
+
+<h4 id="订单明细表">订单明细表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao6.png" alt="" /></p>
+
+<h4 id="收货地址表">收货地址表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao7.png" alt="" /></p>
+
+<h3 id="项目和git初始化">项目和Git初始化</h3>
+
+<h4 id="项目初始化">项目初始化</h4>
+
+<ul>
+  <li>使用idea创建一个maven项目，基于模板webapp</li>
+  <li>使用Git命令创建README.md说明文件</li>
+  <li>使用Git命令创建.gitignore文件，用来忽略上传的文件类型</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 所有的编译完的class文件不提交
+</span><span class="err">*.class</span>
+
+<span class="c">#package file：所有的jar包，war包，ear等不提交
+</span><span class="err">*.jar</span>
+<span class="err">*.war</span>
+<span class="err">*.ear</span>
+
+<span class="c">#kdiff3 ignore
+</span><span class="err">*.orig</span>
+
+<span class="c">#maven ignore
+</span><span class="err">target/</span>
+
+<span class="c">#eclipse ignore
+</span><span class="err">.settings/</span>
+<span class="err">.project</span>
+<span class="err">.classpatch</span>
+
+<span class="c">#idea ignore
+</span><span class="err">.idea/</span>
+<span class="err">/idea/</span>
+<span class="err">*.ipr</span>
+<span class="err">*.iml</span>
+<span class="err">*.iws</span>
+
+<span class="c"># temp file
+</span><span class="err">*.log</span>
+<span class="err">*.cache</span>
+<span class="err">*.diff</span>
+<span class="err">*.patch</span>
+<span class="err">*.tmp</span>
+
+<span class="c"># system ignore
+</span><span class="err">.DS_Store</span>
+<span class="err">Thumbs.db</span>
+
+</code></pre></div></div>
+
+<h4 id="git初始化">Git初始化</h4>
+
+<ul>
+  <li>登录Git官网，登录账号，创建一个项目仓库</li>
+  <li>git init 初始化Git项目</li>
+  <li>git status 查看当前状态</li>
+  <li>git add .   把项目添加到本地仓库</li>
+  <li>git commit -am “first init”   把项目提交到本地仓库</li>
+  <li>git remote add origin 项目地址         把本地仓库提交到远程仓库</li>
+  <li>git branch    查看本地当前分支</li>
+  <li>git pull 拉取远程仓库到本地</li>
+  <li>git push -u -f origin master   提交本地仓库到远程master分支，并强制覆盖</li>
+  <li>git branch -r   查看远程仓库当前分支</li>
+  <li>git checkout -b v1.0 origin/master    在本地基于master分支创建一个v1.0的新分支</li>
+  <li>git push origin HEAD -u     把本地的v1.0分支提交到远程仓库</li>
+</ul>
+:ET

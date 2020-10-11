@@ -1,0 +1,154 @@
+I"MI<ul id="markdown-toc">
+  <li><a href="#简介" id="markdown-toc-简介">简介</a></li>
+  <li><a href="#大小比较" id="markdown-toc-大小比较">大小比较</a></li>
+  <li><a href="#保留小数" id="markdown-toc-保留小数">保留小数</a></li>
+  <li><a href="#常用方法" id="markdown-toc-常用方法">常用方法</a></li>
+  <li><a href="#运算工具类" id="markdown-toc-运算工具类">运算工具类</a></li>
+</ul>
+<h3 id="简介">简介</h3>
+
+<ul>
+  <li><strong>使用 BigDecimal 来定义浮点数的值，再进行浮点数的运算操作，解决浮点数运算精度丢失问题</strong></li>
+  <li>我们在使用BigDecimal时，为了防止精度丢失，推荐使用它的 <strong>BigDecimal(String)</strong> 构造方法来创建对象。</li>
+  <li>BigDecimal 主要用来操作（大）浮点数，BigInteger 主要用来操作大整数（超过 long 类型）。</li>
+  <li>BigDecimal 的实现利用到了 BigInteger, 所不同的是 BigDecimal 加入了小数位的概念</li>
+</ul>
+
+<h3 id="大小比较">大小比较</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//a.compareTo(b) : 返回 -1 表示小于，0 表示 等于， 1表示 大于。</span>
+<span class="nc">BigDecimal</span> <span class="n">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BigDecimal</span><span class="o">(</span><span class="s">"1.0"</span><span class="o">);</span>
+<span class="nc">BigDecimal</span> <span class="n">b</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BigDecimal</span><span class="o">(</span><span class="s">"0.9"</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">a</span><span class="o">.</span><span class="na">compareTo</span><span class="o">(</span><span class="n">b</span><span class="o">));</span><span class="c1">// 1</span>
+</code></pre></div></div>
+
+<h3 id="保留小数">保留小数</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//通过 setScale方法设置保留几位小数以及保留规则。</span>
+<span class="nc">BigDecimal</span> <span class="n">m</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BigDecimal</span><span class="o">(</span><span class="s">"1.255433"</span><span class="o">);</span>
+<span class="nc">BigDecimal</span> <span class="n">n</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="na">setScale</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="nc">BigDecimal</span><span class="o">.</span><span class="na">ROUND_HALF_DOWN</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">n</span><span class="o">);</span><span class="c1">// 1.255</span>
+</code></pre></div></div>
+
+<h3 id="常用方法">常用方法</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 求余数
+ * 返回值为 (this % divisor) 的 BigDecimal
+ */</span>
+<span class="nc">BigDecimal</span> <span class="nf">remainder</span><span class="o">(</span><span class="nc">BigDecimal</span> <span class="n">divisor</span><span class="o">);</span>
+
+<span class="cm">/**
+ * 求相反数
+ * 返回值是 (-this) 的 BigDecimal
+ */</span>
+<span class="nc">BigDecimal</span> <span class="nf">negate</span><span class="o">();</span>
+
+<span class="cm">/**
+ * 将此 BigDecimal 与指定的 BigDecimal 比较
+ * 根据此方法,值相等但具有不同标度的两个 BigDecimal 对象（如，2.0 和 2.00）被认为是相等的;
+ * 相对六个 boolean 比较运算符 (&lt;, ==, &gt;, &gt;=, !=, &lt;=) 中每一个运算符的各个方法,优先提供此方法;
+ * 建议使用以下语句执行上述比较：(x.compareTo(y) &lt;op&gt; 0), 其中 &lt;op&gt; 是六个比较运算符之一;
+ *
+ * 指定者：接口 Comparable&lt;BigDecimal&gt; 中的 compareTo
+ * 返回：当此 BigDecimal 在数字上小于、等于或大于 val 时，返回 -1、0 或 1
+ */</span>
+<span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="nc">BigDecimal</span> <span class="n">val</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h3 id="运算工具类">运算工具类</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">java.math.BigDecimal</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ArithUtil</span> <span class="o">{</span>
+
+    <span class="c1">// 除法运算默认精度  </span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">DEF_DIV_SCALE</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>  
+  
+    <span class="kd">private</span> <span class="nf">ArithUtil</span><span class="o">()</span> <span class="o">{</span>  
+  
+    <span class="o">}</span>  
+  
+    <span class="cm">/** 
+     * 精确加法 
+     */</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">double</span> <span class="nf">add</span><span class="o">(</span><span class="kt">double</span> <span class="n">value1</span><span class="o">,</span> <span class="kt">double</span> <span class="n">value2</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b1</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value1</span><span class="o">);</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b2</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value2</span><span class="o">);</span>  
+        <span class="k">return</span> <span class="n">b1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">b2</span><span class="o">).</span><span class="na">doubleValue</span><span class="o">();</span>  
+    <span class="o">}</span>  
+  
+    <span class="cm">/** 
+     * 精确减法 
+     */</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">double</span> <span class="nf">sub</span><span class="o">(</span><span class="kt">double</span> <span class="n">value1</span><span class="o">,</span> <span class="kt">double</span> <span class="n">value2</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b1</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value1</span><span class="o">);</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b2</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value2</span><span class="o">);</span>  
+        <span class="k">return</span> <span class="n">b1</span><span class="o">.</span><span class="na">subtract</span><span class="o">(</span><span class="n">b2</span><span class="o">).</span><span class="na">doubleValue</span><span class="o">();</span>  
+    <span class="o">}</span>  
+  
+    <span class="cm">/** 
+     * 精确乘法 
+     */</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">double</span> <span class="nf">mul</span><span class="o">(</span><span class="kt">double</span> <span class="n">value1</span><span class="o">,</span> <span class="kt">double</span> <span class="n">value2</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b1</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value1</span><span class="o">);</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b2</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value2</span><span class="o">);</span>  
+        <span class="k">return</span> <span class="n">b1</span><span class="o">.</span><span class="na">multiply</span><span class="o">(</span><span class="n">b2</span><span class="o">).</span><span class="na">doubleValue</span><span class="o">();</span>  
+    <span class="o">}</span>  
+  
+    <span class="cm">/** 
+     * 精确除法 使用默认精度 
+     */</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">double</span> <span class="nf">div</span><span class="o">(</span><span class="kt">double</span> <span class="n">value1</span><span class="o">,</span> <span class="kt">double</span> <span class="n">value2</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IllegalAccessException</span> <span class="o">{</span>  
+        <span class="k">return</span> <span class="nf">div</span><span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">,</span> <span class="no">DEF_DIV_SCALE</span><span class="o">);</span>  
+    <span class="o">}</span>  
+  
+    <span class="cm">/** 
+     * 精确除法 
+     * @param scale 精度 
+     */</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">double</span> <span class="nf">div</span><span class="o">(</span><span class="kt">double</span> <span class="n">value1</span><span class="o">,</span> <span class="kt">double</span> <span class="n">value2</span><span class="o">,</span> <span class="kt">int</span> <span class="n">scale</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IllegalAccessException</span> <span class="o">{</span>  
+        <span class="k">if</span><span class="o">(</span><span class="n">scale</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>  
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalAccessException</span><span class="o">(</span><span class="s">"精确度不能小于0"</span><span class="o">);</span>  
+        <span class="o">}</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b1</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value1</span><span class="o">);</span>  
+        <span class="nc">BigDecimal</span> <span class="n">b2</span> <span class="o">=</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">value2</span><span class="o">);</span>  
+        <span class="c1">// return b1.divide(b2, scale).doubleValue();  </span>
+        <span class="k">return</span> <span class="n">b1</span><span class="o">.</span><span class="na">divide</span><span class="o">(</span><span class="n">b2</span><span class="o">,</span> <span class="n">scale</span><span class="o">,</span> <span class="nc">BigDecimal</span><span class="o">.</span><span class="na">ROUND_HALF_UP</span><span class="o">).</span><span class="na">doubleValue</span><span class="o">();</span>  
+    <span class="o">}</span>  
+  
+    <span class="cm">/** 
+     * 四舍五入 
+     * @param scale 小数点后保留几位 
+     */</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">double</span> <span class="nf">round</span><span class="o">(</span><span class="kt">double</span> <span class="n">v</span><span class="o">,</span> <span class="kt">int</span> <span class="n">scale</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IllegalAccessException</span> <span class="o">{</span>  
+        <span class="k">return</span> <span class="nf">div</span><span class="o">(</span><span class="n">v</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="n">scale</span><span class="o">);</span>  
+    <span class="o">}</span>  
+      
+    <span class="cm">/** 
+     * 比较大小 
+     */</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">equalTo</span><span class="o">(</span><span class="nc">BigDecimal</span> <span class="n">b1</span><span class="o">,</span> <span class="nc">BigDecimal</span> <span class="n">b2</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="k">if</span><span class="o">(</span><span class="n">b1</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">b2</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>  
+            <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>  
+        <span class="o">}</span>  
+        <span class="k">return</span> <span class="mi">0</span> <span class="o">==</span> <span class="n">b1</span><span class="o">.</span><span class="na">compareTo</span><span class="o">(</span><span class="n">b2</span><span class="o">);</span>  
+    <span class="o">}</span>  
+    
+    
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IllegalAccessException</span> <span class="o">{</span>
+        <span class="kt">double</span> <span class="n">value1</span><span class="o">=</span><span class="mf">1.2345678912311</span><span class="o">;</span>
+        <span class="kt">double</span> <span class="n">value2</span><span class="o">=</span><span class="mf">9.1234567890123</span><span class="o">;</span>
+        <span class="nc">BigDecimal</span> <span class="n">value3</span><span class="o">=</span><span class="k">new</span> <span class="nc">BigDecimal</span><span class="o">(</span><span class="nc">Double</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">value1</span><span class="o">));</span>
+        <span class="nc">BigDecimal</span> <span class="n">value4</span><span class="o">=</span><span class="k">new</span> <span class="nc">BigDecimal</span><span class="o">(</span><span class="nc">Double</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">value2</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"精确加法================="</span><span class="o">+</span><span class="nc">ArithUtil</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"精确减法================="</span><span class="o">+</span><span class="nc">ArithUtil</span><span class="o">.</span><span class="na">sub</span><span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"精确乘法================="</span><span class="o">+</span><span class="nc">ArithUtil</span><span class="o">.</span><span class="na">mul</span><span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"精确除法 使用默认精度 ================="</span><span class="o">+</span><span class="nc">ArithUtil</span><span class="o">.</span><span class="na">div</span><span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"精确除法  设置精度================="</span><span class="o">+</span><span class="nc">ArithUtil</span><span class="o">.</span><span class="na">div</span><span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">,</span><span class="mi">20</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"四舍五入   小数点后保留几位 ================="</span><span class="o">+</span><span class="nc">ArithUtil</span><span class="o">.</span><span class="na">round</span><span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="mi">10</span><span class="o">));</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"比较大小 ================="</span><span class="o">+</span><span class="nc">ArithUtil</span><span class="o">.</span><span class="na">equalTo</span><span class="o">(</span><span class="n">value3</span><span class="o">,</span> <span class="n">value4</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET

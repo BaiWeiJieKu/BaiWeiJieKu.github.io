@@ -1,0 +1,1023 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#创建工作簿" id="markdown-toc-创建工作簿">创建工作簿</a>    <ul>
+      <li><a href="#多sheet" id="markdown-toc-多sheet">多sheet</a></li>
+      <li><a href="#添加行列" id="markdown-toc-添加行列">添加行列</a></li>
+      <li><a href="#时间格式化" id="markdown-toc-时间格式化">时间格式化</a></li>
+      <li><a href="#不同类型值" id="markdown-toc-不同类型值">不同类型值</a></li>
+      <li><a href="#遍历内容" id="markdown-toc-遍历内容">遍历内容</a></li>
+      <li><a href="#抽取数据" id="markdown-toc-抽取数据">抽取数据</a></li>
+      <li><a href="#单元格对齐" id="markdown-toc-单元格对齐">单元格对齐</a></li>
+      <li><a href="#边框样式" id="markdown-toc-边框样式">边框样式</a></li>
+      <li><a href="#填充色" id="markdown-toc-填充色">填充色</a></li>
+      <li><a href="#单元格合并" id="markdown-toc-单元格合并">单元格合并</a></li>
+      <li><a href="#字体处理" id="markdown-toc-字体处理">字体处理</a></li>
+      <li><a href="#读取并重写" id="markdown-toc-读取并重写">读取并重写</a></li>
+      <li><a href="#换行" id="markdown-toc-换行">换行</a></li>
+      <li><a href="#数据格式" id="markdown-toc-数据格式">数据格式</a></li>
+    </ul>
+  </li>
+  <li><a href="#struts2导出" id="markdown-toc-struts2导出">struts2导出</a>    <ul>
+      <li><a href="#普通方法" id="markdown-toc-普通方法">普通方法</a></li>
+      <li><a href="#模板方法" id="markdown-toc-模板方法">模板方法</a></li>
+      <li><a href="#工具类" id="markdown-toc-工具类">工具类</a></li>
+    </ul>
+  </li>
+  <li><a href="#struts2导入" id="markdown-toc-struts2导入">struts2导入</a></li>
+  <li><a href="#servlet导入" id="markdown-toc-servlet导入">servlet导入</a></li>
+  <li><a href="#项目地址" id="markdown-toc-项目地址">项目地址</a></li>
+</ul>
+<h3 id="创建工作簿">创建工作簿</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">poi-3.9-20121203.jar</code></li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo1</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"e:\\新工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span><span class="c1">//输出</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span><span class="c1">//关闭</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="多sheet">多sheet</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo2</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">// 定义一个新的工作簿</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">// 创建一个sheet页</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第二个sheet页"</span><span class="o">);</span>  <span class="c1">// 创建第二个sheet页</span>
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\多个sheet页的工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="添加行列">添加行列</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo3</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">// 定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">// 创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">// 创建一个行</span>
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//创建一个单元格，第一列</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>  <span class="c1">// 给单元格设置值为1</span>
+		
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="mf">1.2</span><span class="o">);</span>   <span class="c1">//创建一个单元格 第二列值是1.2</span>
+		
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">2</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"字符串"</span><span class="o">);</span> <span class="c1">//创建一个单元格 第三列值是字符串</span>
+		
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">3</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>  <span class="c1">//创建一个单元格 第四列值是布尔类型</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\新工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="时间格式化">时间格式化</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Calendar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CreationHelper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo4</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//创建一行</span>
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//创建一个单元格 第一列</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">());</span>  <span class="c1">// 给单元格设置一个时间值</span>
+		
+		<span class="nc">CreationHelper</span> <span class="n">createHelper</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">getCreationHelper</span><span class="o">();</span><span class="c1">//时间格式化工具类</span>
+		<span class="nc">CellStyle</span> <span class="n">cellStyle</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span> <span class="c1">//单元格样式</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setDataFormat</span><span class="o">(</span><span class="n">createHelper</span><span class="o">.</span><span class="na">createDataFormat</span><span class="o">().</span><span class="na">getFormat</span><span class="o">(</span><span class="s">"yyy-mm-dd hh:mm:ss"</span><span class="o">));</span>
+		<span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">//第二列</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">());</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">cellStyle</span><span class="o">);</span>
+		
+		<span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>  <span class="c1">// 第三列</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="nc">Calendar</span><span class="o">.</span><span class="na">getInstance</span><span class="o">());</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">cellStyle</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\新工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="不同类型值">不同类型值</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Calendar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFCell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CreationHelper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo5</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//创建一行</span>
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//创建一个单元格 第一列</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="k">new</span> <span class="nc">Date</span><span class="o">());</span>  <span class="c1">// 给单元格设置一个时间值</span>
+		
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">2</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"一个字符串"</span><span class="o">);</span>
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">3</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">4</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="nc">HSSFCell</span><span class="o">.</span><span class="na">CELL_TYPE_NUMERIC</span><span class="o">);</span>
+		<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">5</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\新工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="遍历内容">遍历内容</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFCell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFRow</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFSheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.poifs.filesystem.POIFSFileSystem</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo6</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">InputStream</span> <span class="n">is</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="s">"c:\\二货名单.xls"</span><span class="o">);</span>
+		<span class="nc">POIFSFileSystem</span> <span class="n">fs</span><span class="o">=</span><span class="k">new</span> <span class="nc">POIFSFileSystem</span><span class="o">(</span><span class="n">is</span><span class="o">);</span>
+		<span class="nc">HSSFWorkbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">(</span><span class="n">fs</span><span class="o">);</span>
+		<span class="nc">HSSFSheet</span> <span class="n">hssfSheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">getSheetAt</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//获取第一个sheet页</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">hssfSheet</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+			<span class="k">return</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="c1">// 遍历行Row</span>
+		<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">rowNum</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">rowNum</span><span class="o">&lt;=</span><span class="n">hssfSheet</span><span class="o">.</span><span class="na">getLastRowNum</span><span class="o">();</span><span class="n">rowNum</span><span class="o">++){</span>
+			<span class="nc">HSSFRow</span> <span class="n">hssfRow</span><span class="o">=</span><span class="n">hssfSheet</span><span class="o">.</span><span class="na">getRow</span><span class="o">(</span><span class="n">rowNum</span><span class="o">);</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+				<span class="k">continue</span><span class="o">;</span>
+			<span class="o">}</span>
+			<span class="c1">// 遍历列Cell</span>
+			<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">cellNum</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">cellNum</span><span class="o">&lt;=</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getLastCellNum</span><span class="o">();</span><span class="n">cellNum</span><span class="o">++){</span>
+				<span class="nc">HSSFCell</span> <span class="n">hssfCell</span><span class="o">=</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="n">cellNum</span><span class="o">);</span>
+				<span class="k">if</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+					<span class="k">continue</span><span class="o">;</span>
+				<span class="o">}</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">" "</span><span class="o">+</span><span class="n">getValue</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">));</span>
+			<span class="o">}</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+	<span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">getValue</span><span class="o">(</span><span class="nc">HSSFCell</span> <span class="n">hssfCell</span><span class="o">){</span>
+		<span class="c1">//如果是布尔类型或数字类型，转换为字符串</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getCellType</span><span class="o">()==</span><span class="nc">HSSFCell</span><span class="o">.</span><span class="na">CELL_TYPE_BOOLEAN</span><span class="o">){</span>
+			<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getBooleanCellValue</span><span class="o">());</span>
+		<span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getCellType</span><span class="o">()==</span><span class="nc">HSSFCell</span><span class="o">.</span><span class="na">CELL_TYPE_NUMERIC</span><span class="o">){</span>
+			<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getNumericCellValue</span><span class="o">());</span>
+		<span class="o">}</span><span class="k">else</span><span class="o">{</span>
+			<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getStringCellValue</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="抽取数据">抽取数据</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.extractor.ExcelExtractor</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFCell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFRow</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFSheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.poifs.filesystem.POIFSFileSystem</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo7</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">InputStream</span> <span class="n">is</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="s">"c:\\二货名单.xls"</span><span class="o">);</span>
+		<span class="nc">POIFSFileSystem</span> <span class="n">fs</span><span class="o">=</span><span class="k">new</span> <span class="nc">POIFSFileSystem</span><span class="o">(</span><span class="n">is</span><span class="o">);</span>
+		<span class="nc">HSSFWorkbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">(</span><span class="n">fs</span><span class="o">);</span>
+		<span class="c1">//抽取所有数据</span>
+		<span class="nc">ExcelExtractor</span> <span class="n">excelExtractor</span><span class="o">=</span><span class="k">new</span> <span class="nc">ExcelExtractor</span><span class="o">(</span><span class="n">wb</span><span class="o">);</span>
+		<span class="n">excelExtractor</span><span class="o">.</span><span class="na">setIncludeSheetNames</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span><span class="c1">// 不需要sheet页的名字</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">excelExtractor</span><span class="o">.</span><span class="na">getText</span><span class="o">());</span>
+	<span class="o">}</span>
+	
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="单元格对齐">单元格对齐</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFCell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFCellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFRichTextString</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="cm">/*
+单元格对齐方式
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo8</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span> <span class="c1">//创建一个行</span>
+		<span class="n">row</span><span class="o">.</span><span class="na">setHeightInPoints</span><span class="o">(</span><span class="mi">30</span><span class="o">);</span>
+		
+		<span class="n">createCell</span><span class="o">(</span><span class="n">wb</span><span class="o">,</span> <span class="n">row</span><span class="o">,</span> <span class="o">(</span><span class="kt">short</span><span class="o">)</span><span class="mi">0</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">ALIGN_CENTER</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">VERTICAL_BOTTOM</span><span class="o">);</span>
+		<span class="n">createCell</span><span class="o">(</span><span class="n">wb</span><span class="o">,</span> <span class="n">row</span><span class="o">,</span> <span class="o">(</span><span class="kt">short</span><span class="o">)</span><span class="mi">1</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">ALIGN_FILL</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">VERTICAL_CENTER</span><span class="o">);</span>
+		<span class="n">createCell</span><span class="o">(</span><span class="n">wb</span><span class="o">,</span> <span class="n">row</span><span class="o">,</span> <span class="o">(</span><span class="kt">short</span><span class="o">)</span><span class="mi">2</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">ALIGN_LEFT</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">VERTICAL_TOP</span><span class="o">);</span>
+		<span class="n">createCell</span><span class="o">(</span><span class="n">wb</span><span class="o">,</span> <span class="n">row</span><span class="o">,</span> <span class="o">(</span><span class="kt">short</span><span class="o">)</span><span class="mi">3</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">ALIGN_RIGHT</span><span class="o">,</span> <span class="nc">HSSFCellStyle</span><span class="o">.</span><span class="na">VERTICAL_TOP</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+	
+	<span class="cm">/**
+	 * 创建一个单元格并为其设定指定的对齐方式
+	 * @param wb 工作簿
+	 * @param row 行
+	 * @param column  列
+	 * @param halign  水平方式对齐方式
+	 * @param valign  垂直方向对齐方式
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">createCell</span><span class="o">(</span><span class="nc">Workbook</span> <span class="n">wb</span><span class="o">,</span><span class="nc">Row</span> <span class="n">row</span><span class="o">,</span><span class="kt">short</span> <span class="n">column</span><span class="o">,</span><span class="kt">short</span> <span class="n">halign</span><span class="o">,</span><span class="kt">short</span> <span class="n">valign</span><span class="o">){</span>
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="n">column</span><span class="o">);</span>  <span class="c1">// 创建单元格</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="k">new</span> <span class="nc">HSSFRichTextString</span><span class="o">(</span><span class="s">"Align It"</span><span class="o">));</span>  <span class="c1">// 设置值</span>
+		<span class="nc">CellStyle</span> <span class="n">cellStyle</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span> <span class="c1">// 创建单元格样式</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setAlignment</span><span class="o">(</span><span class="n">halign</span><span class="o">);</span>  <span class="c1">// 设置单元格水平方向对其方式</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setVerticalAlignment</span><span class="o">(</span><span class="n">valign</span><span class="o">);</span> <span class="c1">// 设置单元格垂直方向对齐方式</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">cellStyle</span><span class="o">);</span> <span class="c1">// 设置单元格样式</span>
+	<span class="o">}</span>
+	
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="边框样式">边框样式</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Calendar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CreationHelper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.IndexedColors</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="cm">/*
+边框样式
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo9</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">//创建一个行</span>
+		
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">// 创建一个单元格</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+		
+		<span class="nc">CellStyle</span> <span class="n">cellStyle</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span> 
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setBorderBottom</span><span class="o">(</span><span class="nc">CellStyle</span><span class="o">.</span><span class="na">BORDER_THIN</span><span class="o">);</span> <span class="c1">//底部边框</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setBottomBorderColor</span><span class="o">(</span><span class="nc">IndexedColors</span><span class="o">.</span><span class="na">BLACK</span><span class="o">.</span><span class="na">getIndex</span><span class="o">());</span> <span class="c1">// 底部颜色</span>
+		
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setBorderLeft</span><span class="o">(</span><span class="nc">CellStyle</span><span class="o">.</span><span class="na">BORDER_THIN</span><span class="o">);</span>  <span class="c1">// 左边边框</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setLeftBorderColor</span><span class="o">(</span><span class="nc">IndexedColors</span><span class="o">.</span><span class="na">GREEN</span><span class="o">.</span><span class="na">getIndex</span><span class="o">());</span> <span class="c1">// 左边框颜色</span>
+		
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setBorderRight</span><span class="o">(</span><span class="nc">CellStyle</span><span class="o">.</span><span class="na">BORDER_THIN</span><span class="o">);</span> <span class="c1">// 右边框</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setRightBorderColor</span><span class="o">(</span><span class="nc">IndexedColors</span><span class="o">.</span><span class="na">BLUE</span><span class="o">.</span><span class="na">getIndex</span><span class="o">());</span>  <span class="c1">// 右边框颜色</span>
+		
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setBorderTop</span><span class="o">(</span><span class="nc">CellStyle</span><span class="o">.</span><span class="na">BORDER_MEDIUM_DASHED</span><span class="o">);</span> <span class="c1">// 上边框</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setTopBorderColor</span><span class="o">(</span><span class="nc">IndexedColors</span><span class="o">.</span><span class="na">BLACK</span><span class="o">.</span><span class="na">getIndex</span><span class="o">());</span>  <span class="c1">// 上边框颜色</span>
+		
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">cellStyle</span><span class="o">);</span>
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="填充色">填充色</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Calendar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CreationHelper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.IndexedColors</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="cm">/*
+填充色
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo10</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">//创建一个行</span>
+		
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span><span class="c1">//创建一列</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"XX"</span><span class="o">);</span>
+		<span class="nc">CellStyle</span> <span class="n">cellStyle</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span><span class="c1">//创建一个列样式</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setFillBackgroundColor</span><span class="o">(</span><span class="nc">IndexedColors</span><span class="o">.</span><span class="na">AQUA</span><span class="o">.</span><span class="na">getIndex</span><span class="o">());</span> <span class="c1">// 背景色</span>
+		<span class="n">cellStyle</span><span class="o">.</span><span class="na">setFillPattern</span><span class="o">(</span><span class="nc">CellStyle</span><span class="o">.</span><span class="na">BIG_SPOTS</span><span class="o">);</span>  
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">cellStyle</span><span class="o">);</span>
+		
+		
+		<span class="nc">Cell</span> <span class="n">cell2</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span><span class="c1">//创建第二列</span>
+		<span class="n">cell2</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"YYY"</span><span class="o">);</span>
+		<span class="nc">CellStyle</span> <span class="n">cellStyle2</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span>
+		<span class="n">cellStyle2</span><span class="o">.</span><span class="na">setFillForegroundColor</span><span class="o">(</span><span class="nc">IndexedColors</span><span class="o">.</span><span class="na">RED</span><span class="o">.</span><span class="na">getIndex</span><span class="o">());</span> <span class="c1">// 前景色</span>
+		<span class="n">cellStyle2</span><span class="o">.</span><span class="na">setFillPattern</span><span class="o">(</span><span class="nc">CellStyle</span><span class="o">.</span><span class="na">SOLID_FOREGROUND</span><span class="o">);</span>  
+		<span class="n">cell2</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">cellStyle2</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="单元格合并">单元格合并</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Calendar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CreationHelper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.IndexedColors</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.util.CellRangeAddress</span><span class="o">;</span>
+<span class="cm">/*
+单元格合并
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo11</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">//创建一个行</span>
+		
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"单元格合并测试"</span><span class="o">);</span>
+		
+		<span class="n">sheet</span><span class="o">.</span><span class="na">addMergedRegion</span><span class="o">(</span><span class="k">new</span> <span class="nc">CellRangeAddress</span><span class="o">(</span>
+				<span class="mi">1</span><span class="o">,</span> <span class="c1">// 起始行</span>
+				<span class="mi">2</span><span class="o">,</span> <span class="c1">// 结束行</span>
+				<span class="mi">1</span><span class="o">,</span> <span class="c1">// 起始列</span>
+				<span class="mi">2</span>  <span class="c1">// 结束列</span>
+		<span class="o">));</span>
+		
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="字体处理">字体处理</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Font</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="cm">/*
+字体处理
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo12</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">//创建一个行</span>
+		
+		<span class="c1">// 创建一个字体处理类</span>
+		<span class="nc">Font</span> <span class="n">font</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createFont</span><span class="o">();</span>
+		<span class="n">font</span><span class="o">.</span><span class="na">setFontHeightInPoints</span><span class="o">((</span><span class="kt">short</span><span class="o">)</span><span class="mi">24</span><span class="o">);</span><span class="c1">//高度</span>
+		<span class="n">font</span><span class="o">.</span><span class="na">setFontName</span><span class="o">(</span><span class="s">"Courier New"</span><span class="o">);</span>
+		<span class="n">font</span><span class="o">.</span><span class="na">setItalic</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span><span class="c1">//斜体</span>
+		<span class="n">font</span><span class="o">.</span><span class="na">setStrikeout</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+		
+		<span class="nc">CellStyle</span> <span class="n">style</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span>
+		<span class="n">style</span><span class="o">.</span><span class="na">setFont</span><span class="o">(</span><span class="n">font</span><span class="o">);</span>
+		
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">((</span><span class="kt">short</span><span class="o">)</span><span class="mi">1</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"This is test of fonts"</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">style</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="读取并重写">读取并重写</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.poifs.filesystem.POIFSFileSystem</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="cm">/*
+读取和重写工作簿
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo13</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="c1">//读取文件</span>
+		<span class="nc">InputStream</span> <span class="n">inp</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="nc">POIFSFileSystem</span> <span class="n">fs</span><span class="o">=</span><span class="k">new</span> <span class="nc">POIFSFileSystem</span><span class="o">(</span><span class="n">inp</span><span class="o">);</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">(</span><span class="n">fs</span><span class="o">);</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">getSheetAt</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>  <span class="c1">//获取第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">getRow</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">// 获取第一行</span>
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//获取单元格</span>
+        <span class="c1">//如果第一列为空，则创建第四列，并且赋值为‘测试单元格’</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">cell</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+			<span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+		<span class="o">}</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellType</span><span class="o">(</span><span class="nc">Cell</span><span class="o">.</span><span class="na">CELL_TYPE_STRING</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"测试单元格"</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="换行">换行</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Calendar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CreationHelper</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.IndexedColors</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.util.CellRangeAddress</span><span class="o">;</span>
+<span class="cm">/*
+换行
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo14</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span> <span class="c1">//创建一个行</span>
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="s">"我要换行 \n 成功了吗？"</span><span class="o">);</span>
+		
+		<span class="nc">CellStyle</span> <span class="n">cs</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span>
+		<span class="c1">//设置可以换行</span>
+		<span class="n">cs</span><span class="o">.</span><span class="na">setWrapText</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">cs</span><span class="o">);</span>
+		
+		<span class="c1">// 调整行高度</span>
+		<span class="n">row</span><span class="o">.</span><span class="na">setHeightInPoints</span><span class="o">(</span><span class="mi">2</span><span class="o">*</span><span class="n">sheet</span><span class="o">.</span><span class="na">getDefaultRowHeightInPoints</span><span class="o">());</span>
+		<span class="c1">// 调整单元格宽度</span>
+		<span class="n">sheet</span><span class="o">.</span><span class="na">autoSizeColumn</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="数据格式">数据格式</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.poi</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileOutputStream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Cell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.CellStyle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.DataFormat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+<span class="cm">/*
+数据格式
+*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo15</span> <span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span> <span class="c1">//定义一个新的工作簿</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">(</span><span class="s">"第一个sheet页"</span><span class="o">);</span>  <span class="c1">//创建第一个sheet页</span>
+		<span class="nc">CellStyle</span> <span class="n">style</span><span class="o">;</span>
+		<span class="c1">//创建数据格式</span>
+		<span class="nc">DataFormat</span> <span class="n">format</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createDataFormat</span><span class="o">();</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">;</span>
+		<span class="nc">Cell</span> <span class="n">cell</span><span class="o">;</span>
+		<span class="kt">short</span> <span class="n">rowNum</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+		<span class="kt">short</span> <span class="n">colNum</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+		<span class="c1">//创建一行</span>
+		<span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="n">rowNum</span><span class="o">++);</span>
+		<span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="n">colNum</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="mf">111111.25</span><span class="o">);</span>
+		
+		<span class="n">style</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span>
+		<span class="n">style</span><span class="o">.</span><span class="na">setDataFormat</span><span class="o">(</span><span class="n">format</span><span class="o">.</span><span class="na">getFormat</span><span class="o">(</span><span class="s">"0.0"</span><span class="o">));</span> <span class="c1">// 设置数据格式</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">style</span><span class="o">);</span>
+		
+		<span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="n">rowNum</span><span class="o">++);</span>
+		<span class="n">cell</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="n">colNum</span><span class="o">);</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellValue</span><span class="o">(</span><span class="mf">1111111.25</span><span class="o">);</span>
+		<span class="n">style</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createCellStyle</span><span class="o">();</span>
+		<span class="n">style</span><span class="o">.</span><span class="na">setDataFormat</span><span class="o">(</span><span class="n">format</span><span class="o">.</span><span class="na">getFormat</span><span class="o">(</span><span class="s">"#,##0.000"</span><span class="o">));</span>
+		<span class="n">cell</span><span class="o">.</span><span class="na">setCellStyle</span><span class="o">(</span><span class="n">style</span><span class="o">);</span>
+		
+		<span class="nc">FileOutputStream</span> <span class="n">fileOut</span><span class="o">=</span><span class="k">new</span> <span class="nc">FileOutputStream</span><span class="o">(</span><span class="s">"c:\\工作簿.xls"</span><span class="o">);</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">fileOut</span><span class="o">);</span>
+		<span class="n">fileOut</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="struts2导出">struts2导出</h3>
+
+<h4 id="普通方法">普通方法</h4>
+
+<ul>
+  <li>Action类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">export</span><span class="o">()</span><span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Connection</span> <span class="n">con</span><span class="o">=</span><span class="kc">null</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">con</span><span class="o">=</span><span class="n">dbUtil</span><span class="o">.</span><span class="na">getCon</span><span class="o">();</span>
+			<span class="c1">//创建一个工作簿</span>
+			<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">();</span>
+			<span class="c1">//设置工作簿头部</span>
+			<span class="nc">String</span> <span class="n">headers</span><span class="o">[]={</span><span class="s">"编号"</span><span class="o">,</span><span class="s">"姓名"</span><span class="o">,</span><span class="s">"联系电话"</span><span class="o">,</span><span class="s">"Email"</span><span class="o">,</span><span class="s">"QQ"</span><span class="o">};</span>
+			<span class="nc">ResultSet</span> <span class="n">rs</span><span class="o">=</span><span class="n">userDao</span><span class="o">.</span><span class="na">userList</span><span class="o">(</span><span class="n">con</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+			<span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">fillExcelData</span><span class="o">(</span><span class="n">rs</span><span class="o">,</span> <span class="n">wb</span><span class="o">,</span> <span class="n">headers</span><span class="o">);</span>
+			<span class="nc">ResponseUtil</span><span class="o">.</span><span class="na">export</span><span class="o">(</span><span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getResponse</span><span class="o">(),</span> <span class="n">wb</span><span class="o">,</span> <span class="s">"导出excel.xls"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+			<span class="k">try</span> <span class="o">{</span>
+				<span class="n">dbUtil</span><span class="o">.</span><span class="na">closeCon</span><span class="o">(</span><span class="n">con</span><span class="o">);</span>
+			<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+				<span class="c1">// TODO Auto-generated catch block</span>
+				<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="模板方法">模板方法</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">String</span> <span class="nf">export2</span><span class="o">()</span><span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="nc">Connection</span> <span class="n">con</span><span class="o">=</span><span class="kc">null</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">con</span><span class="o">=</span><span class="n">dbUtil</span><span class="o">.</span><span class="na">getCon</span><span class="o">();</span>
+			<span class="nc">ResultSet</span> <span class="n">rs</span><span class="o">=</span><span class="n">userDao</span><span class="o">.</span><span class="na">userList</span><span class="o">(</span><span class="n">con</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+			<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">fillExcelDataWithTemplate</span><span class="o">(</span><span class="n">userDao</span><span class="o">.</span><span class="na">userList</span><span class="o">(</span><span class="n">con</span><span class="o">,</span> <span class="kc">null</span><span class="o">),</span> <span class="s">"userExporTemplate.xls"</span><span class="o">);</span>
+			<span class="nc">ResponseUtil</span><span class="o">.</span><span class="na">export</span><span class="o">(</span><span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getResponse</span><span class="o">(),</span> <span class="n">wb</span><span class="o">,</span> <span class="s">"模板导出excel.xls"</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+			<span class="k">try</span> <span class="o">{</span>
+				<span class="n">dbUtil</span><span class="o">.</span><span class="na">closeCon</span><span class="o">(</span><span class="n">con</span><span class="o">);</span>
+			<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+				<span class="c1">// TODO Auto-generated catch block</span>
+				<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="工具类">工具类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.util</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.ResultSet</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFCell</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.poifs.filesystem.POIFSFileSystem</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Row</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Sheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ExcelUtil</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 把内容填充到工作簿
+	 * @param rs 数据集
+	 * @param wb 工作簿
+	 * @param headers 工作簿头部
+	 * @throws Exception
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">fillExcelData</span><span class="o">(</span><span class="nc">ResultSet</span> <span class="n">rs</span><span class="o">,</span><span class="nc">Workbook</span> <span class="n">wb</span><span class="o">,</span><span class="nc">String</span><span class="o">[]</span> <span class="n">headers</span><span class="o">)</span><span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="kt">int</span> <span class="n">rowIndex</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">createSheet</span><span class="o">();</span><span class="c1">//创建一个sheet</span>
+		<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="n">rowIndex</span><span class="o">++);</span><span class="c1">//从第一行开始</span>
+		<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">headers</span><span class="o">.</span><span class="na">length</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+			<span class="c1">//把头部写入工作簿</span>
+			<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="n">headers</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+		<span class="o">}</span>
+		<span class="c1">//遍历数据集，写入工作簿</span>
+		<span class="k">while</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">()){</span>
+			<span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="n">rowIndex</span><span class="o">++);</span>
+			<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">headers</span><span class="o">.</span><span class="na">length</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+				<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">).</span><span class="na">toString</span><span class="o">());</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	<span class="cm">/**
+	 * 用流的方式读取模板
+	 * @param rs 数据集
+	 * @param templateFileName 模板名称
+	 * @return
+	 * @throws Exception
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">Workbook</span> <span class="nf">fillExcelDataWithTemplate</span><span class="o">(</span><span class="nc">ResultSet</span> <span class="n">rs</span><span class="o">,</span><span class="nc">String</span> <span class="n">templateFileName</span><span class="o">)</span><span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="c1">//读取包下的Excel模板</span>
+		<span class="nc">InputStream</span> <span class="n">inp</span><span class="o">=</span><span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"/com/java1234/template/"</span><span class="o">+</span><span class="n">templateFileName</span><span class="o">);</span>
+		<span class="nc">POIFSFileSystem</span> <span class="n">fs</span><span class="o">=</span><span class="k">new</span> <span class="nc">POIFSFileSystem</span><span class="o">(</span><span class="n">inp</span><span class="o">);</span>
+		<span class="nc">Workbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">(</span><span class="n">fs</span><span class="o">);</span>
+		<span class="nc">Sheet</span> <span class="n">sheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">getSheetAt</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+		<span class="c1">//获取列数</span>
+		<span class="kt">int</span> <span class="n">cellNums</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">getRow</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">getLastCellNum</span><span class="o">();</span>
+		<span class="kt">int</span> <span class="n">rowIndex</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span>
+		<span class="k">while</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">()){</span>
+			<span class="nc">Row</span> <span class="n">row</span><span class="o">=</span><span class="n">sheet</span><span class="o">.</span><span class="na">createRow</span><span class="o">(</span><span class="n">rowIndex</span><span class="o">++);</span>
+			<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">cellNums</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+				<span class="n">row</span><span class="o">.</span><span class="na">createCell</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">setCellValue</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">).</span><span class="na">toString</span><span class="o">());</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="n">wb</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="cm">/**
+	 * excel列数据类型转换，转换为字符串烈性
+	 * @param hssfCell 列
+	 * @return
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">formatCell</span><span class="o">(</span><span class="nc">HSSFCell</span> <span class="n">hssfCell</span><span class="o">){</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+			<span class="k">return</span> <span class="s">""</span><span class="o">;</span>
+		<span class="o">}</span><span class="k">else</span><span class="o">{</span>
+			<span class="k">if</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getCellType</span><span class="o">()==</span><span class="nc">HSSFCell</span><span class="o">.</span><span class="na">CELL_TYPE_BOOLEAN</span><span class="o">){</span>
+				<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getBooleanCellValue</span><span class="o">());</span>
+			<span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getCellType</span><span class="o">()==</span><span class="nc">HSSFCell</span><span class="o">.</span><span class="na">CELL_TYPE_NUMERIC</span><span class="o">){</span>
+				<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getNumericCellValue</span><span class="o">());</span>
+			<span class="o">}</span><span class="k">else</span><span class="o">{</span>
+				<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">hssfCell</span><span class="o">.</span><span class="na">getStringCellValue</span><span class="o">());</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.java1234.util</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.OutputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.PrintWriter</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.poi.ss.usermodel.Workbook</span><span class="o">;</span>
+
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ResponseUtil</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 向前台打印数据，如json数据
+	 * @param response
+	 * @param o
+	 * @throws Exception
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">write</span><span class="o">(</span><span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span><span class="nc">Object</span> <span class="n">o</span><span class="o">)</span><span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html;charset=utf-8"</span><span class="o">);</span>
+		<span class="nc">PrintWriter</span> <span class="n">out</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">();</span>
+		<span class="n">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">o</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+		<span class="n">out</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+		<span class="n">out</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+	<span class="cm">/**
+	 * 以流的形式导出Excel
+	 * @param response HttpServletResponse
+	 * @param wb 工作簿
+	 * @param fileName 文件名
+	 * @throws Exception
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">export</span><span class="o">(</span><span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span><span class="nc">Workbook</span> <span class="n">wb</span><span class="o">,</span><span class="nc">String</span> <span class="n">fileName</span><span class="o">)</span><span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">setHeader</span><span class="o">(</span><span class="s">"Content-Disposition"</span><span class="o">,</span> <span class="s">"attachment;filename="</span><span class="o">+</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">fileName</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"utf-8"</span><span class="o">),</span><span class="s">"iso8859-1"</span><span class="o">));</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"application/ynd.ms-excel;charset=UTF-8"</span><span class="o">);</span>
+		<span class="nc">OutputStream</span> <span class="n">out</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">();</span>
+		<span class="n">wb</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">out</span><span class="o">);</span>
+		<span class="n">out</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+		<span class="n">out</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="struts2导入">struts2导入</h3>
+
+<ul>
+  <li>使用模板导入数据到数据库</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">String</span> <span class="nf">upload</span><span class="o">()</span><span class="kd">throws</span> <span class="nc">Exception</span><span class="o">{</span>
+		<span class="c1">//获取前台传入的Excel工作簿</span>
+		<span class="nc">POIFSFileSystem</span> <span class="n">fs</span><span class="o">=</span><span class="k">new</span> <span class="nc">POIFSFileSystem</span><span class="o">(</span><span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="n">userUploadFile</span><span class="o">));</span>
+		<span class="nc">HSSFWorkbook</span> <span class="n">wb</span><span class="o">=</span><span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">(</span><span class="n">fs</span><span class="o">);</span>
+		<span class="nc">HSSFSheet</span> <span class="n">hssfSheet</span><span class="o">=</span><span class="n">wb</span><span class="o">.</span><span class="na">getSheetAt</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>  <span class="c1">// 获取第一个sheet页</span>
+		<span class="k">if</span><span class="o">(</span><span class="n">hssfSheet</span><span class="o">!=</span><span class="kc">null</span><span class="o">){</span>
+			<span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">rowNum</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span><span class="n">rowNum</span><span class="o">&lt;=</span><span class="n">hssfSheet</span><span class="o">.</span><span class="na">getLastRowNum</span><span class="o">();</span><span class="n">rowNum</span><span class="o">++){</span>
+				<span class="nc">HSSFRow</span> <span class="n">hssfRow</span><span class="o">=</span><span class="n">hssfSheet</span><span class="o">.</span><span class="na">getRow</span><span class="o">(</span><span class="n">rowNum</span><span class="o">);</span>
+				<span class="k">if</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+					<span class="k">continue</span><span class="o">;</span>
+				<span class="o">}</span>
+				<span class="c1">//获取每一列值封装对象</span>
+				<span class="nc">User</span> <span class="n">user</span><span class="o">=</span><span class="k">new</span> <span class="nc">User</span><span class="o">();</span>
+				<span class="n">user</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">0</span><span class="o">)));</span>
+				<span class="n">user</span><span class="o">.</span><span class="na">setPhone</span><span class="o">(</span><span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">1</span><span class="o">)));</span>
+				<span class="n">user</span><span class="o">.</span><span class="na">setEmail</span><span class="o">(</span><span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">2</span><span class="o">)));</span>
+				<span class="n">user</span><span class="o">.</span><span class="na">setQq</span><span class="o">(</span><span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">3</span><span class="o">)));</span>
+				<span class="nc">Connection</span> <span class="n">con</span><span class="o">=</span><span class="kc">null</span><span class="o">;</span>
+				<span class="k">try</span><span class="o">{</span>
+					<span class="n">con</span><span class="o">=</span><span class="n">dbUtil</span><span class="o">.</span><span class="na">getCon</span><span class="o">();</span>
+					<span class="n">userDao</span><span class="o">.</span><span class="na">userAdd</span><span class="o">(</span><span class="n">con</span><span class="o">,</span> <span class="n">user</span><span class="o">);</span>
+				<span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">){</span>
+					<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+					<span class="n">dbUtil</span><span class="o">.</span><span class="na">closeCon</span><span class="o">(</span><span class="n">con</span><span class="o">);</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		<span class="nc">JSONObject</span> <span class="n">result</span><span class="o">=</span><span class="k">new</span> <span class="nc">JSONObject</span><span class="o">();</span>
+		<span class="n">result</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"success"</span><span class="o">,</span> <span class="s">"true"</span><span class="o">);</span>
+		<span class="nc">ResponseUtil</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="nc">ServletActionContext</span><span class="o">.</span><span class="na">getResponse</span><span class="o">(),</span> <span class="n">result</span><span class="o">);</span>
+		<span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="servlet导入">servlet导入</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.zhuoer.qsecond.servlet</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.FileInputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Iterator</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.servlet.ServletException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.annotation.WebServlet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServlet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.commons.fileupload.FileItem</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.commons.fileupload.FileItemFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.commons.fileupload.FileUploadException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.commons.fileupload.disk.DiskFileItemFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.commons.fileupload.servlet.ServletFileUpload</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFRow</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFSheet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.hssf.usermodel.HSSFWorkbook</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.poi.poifs.filesystem.POIFSFileSystem</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.GsonBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.zhuoer.qmaintance.utils.RepairInfoTools</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 用Excel导入数据到partstate表 
+ */</span>
+<span class="nd">@WebServlet</span><span class="o">(</span><span class="s">"/UploadPartState"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UploadPartState</span> <span class="kd">extends</span> <span class="nc">HttpServlet</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+
+	<span class="cm">/**
+	 * @see HttpServlet#HttpServlet()
+	 */</span>
+	<span class="kd">public</span> <span class="nf">UploadPartState</span><span class="o">()</span> <span class="o">{</span>
+		<span class="kd">super</span><span class="o">();</span>
+		<span class="c1">// TODO Auto-generated constructor stub</span>
+	<span class="o">}</span>
+
+	<span class="cm">/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */</span>
+	<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">doGet</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">ServletException</span><span class="o">,</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">doPost</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="cm">/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */</span>
+	<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">doPost</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">ServletException</span><span class="o">,</span> <span class="nc">IOException</span> <span class="o">{</span>
+		<span class="n">request</span><span class="o">.</span><span class="na">setCharacterEncoding</span><span class="o">(</span><span class="s">"utf-8"</span><span class="o">);</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html;charset=utf-8"</span><span class="o">);</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">setHeader</span><span class="o">(</span><span class="s">"Access-Control-Allow-Origin"</span><span class="o">,</span> <span class="s">"*"</span><span class="o">);</span><span class="c1">// 解决跨域问题</span>
+
+		<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">();</span>
+		<span class="c1">// 获取前台传入的Excel工作簿</span>
+		<span class="nc">FileItemFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DiskFileItemFactory</span><span class="o">();</span>
+		<span class="nc">ServletFileUpload</span> <span class="n">upload</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ServletFileUpload</span><span class="o">(</span><span class="n">factory</span><span class="o">);</span>
+		<span class="nc">List</span> <span class="n">items</span><span class="o">;</span>
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="n">items</span> <span class="o">=</span> <span class="n">upload</span><span class="o">.</span><span class="na">parseRequest</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+			<span class="nc">InputStream</span> <span class="n">is</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+			<span class="nc">Iterator</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span>
+			<span class="k">while</span> <span class="o">(</span><span class="n">iter</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+				<span class="nc">FileItem</span> <span class="n">item</span> <span class="o">=</span> <span class="o">(</span><span class="nc">FileItem</span><span class="o">)</span> <span class="n">iter</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+				<span class="k">if</span> <span class="o">(!</span><span class="n">item</span><span class="o">.</span><span class="na">isFormField</span><span class="o">())</span> <span class="o">{</span>
+					<span class="n">is</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">();</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+
+			<span class="nc">POIFSFileSystem</span> <span class="n">fs</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">POIFSFileSystem</span><span class="o">(</span><span class="n">is</span><span class="o">);</span>
+			<span class="nc">HSSFWorkbook</span> <span class="n">wb</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HSSFWorkbook</span><span class="o">(</span><span class="n">fs</span><span class="o">);</span>
+			<span class="nc">HSSFSheet</span> <span class="n">hssfSheet</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="na">getSheetAt</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">// 获取第一个sheet页</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">hssfSheet</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+				<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">rowNum</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">rowNum</span> <span class="o">&lt;=</span> <span class="n">hssfSheet</span><span class="o">.</span><span class="na">getLastRowNum</span><span class="o">();</span> <span class="n">rowNum</span><span class="o">++)</span> <span class="o">{</span>
+					<span class="nc">HSSFRow</span> <span class="n">hssfRow</span> <span class="o">=</span> <span class="n">hssfSheet</span><span class="o">.</span><span class="na">getRow</span><span class="o">(</span><span class="n">rowNum</span><span class="o">);</span>
+					<span class="k">if</span> <span class="o">(</span><span class="n">hssfRow</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+						<span class="k">continue</span><span class="o">;</span>
+					<span class="o">}</span>
+					<span class="c1">// 获取每一列值封装对象</span>
+					<span class="nc">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"insert into partstate(department_no,department_name,"</span>
+							<span class="o">+</span> <span class="s">"device_no,device_name,part_no,part_name,state_no,"</span>
+							<span class="o">+</span> <span class="s">"state_name) values(?,?,?,?,?,?,?,?)"</span><span class="o">;</span>
+					<span class="kt">int</span> <span class="n">executeUpdate</span> <span class="o">=</span> <span class="nc">RepairInfoTools</span><span class="o">.</span><span class="na">executeUpdate</span><span class="o">(</span><span class="n">sql</span><span class="o">,</span> <span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">0</span><span class="o">)),</span>
+							<span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">1</span><span class="o">)),</span> <span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">2</span><span class="o">)),</span>
+							<span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">3</span><span class="o">)),</span> <span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">4</span><span class="o">)),</span>
+							<span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">5</span><span class="o">)),</span> <span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">6</span><span class="o">)),</span>
+							<span class="nc">ExcelUtil</span><span class="o">.</span><span class="na">formatCell</span><span class="o">(</span><span class="n">hssfRow</span><span class="o">.</span><span class="na">getCell</span><span class="o">(</span><span class="mi">7</span><span class="o">)));</span>
+
+					<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"result"</span><span class="o">,</span> <span class="n">executeUpdate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="kc">true</span> <span class="o">:</span> <span class="kc">false</span><span class="o">);</span>
+				<span class="o">}</span>
+			<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+				<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"result"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+			<span class="o">}</span>
+
+			<span class="nc">Gson</span> <span class="n">gson</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GsonBuilder</span><span class="o">().</span><span class="na">setDateFormat</span><span class="o">(</span><span class="s">"yyyy-MM-dd"</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
+			<span class="nc">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">gson</span><span class="o">.</span><span class="na">toJson</span><span class="o">(</span><span class="n">map</span><span class="o">);</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">().</span><span class="na">write</span><span class="o">(</span><span class="n">json</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">FileUploadException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated catch block</span>
+			<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="项目地址">项目地址</h3>
+
+<p>https://github.com/BaiWeiJieKu/java_poi</p>
+:ET

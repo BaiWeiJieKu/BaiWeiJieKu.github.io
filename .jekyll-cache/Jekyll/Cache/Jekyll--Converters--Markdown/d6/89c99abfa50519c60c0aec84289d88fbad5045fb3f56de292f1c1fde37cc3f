@@ -1,0 +1,1466 @@
+I"^J<ul id="markdown-toc">
+  <li><a href="#数据库设计" id="markdown-toc-数据库设计">数据库设计</a>    <ul>
+      <li><a href="#用户表" id="markdown-toc-用户表">用户表</a></li>
+      <li><a href="#分类表" id="markdown-toc-分类表">分类表</a></li>
+      <li><a href="#产品表" id="markdown-toc-产品表">产品表</a></li>
+      <li><a href="#购物车表" id="markdown-toc-购物车表">购物车表</a></li>
+      <li><a href="#支付信息表" id="markdown-toc-支付信息表">支付信息表</a></li>
+      <li><a href="#订单明细表" id="markdown-toc-订单明细表">订单明细表</a></li>
+      <li><a href="#收货地址表" id="markdown-toc-收货地址表">收货地址表</a></li>
+    </ul>
+  </li>
+  <li><a href="#项目和git初始化" id="markdown-toc-项目和git初始化">项目和Git初始化</a>    <ul>
+      <li><a href="#项目初始化" id="markdown-toc-项目初始化">项目初始化</a></li>
+      <li><a href="#git初始化" id="markdown-toc-git初始化">Git初始化</a></li>
+    </ul>
+  </li>
+  <li><a href="#配置文件初始化" id="markdown-toc-配置文件初始化">配置文件初始化</a></li>
+  <li><a href="#通用类common" id="markdown-toc-通用类common">通用类common</a></li>
+  <li><a href="#controller" id="markdown-toc-controller">Controller</a>    <ul>
+      <li><a href="#portal" id="markdown-toc-portal">portal</a></li>
+      <li><a href="#managecategory" id="markdown-toc-managecategory">manage/category</a></li>
+      <li><a href="#product" id="markdown-toc-product">product</a></li>
+      <li><a href="#manageproduct" id="markdown-toc-manageproduct">manage/product</a></li>
+      <li><a href="#购物车" id="markdown-toc-购物车">购物车</a></li>
+      <li><a href="#收货地址管理" id="markdown-toc-收货地址管理">收货地址管理</a></li>
+      <li><a href="#支付模块" id="markdown-toc-支付模块">支付模块</a></li>
+      <li><a href="#订单模块" id="markdown-toc-订单模块">订单模块</a></li>
+    </ul>
+  </li>
+  <li><a href="#tomcat集群" id="markdown-toc-tomcat集群">Tomcat集群</a></li>
+  <li><a href="#单点登录" id="markdown-toc-单点登录">单点登录</a>    <ul>
+      <li><a href="#引入jedis" id="markdown-toc-引入jedis">引入jedis</a></li>
+      <li><a href="#配置文件" id="markdown-toc-配置文件">配置文件</a></li>
+      <li><a href="#连接池" id="markdown-toc-连接池">连接池</a></li>
+      <li><a href="#连接池工具类" id="markdown-toc-连接池工具类">连接池工具类</a></li>
+      <li><a href="#json序列化工具类" id="markdown-toc-json序列化工具类">json序列化工具类</a></li>
+      <li><a href="#cookie工具类" id="markdown-toc-cookie工具类">cookie工具类</a></li>
+      <li><a href="#修改登录逻辑" id="markdown-toc-修改登录逻辑">修改登录逻辑</a></li>
+      <li><a href="#重置session有效期" id="markdown-toc-重置session有效期">重置session有效期</a></li>
+      <li><a href="#找回密码缓存迁移到redis" id="markdown-toc-找回密码缓存迁移到redis">找回密码缓存迁移到redis</a></li>
+    </ul>
+  </li>
+  <li><a href="#redis分布式" id="markdown-toc-redis分布式">Redis分布式</a></li>
+  <li><a href="#spring-session" id="markdown-toc-spring-session">spring session</a></li>
+  <li><a href="#redis分布式锁" id="markdown-toc-redis分布式锁">Redis分布式锁</a>    <ul>
+      <li><a href="#整合spring-schedule定时任务" id="markdown-toc-整合spring-schedule定时任务">整合spring schedule定时任务</a></li>
+      <li><a href="#实现分布式锁" id="markdown-toc-实现分布式锁">实现分布式锁</a></li>
+    </ul>
+  </li>
+  <li><a href="#redission框架" id="markdown-toc-redission框架">Redission框架</a></li>
+</ul>
+<h3 id="数据库设计">数据库设计</h3>
+
+<ul>
+  <li><a href="https://github.com/BaiWeiJieKu/MK_mall_back">项目源码</a></li>
+</ul>
+
+<h4 id="用户表">用户表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao1.png" alt="" /></p>
+
+<h4 id="分类表">分类表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao2.png" alt="" /></p>
+
+<h4 id="产品表">产品表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao3.png" alt="" /></p>
+
+<h4 id="购物车表">购物车表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao4.png" alt="" /></p>
+
+<h4 id="支付信息表">支付信息表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao5.png" alt="" /></p>
+
+<h4 id="订单明细表">订单明细表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao6.png" alt="" /></p>
+
+<h4 id="收货地址表">收货地址表</h4>
+
+<p><img src="https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/dianshang/dianshangbiao7.png" alt="" /></p>
+
+<h3 id="项目和git初始化">项目和Git初始化</h3>
+
+<h4 id="项目初始化">项目初始化</h4>
+
+<ul>
+  <li>使用idea创建一个maven项目，基于模板webapp</li>
+  <li>使用Git命令创建README.md说明文件</li>
+  <li>使用Git命令创建.gitignore文件，用来忽略上传的文件类型</li>
+</ul>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 所有的编译完的class文件不提交
+</span><span class="err">*.class</span>
+
+<span class="c">#package file：所有的jar包，war包，ear等不提交
+</span><span class="err">*.jar</span>
+<span class="err">*.war</span>
+<span class="err">*.ear</span>
+
+<span class="c">#kdiff3 ignore
+</span><span class="err">*.orig</span>
+
+<span class="c">#maven ignore
+</span><span class="err">target/</span>
+
+<span class="c">#eclipse ignore
+</span><span class="err">.settings/</span>
+<span class="err">.project</span>
+<span class="err">.classpatch</span>
+
+<span class="c">#idea ignore
+</span><span class="err">.idea/</span>
+<span class="err">/idea/</span>
+<span class="err">*.ipr</span>
+<span class="err">*.iml</span>
+<span class="err">*.iws</span>
+
+<span class="c"># temp file
+</span><span class="err">*.log</span>
+<span class="err">*.cache</span>
+<span class="err">*.diff</span>
+<span class="err">*.patch</span>
+<span class="err">*.tmp</span>
+
+<span class="c"># system ignore
+</span><span class="err">.DS_Store</span>
+<span class="err">Thumbs.db</span>
+
+</code></pre></div></div>
+
+<h4 id="git初始化">Git初始化</h4>
+
+<ul>
+  <li>登录Git官网，登录账号，创建一个项目仓库</li>
+  <li>git init 初始化Git项目</li>
+  <li>git status 查看当前状态</li>
+  <li>git add .   把项目添加到本地仓库</li>
+  <li>git commit -am “first init”   把项目提交到本地仓库</li>
+  <li>git remote add origin 项目地址         把本地仓库提交到远程仓库</li>
+  <li>git branch    查看本地当前分支</li>
+  <li>git pull 拉取远程仓库到本地</li>
+  <li>git push -u -f origin master   提交本地仓库到远程master分支，并强制覆盖</li>
+  <li>git branch -r   查看远程仓库当前分支</li>
+  <li>git checkout -b v1.0 origin/master    在本地基于master分支创建一个v1.0的新分支</li>
+  <li>git push origin HEAD -u     把本地的v1.0分支提交到远程仓库</li>
+</ul>
+
+<h3 id="配置文件初始化">配置文件初始化</h3>
+
+<ul>
+  <li>初始化web.xml</li>
+  <li>初始化spring配置文件</li>
+  <li>初始化日志logback配置文件</li>
+  <li>初始化springmvc配置文件</li>
+  <li>使用mybatis generator 生成pojo和dao</li>
+</ul>
+
+<h3 id="通用类common">通用类common</h3>
+
+<ul>
+  <li>常量类：Const</li>
+  <li>通用数据响应类：ServerResponse</li>
+  <li>响应状态枚举类：ResponseCode</li>
+</ul>
+
+<h3 id="controller">Controller</h3>
+
+<h4 id="portal">portal</h4>
+
+<ul>
+  <li>用户登录:校验用户是否存在，返回用户信息</li>
+  <li>用户登出</li>
+  <li>用户注册</li>
+  <li>校验用户名或邮箱</li>
+  <li>获取当前登录用户的信息</li>
+  <li>忘记密码，获取修改密码的问题</li>
+  <li>忘记密码验证问题正确性</li>
+  <li>忘记密码时重置密码</li>
+  <li>登录状态下重置密码</li>
+  <li>修改用户信息</li>
+  <li>获取用户详情信息</li>
+</ul>
+
+<h4 id="managecategory">manage/category</h4>
+
+<ul>
+  <li>添加商品分类</li>
+  <li>更新商品分类</li>
+  <li>获取分类的平级商品信息</li>
+  <li>查询当前节点的id和递归子节点的id</li>
+</ul>
+
+<h4 id="product">product</h4>
+
+<ul>
+  <li>产品搜索</li>
+  <li>动态排序列表</li>
+  <li>商品详情</li>
+</ul>
+
+<h4 id="manageproduct">manage/product</h4>
+
+<ul>
+  <li>商品列表</li>
+  <li>商品搜索</li>
+  <li>图片上传</li>
+  <li>富文本图片上传</li>
+  <li>商品详情</li>
+  <li>商品上下架</li>
+  <li>增加商品</li>
+  <li>更新商品</li>
+  <li>ftp服务器对接</li>
+  <li>流读取Properties配置文件</li>
+  <li>joda-time</li>
+</ul>
+
+<h4 id="购物车">购物车</h4>
+
+<ul>
+  <li>加入商品</li>
+  <li>更新商品数</li>
+  <li>查询商品数</li>
+  <li>移除商品</li>
+  <li>单选/取消</li>
+  <li>全选/取消</li>
+  <li>购物车列表</li>
+</ul>
+
+<h4 id="收货地址管理">收货地址管理</h4>
+
+<ul>
+  <li>添加地址</li>
+  <li>删除地址</li>
+  <li>更新地址</li>
+  <li>地址列表</li>
+  <li>地址分页</li>
+  <li>地址详情</li>
+</ul>
+
+<h4 id="支付模块">支付模块</h4>
+
+<ul>
+  <li>支付宝对接</li>
+  <li>支付回调</li>
+  <li>查询支付状态</li>
+</ul>
+
+<h4 id="订单模块">订单模块</h4>
+
+<ul>
+  <li>前：创建订单</li>
+  <li>前：商品信息</li>
+  <li>前：订单列表</li>
+  <li>前：订单详情</li>
+  <li>前：取消订单</li>
+  <li>后：订单列表</li>
+  <li>后：订单搜索</li>
+  <li>后：订单详情</li>
+  <li>后：订单发货</li>
+</ul>
+
+<h3 id="tomcat集群">Tomcat集群</h3>
+
+<ul>
+  <li>为什么要集群？
+    <ul>
+      <li>提高服务的性能，并发能力，以及高可用性</li>
+      <li>提供项目架构的横向扩展能力</li>
+    </ul>
+  </li>
+  <li>集群会带来哪些问题？怎样解决？
+    <ul>
+      <li>session登录信息存储以及读取的问题</li>
+      <li>服务器定时任务并发的问题</li>
+      <li>通过Nginx负载均衡进行请求转发</li>
+    </ul>
+  </li>
+  <li>
+    <p>单机部署多应用：</p>
+  </li>
+  <li>
+    <p>添加Tomcat环境变量</p>
+  </li>
+  <li>
+    <p>修改第二个tomcat的Catalina.bat和startup.bat</p>
+
+    <p>CATALINA_BASE-&gt;CATALINA_2_BASE</p>
+
+    <p>CATALINA_HOME-&gt;CATALINA_2_HOME</p>
+  </li>
+  <li>
+    <p>修改配置文件server.xml。</p>
+
+    <p>修改server port端口号</p>
+
+    <p>修改connector port端口号</p>
+
+    <p>​</p>
+  </li>
+  <li>
+    <p>配置Nginx，选择合适的策略</p>
+  </li>
+  <li>
+    <p>修改系统host，启动tomcat和Nginx，访问测试</p>
+  </li>
+  <li>多机部署多应用：在每台服务器上装一个tomcat即可，保证服务器之间的连通性</li>
+</ul>
+
+<h3 id="单点登录">单点登录</h3>
+
+<h4 id="引入jedis">引入jedis</h4>
+
+<ul>
+  <li>pom</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>redis.clients<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>jedis<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>2.6.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<h4 id="配置文件">配置文件</h4>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># redis config start
+</span> 
+<span class="py">redis.ip</span><span class="p">=</span><span class="s">127.0.0.1</span>
+<span class="py">redis.port</span><span class="p">=</span><span class="s">6379</span>
+
+<span class="c"># 最大连接数
+</span><span class="py">redis.max.total</span> <span class="p">=</span> <span class="s">20</span>
+
+<span class="c"># 最大空闲数
+</span><span class="py">redis.max.idle</span> <span class="p">=</span> <span class="s">10</span>
+
+<span class="c"># 最小空闲数
+</span><span class="py">redis.min.idle</span> <span class="p">=</span> <span class="s">2</span>
+
+<span class="c"># 从jedis连接池获取连接时，校验并返回可用的连接
+</span><span class="py">redis.test.borrow</span> <span class="p">=</span> <span class="s">true</span>
+
+<span class="c"># 把连接放回jedis连接池时，校验并返回可用的连接
+</span><span class="py">redis.test.return</span> <span class="p">=</span> <span class="s">false</span>
+
+<span class="c"># redis config end
+</span>
+</code></pre></div></div>
+
+<h4 id="连接池">连接池</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Redis连接池
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisPool</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">JedisPool</span> <span class="n">pool</span><span class="o">;</span><span class="c1">//jedis连接池</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">maxTotal</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.max.total"</span><span class="o">,</span><span class="s">"20"</span><span class="o">));</span><span class="c1">//最大连接数</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">maxIdle</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.max.idle"</span><span class="o">,</span><span class="s">"10"</span><span class="o">));</span><span class="c1">//在jedispool中最大的idle状态（空闲）的jedis实例的个数</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">minIdle</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.min.idle"</span><span class="o">,</span><span class="s">"2"</span><span class="o">));</span><span class="c1">//在jedispool中最小的idle状态（空闲）的jedis实例的个数</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Boolean</span> <span class="n">testOnBorrow</span> <span class="o">=</span> <span class="nc">Boolean</span><span class="o">.</span><span class="na">parseBoolean</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.test.borrow"</span><span class="o">,</span><span class="s">"true"</span><span class="o">));</span><span class="c1">//在borrow一个jedis实例的时候，是否要进行验证操作，如果赋值true，则得到的jedis实例肯定是可以用的</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Boolean</span> <span class="n">testOnReturn</span> <span class="o">=</span> <span class="nc">Boolean</span><span class="o">.</span><span class="na">parseBoolean</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.test.return"</span><span class="o">,</span> <span class="s">"true"</span><span class="o">));</span><span class="c1">//在return一个jedis实例的时候，是否要进行验证操作，如果赋值true，则放回jedispool的jedis实例肯定是可以用的</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="n">redisIp</span> <span class="o">=</span> <span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.ip"</span><span class="o">,</span> <span class="s">"127.0.0.1"</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">redisPort</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.port"</span><span class="o">,</span> <span class="s">"6379"</span><span class="o">));</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">initPool</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">JedisPoolConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPoolConfig</span><span class="o">();</span>
+
+        <span class="n">config</span><span class="o">.</span><span class="na">setMaxTotal</span><span class="o">(</span><span class="n">maxTotal</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setMaxIdle</span><span class="o">(</span><span class="n">maxIdle</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setMinIdle</span><span class="o">(</span><span class="n">minIdle</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setTestOnBorrow</span><span class="o">(</span><span class="n">testOnBorrow</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setTestOnReturn</span><span class="o">(</span><span class="n">testOnReturn</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setBlockWhenExhausted</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span> <span class="c1">//连接耗尽时，是否阻塞，false会抛出异常，true阻塞直到超时，</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPool</span><span class="o">(</span><span class="n">config</span><span class="o">,</span> <span class="n">redisIp</span><span class="o">,</span> <span class="n">redisPort</span><span class="o">,</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">2</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="n">initPool</span><span class="o">();</span>
+    <span class="o">}</span>
+ 
+     <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Jedis</span> <span class="nf">getJedis</span><span class="o">(){</span>
+       <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+     <span class="o">}</span>
+
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">returnBrokenResource</span><span class="o">(</span><span class="nc">Jedis</span> <span class="n">jedis</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">pool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">returnResource</span><span class="o">(</span><span class="nc">Jedis</span> <span class="n">jedis</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">pool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="连接池工具类">连接池工具类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 数据库连接池工具类
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisPoolUtil</span> <span class="o">{</span>
+
+    <span class="cm">/**
+     * 设置key的有效期，单位是秒
+     * @param key
+     * @param exTime
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Long</span> <span class="nf">expire</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span><span class="kt">int</span> <span class="n">exTime</span><span class="o">){</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Long</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">expire</span><span class="o">(</span><span class="n">key</span><span class="o">,</span><span class="n">exTime</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"expire key:{} error"</span><span class="o">,</span><span class="n">key</span><span class="o">,</span><span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">set</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"set key:{} value:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 设置键值对
+     *
+     * @param key
+     * @param value
+     * @param exTime 超时时间，单位是秒
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">setEx</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">exTime</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">setex</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">exTime</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"setex key:{} value:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**重新设置键的超时时间
+     * @param key
+     * @param exTime 单位是秒
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Long</span> <span class="nf">setEx</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span><span class="kt">int</span> <span class="n">exTime</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Long</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">expire</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">exTime</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"setex key:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">get</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"get key:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Long</span> <span class="nf">del</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Long</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">del</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"del key:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="json序列化工具类">json序列化工具类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * json序列化工具
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JsonUtil</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">ObjectMapper</span> <span class="n">objectMapper</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ObjectMapper</span><span class="o">();</span>
+
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="c1">//对象的所有字段全部列入</span>
+        <span class="n">objectMapper</span><span class="o">.</span><span class="na">setSerializationInclusion</span><span class="o">(</span><span class="nc">JsonSerialize</span><span class="o">.</span><span class="na">Inclusion</span><span class="o">.</span><span class="na">ALWAYS</span><span class="o">);</span>
+        <span class="c1">//取消默认转换timestamps形式</span>
+        <span class="n">objectMapper</span><span class="o">.</span><span class="na">configure</span><span class="o">(</span><span class="nc">SerializationConfig</span><span class="o">.</span><span class="na">Feature</span><span class="o">.</span><span class="na">WRITE_DATES_AS_TIMESTAMPS</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="c1">//忽略空Bean转json的错误</span>
+        <span class="n">objectMapper</span><span class="o">.</span><span class="na">configure</span><span class="o">(</span><span class="nc">SerializationConfig</span><span class="o">.</span><span class="na">Feature</span><span class="o">.</span><span class="na">FAIL_ON_EMPTY_BEANS</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="c1">//所有的日期格式都统一为以下样式，即yyyy-MM-dd HH:mm:ss</span>
+        <span class="n">objectMapper</span><span class="o">.</span><span class="na">setDateFormat</span><span class="o">(</span><span class="k">new</span> <span class="nc">SimpleDateFormat</span><span class="o">(</span><span class="nc">DateTimeUtil</span><span class="o">.</span><span class="na">STANDARD_FORMAT</span><span class="o">));</span>
+
+        <span class="c1">//忽略在json字符串中存在，但是在java对象中不存在对应属性的情况，防止错误</span>
+        <span class="n">objectMapper</span><span class="o">.</span><span class="na">configure</span><span class="o">(</span><span class="nc">DeserializationConfig</span><span class="o">.</span><span class="na">Feature</span><span class="o">.</span><span class="na">FAIL_ON_UNKNOWN_PROPERTIES</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 对象转字符串
+     *
+     * @param obj
+     * @param &lt;T&gt;
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">String</span> <span class="nf">obj2String</span><span class="o">(</span><span class="no">T</span> <span class="n">obj</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">obj</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">obj</span> <span class="k">instanceof</span> <span class="nc">String</span> <span class="o">?</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">obj</span> <span class="o">:</span> <span class="n">objectMapper</span><span class="o">.</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="n">obj</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"parse object to string error"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 对象转字符串并进行格式化
+     *
+     * @param obj
+     * @param &lt;T&gt;
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">String</span> <span class="nf">obj2StringPretty</span><span class="o">(</span><span class="no">T</span> <span class="n">obj</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">obj</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">obj</span> <span class="k">instanceof</span> <span class="nc">String</span> <span class="o">?</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">obj</span> <span class="o">:</span> <span class="n">objectMapper</span><span class="o">.</span><span class="na">writerWithDefaultPrettyPrinter</span><span class="o">().</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="n">obj</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"parse object to string error"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 字符串转对象
+     *
+     * @param str
+     * @param clazz
+     * @param &lt;T&gt;
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span> <span class="nf">string2Obj</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">str</span><span class="o">)</span> <span class="o">||</span> <span class="n">clazz</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">clazz</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">?</span> <span class="o">(</span><span class="no">T</span><span class="o">)</span> <span class="n">str</span> <span class="o">:</span> <span class="n">objectMapper</span><span class="o">.</span><span class="na">readValue</span><span class="o">(</span><span class="n">str</span><span class="o">,</span> <span class="n">clazz</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"parse string to object error"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 字符串转嵌套集合
+     *
+     * @param str
+     * @param typeReference
+     * @param &lt;T&gt;
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span> <span class="nf">string2Obj</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">TypeReference</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">typeReference</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">str</span><span class="o">)</span> <span class="o">||</span> <span class="n">typeReference</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">(</span><span class="no">T</span><span class="o">)</span> <span class="o">(</span><span class="n">typeReference</span><span class="o">.</span><span class="na">getType</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">?</span> <span class="n">str</span> <span class="o">:</span> <span class="n">objectMapper</span><span class="o">.</span><span class="na">readValue</span><span class="o">(</span><span class="n">str</span><span class="o">,</span> <span class="n">typeReference</span><span class="o">));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"parse string to object error"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 字符串转集合 如string转List&lt;User&gt;
+     *
+     * @param str
+     * @param collectionClass 最外层泛型
+     * @param elementClasses  内层泛型列表
+     * @param &lt;T&gt;
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span> <span class="nf">string2Obj</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;?&gt;</span> <span class="n">collectionClass</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;?&gt;...</span> <span class="n">elementClasses</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">JavaType</span> <span class="n">javaType</span> <span class="o">=</span> <span class="n">objectMapper</span><span class="o">.</span><span class="na">getTypeFactory</span><span class="o">().</span><span class="na">constructParametricType</span><span class="o">(</span><span class="n">collectionClass</span><span class="o">,</span> <span class="n">elementClasses</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">objectMapper</span><span class="o">.</span><span class="na">readValue</span><span class="o">(</span><span class="n">str</span><span class="o">,</span> <span class="n">javaType</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"Parse String to Object error"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="cookie工具类">cookie工具类</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * cookie工具类
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CookieUtil</span> <span class="o">{</span>
+    <span class="c1">//X:domain=".happymmall.com"</span>
+    <span class="c1">//a:A.happymmall.com            cookie:domain=A.happymmall.com;path="/"</span>
+    <span class="c1">//b:B.happymmall.com            cookie:domain=B.happymmall.com;path="/"</span>
+    <span class="c1">//c:A.happymmall.com/test/cc    cookie:domain=A.happymmall.com;path="/test/cc"</span>
+    <span class="c1">//d:A.happymmall.com/test/dd    cookie:domain=A.happymmall.com;path="/test/dd"</span>
+    <span class="c1">//e:A.happymmall.com/test       cookie:domain=A.happymmall.com;path="/test"</span>
+   <span class="c1">//cookie的范围，只要是以.happymmall.com结尾的都可以共享同一个cookie</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="nc">String</span> <span class="no">COOKIE_DOMAIN</span> <span class="o">=</span> <span class="s">".happymmall.com"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="nc">String</span> <span class="no">COOKIE_NAME</span> <span class="o">=</span> <span class="s">"mmall_login_token"</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">writeLoginToken</span><span class="o">(</span><span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">String</span> <span class="n">token</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Cookie</span> <span class="n">ck</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Cookie</span><span class="o">(</span><span class="no">COOKIE_NAME</span><span class="o">,</span> <span class="n">token</span><span class="o">);</span>
+        <span class="n">ck</span><span class="o">.</span><span class="na">setDomain</span><span class="o">(</span><span class="no">COOKIE_DOMAIN</span><span class="o">);</span>
+        <span class="n">ck</span><span class="o">.</span><span class="na">setPath</span><span class="o">(</span><span class="s">"/"</span><span class="o">);</span> <span class="c1">//代表设置在根目录</span>
+        <span class="n">ck</span><span class="o">.</span><span class="na">setHttpOnly</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+
+        <span class="c1">//单位是秒</span>
+        <span class="c1">//如果这个maxage不设置的话，cookie就不会写入硬盘，而是写在内存，只在当前页面有效。</span>
+        <span class="n">ck</span><span class="o">.</span><span class="na">setMaxAge</span><span class="o">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span><span class="o">);</span> <span class="c1">//如果是-1，代表永久</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"write cookieName:{},cookieValue:{}"</span><span class="o">,</span> <span class="n">ck</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span> <span class="n">ck</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+        <span class="n">response</span><span class="o">.</span><span class="na">addCookie</span><span class="o">(</span><span class="n">ck</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">readLoginToken</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Cookie</span><span class="o">[]</span> <span class="n">cks</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getCookies</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">cks</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="nc">Cookie</span> <span class="n">ck</span> <span class="o">:</span> <span class="n">cks</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"read cookieName:{},cookieValue:{}"</span><span class="o">,</span><span class="n">ck</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span><span class="n">ck</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+                <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">ck</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span> <span class="no">COOKIE_NAME</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"return cookieName:{},cookieValue:{}"</span><span class="o">,</span><span class="n">ck</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span><span class="n">ck</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+                    <span class="k">return</span> <span class="n">ck</span><span class="o">.</span><span class="na">getValue</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">delLoginToken</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Cookie</span><span class="o">[]</span> <span class="n">cks</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getCookies</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">cks</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">for</span> <span class="o">(</span><span class="nc">Cookie</span> <span class="n">ck</span> <span class="o">:</span> <span class="n">cks</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">ck</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span> <span class="no">COOKIE_NAME</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="n">ck</span><span class="o">.</span><span class="na">setDomain</span><span class="o">(</span><span class="no">COOKIE_DOMAIN</span><span class="o">);</span>
+                    <span class="n">ck</span><span class="o">.</span><span class="na">setPath</span><span class="o">(</span><span class="s">"/"</span><span class="o">);</span>
+                    <span class="n">ck</span><span class="o">.</span><span class="na">setMaxAge</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <span class="c1">//设置为0代表删除此cookie</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"del cookieName:{},cookieValue:{}"</span><span class="o">,</span><span class="n">ck</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span><span class="n">ck</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+                    <span class="n">response</span><span class="o">.</span><span class="na">addCookie</span><span class="o">(</span><span class="n">ck</span><span class="o">);</span>
+                    <span class="k">return</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="修改登录逻辑">修改登录逻辑</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 用户登录:校验用户是否存在，返回用户信息
+ * @param username
+ * @param password
+ * @param session
+ * @return
+ */</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"login.do"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+<span class="nd">@ResponseBody</span>
+<span class="kd">public</span> <span class="nc">ServerResponse</span> <span class="nf">login</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">String</span> <span class="n">password</span><span class="o">,</span> <span class="nc">HttpSession</span> <span class="n">session</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">httpServletResponse</span><span class="o">,</span> <span class="nc">HttpServletRequest</span> <span class="n">httpServletRequest</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">ServerResponse</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">iUserService</span><span class="o">.</span><span class="na">login</span><span class="o">(</span><span class="n">username</span><span class="o">,</span><span class="n">password</span><span class="o">);</span>
+    <span class="c1">//登录成功后把用户信息放到session中</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">isSuccess</span><span class="o">())</span> <span class="o">{</span>
+        <span class="c1">// session中key用常量类中的常量，value为用户的数据</span>
+        <span class="c1">//老版本方法session.setAttribute(Const.CURRENT_USER,response.getData());</span>
+
+        <span class="nc">CookieUtil</span><span class="o">.</span><span class="na">writeLoginToken</span><span class="o">(</span><span class="n">httpServletResponse</span><span class="o">,</span> <span class="n">session</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+        <span class="nc">RedisPoolUtil</span><span class="o">.</span><span class="na">setEx</span><span class="o">(</span><span class="n">session</span><span class="o">.</span><span class="na">getId</span><span class="o">(),</span> <span class="nc">JsonUtil</span><span class="o">.</span><span class="na">obj2String</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">getData</span><span class="o">()),</span><span class="nc">Const</span><span class="o">.</span><span class="na">RedisCacheExtime</span><span class="o">.</span><span class="na">REDIS_SESSION_EXTIME</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">response</span><span class="o">;</span>
+<span class="o">}</span>
+ 
+<span class="cm">/**
+ * 用户登出
+ * @param
+ * @return
+ */</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"logout.do"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+<span class="nd">@ResponseBody</span>
+<span class="kd">public</span> <span class="nc">ServerResponse</span> <span class="nf">logout</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span><span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//移除session中的用户信息</span>
+    <span class="c1">//session.removeAttribute(Const.CURRENT_USER);</span>
+    <span class="c1">//token</span>
+    <span class="nc">String</span> <span class="n">loginToken</span> <span class="o">=</span> <span class="nc">CookieUtil</span><span class="o">.</span><span class="na">readLoginToken</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+    <span class="nc">CookieUtil</span><span class="o">.</span><span class="na">delLoginToken</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+    <span class="nc">RedisPoolUtil</span><span class="o">.</span><span class="na">del</span><span class="o">(</span><span class="n">loginToken</span><span class="o">);</span>
+    <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createBySuccess</span><span class="o">();</span>
+<span class="o">}</span>
+ 
+<span class="cm">/**
+ * 获取当前登录用户的信息
+ * @param
+ * @return
+ */</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"get_user_info.do"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+<span class="nd">@ResponseBody</span>
+<span class="kd">public</span> <span class="nc">ServerResponse</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="nf">getUserInfo</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span><span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//判断用户是否登录</span>
+    <span class="c1">//User user = (User) session.getAttribute(Const.CURRENT_USER);</span>
+    <span class="c1">//token方式</span>
+    <span class="nc">String</span> <span class="n">loginToken</span> <span class="o">=</span> <span class="nc">CookieUtil</span><span class="o">.</span><span class="na">readLoginToken</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">loginToken</span><span class="o">))</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"用户未登录，无法获取当前用户的信息"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="nc">String</span> <span class="n">userJsonStr</span> <span class="o">=</span> <span class="nc">RedisPoolUtil</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">loginToken</span><span class="o">);</span>
+    <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="nc">JsonUtil</span><span class="o">.</span><span class="na">string2Obj</span><span class="o">(</span><span class="n">userJsonStr</span><span class="o">,</span> <span class="nc">User</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">user</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createBySuccess</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"用户未登录，无法获取当前用户的信息"</span><span class="o">);</span>
+<span class="o">}</span>
+ 
+<span class="o">========================================================================================================</span>
+<span class="cm">/**
+ * 常量类
+ * @auther QinFen
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Const</span> <span class="o">{</span>
+  <span class="cm">/**
+  * redis缓存过期时间
+    */</span>
+  <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RedisCacheExtime</span><span class="o">{</span>
+    <span class="kt">int</span> <span class="no">REDIS_SESSION_EXTIME</span> <span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="mi">30</span><span class="o">;</span><span class="c1">//30分钟</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="重置session有效期">重置session有效期</h4>
+
+<ul>
+  <li>web.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--二期重置session时间的filter--&gt;</span>
+<span class="nt">&lt;filter&gt;</span>
+    <span class="nt">&lt;filter-name&gt;</span>sessionExpireFilter<span class="nt">&lt;/filter-name&gt;</span>
+    <span class="nt">&lt;filter-class&gt;</span>com.mmall.controller.common.SessionExpireFilter<span class="nt">&lt;/filter-class&gt;</span>
+<span class="nt">&lt;/filter&gt;</span>
+<span class="nt">&lt;filter-mapping&gt;</span>
+    <span class="nt">&lt;filter-name&gt;</span>sessionExpireFilter<span class="nt">&lt;/filter-name&gt;</span>
+    <span class="nt">&lt;url-pattern&gt;</span>*.do<span class="nt">&lt;/url-pattern&gt;</span>
+<span class="nt">&lt;/filter-mapping&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>过滤器</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 单点登录重置session有效期
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SessionExpireFilter</span> <span class="kd">implements</span> <span class="nc">Filter</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="nc">FilterConfig</span> <span class="n">filterConfig</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">ServletException</span> <span class="o">{</span>
+
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doFilter</span><span class="o">(</span><span class="nc">ServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">ServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">FilterChain</span> <span class="n">chain</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">,</span> <span class="nc">ServletException</span> <span class="o">{</span>
+        <span class="nc">HttpServletRequest</span> <span class="n">httpServletRequest</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HttpServletRequest</span><span class="o">)</span> <span class="n">request</span><span class="o">;</span>
+
+        <span class="nc">String</span> <span class="n">loginToken</span> <span class="o">=</span> <span class="nc">CookieUtil</span><span class="o">.</span><span class="na">readLoginToken</span><span class="o">(</span><span class="n">httpServletRequest</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">loginToken</span><span class="o">))</span> <span class="o">{</span>
+            <span class="c1">//判断loginToken是否为空或“”</span>
+            <span class="c1">//如果不为空，符合条件，继续拿user信息</span>
+            <span class="nc">String</span> <span class="n">userJsonStr</span> <span class="o">=</span> <span class="nc">RedisPoolUtil</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">loginToken</span><span class="o">);</span>
+            <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="nc">JsonUtil</span><span class="o">.</span><span class="na">string2Obj</span><span class="o">(</span><span class="n">userJsonStr</span><span class="o">,</span> <span class="nc">User</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">user</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">//如果user不为空，则重置session时间，即调用redis的expire命令</span>
+                <span class="nc">RedisPoolUtil</span><span class="o">.</span><span class="na">expire</span><span class="o">(</span><span class="n">loginToken</span><span class="o">,</span> <span class="nc">Const</span><span class="o">.</span><span class="na">RedisCacheExtime</span><span class="o">.</span><span class="na">REDIS_SESSION_EXTIME</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="n">chain</span><span class="o">.</span><span class="na">doFilter</span><span class="o">(</span><span class="n">request</span><span class="o">,</span><span class="n">response</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="o">{</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="找回密码缓存迁移到redis">找回密码缓存迁移到redis</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**验证密保问题
+ * @param username
+ * @param question
+ * @param answer
+ * @return
+ */</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span> <span class="nc">ServerResponse</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">forgetCheckAnswer</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">String</span> <span class="n">question</span><span class="o">,</span> <span class="nc">String</span> <span class="n">answer</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//通过username,问题，答案验证</span>
+    <span class="kt">int</span> <span class="n">resultCount</span> <span class="o">=</span> <span class="n">userMapper</span><span class="o">.</span><span class="na">checkAnswer</span><span class="o">(</span><span class="n">username</span><span class="o">,</span><span class="n">question</span><span class="o">,</span><span class="n">answer</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">resultCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//说明问题和问题的答案是这个用户的，并且是正确的</span>
+        <span class="nc">String</span> <span class="n">forgetToken</span> <span class="o">=</span> <span class="no">UUID</span><span class="o">.</span><span class="na">randomUUID</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+        <span class="nc">RedisPoolUtil</span><span class="o">.</span><span class="na">setEx</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">TOKEN_PREFIX</span><span class="o">+</span><span class="n">username</span><span class="o">,</span><span class="n">forgetToken</span><span class="o">,</span><span class="mi">606012</span><span class="o">);</span>
+        <span class="c1">//返回一个token用于修改密码</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createBySuccess</span><span class="o">(</span><span class="n">forgetToken</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"问题的答案错误"</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="cm">/**忘记密码时重置密码
+ * @param username
+ * @param passwordNew
+ * @param forgetToken
+ * @return
+ */</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span> <span class="nc">ServerResponse</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">forgetRestPassword</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">String</span> <span class="n">passwordNew</span><span class="o">,</span> <span class="nc">String</span> <span class="n">forgetToken</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//判断参数中是否有token</span>
+    <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isBlank</span><span class="o">(</span><span class="n">forgetToken</span><span class="o">))</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"参数错误，token需要传递"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="c1">//查询用户名是否已经存在</span>
+    <span class="nc">ServerResponse</span> <span class="n">validResponse</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">checkValid</span><span class="o">(</span><span class="n">username</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">USERNAME</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">validResponse</span><span class="o">.</span><span class="na">isSuccess</span><span class="o">())</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"用户不存在"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="c1">//获取服务端存储的token，用于和传入的参数比较</span>
+    <span class="nc">String</span> <span class="n">token</span> <span class="o">=</span> <span class="nc">RedisPoolUtil</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">TOKEN_PREFIX</span><span class="o">+</span><span class="n">username</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isBlank</span><span class="o">(</span><span class="n">token</span><span class="o">))</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"token无效或者过期"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="c1">//如果token相同，允许修改密码</span>
+    <span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">forgetToken</span><span class="o">,</span><span class="n">token</span><span class="o">))</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">md5Password</span> <span class="o">=</span> <span class="nc">MD5Util</span><span class="o">.</span><span class="na">MD5EncodeUtf8</span><span class="o">(</span><span class="n">passwordNew</span><span class="o">);</span>
+        <span class="c1">//修改密码</span>
+        <span class="kt">int</span> <span class="n">rowCount</span> <span class="o">=</span> <span class="n">userMapper</span><span class="o">.</span><span class="na">updatePasswordByUsername</span><span class="o">(</span><span class="n">username</span><span class="o">,</span> <span class="n">md5Password</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">rowCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createBySuccessMessage</span><span class="o">(</span><span class="s">"修改密码成功"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span><span class="k">else</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"token错误，请重新获取重置密码的token"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"修改密码失败"</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>配置集群环境进行测试</li>
+</ul>
+
+<h3 id="redis分布式">Redis分布式</h3>
+
+<ul>
+  <li>启动两个redis，6379和6380</li>
+  <li>redis分片池</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * redis 分片池
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisShardedPool</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">ShardedJedisPool</span> <span class="n">pool</span><span class="o">;</span><span class="c1">//jedis连接池</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">maxTotal</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.max.total"</span><span class="o">,</span><span class="s">"20"</span><span class="o">));</span><span class="c1">//最大连接数</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">maxIdle</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.max.idle"</span><span class="o">,</span><span class="s">"10"</span><span class="o">));</span><span class="c1">//在jedispool中最大的idle状态（空闲）的jedis实例的个数</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">minIdle</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.min.idle"</span><span class="o">,</span><span class="s">"2"</span><span class="o">));</span><span class="c1">//在jedispool中最小的idle状态（空闲）的jedis实例的个数</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Boolean</span> <span class="n">testOnBorrow</span> <span class="o">=</span> <span class="nc">Boolean</span><span class="o">.</span><span class="na">parseBoolean</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.test.borrow"</span><span class="o">,</span><span class="s">"true"</span><span class="o">));</span><span class="c1">//在borrow一个jedis实例的时候，是否要进行验证操作，如果赋值true，则得到的jedis实例肯定是可以用的</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Boolean</span> <span class="n">testOnReturn</span> <span class="o">=</span> <span class="nc">Boolean</span><span class="o">.</span><span class="na">parseBoolean</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis.test.return"</span><span class="o">,</span> <span class="s">"true"</span><span class="o">));</span><span class="c1">//在return一个jedis实例的时候，是否要进行验证操作，如果赋值true，则放回jedispool的jedis实例肯定是可以用的</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="n">redis1Ip</span> <span class="o">=</span> <span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis1.ip"</span><span class="o">,</span> <span class="s">"127.0.0.1"</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">redis1Port</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis1.port"</span><span class="o">,</span> <span class="s">"6379"</span><span class="o">));</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="n">redis2Ip</span> <span class="o">=</span> <span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis2.ip"</span><span class="o">,</span> <span class="s">"127.0.0.1"</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">redis2Port</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis2.port"</span><span class="o">,</span> <span class="s">"6379"</span><span class="o">));</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">initPool</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">JedisPoolConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisPoolConfig</span><span class="o">();</span>
+
+        <span class="n">config</span><span class="o">.</span><span class="na">setMaxTotal</span><span class="o">(</span><span class="n">maxTotal</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setMaxIdle</span><span class="o">(</span><span class="n">maxIdle</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setMinIdle</span><span class="o">(</span><span class="n">minIdle</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setTestOnBorrow</span><span class="o">(</span><span class="n">testOnBorrow</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setTestOnReturn</span><span class="o">(</span><span class="n">testOnReturn</span><span class="o">);</span>
+        <span class="n">config</span><span class="o">.</span><span class="na">setBlockWhenExhausted</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span> <span class="c1">//连接耗尽时，是否阻塞，false会抛出异常，true阻塞直到超时，</span>
+
+        <span class="nc">JedisShardInfo</span> <span class="n">info1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisShardInfo</span><span class="o">(</span><span class="n">redis1Ip</span><span class="o">,</span> <span class="n">redis1Port</span><span class="o">);</span>
+        <span class="nc">JedisShardInfo</span> <span class="n">info2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JedisShardInfo</span><span class="o">(</span><span class="n">redis2Ip</span><span class="o">,</span> <span class="n">redis2Port</span><span class="o">);</span>
+
+        <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">JedisShardInfo</span><span class="o">&gt;</span> <span class="n">jedisShardInfos</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;(</span><span class="mi">2</span><span class="o">);</span>
+        <span class="n">jedisShardInfos</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">info1</span><span class="o">);</span>
+        <span class="n">jedisShardInfos</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">info2</span><span class="o">);</span>
+
+        <span class="n">pool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ShardedJedisPool</span><span class="o">(</span><span class="n">config</span><span class="o">,</span> <span class="n">jedisShardInfos</span><span class="o">,</span> <span class="nc">Hashing</span><span class="o">.</span><span class="na">MURMUR_HASH</span><span class="o">,</span> <span class="nc">Sharded</span><span class="o">.</span><span class="na">DEFAULT_KEY_TAG_PATTERN</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="n">initPool</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">ShardedJedis</span> <span class="nf">getJedis</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="na">getResource</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">returnBrokenResource</span><span class="o">(</span><span class="nc">ShardedJedis</span> <span class="n">jedis</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">pool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">returnResource</span><span class="o">(</span><span class="nc">ShardedJedis</span> <span class="n">jedis</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">pool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>工具类</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * redis分片工具类
+ */</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedisShardedPoolUtil</span> <span class="o">{</span>
+
+    <span class="cm">/**
+     * 设置key的有效期，单位是秒
+     * @param key
+     * @param exTime
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Long</span> <span class="nf">expire</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span><span class="kt">int</span> <span class="n">exTime</span><span class="o">){</span>
+        <span class="nc">ShardedJedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Long</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">expire</span><span class="o">(</span><span class="n">key</span><span class="o">,</span><span class="n">exTime</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"expire key:{} error"</span><span class="o">,</span><span class="n">key</span><span class="o">,</span><span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">set</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ShardedJedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"set key:{} value:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 设置键值对
+     *
+     * @param key
+     * @param value
+     * @param exTime 超时时间，单位是秒
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">setEx</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span> <span class="nc">String</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">exTime</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ShardedJedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">setex</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">exTime</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"setex key:{} value:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**重新设置键的超时时间
+     * @param key
+     * @param exTime 单位是秒
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Long</span> <span class="nf">setEx</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">,</span><span class="kt">int</span> <span class="n">exTime</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ShardedJedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Long</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">expire</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">exTime</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"setex key:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">get</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ShardedJedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"get key:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">Long</span> <span class="nf">del</span><span class="o">(</span><span class="nc">String</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ShardedJedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Long</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">jedis</span> <span class="o">=</span> <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">getJedis</span><span class="o">();</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">del</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"del key:{} error"</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+            <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnBrokenResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="nc">RedisShardedPool</span><span class="o">.</span><span class="na">returnResource</span><span class="o">(</span><span class="n">jedis</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="spring-session">spring session</h3>
+
+<ul>
+  <li>特点：特点：侵入性低，但不支持分片策略</li>
+  <li>web.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--二期spring session方式实现单点登录--&gt;</span>
+<span class="nt">&lt;filter&gt;</span>
+    <span class="nt">&lt;filter-name&gt;</span>springSessionRepositoryFilter<span class="nt">&lt;/filter-name&gt;</span>
+    <span class="nt">&lt;filter-class&gt;</span>org.springframework.web.filter.DelegatingFilterProxy<span class="nt">&lt;/filter-class&gt;</span>
+<span class="nt">&lt;/filter&gt;</span>
+<span class="nt">&lt;filter-mapping&gt;</span>
+    <span class="nt">&lt;filter-name&gt;</span>springSessionRepositoryFilter<span class="nt">&lt;/filter-name&gt;</span>
+    <span class="nt">&lt;url-pattern&gt;</span>*.do<span class="nt">&lt;/url-pattern&gt;</span>
+<span class="nt">&lt;/filter-mapping&gt;</span>
+ 
+
+</code></pre></div></div>
+
+<ul>
+  <li>spring配置文件</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"redisHttpSessionConfiguration"</span> <span class="na">class=</span><span class="s">"org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"maxInactiveIntervalInSeconds"</span> <span class="na">value=</span><span class="s">"1800"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+ 
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"defaultCookieSerializer"</span> <span class="na">class=</span><span class="s">"org.springframework.session.web.http.DefaultCookieSerializer"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"domainName"</span> <span class="na">value=</span><span class="s">".happymmall.com"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"useHttpOnlyCookie"</span> <span class="na">value=</span><span class="s">"true"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"cookiePath"</span> <span class="na">value=</span><span class="s">"/"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"cookieMaxAge"</span> <span class="na">value=</span><span class="s">"31536000"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+ 
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"jedisPoolConfig"</span> <span class="na">class=</span><span class="s">"redis.clients.jedis.JedisPoolConfig"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"maxTotal"</span> <span class="na">value=</span><span class="s">"20"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+ 
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">"jedisConnectionFactory"</span> <span class="na">class=</span><span class="s">"org.springframework.data.redis.connection.jedis.JedisConnectionFactory"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"hostName"</span> <span class="na">value=</span><span class="s">"127.0.0.1"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"port"</span> <span class="na">value=</span><span class="s">"6379"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"poolConfig"</span> <span class="na">ref=</span><span class="s">"jedisPoolConfig"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>userController</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**前端用户管理
+ * @author qinfen
+ */</span>
+<span class="nd">@Controller</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/user/springsession"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserSpringSessionController</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">IUserService</span> <span class="n">iUserService</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * 用户登录:校验用户是否存在，返回用户信息
+     * @param username
+     * @param password
+     * @param session
+     * @return
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"login.do"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+    <span class="nd">@ResponseBody</span>
+    <span class="kd">public</span> <span class="nc">ServerResponse</span> <span class="nf">login</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">,</span> <span class="nc">String</span> <span class="n">password</span><span class="o">,</span> <span class="nc">HttpSession</span> <span class="n">session</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">httpServletResponse</span><span class="o">,</span> <span class="nc">HttpServletRequest</span> <span class="n">httpServletRequest</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ServerResponse</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">iUserService</span><span class="o">.</span><span class="na">login</span><span class="o">(</span><span class="n">username</span><span class="o">,</span><span class="n">password</span><span class="o">);</span>
+        <span class="c1">//登录成功后把用户信息放到session中</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">isSuccess</span><span class="o">())</span> <span class="o">{</span>
+            <span class="c1">// session中key用常量类中的常量，value为用户的数据</span>
+            <span class="n">session</span><span class="o">.</span><span class="na">setAttribute</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">CURRENT_USER</span><span class="o">,</span><span class="n">response</span><span class="o">.</span><span class="na">getData</span><span class="o">());</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * 用户登出
+     * @param
+     * @return
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"logout.do"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+    <span class="nd">@ResponseBody</span>
+    <span class="kd">public</span> <span class="nc">ServerResponse</span> <span class="nf">logout</span><span class="o">(</span><span class="nc">HttpSession</span> <span class="n">session</span><span class="o">,</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span><span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//移除session中的用户信息</span>
+        <span class="n">session</span><span class="o">.</span><span class="na">removeAttribute</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">CURRENT_USER</span><span class="o">);</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createBySuccess</span><span class="o">();</span>
+    <span class="o">}</span>
+
+
+    <span class="cm">/**
+     * 获取当前登录用户的信息
+     * @param
+     * @return
+     */</span>
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"get_user_info.do"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">)</span>
+    <span class="nd">@ResponseBody</span>
+    <span class="kd">public</span> <span class="nc">ServerResponse</span><span class="o">&lt;</span><span class="nc">User</span><span class="o">&gt;</span> <span class="nf">getUserInfo</span><span class="o">(</span><span class="nc">HttpSession</span> <span class="n">session</span><span class="o">,</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span><span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//判断用户是否登录</span>
+        <span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="o">(</span><span class="nc">User</span><span class="o">)</span> <span class="n">session</span><span class="o">.</span><span class="na">getAttribute</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">CURRENT_USER</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">user</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createBySuccess</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="nc">ServerResponse</span><span class="o">.</span><span class="na">createByErrorMessage</span><span class="o">(</span><span class="s">"用户未登录，无法获取当前用户的信息"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="redis分布式锁">Redis分布式锁</h3>
+
+<h4 id="整合spring-schedule定时任务">整合spring schedule定时任务</h4>
+
+<ul>
+  <li>一句话：作业调度，定时任务</li>
+  <li>applicationContext.xml</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--二期新增spring schedule定时任务--&gt;</span>
+<span class="nt">&lt;context:property-placeholder</span> <span class="na">location=</span><span class="s">"classpath:datasource.properties"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;task:annotation-driven</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>定时任务</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 定时关闭订单定时任务
+ */</span>
+<span class="nd">@Component</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CloseOrderTask</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">IOrderService</span> <span class="n">iOrderService</span><span class="o">;</span>
+
+    <span class="nd">@Scheduled</span><span class="o">(</span><span class="n">cron</span> <span class="o">=</span> <span class="s">"0 */1 * * * ?"</span><span class="o">)</span><span class="c1">//每分钟执行一次</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">closeOrderTaskV1</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务启动"</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">hour</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"close.order.task.time.hour"</span><span class="o">,</span><span class="s">"2"</span><span class="o">));</span>
+        <span class="n">iOrderService</span><span class="o">.</span><span class="na">closeOrder</span><span class="o">(</span><span class="n">hour</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务结束"</span><span class="o">);</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+ 
+
+</code></pre></div></div>
+
+<ul>
+  <li>问题：<strong>在集群环境下我们只需要一台服务器执行任务就可以了，如果全部服务器都执行会发生数据错乱</strong></li>
+</ul>
+
+<h4 id="实现分布式锁">实现分布式锁</h4>
+
+<p><img src="https://i.loli.net/2020/09/07/FZ34NtkSsvpH25K.png" alt="image.png" /></p>
+
+<ul>
+  <li>​</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 定时关闭订单定时任务
+ */</span>
+<span class="nd">@Component</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CloseOrderTask</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">IOrderService</span> <span class="n">iOrderService</span><span class="o">;</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">RedissonManager</span> <span class="n">redissonManager</span><span class="o">;</span>
+
+    <span class="nd">@PreDestroy</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">delLock</span><span class="o">(){</span>
+        <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">del</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+
+    <span class="o">}</span>
+    <span class="c1">//v1版本，不适用于分布式</span>
+    <span class="nd">@Scheduled</span><span class="o">(</span><span class="n">cron</span> <span class="o">=</span> <span class="s">"0 */1 * * * ?"</span><span class="o">)</span><span class="c1">//每分钟执行一次</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">closeOrderTaskV1</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务启动"</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">hour</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"close.order.task.time.hour"</span><span class="o">,</span><span class="s">"2"</span><span class="o">));</span>
+        <span class="n">iOrderService</span><span class="o">.</span><span class="na">closeOrder</span><span class="o">(</span><span class="n">hour</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务结束"</span><span class="o">);</span>
+
+    <span class="o">}</span>
+
+    <span class="c1">//v2版本，分布式防止死锁，有缺陷</span>
+    <span class="c1">//    @Scheduled(cron="0 */1 * * * ?")</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">closeOrderTaskV2</span><span class="o">(){</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务启动"</span><span class="o">);</span>
+        <span class="kt">long</span> <span class="n">lockTimeout</span> <span class="o">=</span> <span class="nc">Long</span><span class="o">.</span><span class="na">parseLong</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"lock.timeout"</span><span class="o">,</span><span class="s">"5000"</span><span class="o">));</span>
+
+        <span class="nc">Long</span> <span class="n">setnxResult</span> <span class="o">=</span> <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">setnx</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()+</span><span class="n">lockTimeout</span><span class="o">));</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">setnxResult</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">setnxResult</span><span class="o">.</span><span class="na">intValue</span><span class="o">()</span> <span class="o">==</span> <span class="mi">1</span><span class="o">){</span>
+            <span class="c1">//如果返回值是1，代表设置成功，获取锁</span>
+            <span class="n">closeOrder</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+        <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"没有获得分布式锁:{}"</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务结束"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//v3版本，分布式锁双重防死锁</span>
+    <span class="nd">@Scheduled</span><span class="o">(</span><span class="n">cron</span><span class="o">=</span><span class="s">"0 */1 * * * ?"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">closeOrderTaskV3</span><span class="o">(){</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务启动"</span><span class="o">);</span>
+        <span class="kt">long</span> <span class="n">lockTimeout</span> <span class="o">=</span> <span class="nc">Long</span><span class="o">.</span><span class="na">parseLong</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"lock.timeout"</span><span class="o">,</span><span class="s">"5000"</span><span class="o">));</span>
+        <span class="nc">Long</span> <span class="n">setnxResult</span> <span class="o">=</span> <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">setnx</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()+</span><span class="n">lockTimeout</span><span class="o">));</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">setnxResult</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">setnxResult</span><span class="o">.</span><span class="na">intValue</span><span class="o">()</span> <span class="o">==</span> <span class="mi">1</span><span class="o">){</span>
+            <span class="n">closeOrder</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+        <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+            <span class="c1">//未获取到锁，继续判断，判断时间戳，看是否可以重置并获取到锁</span>
+            <span class="nc">String</span> <span class="n">lockValueStr</span> <span class="o">=</span> <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">lockValueStr</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">&gt;</span> <span class="nc">Long</span><span class="o">.</span><span class="na">parseLong</span><span class="o">(</span><span class="n">lockValueStr</span><span class="o">)){</span>
+                <span class="nc">String</span> <span class="n">getSetResult</span> <span class="o">=</span> <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">getSet</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()+</span><span class="n">lockTimeout</span><span class="o">));</span>
+                <span class="c1">//再次用当前时间戳getset。</span>
+                <span class="c1">//返回给定的key的旧值，-&gt;旧值判断，是否可以获取锁</span>
+                <span class="c1">//当key没有旧值时，即key不存在时，返回nil -&gt;获取锁</span>
+                <span class="c1">//这里我们set了一个新的value值，获取旧的值。</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">getSetResult</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="o">(</span><span class="n">getSetResult</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nc">StringUtils</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">lockValueStr</span><span class="o">,</span><span class="n">getSetResult</span><span class="o">))){</span>
+                    <span class="c1">//真正获取到锁</span>
+                    <span class="n">closeOrder</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+                <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"没有获取到分布式锁:{}"</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"没有获取到分布式锁:{}"</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"关闭订单定时任务结束"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+ 
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">closeOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">lockName</span><span class="o">){</span>
+        <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">expire</span><span class="o">(</span><span class="n">lockName</span><span class="o">,</span><span class="mi">5</span><span class="o">);</span><span class="c1">//有效期50秒，防止死锁</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"获取{},ThreadName:{}"</span><span class="o">,</span> <span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+        <span class="kt">int</span> <span class="n">hour</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"close.order.task.time.hour"</span><span class="o">,</span><span class="s">"2"</span><span class="o">));</span>
+        <span class="n">iOrderService</span><span class="o">.</span><span class="na">closeOrder</span><span class="o">(</span><span class="n">hour</span><span class="o">);</span>
+        <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">del</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"释放{},ThreadName:{}"</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"==============================="</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="redission框架">Redission框架</h3>
+
+<ul>
+  <li>Redission是架设在Reids基础上的一个Java驻内存数据网格（In-Memory Data Grid）</li>
+  <li>Redission在基于NIO的Netty框架上，充分的利用了Reids键值数据库提供的一系列优势</li>
+  <li>在Java实用工具包中常用接口的基础上，为使用者提供了一系列具有分布式特性的常用工具类</li>
+  <li>使得原本作为协调单机多线程并发程序的工具包获得了协调分布式多机多线程并发系统的能力，大大降低了设计和研发大规模分布式系统的难度</li>
+  <li>
+    <p>同时结合各富特色的分布式服务，更进一步简化了分布式环境中程序之间的相互协作</p>
+  </li>
+  <li>依赖</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--Redission分布式锁框架--&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>org.redisson<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>redisson<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>2.9.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.fasterxml.jackson.dataformat<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>jackson-dataformat-avro<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>2.9.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>管理器</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Redisson管理器
+ */</span>
+<span class="nd">@Component</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RedissonManager</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nc">Config</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Config</span><span class="o">();</span>
+
+    <span class="kd">private</span> <span class="nc">Redisson</span> <span class="n">redisson</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nc">Redisson</span> <span class="nf">getRedisson</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">redisson</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="n">redis1Ip</span> <span class="o">=</span> <span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis1.ip"</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">redis1Port</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis1.port"</span><span class="o">));</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="n">redis2Ip</span> <span class="o">=</span> <span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis2.ip"</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Integer</span> <span class="n">redis2Port</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"redis2.port"</span><span class="o">));</span>
+
+    <span class="nd">@PostConstruct</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(){</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">config</span><span class="o">.</span><span class="na">useSingleServer</span><span class="o">().</span><span class="na">setAddress</span><span class="o">(</span><span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">().</span><span class="na">append</span><span class="o">(</span><span class="n">redis1Ip</span><span class="o">).</span><span class="na">append</span><span class="o">(</span><span class="s">":"</span><span class="o">).</span><span class="na">append</span><span class="o">(</span><span class="n">redis1Port</span><span class="o">).</span><span class="na">toString</span><span class="o">());</span>
+
+            <span class="n">redisson</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Redisson</span><span class="o">)</span> <span class="nc">Redisson</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">config</span><span class="o">);</span>
+
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"初始化Redisson结束"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"redisson init error"</span><span class="o">,</span><span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>分布式锁</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 定时关闭订单定时任务
+ */</span>
+<span class="nd">@Component</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CloseOrderTask</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">IOrderService</span> <span class="n">iOrderService</span><span class="o">;</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">RedissonManager</span> <span class="n">redissonManager</span><span class="o">;</span>
+
+    <span class="c1">//Redisson方式</span>
+      <span class="nd">@Scheduled</span><span class="o">(</span><span class="n">cron</span><span class="o">=</span><span class="s">"0 */1 * * * ?"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">closeOrderTaskV4</span><span class="o">(){</span>
+        <span class="nc">RLock</span> <span class="n">lock</span> <span class="o">=</span> <span class="n">redissonManager</span><span class="o">.</span><span class="na">getRedisson</span><span class="o">().</span><span class="na">getLock</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+        <span class="kt">boolean</span> <span class="n">getLock</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">getLock</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="na">tryLock</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="mi">50</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)){</span>
+                <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Redisson获取到分布式锁:{},ThreadName:{}"</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+                <span class="kt">int</span> <span class="n">hour</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"close.order.task.time.hour"</span><span class="o">,</span><span class="s">"2"</span><span class="o">));</span>
+<span class="c1">//                iOrderService.closeOrder(hour);</span>
+            <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Redisson没有获取到分布式锁:{},ThreadName:{}"</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Redisson分布式锁获取异常"</span><span class="o">,</span><span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="k">if</span><span class="o">(!</span><span class="n">getLock</span><span class="o">){</span>
+                <span class="k">return</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="n">lock</span><span class="o">.</span><span class="na">unlock</span><span class="o">();</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Redisson分布式锁释放锁"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+
+
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">closeOrder</span><span class="o">(</span><span class="nc">String</span> <span class="n">lockName</span><span class="o">){</span>
+        <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">expire</span><span class="o">(</span><span class="n">lockName</span><span class="o">,</span><span class="mi">5</span><span class="o">);</span><span class="c1">//有效期50秒，防止死锁</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"获取{},ThreadName:{}"</span><span class="o">,</span> <span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+        <span class="kt">int</span> <span class="n">hour</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="nc">PropertiesUtil</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"close.order.task.time.hour"</span><span class="o">,</span><span class="s">"2"</span><span class="o">));</span>
+        <span class="n">iOrderService</span><span class="o">.</span><span class="na">closeOrder</span><span class="o">(</span><span class="n">hour</span><span class="o">);</span>
+        <span class="nc">RedisShardedPoolUtil</span><span class="o">.</span><span class="na">del</span><span class="o">(</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">);</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"释放{},ThreadName:{}"</span><span class="o">,</span><span class="nc">Const</span><span class="o">.</span><span class="na">REDIS_LOCK</span><span class="o">.</span><span class="na">CLOSE_ORDER_TASK_LOCK</span><span class="o">,</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"==============================="</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+:ET
