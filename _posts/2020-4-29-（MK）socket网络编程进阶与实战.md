@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "（MK）socket网络编程进阶与实战"
-categories: 网络编程 MK
-tags: socket 网络编程
+categories: 网络编程
+tags: socket 网络编程 MK
 author: 百味皆苦
 music-id: 2602106546
 ---

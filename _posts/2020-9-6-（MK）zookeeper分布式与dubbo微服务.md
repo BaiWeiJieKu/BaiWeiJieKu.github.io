@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "(MK)zookeeper分布式与dubbo微服务"
-categories: zookeeper MK
-tags: zookeeper
+categories: zookeeper
+tags: zookeeper MK
 author: 百味皆苦
 music-id: 3136952023
 ---
