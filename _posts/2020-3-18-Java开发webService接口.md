@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "Java开发webService接口"
-categories: springboot
-tags: springboot
+categories: springBoot
+tags: webService
 author: 百味皆苦
 music-id: 2602106546
 ---

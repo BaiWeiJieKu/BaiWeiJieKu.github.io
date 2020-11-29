@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Google-guava"
-categories: guava
+categories: 工具类
 tags: guava
 author: 百味皆苦
 music-id: 2602106546
