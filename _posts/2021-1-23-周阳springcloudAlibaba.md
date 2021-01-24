@@ -535,3 +535,134 @@ public class ConfigClientController
 
 ### Nacos集群和持久化配置
 
+- https://nacos.io/zh-cn/docs/cluster-mode-quick-start.html
+
+
+
+#### 架构说明
+
+- ![image.png](https://i.loli.net/2021/01/24/8G7muhOsUDtQb92.png)
+- 默认nacos使用嵌入式数据库实现数据的存储；所以，如果启动多个默认配置下的nacos节点，数据存储是存在一致性问题的。为了解决这个问题，nacos采用了集中式存储的方式来支持集群化部署，目前只支持MySQL存储。
+- nacos支持三种部署模式
+  - 单机模式：用于测试和单机使用
+  - 集群模式：用于生产环境，确保高可用
+  - 多集群模式：用于多数据中心场景
+- 单机模式支持MySQL
+  - ![image.png](https://i.loli.net/2021/01/24/7inIE38MquGOv14.png)
+- https://nacos.io/zh-cn/docs/deployment.html
+
+#### 持久化配置解释
+
+- nacos默认自带的是嵌入式数据库Derby：https://github.com/alibaba/nacos/blob/develop/config/pom.xml
+
+- derby到mysql切换配置步骤
+
+  - nacos-server-1.1.4\nacos\conf目录下找到sql脚本nacos-mysql.sql
+
+  - 在MySQL中执行数据库脚本
+
+  - nacos-server-1.1.4\nacos\conf目录下找到application.properties
+
+  - ```properties
+    spring.datasource.platform=mysql
+     
+    db.num=1
+    db.url.0=jdbc:mysql://localhost:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
+    db.user=root
+    db.password=123456
+    ```
+
+  - 启动nacos，可以看到是个全新的空记录界面，以前是记录进derby，现在是记录进MySQL
+
+#### 生产环境配置
+
+- 预计需要，1个nginx+3个nacos注册中心+1个mysql
+
+- 下载Linux版本nacos：https://github.com/alibaba/nacos/releases/tag/1.1.4
+
+- 1.Linux服务器上mysql数据库配置
+
+  - 执行nacos的数据库脚本：nacos-mysql.sql
+
+- 2.application.properties配置
+
+  - ![image.png](https://i.loli.net/2021/01/24/ozjRYKvxbuU2Fa4.png)
+
+  - ```properties
+    spring.datasource.platform=mysql
+     
+    db.num=1
+    db.url.0=jdbc:mysql://1.7.0.1:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
+    db.user=root
+    db.password=HF_mysql_654321
+    ```
+
+  - ```
+    mysql  授权远程访问
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456' WITH GRANT OPTION;
+    flush privileges;
+    ```
+
+- 3.Linux服务器上nacos的集群配置cluster.conf
+
+  - 梳理出3台nacos机器的不同服务端口号
+  - 复制出cluster.conf
+  - ![image.png](https://i.loli.net/2021/01/24/81d5IKObuxGYFai.png)
+  - ![image.png](https://i.loli.net/2021/01/24/OL7eyGIrWfcMSX5.png)
+
+- 4.编辑Nacos的启动脚本startup.sh，使它能够接受不同的启动端
+
+  - /mynacos/nacos/bin目录下有startup.sh
+  - 在什么地方，修改什么，怎么修改
+  - 集群启动，我们希望可以类似其他软件的shell命令，传递不同的端口号启动不同的nacos实例
+  - 命令：./startup.sh -p 3333 表示启动端口号为3333的nacos服务器实例。和上一步cluster配置的一致
+  - 修改startup.sh
+  - ![image.png](https://i.loli.net/2021/01/24/mO5R3Jhl9FMpWvk.png)
+  - 按照端口号启动三个nacos实例
+
+- 5.Nginx的配置，由它作为负载均衡器
+
+  - 修改nginx的配置文件/nginx/conf/nginx.conf
+
+  - ```
+    upstream cluster{                                                        
+     
+        server 127.0.0.1:3333;
+        server 127.0.0.1:4444;
+        server 127.0.0.1:5555;
+    }
+
+     server{
+                              
+        listen 1111;
+        server_name localhost;
+        location /{
+             proxy_pass http://cluster;
+                                                            
+        }
+    ....省略  
+    ```
+
+  - 按照配置文件启动./nginx -c /usr/local/nginx/conf/nginx.conf
+
+- 6.截止到此处，1个Nginx+3个nacos注册中心+1个mysql
+
+  - 测试通过nginx访问nacos：https://写你自己虚拟机的ip:1111/nacos/#/login
+  - 新建一个nacos配置测试
+  - linux服务器的mysql插入一条记录
+
+- 测试
+
+  - 微服务cloudalibaba-provider-payment9002启动注册进nacos集群
+
+  - yml
+
+  - ```yaml
+    server-addr:  写你自己的虚拟机ip:1111
+    ```
+
+  - 看nacos控制台：https://写你自己虚拟机的ip:1111/nacos/#/login
+
+  - ![image.png](https://i.loli.net/2021/01/24/WNvqEMa5o3rQxzX.png)
+
+- ​
