@@ -666,3 +666,242 @@ public class ConfigClientController
   - ![image.png](https://i.loli.net/2021/01/24/WNvqEMa5o3rQxzX.png)
 
 - ​
+
+## Sentinel熔断与限流
+
+### 简介
+
+- 中文文档：https://github.com/alibaba/Sentinel/wiki/%E4%BB%8B%E7%BB%8D
+- sentinel：一句话解释，之前我们讲解过的Hystrix
+- 下载地址：https://github.com/alibaba/Sentinel/releases
+- 指导手册：https://spring-cloud-alibaba-group.github.io/github-pages/greenwich/spring-cloud-alibaba.html#_spring_cloud_alibaba_sentinel
+- 特性：
+  - ![image.png](https://i.loli.net/2021/01/31/gNFhGVtC25x7zmr.png)
+- 服务使用中的各种问题：
+  - 服务雪崩
+  - 服务降级
+  - 服务熔断
+  - 服务限流
+
+
+
+### 安装控制台
+
+- sentinel分为两部分
+  - 核心库（java客户端）：不依赖任何框架，能够运行于任何java运行环境，同时对dubbo和spring cloud有较好的支持
+  - 控制台（dashboard）：基于springboot开发，打包后可以直接运行，不需要额外的tomcat等应用容器
+- 运行环境：java8，8080端口
+- 运行命令：`java -jar sentinel-dashboard-1.7.0.jar `
+- 访问sentinel管理界面
+  - http://localhost:8080
+  - 登录账号密码均为sentinel
+
+
+
+### 初始化demo
+
+- 启动Nacos8848成功：http://localhost:8848/nacos/#/login
+- 新建：cloudalibaba-sentinel-service8401
+- pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud2020</artifactId>
+        <groupId>com.atguigu.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloudalibaba-sentinel-service8401</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.atguigu.springcloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-datasource-nacos</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+      
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>4.6.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>
+```
+
+- yml
+
+```yaml
+server:
+  port: 8401
+
+spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        port: 8719  #默认8719，假如被占用了会自动从8719开始依次+1扫描。直至找到未被占用的端口
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+```
+
+- 启动类
+
+```java
+@EnableDiscoveryClient
+@SpringBootApplication
+public class MainApp8401
+{
+    public static void main(String[] args) {
+        SpringApplication.run(MainApp8401.class, args);
+    }
+}
+```
+
+- 业务类
+
+```java
+@RestController
+public class FlowLimitController
+{
+    @GetMapping("/testA")
+    public String testA() {
+        return "------testA";
+    }
+
+    @GetMapping("/testB")
+    public String testB() {
+
+        return "------testB";
+    }
+}
+```
+
+- 启动Sentinel8080:java -jar sentinel-dashboard-1.7.0
+- 启动微服务8401
+- 启动8401微服务后查看sentienl控制台
+  - Sentinel采用的懒加载说明:需要执行以下接口
+  - http://localhost:8401/testA
+  - 查看监控效果：sentinel8080正在监控微服务8401
+- ​
+
+
+
+### 流控规则
+
+- 资源名：唯一的名称，默认请求路径
+- 针对来源：sentinel可以针对调用者进行限流，填写微服务名，默认default（不区分来源）
+- 阈值类型/单机阈值：
+  - QPS（每秒钟的请求数量）：当调用该api的QPS达到阈值后，进行限流
+  - 线程数：当调用该api的线程数达到阈值时，进行限流
+- 是否集群：不需要集群
+- 流控模式：
+  - 直接：api达到限流条件时，直接限流
+  - 关联：当关联的资源达到阈值时，就限流自己
+  - 链路：只记录指定链路上的流量（指定资源从入口资源进来的流量，如果达到阈值，就限流）【api级别的针对来源】
+- 流控效果：
+  - 快速失败：直接失败，抛出异常
+  - warm up：根据codeFactor（冷加载因子，默认为3）的值，从阈值/codeFactor，经过预热时长，才达到设置的QPS阈值
+  - 排队等待：匀速排队，让请求以匀速的速度通过，**阈值类型必须设置为QPS，否侧无效**
+- 直接流控模式：
+  - 直接----快速失败
+  - 配置说明
+  - ![image.png](https://i.loli.net/2021/01/31/aSnkdiVDgQNtRKu.png)
+  - 快速点击访问http://localhost:8401/testA
+  - 结果：Blocked by Sentinel (flow limiting)
+  - 后续会介绍兜底方法
+- 关联流控模式
+  - 当关联的资源达到阈值时，就限流自己
+  - 当与A关联的资源B达到阈值后，就限流自己
+  - B惹事，A挂了
+  - 配置A
+  - ![image.png](https://i.loli.net/2021/01/31/ibnUZqxIOcHVrLk.png)
+  - postman模拟并发密集访问testB
+  - 访问testB成功
+  - 点击访问http://localhost:8401/testA；运行后发现testA挂了
+  - 结果：Blocked by Sentinel (flow limiting)
+- 链路流控模式
+  - 多个请求调用了同一个微服务
+- 快速失败流控效果：
+  - 直接失败，抛出异常：Blocked by Sentinel (flow limiting)
+- 预热流控效果：
+  - 公式：阈值除以coldFactor（默认值为3），经过预热时长后才会达到阈值
+  - 默认coldFactor为3，即请求QPS从threshold/3开始，经预热时长逐渐升至设定的QPS阈值。
+  - 限流 冷启动
+  - https://github.com/alibaba/Sentinel/wiki/%E9%99%90%E6%B5%81---%E5%86%B7%E5%90%AF%E5%8A%A8
+  - 源码：com.alibaba.csp.sentinel.slots.block.flow.controller.WarmUpController
+  - warmup配置
+  - ![image.png](https://i.loli.net/2021/01/31/wUKpLP7cu5jEYZJ.png)
+  - 多次点击http://localhost:8401/testB；刚开始不行，后续慢慢OK
+  - 应用场景：秒杀活动，开启瞬间会有大量流量，很有可能把系统打死，预热方式是为了保护系统，可慢慢把流量放进来，慢慢把阈值增长到设置的阈值
+- 排队等待流控效果：
+  - ![image.png](https://i.loli.net/2021/01/31/wxXqYlBCoPUEJcK.png)
+  - 匀速排队，阈值必须设置为QPS
+  - ![image.png](https://i.loli.net/2021/01/31/XQUF3SzRlJeaWkh.png)
+
+
+
+### 降级规则
+
