@@ -12,6 +12,8 @@ music-id: 28481105
 <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="86" src="//music.163.com/outchain/player?type=2&id=487289489&auto=1&height=66"></iframe>
 <p>
 <video controls="" autoplay="" name="media"><source src="https://www.bilibili.com/video/BV1ui4y1T7wN" type="video/mp4"></video>
+
+<iframe src="//player.bilibili.com/player.html?aid=544249534&bvid=BV1ui4y1T7wN&cid=298559625&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 <p>
 <h3>📋<strong>自我介绍</strong></h3>  
 
