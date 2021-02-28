@@ -11,12 +11,12 @@ music-id: 28481105
 {:toc}
 <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="86" src="//music.163.com/outchain/player?type=2&id=487289489&auto=1&height=66"></iframe>
 <p>
-<video controls="" autoplay="" name="media"><source src="http://36.156.4.159/vcloud1049.tc.qq.com/1049_M2100551000aVcD23Wm18k1001541035.f20.mp4?vkey=6E96B8295ED2981F26A915BBA5A87E45C2D3AB38787F68CC0F3B7FBE771DCACBCE982E73FD3FE1D9F092E6B671C001C0C038CCD6B6D8AC026973480F6D535B78B7DA3945707950AC8547F71480EE7881D7A258DC72039989" type="video/mp4"></video>
+<video controls="" autoplay="" name="media"><source src="https://www.bilibili.com/video/BV1ui4y1T7wN" type="video/mp4"></video>
 <p>
 <h3>📋<strong>自我介绍</strong></h3>  
 
 
-&nbsp;🔹目前位于山东烟台上学，软件工程专业，主学Java后端。<br/>
+&nbsp;🔹目前就职于帝都互联网公司，Java后端。<br/>
 
 &nbsp;🔹本人山东水瓶座男孩子一枚<br/>
 
@@ -44,13 +44,13 @@ music-id: 28481105
 
 &nbsp;🔹热爱有灵魂的事物<br/>
 
-&nbsp;🔹喜欢纯音乐（网易云ID：百味皆苦）<br/>
+&nbsp;🔹喜欢纯音乐，因为可以带来无限遐想（网易云ID：百味皆苦）<br/>
 
-&nbsp;🔹篮球（忠于黑曼巴精神）<br/>
+&nbsp;🔹篮球（秉持黑曼巴精神）<br/>
 
-&nbsp;🔹还喜欢研究周易，太极八卦，六爻预测，紫微斗数，中医内经等等（若需预测，请联系下面的email）<br/>
+&nbsp;🔹还喜欢研究周易，太极八卦，六爻预测，紫微斗数，中医内经等等<br/>
 
-🔹喜欢打坐冥想 <br/>
+🔹喜欢冥想 <br/>
 
 🔹喜欢健身<br/>
 
@@ -82,7 +82,9 @@ music-id: 28481105
 <h3>🎓<strong>还有，学习是一个非常愉快的过程。共同加油！</strong></h3>
 &nbsp;🔹2016.9.11 进入大学，开始程序员之路。<br/>
 
- 🔹2017.9 开始学习java，方向选定为java后端开发<br/>
+ 🔹2020.7 终于毕业啦<br/>
+
+🔹2020.10 来帝都搬砖啦，打工人，打工魂<br/>
 
 <hr>
 <h3>🎓<strong>联系我：</strong></h3>
@@ -93,7 +95,7 @@ music-id: 28481105
 
 &nbsp;🔹<a href="https://music.163.com/#/user/home?id=302749816">网易云音乐</a>让敲代码的手飞舞起来<br/>
 
-&nbsp;🔹email：2534964002@qq.com<br/>
+&nbsp;🔹email：baiweijieku@qq.com<br/>
 
 
 <hr>
