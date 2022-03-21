@@ -579,6 +579,19 @@ MySQL当记录不存在时insert,当记录存在时update，语句怎么写？
 INSERT INTO table (a,b,c) VALUES (1,2,3) ON DUPLICATE KEY UPDATE c=c+1;
 ```
 
+```
+数据库怎样保证并发更新不出错？
+
+```
+
+```
+什么事undo log 和 mvcc ？
+```
+
+```
+mysql的索引下推是什么？缓冲池是什么？
+```
+
 
 
 ### spring
@@ -792,6 +805,14 @@ BeanFactory和ApplicationContext有什么区别？
  
  （4）BeanFactory和ApplicationContext都支持BeanPostProcessor、BeanFactoryPostProcessor的使用，但两者之间的区别是：BeanFactory需要手动注册，而ApplicationContext则是自动注册。
 ```
+
+```
+spring是怎样解决循环依赖的？
+```
+
+
+
+
 
 ### springmvc
 
@@ -1602,5 +1623,33 @@ Redis单点吞吐量是多少？什么是QPS？什么是TPS？
 单点TPS达到8万/秒，QPS达到10万/秒，补充下TPS和QPS的概念
 QPS: 应用系统每秒钟最大能接受的用户访问量：每秒钟处理完请求的次数，注意这里是处理完，具体是指发出请求到服务器处理完成功返回结果。可以理解在server中有个counter，每处理一个请求加1，1秒后counter=QPS。
 TPS： 每秒钟最大能处理的请求数。每秒钟处理完的事务次数，一个应用系统1s能完成多少事务处理，一个事务在分布式处理中，可能会对应多个请求，对于衡量单个接口服务的处理能力，用QPS比较合理。
+```
+
+```
+怎样用Redis实现分布式锁？怎样用zookeeper实现分布式锁？怎样用数据库实现分布式锁？
+
+
+```
+
+
+
+### 消息中间件
+
+
+
+```
+消息中间件怎样保证不丢失消息的？
+
+
+```
+
+
+
+
+
+### dubbo
+
+```
+dubbo的工作流程是什么？
 ```
 
