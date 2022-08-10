@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "业务层框架spring(3)"
+title: "业务层框架spring(JDBC)"
 categories: spring
 tags: spring
 author: 百味皆苦

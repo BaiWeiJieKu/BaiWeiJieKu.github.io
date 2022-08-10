@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "业务层框架spring(1)"
+title: "业务层框架spring(bean配置)"
 categories: spring
 tags: spring
 author: 百味皆苦
