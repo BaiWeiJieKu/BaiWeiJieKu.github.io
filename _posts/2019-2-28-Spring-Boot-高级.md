@@ -1021,40 +1021,73 @@ public class Springboot03ElasticApplicationTests {
 
 ### 四：整合任务
 
-#### 异步任务
+#### 异步任务@Aysnc
 
 - 在Java应用中，绝大多数情况下都是通过同步的方式来实现交互处理的；但是在处理与第三方系统交互的时候，容易造成响应迟缓的情况，之前大部分都是使用多线程来完成此类任务，其实，在Spring 3.x之后，就已经内置了@Async来完美解决这个问题。
 - 两个注解：@EnableAysnc、@Aysnc
 - 首先给springboot启动类添加@EnableAysnc注解，开启异步
 - 然后给需要进行异步调用的方法上添加@Aysnc注解就可以了
 
-#### 定时任务
+#### 定时任务@Scheduled
 
 - 项目开发中经常需要执行一些定时任务，比如需要在每天凌晨时候，分析一次前一天的日志信息。
 - Spring为我们提供了异步执行任务调度的方式，提供**TaskExecutor** 、**TaskScheduler** 接口。
 - 两个注解：@EnableScheduling、@Scheduled
+
+@Scheduled支持以下8个参数
+
+- `cron`：表达式，指定任务在特定时间执行；
+- 2.`fixedDelay`：表示上一次任务执行完成后多久再次执行，参数类型为long，单位ms；
+- 3.`fixedDelayString`：与fixedDelay含义一样，只是参数类型变为String；
+- 4.`fixedRate`：表示按一定的频率执行任务，即每次开始执行的时间间隔一致，参数类型为long，单位ms；
+- 5.`fixedRateString`：与fixedRate的含义一样，只是将参数类型变为String；
+- 6.`initialDelay`：表示延迟多久再第一次执行任务，参数类型为long，单位ms；
+- 7.`initialDelayString`：与initialDelay的含义一样，只是将参数类型变为String；
+- 8.`zone`：时区，默认为当前时区。
+
+
+
+
+
 - cron表达式：
 
-| 字段 | 允许值                | 允许的特殊字符  |
-| ---- | --------------------- | --------------- |
-| 秒   | 0-59                  | , - * /         |
-| 分   | 0-59                  | , - * /         |
-| 小时 | 0-23                  | , - * /         |
-| 日期 | 1-31                  | , - * ? / L W C |
-| 月份 | 1-12                  | , - * /         |
-| 星期 | 0-7或SUN-SAT 0,7是SUN | , - * ? / L C # |
+| 字段 | 允许值                       | 允许的特殊字符  |
+| ---- | ---------------------------- | --------------- |
+| 秒   | 0-59                         | , - * /         |
+| 分   | 0-59                         | , - * /         |
+| 小时 | 0-23                         | , - * /         |
+| 日期 | 1-31整数（需要考虑月的天数） | , - * ? / L W C |
+| 月份 | 1-12整数 或 JAN-DEC          | , - * /         |
+| 星期 | 1-7整数 或 SUN-SAT           | , - * ? / L C # |
 
-| 特殊字符 | 代表含义                   |
-| -------- | -------------------------- |
-| ,        | 枚举                       |
-| -        | 区间                       |
-| *        | 任意                       |
-| /        | 步长                       |
-| ?        | 日/星期冲突匹配            |
-| L        | 最后                       |
-| W        | 工作日                     |
-| C        | 和calendar联系后计算过的值 |
-| #        | 星期，4#2，第2个星期四     |
+| 特殊字符 | 代表含义                                                     |
+| -------- | ------------------------------------------------------------ |
+| ,        | 表示列出枚举值。例如：在minutes域使用5,20，则意味着在5分和20分时各触发一次。 |
+| -        | 表示范围。例如在minutes域使用5-20，表示从5分到20分钟每分钟触发一次 |
+| *        | 表示匹配该域的任意值。在minutes域使用 * 表示每分钟。在months里表示每个月。在daysOfWeek域表示一周的每一天。 |
+| /        | 表示起始时间开始触发，然后每隔固定时间触发一次。例如在minutes域使用5/20，则意味着从当前小时的第5分钟开每20分钟触发一次。 |
+| ?        | 只能用在daysofMonth和daysofWeek两个域，表示不指定值，当两个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为 ？。因为daysofMonth和daysofWeek会相互影响。例如想在每月的2号触发调度，不管2号是周几，则只能使用如下写法：0 0 0 2 * ?, 其中最后一位只能用?，而不能使用*，如果使用*表示不管周几都会触发。 |
+| L        | 表示最后，是单词“last”的缩写，只能出现在daysofWeek和dayofMonth域。在daysofWeek域使用5L意思是在指定月的最后的一个星期四触发。在dayofMonth域使用5L或者FRIL意思是在指定月的倒数第5天触发。在使用L参数时，不要指定列表或范围。 |
+| W        | 表示有效工作日(周一到周五),只能出现在daysofMonth域，系统将在离指定日期的最近的有效工作日触发事件。例如：在daysofMonth使用5W，如果5号是周六，则将在最近的工作日周五，即4号触发。如果5号是周日，则在6日(周一)触发。如果5日在星期一到星期五中的一天，则就在5日触发。另外，W的最近寻找不会跨过月份 。 |
+| C        | 和calendar联系后计算过的值                                   |
+| #        | 用于确定每个月第几个周几，只能出现在daysofMonth域。例如在4#2，表示某月的第二个周三。 |
+
+
+
+生成器工具地址-[http://cron.qqe2.com/](https://cron.qqe2.com/)
+
+
+
+
+
+使用@Scheduled注意事项:
+
+- spring的注解@Scheduled 需要写在实现方法上；
+- 定时器的任务方法不能有返回值（如果有返回值，spring初始化的时候会告诉你有个错误、需要设定一个proxytargetclass的某个值为true），不能指向任何的参数；
+- 如果该方法需要与应用程序上下文的其他对象进行交互，通常是通过依赖注入来实现；
+- 实现类上要有组件的注解@Component或者其他组件注解。
+
+
 
 - 首先启动类加入@EnableScheduling注解
 - 编写需要定时执行的方法
@@ -1084,6 +1117,76 @@ public class ScheduledService {
     }
 }
 ```
+
+
+
+@Schedule注解的一个缺点就是其定时时间不能动态更改，它适用于具有固定任务周期的任务，若要修改任务执行周期，只能走“停服务→修改任务执行周期→重启服务”这条路。而基于 SchedulingConfigurer 接口方式可以做到。SchedulingConfigurer 接口可以实现在@Configuration等注解类上。
+
+```java
+@Component
+public class TestTask implements SchedulingConfigurer {
+  
+  @Override
+  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+    taskRegistrar.addTriggerTask(new Runnable() {
+      @Override
+      public void run() {
+        // 定时任务要执行的内容
+        System.out.println("【开始执行定时任务。。。】");
+      }
+    }, new Trigger() {
+      @Override
+      public Date nextExecutionTime(TriggerContext triggerContext) {
+        // 定时任务触发，可修改定时任务的执行周期
+        //可以将表达式配置在数据库中
+        String cron = "0 0/5 * * * ?"; 
+        CronTrigger trigger = new CronTrigger(cron);
+        Date nextExecDate = trigger.nextExecutionTime(triggerContext);
+        return nextExecDate;
+      }
+    });
+  }
+}
+
+/*
+ScheduledTaskRegistrar类包括以下几个重要方法：
+void addTriggerTask(Runnable task, Trigger trigger)
+void addTriggerTask(TriggerTask task)
+void addCronTask(Runnable task, String expression)
+void addCronTask(CronTask task)
+void addFixedRateTask(Runnable task, long interval)
+void addFixedRateTask(IntervalTask task)
+void addFixedDelayTask(Runnable task, long delay)
+void addFixedDelayTask(IntervalTask task)
+*/
+
+//提示：如果在数据库修改时格式出现错误，则定时任务会停止，即使重新修改正确；此时只能重新启动项目才能恢复。
+```
+
+
+
+单线程任务丢失，转为异步线程池
+
+默认的 ConcurrentTaskScheduler 计划执行器采用Executors.newSingleThreadScheduledExecutor() 实现单线程的执行器。因此，对同一个调度任务的执行总是同一个线程。如果任务的执行时间超过该任务的下一次执行时间，则会出现任务丢失，跳过该段时间的任务。上述问题有以下解决办法：
+
+采用异步的方式执行调度任务，配置 Spring 的 @EnableAsync，在执行定时任务的方法上标注 @Async配置任务执行池
+
+```java
+//每30秒执行一次
+@Async("taskExecutor")
+@Scheduled(fixedRate = 1000 * 3)
+public void reportCurrentTime(){
+  System.out.println ("线程" + Thread.currentThread().getName() + "开始执行定时任务===&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7&&&====》"
+      + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+  long start = System.currentTimeMillis();
+}
+```
+
+
+
+##### 配置多任务动态cron(增删启停)
+
+https://www.jb51.net/article/207667.htm
 
 
 
