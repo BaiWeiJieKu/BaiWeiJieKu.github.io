@@ -303,7 +303,7 @@ openSession.commit();
 ### foreach遍历集合
 
 ```java
-/查询员工id'在给定集合中的
+//查询员工id在给定集合中的
 	public List<Employee> getEmpsByConditionForeach(@Param("ids")List<Integer> ids);
 ```
 
@@ -551,3 +551,20 @@ insert into tbl_employee(
 )
 ```
 
+
+
+### 转义字符
+
+在`Mybatis`编写特殊常用字符你会发现会报错,比如常用的`<`,`>`,`<=`,`>=` 等，原因是与`xml`文件的元素`<>`冲突，所以需要转义。整理转义字符如下：
+
+
+
+| 符号     | 原始字符 | 转义字符 |
+| :------- | :------- | :------- |
+| 大于     | >        | `&gt;`   |
+| 大于等于 | >=       | `&gt;=`  |
+| 小于     | <        | `&lt;`   |
+| 小于等于 | <=       | `&lt;=`  |
+| 和       | &        | `&amp;`  |
+| 单引号   | ’        | `&apos;` |
+| 双引号   | "        | `&quot;` |
