@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "业务层框架spring(JDBC)"
+title: "业务层框架spring(JDBC与cache)"
 categories: spring
 tags: spring
 author: 百味皆苦
@@ -505,4 +505,213 @@ public class JDBCTest {
 }
 
 ```
+
+
+
+
+
+
+
+### spring cache
+
+Spring Cache 是 Spring 提供的一整套的缓存解决方案。虽然它本身并没有提供缓存的实现，但是它提供了一整套的接口和代码规范、配置、注解等，这样它就可以整合各种缓存方案了，比如 Redis、Ehcache，我们也就不用关心操作缓存的细节。
+
+Spring 3.1 开始定义了 org.springframework.cache.Cache 和 org.springframework.cache.CacheManager 接口来统一不同的缓存技术，并支持使用注解来简化我们开发。
+
+Cache 接口它包含了缓存的各种操作方式，同时还提供了各种xxxCache缓存的实现，比如 RedisCache 针对Redis，EhCacheCache 针对 EhCache，ConcurrentMapCache 针对 ConCurrentMap
+
+每次调用某方法，而此方法又是带有缓存功能时，Spring 框架就会检查`指定参数`的那个方法是否已经被调用过，如果之前调用过，就从缓存中取之前调用的结果；如果没有调用过，则再调用一次这个方法，并缓存结果，然后再返回结果，那下次调用这个方法时，就可以直接从缓存中获取结果了。
+
+Spring Cache 主要是作用在类上或者方法上，对类中的方法的返回结果进行缓存。
+
+Spring Cache 的注解会帮忙在调用方法之后，去缓存方法调用的最终结果，或者在方法调用之前拿缓存中的结果，或者删除缓存中的结果，这些读、写、删缓存的脏活都交给 Spring Cache 来做了
+
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/20220907152920.png)
+
+
+
+Spring Cache 支持很多缓存中间件作为框架中的缓存，总共有 9 种选择：
+
+- caffeine：Caffeine 是一种高性能的缓存库，基于 Google Guava。
+- couchbase：*CouchBase*是一款非关系型JSON文档数据库。
+- generic：由泛型机制和 static 组合实现的泛型缓存机制。
+- hazelcast：一个高度可扩展的数据分发和集群平台，可用于实现分布式数据存储、数据缓存。
+- infinispan：分布式的集群缓存系统。
+- jcache：JCache 作为缓存。它是 JSR107 规范中提到的缓存规范。
+- none：没有缓存。
+- redis：用 Redis 作为缓存
+- simple：用内存作为缓存。
+
+
+
+
+
+
+
+#### 使用缓存
+
+依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+
+
+配置 Redis 作为缓存也很简单，在配置文件 application.properties 中设置缓存的类型为 Redis 就可以了
+
+```properties
+# 使用 Redis 作为缓存组件
+spring.cache.type=redis
+# 缓存过期时间为 3600s
+spring.cache.redis.time-to-live=3600000
+# 缓存的键的名字前缀
+spring.cache.redis.key-prefix=prefix_
+# 是否使用缓存前缀
+spring.cache.redis.use-key-prefix=true
+# 是否缓存控制，防止缓存穿透
+spring.cache.redis.cache-null-values=true
+```
+
+
+
+添加一个配置类
+
+```java
+@EnableConfigurationProperties(CacheProperties.class)
+@Configuration
+@EnableCaching
+public class MyCacheConfig {
+
+    @Autowired
+    CacheProperties cacheProperties;
+
+    @Bean
+    RedisCacheConfiguration redisCacheConfiguration(CacheProperties cacheProperties) {
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+        config = config.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
+        config = config.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+        CacheProperties.Redis redisProperties = cacheProperties.getRedis();
+
+        if (redisProperties.getTimeToLive() != null) {
+            config = config.entryTtl(redisProperties.getTimeToLive());
+        }
+        if (redisProperties.getKeyPrefix() != null) {
+            config = config.prefixKeysWith(redisProperties.getKeyPrefix());
+        }
+        if (!redisProperties.isCacheNullValues()) {
+            config = config.disableCachingNullValues();
+        }
+        if (!redisProperties.isUseKeyPrefix()) {
+            config = config.disableKeyPrefix();
+        }
+
+        return config;
+    }
+}
+```
+
+
+
+
+
+启动类上添加 `@EnableCaching`注解。
+
+指定某方法开启缓存功能。在方法上添加 `@Cacheable` 缓存注解就可以了。
+
+@Cacheable 注解中，可以添加四种参数：value，key，condition，unless。首先我们来看下 value 参数。
+
+```java
+@RequestMapping("/test")
+@Cacheable({"hot"})
+public int test() {
+    return 222;
+}
+```
+
+
+
+@Cacheable 注解中小括号里面还含有大括号，大括号里面还有 “hot” 字符串，这个 hot 字符串你可以把它当作一个缓存的名字，然后将 test 方法返回的结果存到 hot 缓存中。我们也可以用 value="hot" 的方式。
+
+第一次调用 test 方法前，既没有 hot 缓存，更没有 test 的结果缓存。
+
+调用 test 方法后，Redis 中就创建出了 hot 缓存了，然后缓存了一个 key
+
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/20220907154940.png)
+
+
+
+第二次调用 test 方法时，就从缓存 hot 中将 test 方法缓存的结果 222 取出来了，为了验证没有执行 test 中的方法，大家可以在 test 方法中打下 log 或者断点。最后的验证结果肯定是没有走 test 方法的，而是直接从缓存中获取的。
+
+
+
+结论：
+
+- 如果没有指定请求参数，则缓存生成的 key name，是默认自动生成的，叫做 SimpleKey[]。
+- 如果指定了请求参数，则缓存的 key name 就是请求参数
+- 缓存中 key 对应的 value 默认使用 JDK 序列化后的数据。
+- value 的过期时间为 -1，表示永不过期。
+
+
+
+#### 自定义key
+
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/20220907161925.png)
+
+
+
+#### 自定义条件
+
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/20220907163058.png)
+
+
+
+#### 更新缓存注解
+
+@CachePut 也是用来更新缓存，和 @Cacheable 非常相似，不同点是 @CachePut 注解的方法始终都会执行，返回值也会也会放到缓存中。通常用在保存的方法上。
+
+保存成功后，可以将 key 设置保存实例的 id。这个怎么做呢？
+
+之前我们说过 key 可以通过 SpEL 表达式来指定，这里就可以搭配 #result.id 来实现。
+
+这里还是用个例子来说明用法：创建题目的方法，返回题目实例，其中包含有题目 id。
+
+```java
+@RequestMapping("/create")
+@CachePut(value = "hot", key = "#result.id")
+public QuestionEntity create(@Valid @RequestBody QuestionEntity question){
+    return IQuestionService.createQuestion(question);
+}
+```
+
+
+
+#### 删除缓存注解
+
+@CacheEvict 注解的方法在调用时不会在缓存中添加任何东西，但是会从从缓存中移除之前的缓存结果。
+
+```java
+@RequestMapping("/remove/{id}")
+@CacheEvict(value = "hot")
+public R remove(@PathVariable("id") Long id){
+    IQuestionService.removeById(id);
+    return R.ok();
+}
+```
+
+
+
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/20220907163652.png)
+
+
+
+
 
