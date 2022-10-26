@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "springsecurity分布式"
-categories: springsecurity
-tags: 安全框架
+categories: 鉴权
+tags: springsecurity
 author: 百味皆苦
 music-id: 2602106546
 ---
