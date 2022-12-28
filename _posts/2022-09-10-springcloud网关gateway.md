@@ -344,3 +344,285 @@ HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload) , secret)
 授权表示你能干什么。系统如何控制一个用户能看到哪些数据和操作哪些功能，也就是具有哪些权限。
 
 凭证表示你如何证明你的身份。系统如何保证它与用户之间的承诺是双方当时真实意图的体现，是准确、完整和不可抵赖的。
+
+
+
+### 认证的原理
+
+认证和验证身份的流程：
+
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-202208142218310444AGSjdwqWPvG.png)
+
+
+
+① **用户登录**：客户端在登录页面输入用户名和密码，提交表单，调用登录接口。
+
+② **转发请求**：这里会先将登录请求发送到网关服务 passjava-gateway，网关对于登录请求会直接转发到认证服务 passjava-auth。（网关对登录请求不做 token 校验，这个可以配置不校验哪些请求 URL）
+
+③ **认证**：认证服务会将请求参数中的用户名+密码和数据库中的用户进行比对，如果完全匹配，则认证通过。
+
+④ **生成令牌**：生成两个令牌：`access_token` 和 refresh_token（刷新令牌），刷新令牌我们后面再说，这里其实也可以只用生成一个令牌 access_token。令牌里面会包含用户的身份信息，**如果要做权限管控**，还需要在 token 里面包含用户的权限信息，权限这一块不在本篇展开，会放到下一篇中进行讲解。
+
+⑤ **客户端缓存 token**：客户端拿到两个 token 缓存到 cookie 中或者 LocalStorage 中。
+
+⑥ **携带 token 发起请求**：客户端下次想调用业务服务时，将 access_token 放到请求的 header 中。
+
+⑦ **网关校验 token**：请求还是先到到网关服务，然后由它校验 access_token 是否合法。如果 access_token 未过期，且能正确解析出来，就说明是合法的 access_token。
+
+⑧ **携带用户身份信息转发请求**：网关将 access_token 中携带的用户的 user_id 放到请求的 header 中，转发给真正的业务服务。
+
+⑨ **处理业务逻辑**：业务服务从 header 中拿到用户的 user_id，然后处理业务逻辑，处理完后将结果延原理返回给客户端。
+
+
+
+### 如何做登陆认证
+
+
+
+登录认证就是校验下用户提交的账户名和密码与本地数据库中的是否完全匹配，如果匹配，就认证通过。就是下方这个流程的 1、2、3 步。
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814105416774WMesSj.png)
+
+第一步：提交用户名和密码
+
+这里用 Postman 工具模拟前端发起登录请求，请求的 URL 如下：
+
+```SH
+http://localhost:8060/api/auth/login
+```
+
+![image-20220814161920022](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814161920022TSi6Tf.png)
+
+请求是向网关服务 passjava-gateway 发起的，所以可以看到上面的 URL 中 localhost 和 8060 是网关的 host 和 port。
+
+然后 API 地址为 /api/auth/login，这个地址经过网关的路由匹配后会转发到 passjava-auth 服务的登录 API。
+
+```
+http://localhost:10001/auth/login
+```
+
+
+
+账号和密码都是密文的，转发到认证服务后，会根据 userId 查询出系统用户，然后将 password 参数加密后对比系统用户的密码。
+
+所以为了让用户登录成功，还需要在数据库插入一条系统用户，用户 id 为 wukong，密码是对 123456 加密后的密码。
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814163415719HMyHcP.png)
+
+在线加密工具地址：
+
+https://www.bejson.com/encrypt/bcrpyt_encode
+
+
+
+第二步：转发登陆请求
+
+转发登录请求是网关服务做的，所以我们来看下做了那些事情。
+
+在 Gateway 项目的 application-routers.yml 中配置路由规则：
+
+```YAML
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: route_auth # 认证微服务路由规则
+          uri: lb://passjava-auth # 负载均衡，将请求转发到注册中心注册的 passjava-auth 服务
+          predicates: # 断言
+            - Path=/api/auth/** # 如果前端请求路径包含 api/auth，则应用这条路由规则
+          filters: #过滤器
+            - RewritePath=/api/(?<segment>.*),/$\{segment} # 将跳转路径中包含的api替换成空复制复制失败复制成功
+```
+
+在 application.properties 引入 application-routers.yml
+
+```yaml
+spring:
+  profiles:
+    include: routers, jwt
+```
+
+
+
+第三步：验证用户名和密码
+
+这一步是认证服务的登录 API 里面做的。在 AuthController 中定义 login 接口，核心步骤就是查找系统用户和比对密码。
+
+![登录 API](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-202208141655254572aPJrp.png)
+
+用户名和密码匹配成功后，就会生成 JWT 令牌。
+
+
+
+### 如何生成令牌
+
+
+
+生成令牌就是通过工具类 PassJavaJwtTokenUtil 生成 JWT Token，也就是流程图中的第四步。
+
+![流程图-生成 JWT 令牌](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-2022081417084513103ogTt.png)
+
+生成令牌的核心代码如下：
+
+![生成 JWT 的核心代码](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814172121051Rqwmfq.png)
+
+使用这个工具类的前提是我们需要先引入 jwt 依赖。这个在 passjava-jwt 项目的 pom 文件中引入。
+
+![引入 jjwt 依赖](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814172217792z4J5WV.png)
+
+用 Postman 工具调用后，可以看到生成的令牌如下：
+
+![生成令牌](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814182655100H4H07N.png)
+
+用 base64 解码后，可以看到 token 中的 PAYLOAD 里面包含了用户 id 和用户名。
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814171711910cic4Jn.png)
+
+生成 JWT 的加密密钥一般都是写到配置文件中。这里我是配置在 passjava-jwt 项目的 application-jwt.yml 配置文件中的。
+
+![JWT 配置项](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814181404573xWi2V2.png)
+
+然后认证服务就会将 JWT 令牌返回给客户端了。当客户端想要查询这个 userId 对应的会员信息时，就可以在请求的 Header 中带上 JWT 令牌。
+
+
+
+### 如何携带JWT发送请求
+
+
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814184517467cvInSy.png)
+
+客户端（浏览器或 APP）拿到 JWT 后，可以将 JWT 存放在浏览器的 Cookie 或 LocalStorage（本地存储） 或者内存中。
+
+发送请求时在请求 Header 的 Authorization 字段中设置 JWT，这个字段其实可以自定义，但是我建议用 Authorization，因为这是一种业界标准。
+
+另外告诉大家一个小技巧，在 Postman 工具中有个地方专门配置 Authorization，然后自动加到 Header 中，不用自己手动加 Header。
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814180402617UdX4Rz.png)
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814180431393sqNqcg.png)
+
+还有一个点需要注意，这里配置的 Authorization 的认证类型为 Bearer Token。它表示令牌可以是任意字符串格式的令牌。然后会在 Authorization 字段中加上一个前缀 Bearer。所以我们在网关服务解析 Header 中的 Authorization 时，需要去掉这个前缀 Bearer，代码如下所示：
+
+![去掉 Bearer 前缀](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-202208141825224276nl5ld.png)
+
+
+
+### 网关如何验证 JWT 和转发请求
+
+
+
+![网关验证 Token和转发请求](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814194440430RIKvF0.png)
+
+网关接收到前端发起的业务请求后，会先验证请求的 Header 中是否携带 Authorization 字段，以及里面的 Token 是否合法。然后解析 Token 中的 userId 和 username，放到 header 中再进行转发，也就是流程图中的第七步和第八步。
+
+网关是通过多个`过滤器 Filter`对请求进行串行拦截处理的，所以我们可以自定义一个全局过滤器，对所有请求进行校验，当然对于一些特殊请求比如登录请求就不需要校验了，因为调用登录请求的时候还没有生成 Token。
+
+网关的全局过滤器 JwtAuthCheckFilter 的核心代码如下所示：
+
+![网关的全局过滤器 JwtAuthCheckFilter](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814185733422F5KMsJ.png)
+
+
+
+### 处理业务逻辑
+
+
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814221220859aWnQGr.png)
+
+会员服务接收到网关转发的请求后，就从 Header 中拿到用户身份信息，然后通过 userId 获取会员信息。
+
+> 注意：有的时候业务逻辑并不需要身份信息，更多的时候是需要检验用户的操作权限是否足够。其实 Token 里面也是可以携带权限信息的，不过这是下一篇讲解授权的部分。
+
+获取 userId 的方式其实可以通过加一个`拦截器`，由拦截器将 Header 中的 userId 和 username 放到线程中，后续的 controller，service，dao 类都可以从线程里面拿到 userId 和 username，不用通过传参的方式。
+
+获取 userId 的方式：
+
+- 方式一：从 request 的 Header 中拿到 userId。代码简单，但是如果其他地方也要用到 userId，则需要通过方法传参的方式传递 userId。
+- 方式二：从线程变量里面拿到 userId。代码复杂，使用简单。好处是所有地方统一从一个地方获取。
+
+
+
+Request 中获取 userId 方式：
+
+代码示例如下：
+
+![img](http://cdn.jayh.club/uPic/image-20220814195455216njzYqE.png)
+
+下面介绍如何使用拦截器方式将 userId 存入线程变量的方式。
+
+
+
+拦截器方式：
+
+在 passjava-common 模块中新增一个拦截器，获取请求头中的身份信息，加入到线程变量中。文件名为 HeaderInterceptor。
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814195944424JfFsIz.png)
+
+将拦截器注册到 WebMvcConfigurer。文件名为 WebMvcConfig.java。![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814220241678N9udz3.png)
+
+配置文件中需要定义一个配置项：
+
+```SH
+文件名；org.springframework.boot.autoconfigure.AutoConfiguration.imports
+配置项：com.jackson0714.passjava.common.config.WebMvcConfig
+```
+
+然后 passjava-member 服务引入这个拦截器配置。
+
+```JAVA
+@Import({WebMvcConfig.class})
+```
+
+通过上面两种方式中的任意一种拿到 userId 后，通过 userId 查询会员的详情。这里需要注意的是这个 user 既是系统用户也是系统中的会员。关于查询会员的数据库操作就不在此展开了。
+
+执行结果如下图所示：
+
+![img](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220814224556708tM1RKs.png)
+
+
+
+### 如何刷新令牌
+
+
+
+还有一个内容是关于如何刷新令牌的。当认证服务返回给客户端的 JWT 也就是 access_token 过期后，客户端是通过发送登录请求重新拿到 access_token 吗？
+
+这种重新登录的操作如果很频繁（因 JWT 过期时间较短），对于用户来说体验就很差了。客户端需要跳转到登录页面，让用户重新提交用户名和密码，即使客户端有记住用户名和密码，但是这种跳转的到登录页的操作会大幅度降低用户的体验，甚至导致用户不想再用第二次。
+
+> 有没有一种比较优雅的方式让客户端重新拿到 access_token 或者说延长 access_token 有效期呢？
+
+我们知道 JWT 生成后是不能篡改里面的内容，即使是 JWT 的有效期也不行。所以延长 access_token 有效期的做法并不适合，而且如果长期保持一个 access_token 有效，也是不安全的。
+
+那就只能重新生成 access_token 了。方案其实挺简单，客户端拿之前生成的 JWT 调用后端一个接口，然后后端校验这个 JWT 是否合法，如果是合法的就重新生成一个新的返回给客户端。客户端自行替换掉之前本地保存的 access_token 就可以了。
+
+![生成 access_token 和 refresh_token](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220815085804556JqzMJA.png)
+
+这里有一个巧妙的设计，就是生成 JWT 时，返回了两个 JWT token，一个 access_token，一个 refresh_token，这两个 token 其实都可以用来刷新 token，但是我们把 refresh_token 设置的过期时间稍微长一点，比如两倍于 access_token，当 access_token 过期后，refresh_token 如果还没有过期，**就可以利用两者的过期时间差进行重新生成令牌的操作**，也就是`刷新令牌`，这里的刷新指的是客户端重置本地保存的令牌，以后都用新的令牌。
+
+
+
+饥饿模式和懒模式：
+
+当然，在 access_token 过期之前，客户端提前刷新令牌也是可以的，我称这种提前刷新的模式为`饥饿模式`（单例模式中也有这种叫法），而过期后再刷新令牌的模式我称之为`懒模式`。两种模式都可以用，前者需要客户端定期检查过期时间，增加了复杂性；后者则会出现短暂的请求失败的情况，得拿到新的令牌后才会成功。
+
+刷新令牌的操作完全是通过客户端自己控制的，而且客户端也不仅限于浏览器，还有可能是第三方服务。
+
+
+
+一次性：
+
+通常情况下，我们会将刷新令牌 refresh_token 设置为只能用一次，来保证刷新令牌的安全性。而这种就需要服务端来缓存刷新令牌了，当用过一次后，就从缓存里面主动剔除掉。但这样就违背了 JWT 无状态的特性，这个完全看业务需求来决定是否使用这种缓存方式。
+
+如下图所示，生成令牌时我将刷新令牌缓存到了 Redis 里面。当我用 refresh_token 调用刷新 API 时，会主动剔除掉这个 key，下次再用相同的 refresh_token 刷新令牌时，因 Redis 中不存在这个 key，就会提示刷新刷新失败了。
+
+![缓存令牌](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/image-20220815083736227NZOnFi.png)
+
+留两个小问题：
+
+- 有没有办法让 access_token 主动失效？
+- 场景题：如何保证同一个用户只能登录一台设备？
+
+
+
+整理自：http://www.passjava.cn/#/02.SpringCloud/06.Gateway%E7%BD%91%E5%85%B3/04.%E5%AE%9E%E6%88%98SpringCloud+JWT%E8%AE%A4%E8%AF%81
