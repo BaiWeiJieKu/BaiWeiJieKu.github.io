@@ -46,9 +46,9 @@ music-id: 5188665
 | keyGenerator   | 缓存数据时key生成策略                                        |
 | serialize      | 缓存数据时value序列化策略                                    |
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/springboot-cache-annotation.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302091833351.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/springboot-cache-spel.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302091833168.png)
 
 - 案例
 
