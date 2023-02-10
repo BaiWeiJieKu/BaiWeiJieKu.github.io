@@ -635,7 +635,7 @@ Boolean：<property name="enabled" value="#{false}"/>
 
 #### 生命周期
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/springlife.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101501314.png)
 
 - 1.当调用者通过 getBean(beanName)向 容器请求Bean 时，如果容器注册了org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor接口，在实例 bean 之前，将调用该接口的 postProcessBeforeInstantiation()方法（实例化以前的操作）。
 
@@ -687,7 +687,7 @@ Boolean：<property name="enabled" value="#{false}"/>
 
 - 下图描述了ApplicationContext 的生命周期
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/springlife2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101501312.png)
 
 
 

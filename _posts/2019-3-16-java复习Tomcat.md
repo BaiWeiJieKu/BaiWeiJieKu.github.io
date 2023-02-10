@@ -218,7 +218,7 @@ music-id: 2602106546
 
 ### 顶层架构
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t1.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101045979.png)
 
 - Tomcat中最顶层的容器是Server，代表着整个服务器，从上图中可以看出，一个Server可以包含至少一个Service，用于具体提供服务。
 
@@ -230,17 +230,17 @@ music-id: 2602106546
 
 - 一个Tomcat中只有一个Server，一个Server可以包含多个Service，一个Service只有一个Container，但是可以有多个Connectors，这是因为一个服务可以有多个连接，如同时提供Http和Https链接，也可以提供向相同协议不同端口的连接,示意图如下（Engine、Host、Context下边会说到）：
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101045773.png)
 
 - 多个 Connector 和一个 Container 就形成了一个 Service，有了 Service 就可以对外提供服务了，但是 Service 还要一个生存的环境，必须要有人能够给她生命、掌握其生死大权，那就非 Server 莫属了！所以整个 Tomcat 的生命周期由 Server 控制。
 - 另外，上述的包含关系或者说是父子关系，都可以在tomcat的conf目录下的`server.xml`配置文件中看出，下图是删除了注释内容之后的一个完整的`server.xml`配置文件（Tomcat版本为8.0）
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t3.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101046989.png)
 
 - 详细的配置文件文件内容可以到Tomcat官网查看：http://tomcat.apache.org/tomcat-8.0-doc/index.html
 - 上边的配置文件，还可以通过下边的一张结构图更清楚的理解：
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t4.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101046298.png)
 
 - Server标签设置的端口号为8005，shutdown=”SHUTDOWN” ，表示在8005端口监听“SHUTDOWN”命令，如果接收到了就会关闭Tomcat。一个Server有一个Service，当然还可以进行配置，一个Service有多个，Service左边的内容都属于Container的，Service下边是Connector。
 
@@ -269,7 +269,7 @@ music-id: 2602106546
 - 封装完之后的Request和Response如何交给Container进行处理的？ 
 - Container处理完之后如何交给Connector并返回给客户端的？
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t5.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101046610.png)
 
 - Connector就是使用ProtocolHandler来处理请求的，不同的ProtocolHandler代表不同的连接类型，比如：Http11Protocol使用的是普通Socket来连接的，Http11NioProtocol使用的是NioSocket来连接的。
 - 其中ProtocolHandler由包含了三个部件：Endpoint、Processor、Adapter。
@@ -281,14 +281,14 @@ music-id: 2602106546
 
 - Container用于封装和管理Servlet，以及具体处理Request请求，在Connector内部包含了4个子容器
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t6.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101046228.png)
 
 - （1）Engine：引擎，用来管理多个站点，一个Service最多只能有一个Engine；
 - （2）Host：代表一个站点，也可以叫虚拟主机，通过配置Host就可以添加站点；
 - （3）Context：代表一个应用程序，对应着平时开发的一套程序，或者一个WEB-INF目录以及下面的web.xml文件；
 - （4）Wrapper：每一Wrapper封装着一个Servlet；
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t7.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101047200.png)
 
 - Context和Host的区别是Context表示一个应用，我们的Tomcat中默认的配置下webapps下的每一个文件夹目录都是一个Context，其中ROOT目录中存放着主应用，其他目录存放着子应用，而整个webapps就是一个Host站点。
 - 我们访问应用Context的时候，如果是ROOT下的则直接使用域名就可以访问，例如：www.ledouit.com,如果是Host（webapps）下的其他应用，则可以使用www.ledouit.com/docs进行访问，当然默认指定的根应用（ROOT）是可以进行设定的，只不过Host站点下默认的主营用是ROOT目录下的。
@@ -299,7 +299,7 @@ music-id: 2602106546
 - Container处理请求是使用Pipeline-Valve管道来处理的！（Valve是阀门之意）
 - Pipeline-Valve是责任链模式，责任链模式是指在一个请求处理的过程中有很多处理者依次对请求进行处理，每个处理者负责做自己相应的处理，处理完之后将处理后的请求返回，再让下一个处理着继续处理。
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t8.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101047204.png)
 
 - 但是！Pipeline-Valve使用的责任链模式和普通的责任链模式有些不同！区别主要有以下两点：
 
@@ -311,7 +311,7 @@ music-id: 2602106546
 
   Pipeline的处理流程图如下（图D）：
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/t9.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101047920.png)
 
 - （1）Connector在接收到请求后会首先调用最顶层容器的Pipeline来处理，这里的最顶层容器的Pipeline就是EnginePipeline（Engine的管道）；
 - （2）在Engine的管道中依次会执行EngineValve1、EngineValve2等等，最后会执行StandardEngineValve，在StandardEngineValve中会调用Host管道，然后再依次执行Host的HostValve1、HostValve2等，最后在执行StandardHostValve，然后再依次调用Context的管道和Wrapper的管道，最后执行到StandardWrapperValve。

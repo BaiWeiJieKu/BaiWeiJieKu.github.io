@@ -369,9 +369,9 @@ public class BrowserProperties {
 
 #### 社交账号登录
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/shejiao.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101816975.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/oauth.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101816790.png)
 
 ##### QQ登录
 
@@ -878,7 +878,7 @@ imooc.security.browser.loginType = REDIRECT
 
 #### RestFul
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/spring-security/restful.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101817185.png)
 
 #### 常用注解
 

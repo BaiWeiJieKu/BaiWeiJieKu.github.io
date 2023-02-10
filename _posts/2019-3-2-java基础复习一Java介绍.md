@@ -1623,7 +1623,7 @@ static Object[]	removeElement(Object[] array, Object element)
 
 ### 类加载过程
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/leijiazai.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101028816.png)
 
 - 首先cong.java生成了.class文件
 - 要运行程序，首先虚拟机里会有一个类加载器（class loader），把类加载到虚拟机里去，存到静态方法区里面了

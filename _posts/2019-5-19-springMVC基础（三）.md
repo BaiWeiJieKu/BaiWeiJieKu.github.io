@@ -205,7 +205,7 @@ public class UserNameNotMatchPasswordException extends RuntimeException{
 
 - 客户端发送请求-> 前端控制器 DispatcherServlet 接受客户端请求 -> 找到处理器映射 HandlerMapping 解析请求对应的 Handler-> HandlerAdapter 会根据 Handler 来调用真正的处理器开处理请求，并处理相应的业务逻辑 -> 处理器返回一个模型视图 ModelAndView -> 视图解析器进行解析 -> 返回一个视图对象->前端控制器 DispatcherServlet 渲染数据（Moder）->将得到视图对象返回给用户
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/mvc.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101631767.png)
 
 - 流程
   - （1）客户端（浏览器）发送请求，直接请求到 DispatcherServlet。

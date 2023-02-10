@@ -486,7 +486,7 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
 - employeeMapper 的本质  org.apache.ibatis.binding.MapperProxy
 - MapperProxy 中 sqlSession –>SqlSessionFactory 
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/plus1.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101738325.png)
 
 - SqlSessionFacotry 中  → Configuration→ MappedStatements
 - 每一个mappedStatement 都表示Mapper 接口中的一个方法与 Mapper 映射文件 中的一个SQL
@@ -499,11 +499,11 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
 - SqlSource: SQL 语句处理对象
 - MapperBuilderAssistant： 用于缓存、SQL 参数、查询方剂结果集处理等. 通过 MapperBuilderAssistant 将每一个 mappedStatement 添加到configuration 中的mappedstatements 中 
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/plus2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101738062.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/plus3.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101738276.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/plus4.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101738514.png)
 
 
 

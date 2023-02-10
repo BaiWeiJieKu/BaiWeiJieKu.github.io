@@ -34,7 +34,7 @@ music-id: 2602106546
 4)重启防火墙
 ```
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/l6.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101409270.png)
 
 
 

@@ -21,49 +21,49 @@ music-id: 2602106546
 
 ## 目前技术
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m1.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101054441.png)
 
 ## 为啥使用
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101054926.png)
 
 ## maven简介
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m3.1.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101054102.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m3.2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101054737.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m3.3.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101054908.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m3.4.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101055259.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m3.5.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101055215.png)
 
 ## 安装
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m4.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101055019.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m4.2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101055654.png)
 
 ## 核心概念
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m5.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101055922.png)
 
 ## 简单工程
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m6.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101055381.png)
 
 ## 常用命令
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m7.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101056800.png)
 
 ## 联网下载
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m8.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101056155.png)
 
 ## POM
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m9.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101056546.png)
 
 
 
@@ -439,57 +439,57 @@ reporting：该元素描述使用报表插件产生报表的规范。当用户�
 
 ## 坐标
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m10.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101056609.png)
 
 ## 仓库
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m11.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101057345.png)
 
 ## 初步依赖
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m12.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101057078.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m12.2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101057056.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m12.3.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101057950.png)
 
 ## 生命周期
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m13.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101057628.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m13.2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101057676.png)
 
 
 
 ## eclipse
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m14.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101058582.png)
 
 ## 高级依赖
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m15.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101058030.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m15.2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101058448.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m15.3.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101058632.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m15.4.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101058548.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m15.5.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101058592.png)
 
 ## 继承
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m16.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101059282.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m16.2.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101059198.png)
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m16.3.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101059196.png)
 
 
 
 ## 聚合
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/m17.png)
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302101059299.png)
 
 
 
