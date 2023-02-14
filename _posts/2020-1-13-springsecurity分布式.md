@@ -13,7 +13,7 @@ music-id: 2602106546
 
 - 具有分布式架构的系统叫分布式系统，分布式系统的运行通常依赖网络，它将单体结构的系统分为若干服务，服务之间通过网络交互来完成用户的业务处理，当前流行的微服务架构就是分布式系统架构，如下图：
 
-![image.png](https://i.loli.net/2020/02/22/w5Ner6XfDSOYKUz.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131121348.png)
 
 - 分布式系统具体如下基本特点：
   - 1、分布性：每个部分都可以独立部署，服务之间交互通过网络进行通信，比如：订单服务、商品服务。
@@ -31,7 +31,7 @@ music-id: 2602106546
 
 - 1、**基于session的认证方式**：在分布式的环境下，基于session的认证会出现一个问题，每个应用服务都需要在session中存储用户身份信息，通过负载均衡将本地的请求分配到另一个应用服务需要将session信息带过去，否则会重新认证。
 
-![image.png](https://i.loli.net/2020/02/22/WgNtHA6mMbIwGXK.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131121289.png)
 
 - 这个时候，通常的做法有下面几种：
   - **Session复制**：多台应用服务器之间同步session，使session保持一致，对外透明。
@@ -43,7 +43,7 @@ music-id: 2602106546
 
 - **2、基于token的认证方式**：基于token的认证方式，服务端不用存储认证数据，易维护扩展性强， 客户端可以把token 存在任意地方，并且可以实现web和app统一认证机制。其缺点也很明显，token由于自包含信息，因此一般数据量较大，而且每次请求都需要传递，因此比较占带宽。另外，token的签名验签操作也会给cpu带来额外的处理负担。
 
-![image.png](https://i.loli.net/2020/02/22/nh6woNYavKkTGrE.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131121484.png)
 
 
 
@@ -54,7 +54,7 @@ music-id: 2602106546
   - 2、token认证方式对第三方应用接入更适合，因为它更开放，可使用当前有流行的开放协议Oauth2.0、JWT等。
   - 3、一般情况服务端无需存储会话信息，减轻了服务端的压力。
 
-![image.png](https://i.loli.net/2020/02/22/rtpwgYBR5AT8Mkv.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131121283.png)
 
 - 流程描述：
   - （1）用户通过接入方（应用）登录，接入方采取OAuth2.0方式在统一认证服务(UAA)中认证。
@@ -87,11 +87,11 @@ music-id: 2602106546
   - 5、**客户端请求资源服务器的资源**：客户端携带令牌访问资源服务器的资源。黑马程序员网站携带令牌请求访问微信服务器获取用户的基本信息。
   - 6、**资源服务器返回受保护资源**：资源服务器校验令牌的合法性，如果合法则向用户响应资源信息内容。
 
-  ![image.png](https://i.loli.net/2020/02/22/oHWTDqQEk2vJMeF.png)
+  ![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131121866.png)
 
 - OAuth2.0认证流程：
 
-  ![image.png](https://i.loli.net/2020/02/22/RQbEL1jm6rIxywO.png)
+  ![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131121598.png)
 
   - 1、**客户端**：本身不存储资源，需要通过资源拥有者的授权去请求资源服务器的资源，比如：Android客户端、Web客户端（浏览器端）、微信客户端等。
   - 2、**资源拥有者**：通常为用户，也可以是应用程序，即该资源的拥有者。
@@ -125,7 +125,7 @@ music-id: 2602106546
 
 - 本案例分别创建uaa授权服务（也可叫认证服务）和order订单资源服务。
 
-  ![image.png](https://i.loli.net/2020/02/22/U1lKzkdnI28AgeQ.png)
+  ![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131122195.png)
 
   - 1、客户端请求UAA授权服务进行认证。
   - 2、认证通过后由UAA颁发令牌。
@@ -798,7 +798,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 #### 授权码模式
 
-![image.png](https://i.loli.net/2020/02/22/JWowy86dLm1S3PF.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131122060.png)
 
 - **（1）资源拥有者打开客户端，客户端要求资源拥有者给予授权，它将浏览器被重定向到授权服务器，重定向时会附加客户端的身份信息。如：**
 
@@ -839,7 +839,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 #### 简化模式
 
-![image.png](https://i.loli.net/2020/02/22/J7wnpS6siXv4jt9.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131122607.png)
 
 - **（1）资源拥有者打开客户端，客户端要求资源拥有者给予授权，它将浏览器被重定向到授权服务器，重定向时会附加客户端的身份信息**
 
@@ -861,7 +861,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 #### 密码模式
 
-![image.png](https://i.loli.net/2020/02/22/ptuUb1yeXoTw7nL.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131123023.png)
 
 - **（1）资源拥有者将用户名、密码发送给客户端**
 
@@ -887,7 +887,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 #### 客户端模式
 
-![image.png](https://i.loli.net/2020/02/22/XdovzaUsS5TlKMO.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131123702.png)
 
 - **（1）客户端向授权服务器发送自己的身份信息，并请求令牌（access_token）**
 
@@ -1058,7 +1058,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   - 按照oauth2.0协议要求，请求资源需要携带token，token的参数名称为：Authorization，值为：Bearer token值
 
-    ![image.png](https://i.loli.net/2020/02/22/bOodjmfJeT2AIwl.png)
+    ![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131123076.png)
 
   - 如果token错误，则授权失败，如下：
 
@@ -1203,7 +1203,7 @@ service.setTokenEnhancer(tokenEnhancerChain);
 
 #### 生成JWT令牌
 
-![](https://i.postimg.cc/hGPKMCCd/image.png)
+<img src="https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131123355.png"  />
 
 
 
@@ -1267,7 +1267,7 @@ public class ResouceServerConfig extends
     `autoapprove` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
     PRIMARY KEY (`client_id`) USING BTREE
   ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '接入客户端信息' ROW_FORMAT = Dynamic;
-
+  
   INSERT INTO `oauth_client_details` VALUES ('c1', 'res1', '$2a$10$NlBC84MVb7F95EXYTXwLneXgCca6/GipyWR5NHm8K0203bSQMLpvm', 'ROLE_ADMIN,ROLE_USER,ROLE_API', 'client_credentials,password,authorization_code,implicit,refresh_token', 'http://www.baidu.com', NULL, 7200, 259200, NULL, '2019-09-09 16:04:28', 0, 0, 'false');
   INSERT INTO `oauth_client_details` VALUES ('c2', 'res2', '$2a$10$NlBC84MVb7F95EXYTXwLneXgCca6/GipyWR5NHm8K0203bSQMLpvm', 'ROLE_API', 'client_credentials,password,authorization_code,implicit,refresh_token', 'http://www.baidu.com', NULL, 31536000, 2592000, NULL, '2019-09-09 21:48:51', 0, 0, 'false');
   ```

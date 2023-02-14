@@ -16,11 +16,11 @@ music-id: 2602106546
 - **会话**：用户认证通过后，为了避免用户的每次操作都进行认证可将用户的信息保证在会话中。会话就是系统为了保持当前用户的登录状态所提供的机制，常见的有基于session方式、基于token方式等。
 - 基于session的认证方式流程是，用户认证成功后，在服务端生成用户相关的数据保存在session(当前会话)中，发给客户端的 sesssion_id 存放到 cookie 中，这样用户客户端请求时带上 session_id 就可以验证服务器端是否存在 session 数据，以此完成用户的合法校验，当用户退出系统或session过期销毁时,客户端的session_id也就无效了。
 
-![image.png](https://i.loli.net/2020/01/02/mPpJqUCaZ2sAGSo.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131059628.png)
 
 - 基于token方式交互流程是，用户认证成功后，服务端生成一个token发给客户端，客户端可以放到 cookie 或 localStorage 等存储中，每次请求时带上 token，服务端收到token通过验证后即可确认用户身份。
 
-![image.png](https://i.loli.net/2020/01/02/XLWU8KDvdk94QS5.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131059957.png)
 
 - 基于session的认证方式由Servlet规范定制，服务端要存储session信息需要占用内存资源，客户端需要支持cookie；
 - 基于token的方式则一般不需要服务端存储token，并且不限制客户端的存储方式。如今移动互联网时代更多类型的客户端需要接入系统，系统多是采用前后端分离的架构进行实现，所以基于token的方式更适合。
@@ -35,7 +35,7 @@ music-id: 2602106546
 -  系统菜单、页面、按钮、代码方法都属于系统功能资源，对于web系统每个功能资源通常对应一个URL；系统商品信息、系统订单信息都属于实体资源（数据资源），实体资源由资源类型和资源实例组成，比如商品信息为资源类型，商品编号 为001的商品为资源实例。
 -  How，权限/许可（Permission），规定了用户对资源的操作许可，权限离开资源没有意义，如用户查询权限、用户添加权限、某个代码方法的调用权限、编号为001的用户的修改权限等，通过权限可知用户对哪些资源都有哪些操作许可。
 
-![image.png](https://i.loli.net/2020/01/02/Hi7FlEOMPqshr6Y.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131059840.png)
 
 - 主体、资源、权限相关的数据模型如下：
   - 主体（用户id、账号、密码、…）
@@ -46,7 +46,7 @@ music-id: 2602106546
   - 主体（用户）和角色关系（用户id、角色id、…）
 - 主体（用户）、资源、权限关系如下图：
 
-![image.png](https://i.loli.net/2020/02/22/MpGdaUH2TENn5Rg.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131059457.png)
 
 - 通常企业开发中将资源和权限表合并为一张权限表，如下：
 
@@ -58,7 +58,7 @@ music-id: 2602106546
 
   权限（权限id、权限标识、权限名称、资源名称、资源访问地址、…）
 
-![image.png](https://i.loli.net/2020/02/22/4RCgeAc8fp7w5JO.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131059010.png)
 
 
 
@@ -713,7 +713,7 @@ public void addInterceptors(InterceptorRegistry registry) {
 
 - 创建maven工程 security-spring-security
 
-![image.png](https://i.loli.net/2020/02/22/Pf6kyioVnOucqbs.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131102669.png)
 
 #### pom
 

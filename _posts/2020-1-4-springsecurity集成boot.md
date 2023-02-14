@@ -13,7 +13,7 @@ music-id: 2602106546
 
 - 创建maven工程 security-spring-boot
 
-![image.png](https://i.loli.net/2020/02/22/mDw8r6jTY4o3UFB.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131118944.png)
 
 #### pom
 
@@ -244,12 +244,12 @@ public String r2(){
 - 可以通过Filter或AOP等技术来实现，Spring Security对Web资源的保护是靠Filter实现的
 - 当初始化Spring Security时，会创建一个名为`SpringSecurityFilterChain`的Servlet过滤器，类型为 org.springframework.security.web.FilterChainProxy，它实现了javax.servlet.Filter，因此外部的请求会经过此类
 
-![image.png](https://i.loli.net/2020/02/22/UXrMlHCoE5iPnOg.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131119595.png)
 
 - FilterChainProxy是一个代理，真正起作用的是FilterChainProxy中SecurityFilterChain所包含的各个Filter
 - 同时这些Filter作为Bean被Spring管理，它们是Spring Security核心，各有各的职责，但他们并不直接处理用户的**认证**，也不直接处理用户的**授权**，而是把它们交给了**认证管理器**（AuthenticationManager）和**决策管理器**（AccessDecisionManager）进行处理
 
-![image.png](https://i.loli.net/2020/02/22/3JWCQYZ74KFfomy.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131119554.png)
 
 - **SecurityContextPersistenceFilter** ：这个Filter是整个拦截过程的入口和出口（也就是第一个和最后一个拦截器），会在请求开始时从配置好的 SecurityContextRepository 中获取 SecurityContext，然后把它设置给 SecurityContextHolder。在请求完成后将 SecurityContextHolder 持有的 SecurityContext 再保存到配置好的 SecurityContextRepository，同时清除 securityContextHolder 所持有的 SecurityContext；
 - **UsernamePasswordAuthenticationFilter** 用于处理来自表单提交的认证。该表单必须提供对应的用户名和密码，其内部还有登录成功或失败后进行处理的 AuthenticationSuccessHandler 和 AuthenticationFailureHandler，这些都可以根据需求做相关改变；
@@ -258,7 +258,7 @@ public String r2(){
 
 #### 认证流程
 
-![image.png](https://i.loli.net/2020/02/22/rdeuIJ8gGq6DKom.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131119544.png)
 
 - 仔细分析认证过程：
   - 用户提交用户名、密码被SecurityFilterChain中的`UsernamePasswordAuthenticationFilter`过滤器获取到，封装为请求Authentication，通常情况下是UsernamePasswordAuthenticationToken这个实现类
@@ -268,7 +268,7 @@ public String r2(){
 - 可以看出AuthenticationManager接口（认证管理器）是认证相关的核心接口，也是发起认证的出发点，它的实现类为ProviderManager。而Spring Security支持多种认证方式，因此ProviderManager维护着一个`List<AuthenticationProvider>`列表，存放多种认证方式，最终实际的认证工作是由AuthenticationProvider完成的。
 - web表单的对应的AuthenticationProvider实现类为DaoAuthenticationProvider，它的内部又维护着一个UserDetailsService负责UserDetails的获取。最终AuthenticationProvider将UserDetails填充至Authentication。
 
-![image.png](https://i.loli.net/2020/02/22/FqVJ4PhoX3bAs5L.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131119834.png)
 
 #### AuthenticationProvider
 
@@ -466,7 +466,7 @@ public PasswordEncoder passwordEncoder() {
   - **拦截请求**，已认证用户访问受保护的web资源将被SecurityFilterChain中的`FilterSecurityInterceptor`的子类拦截。
   - **获取资源访问策略**，FilterSecurityInterceptor会从`SecurityMetadataSource`的子类`DefaultFilterInvocationSecurityMetadataSource`获取要访问当前资源所需要的权限`Collection<ConfigAttribute>`。
 
-![image.png](https://i.loli.net/2020/02/22/aTW3FGwodSMRsQ6.png)
+![image.png](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302131120006.png)
 
 - SecurityMetadataSource其实就是读取访问策略的抽象，而读取的内容，其实就是我们配置的访问规则， 读取访问策略如：
 
