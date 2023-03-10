@@ -206,4 +206,104 @@ Nacos中创建限流规则的配置
 
 
 
+## 修改配置同步nacos
+
+在`com.alibaba.csp.sentinel.dashboard.rule`包下新建一个nacos包，用来编写针对Nacos的扩展实现。
+
+创建Nacos的配置类
+
+```java
+@Configuration
+public class NacosConfig {
+
+    @Bean
+    public Converter<List<FlowRuleEntity>, String> flowRuleEntityEncoder() {
+        return JSON::toJSONString;
+    }
+
+    @Bean
+    public Converter<String, List<FlowRuleEntity>> flowRuleEntityDecoder() {
+        return s -> JSON.parseArray(s, FlowRuleEntity.class);
+    }
+
+    @Bean
+    public ConfigService nacosConfigService() throws Exception {
+        Properties properties = new Properties();
+        properties.put(PropertyKeyConst.SERVER_ADDR, "localhost");
+        return ConfigFactory.createConfigService(properties);
+    }
+}
+```
+
+
+
+实现Nacos的配置拉取
+
+```java
+@Component("flowRuleNacosProvider")
+public class FlowRuleNacosProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
+
+    @Autowired
+    private ConfigService configService;
+    @Autowired
+    private Converter<String, List<FlowRuleEntity>> converter;
+
+    public static final String FLOW_DATA_ID_POSTFIX = "-sentinel";
+    public static final String GROUP_ID = "DEFAULT_GROUP";
+
+    @Override
+    public List<FlowRuleEntity> getRules(String appName) throws Exception {
+        String rules = configService.getConfig(appName + FLOW_DATA_ID_POSTFIX, GROUP_ID, 3000);
+        if (StringUtil.isEmpty(rules)) {
+            return new ArrayList<>();
+        }
+        return converter.convert(rules);
+    }
+}
+```
+
+
+
+实现Nacos的配置推送。
+
+```java
+@Component("flowRuleNacosPublisher")
+public class FlowRuleNacosPublisher implements DynamicRulePublisher<List<FlowRuleEntity>> {
+
+    @Autowired
+    private ConfigService configService;
+    @Autowired
+    private Converter<List<FlowRuleEntity>, String> converter;
+
+    public static final String FLOW_DATA_ID_POSTFIX = "-sentinel";
+    public static final String GROUP_ID = "DEFAULT_GROUP";
+
+    @Override
+    public void publish(String app, List<FlowRuleEntity> rules) throws Exception {
+        AssertUtil.notEmpty(app, "app name cannot be empty");
+        if (rules == null) {
+            return;
+        }
+        configService.publishConfig(app + FLOW_DATA_ID_POSTFIX, GROUP_ID, converter.convert(rules));
+    }
+}
+```
+
+
+
+修改`com.alibaba.csp.sentinel.dashboard.controller.v2.FlowControllerV2`中`DynamicRuleProvider`和`DynamicRulePublisher`注入的Bean
+
+```java
+@Autowired
+@Qualifier("flowRuleNacosProvider")
+private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
+@Autowired
+@Qualifier("flowRuleNacosPublisher")
+private DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
+```
+
+
+
+
+
 整理自：http://www.passjava.cn/#/02.SpringCloud/
