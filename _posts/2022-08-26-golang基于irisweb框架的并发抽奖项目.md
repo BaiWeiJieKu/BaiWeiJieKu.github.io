@@ -1537,3 +1537,467 @@ func (c *lotteryController) GetDebug() string {
 }
 ```
 
+
+
+## 抽奖web程序
+
+流程：
+
+![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202307201127343.png)
+
+
+
+### 配置类
+
+MySQL
+
+```go
+/**
+ * mysql数据库配置信息
+ */
+package conf
+
+const DriverName = "mysql"
+
+type DbConfig struct {
+	Host      string
+	Port      int
+	User      string
+	Pwd       string
+	Database  string
+	IsRunning bool // 是否正常运行
+}
+
+// 系统中所有mysql主库 root:root@tcp(127.0.0.1:3306)/lottery?charset=utf-8
+var DbMasterList = []DbConfig{
+	{
+		Host:      "127.0.0.1",
+		Port:      3306,
+		User:      "root",
+		Pwd:       "root",
+		Database:  "lottery",
+		IsRunning: true,
+	},
+}
+
+var DbMaster DbConfig = DbMasterList[0]
+```
+
+
+
+redis配置
+
+```go
+package conf
+
+type RdsConfig struct {
+	Host      string
+	Port      int
+	User      string
+	Pwd       string
+	IsRunning bool // 是否正常运行
+}
+
+// 系统中用到的所有redis缓存资源
+var RdsCacheList = []RdsConfig{
+	{
+		Host:      "127.0.0.1",
+		Port:      6379,
+		User:      "",
+		Pwd:       "",
+		IsRunning: true,
+	},
+}
+
+var RdsCache RdsConfig = RdsCacheList[0]
+```
+
+
+
+
+
+抽奖配置
+
+```go
+package conf
+
+import "time"
+
+const UserPrizeMax = 3000            // 用户每天最多抽奖次数
+const IpPrizeMax = 30000             // 同一个IP每天最多抽奖次数
+const IpLimitMax = 300000            // 同一个IP每天最多抽奖次数
+// 定义24小时的奖品分配权重
+var PrizeDataRandomDayTime = [100]int{
+	// 24 * 3 = 72   平均3%的机会
+	// 100 - 72 = 28 剩余28%的机会
+	// 7 * 4 = 28    剩下的分别给7个时段增加4%的机会
+	0, 0, 0,
+	1, 1, 1,
+	2, 2, 2,
+	3, 3, 3,
+	4, 4, 4,
+	5, 5, 5,
+	6, 6, 6,
+	7, 7, 7,
+	8, 8, 8,
+	9, 9, 9, 9, 9, 9, 9,
+	10, 10, 10, 10, 10, 10, 10,
+	11, 11, 11,
+	12, 12, 12,
+	13, 13, 13,
+	14, 14, 14,
+	15, 15, 15, 15, 15, 15, 15,
+	16, 16, 16, 16, 16, 16, 16,
+	17, 17, 17, 17, 17, 17, 17,
+	18, 18, 18,
+	19, 19, 19,
+	20, 20, 20, 20, 20, 20, 20,
+	21, 21, 21, 21, 21, 21, 21,
+	22, 22, 22,
+	23, 23, 23,
+}
+
+const GtypeVirtual = 0   // 虚拟币
+const GtypeCodeSame = 1  // 虚拟券，相同的码
+const GtypeCodeDiff = 2  // 虚拟券，不同的码
+const GtypeGiftSmall = 3 // 实物小奖
+const GtypeGiftLarge = 4 // 实物大奖
+
+const SysTimeform = "2006-01-02 15:04:05"
+const SysTimeformShort = "2006-01-02"
+
+// 是否需要启动全局计划任务服务
+var RunningCrontabService = false
+
+// 中国时区
+var SysTimeLocation, _ = time.LoadLocation("Asia/Chongqing")
+
+// ObjSalesign 签名密钥
+var SignSecret = []byte("0123456789abcdef")
+
+// cookie中的加密验证密钥
+var CookieSecret = "hellolottery"
+```
+
+
+
+### 数据源
+
+MySQL
+
+```go
+package datasource
+
+import (
+	"fmt"
+	"log"
+	"sync"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
+	"imooc.com/lottery/conf"
+)
+
+var dbLock sync.Mutex
+var masterInstance *xorm.Engine
+var slaveInstance *xorm.Engine
+
+// 得到唯一的主库实例
+func InstanceDbMaster() *xorm.Engine {
+	if masterInstance != nil {
+		return masterInstance
+	}
+	dbLock.Lock()
+	defer dbLock.Unlock()
+
+	if masterInstance != nil {
+		return masterInstance
+	}
+	return NewDbMaster()
+}
+
+func NewDbMaster() *xorm.Engine {
+	sourcename := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8",
+		conf.DbMaster.User,
+		conf.DbMaster.Pwd,
+		conf.DbMaster.Host,
+		conf.DbMaster.Port,
+		conf.DbMaster.Database)
+
+	instance, err := xorm.NewEngine(conf.DriverName, sourcename)
+	if err != nil {
+		log.Fatal("dbhelper.InstanceDbMaster NewEngine error ", err)
+		return nil
+	}
+	instance.ShowSQL(true)
+	//instance.ShowSQL(false)
+	masterInstance = instance
+	return masterInstance
+}
+```
+
+
+
+redis
+
+```go
+package datasource
+
+import (
+	"fmt"
+	"log"
+	"sync"
+	"time"
+
+	"github.com/gomodule/redigo/redis"
+	"imooc.com/lottery/conf"
+)
+
+var rdsLock sync.Mutex
+var cacheInstance *RedisConn
+
+// 封装成一个redis资源池
+type RedisConn struct {
+	pool *redis.Pool
+	showDebug bool
+}
+
+// 对外只有一个命令，封装了一个redis的命令
+func (rds *RedisConn) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+	conn := rds.pool.Get()
+	defer conn.Close()
+
+	t1 := time.Now().UnixNano()
+	reply, err = conn.Do(commandName, args...)
+	if err != nil {
+		e := conn.Err()
+		if e != nil {
+			log.Println("rdshelper Do", err, e)
+		}
+	}
+	t2 := time.Now().UnixNano()
+	if rds.showDebug {
+		fmt.Printf("[redis] [info] [%dus]cmd=%s, err=%s, args=%v, reply=%s\n", (t2-t1)/1000, commandName, err, args, reply)
+	}
+	return reply, err
+}
+
+// 设置是否打印操作日志
+func (rds *RedisConn) ShowDebug(b bool) {
+	rds.showDebug = b
+}
+
+// 得到唯一的redis缓存实例
+func InstanceCache() *RedisConn {
+	if cacheInstance != nil {
+		return cacheInstance
+	}
+	rdsLock.Lock()
+	defer rdsLock.Unlock()
+
+	if cacheInstance != nil {
+		return cacheInstance
+	}
+	return NewCache()
+}
+
+// 重新实例化
+func NewCache() *RedisConn {
+	pool := redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", conf.RdsCache.Host, conf.RdsCache.Port))
+			if err != nil {
+				log.Fatal("rdshelper.NewCache Dial error ", err)
+				return nil, err
+			}
+			return c, nil
+		},
+		TestOnBorrow:    func(c redis.Conn, t time.Time) error {
+			if time.Since(t) < time.Minute {
+				return nil
+			}
+			_, err := c.Do("PING")
+			return err
+		},
+		MaxIdle:         10000,
+		MaxActive:       10000,
+		IdleTimeout:     0,
+		Wait:            false,
+		MaxConnLifetime: 0,
+	}
+	instance := &RedisConn{
+		pool:&pool,
+	}
+	cacheInstance = instance
+	cacheInstance.ShowDebug(true)
+	//cacheInstance.ShowDebug(false)
+	return cacheInstance
+}
+```
+
+
+
+
+
+### 数据模型models
+
+IP黑名单
+
+```go
+package models
+
+type LtBlackip struct {
+	Id         int    `xorm:"not null pk autoincr INT(10)"`
+	Ip         string `xorm:"not null default '' comment('IP地址') VARCHAR(50)"`
+	Blacktime  int    `xorm:"not null default 0 comment('黑名单限制到期时间') INT(10)"`
+	SysCreated int    `xorm:"not null default 0 comment('创建时间') INT(10)"`
+	SysUpdated int    `xorm:"not null default 0 comment('修改时间') INT(10)"`
+}
+```
+
+
+
+优惠券
+
+```go
+package models
+
+type LtCode struct {
+	Id         int    `xorm:"not null pk autoincr INT(10)"`
+	GiftId     int    `xorm:"not null default 0 comment('奖品ID，关联lt_gift表') INT(10)"`
+	Code       string `xorm:"not null default '' comment('虚拟券编码') VARCHAR(255)"`
+	SysCreated int    `xorm:"not null default 0 comment('创建时间') INT(10)"`
+	SysUpdated int    `xorm:"not null default 0 comment('更新时间') INT(10)"`
+	SysStatus  int    `xorm:"not null default 0 comment('状态，0正常，1作废，2已发放') SMALLINT(5)"`
+}
+```
+
+
+
+奖品
+
+```go
+package models
+
+type LtGift struct {
+	Id           int    `xorm:"not null pk autoincr INT(10)" json:"id"`
+	Title        string `xorm:"not null default '' comment('奖品名称') VARCHAR(255)" json:"title"`
+	PrizeNum     int    `xorm:"not null default -1 comment('奖品数量，0 无限量，>0限量，<0无奖品') INT(11)" json:"-"`
+	LeftNum      int    `xorm:"not null default 0 comment('剩余数量') INT(11)" json:"-"`
+	PrizeCode    string `xorm:"not null default '' comment('0-9999表示100%，0-0表示万分之一的中奖概率') VARCHAR(50)" json:"-"`
+	PrizeTime    int    `xorm:"not null default 0 comment('发奖周期，D天') INT(10)" json:"-"`
+	Img          string `xorm:"not null default '' comment('奖品图片') VARCHAR(255)" json:"img"`
+	Displayorder int    `xorm:"not null default 0 comment('位置序号，小的排在前面') INT(10)" json:"displayorder"`
+	Gtype        int    `xorm:"not null default 0 comment('奖品类型，0 虚拟币，1 虚拟券，2 实物-小奖，3 实物-大奖') INT(10)" json:"gtype"`
+	Gdata        string `xorm:"not null default '' comment('扩展数据，如：虚拟币数量') VARCHAR(255)" json:"-"`
+	TimeBegin    int    `xorm:"not null default 0 comment('开始时间') INT(11)" json:"-"`
+	TimeEnd      int    `xorm:"not null default 0 comment('结束时间') INT(11)" json:"-"`
+	PrizeData    string `xorm:"comment('发奖计划，[[时间1,数量1],[时间2,数量2]]') MEDIUMTEXT" json:"-"`
+	PrizeBegin   int    `xorm:"not null default 0 comment('发奖计划周期的开始') INT(11)" json:"-"`
+	PrizeEnd     int    `xorm:"not null default 0 comment('发奖计划周期的结束') INT(11)" json:"-"`
+	SysStatus    int    `xorm:"not null default 0 comment('状态，0 正常，1 删除') SMALLINT(5)" json:"-"`
+	SysCreated   int    `xorm:"not null default 0 comment('创建时间') INT(10)" json:"-"`
+	SysUpdated   int    `xorm:"not null default 0 comment('修改时间') INT(10)" json:"-"`
+	SysIp        string `xorm:"not null default '' comment('操作人IP') VARCHAR(50)" json:"-"`
+}
+```
+
+
+
+中奖结果
+
+```go
+package models
+
+type LtResult struct {
+	Id         int    `xorm:"not null pk autoincr INT(10)" json:"-"`
+	GiftId     int    `xorm:"not null default 0 comment('奖品ID，关联lt_gift表') INT(10)" json:"gift_id"`
+	GiftName   string `xorm:"not null default '' comment('奖品名称') VARCHAR(255)" json:"gift_name"`
+	GiftType   int    `xorm:"not null default 0 comment('奖品类型，同lt_gift. gtype') INT(10)" json:"gift_type"`
+	Uid        int    `xorm:"not null default 0 comment('用户ID') INT(10)" json:"uid"`
+	Username   string `xorm:"not null default '' comment('用户名') VARCHAR(50)" json:"username"`
+	PrizeCode  int    `xorm:"not null default 0 comment('抽奖编号（4位的随机数）') INT(10)" json:"-"`
+	GiftData   string `xorm:"not null default '' comment('获奖信息') VARCHAR(255)" json:"-"`
+	SysCreated int    `xorm:"not null default 0 comment('创建时间') INT(10)" json:"-"`
+	SysIp      string `xorm:"not null default '' comment('用户抽奖的IP') VARCHAR(50)" json:"-"`
+	SysStatus  int    `xorm:"not null default 0 comment('状态，0 正常，1删除，2作弊') SMALLINT(5)" json:"-"`
+}
+```
+
+
+
+用户
+
+```go
+package models
+
+type LtUser struct {
+	Id         int    `xorm:"not null pk autoincr INT(10)"`
+	Username   string `xorm:"not null default '' comment('用户名') VARCHAR(50)"`
+	Blacktime  int    `xorm:"not null default 0 comment('黑名单限制到期时间') INT(10)"`
+	Realname   string `xorm:"not null default '' comment('联系人') VARCHAR(50)"`
+	Mobile     string `xorm:"not null default '' comment('手机号') VARCHAR(50)"`
+	Address    string `xorm:"not null default '' comment('联系地址') VARCHAR(255)"`
+	SysCreated int    `xorm:"not null default 0 comment('创建时间') INT(10)"`
+	SysUpdated int    `xorm:"not null default 0 comment('修改时间') INT(10)"`
+	SysIp      string `xorm:"not null default '' comment('IP地址') VARCHAR(50)"`
+}
+```
+
+
+
+用户抽奖次数
+
+```go
+package models
+
+type LtUserday struct {
+	Id         int `xorm:"not null pk autoincr INT(10)"`
+	Uid        int `xorm:"not null default 0 comment('用户ID') INT(10)"`
+	Day        int `xorm:"not null default 0 comment('日期，如：20180725') INT(10)"`
+	Num        int `xorm:"not null default 0 comment('次数') INT(10)"`
+	SysCreated int `xorm:"not null default 0 comment('创建时间') INT(10)"`
+	SysUpdated int `xorm:"not null default 0 comment('修改时间') INT(10)"`
+}
+```
+
+
+
+商品属性
+
+```go
+package models
+
+type ObjGiftPrize struct {
+	Id           int    `json:"id"`
+	Title        string `json:"title"`
+	PrizeNum     int    `json:"-"`
+	LeftNum		 int    `json:"-"`
+	PrizeCodeA   int    `json:"-"`
+	PrizeCodeB   int    `json:"-"`
+	Img          string `json:"img"`
+	Displayorder int    `json:"displayorder"`
+	Gtype        int    `json:"gtype"`
+	Gdata        string `json:"gdata"`
+}
+```
+
+
+
+交互模型
+
+```go
+package models
+
+// 站点中与浏览器交互的用户模型
+type ObjLoginuser struct {
+	Uid      int
+	Username string
+	Now      int
+	Ip       string
+	Sign     string
+}
+```
+
+
+
