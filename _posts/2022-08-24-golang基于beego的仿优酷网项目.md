@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "基于beego的仿优酷网项目"
+title: "golang基于beego的仿优酷网项目"
 categories: golang基础
 tags: golang
 author: 百味皆苦

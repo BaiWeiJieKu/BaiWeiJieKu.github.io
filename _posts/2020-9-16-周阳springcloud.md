@@ -1682,13 +1682,191 @@ public class OrderConsulController {
   - 再根据用户指定的策略，从server取到的服务注册列表中选择一个地址。
 - Ribbon提供了多种策略：轮询，随机，根据响应时间加权
 
+Ribbon模块
+
+| 名 称               | 说  明                                                       |
+| :------------------ | :----------------------------------------------------------- |
+| ribbon-core         | 一些比较核心且具有通用性的代码，客户端 API 的一些配置和其他 API 的定义。 |
+| ribbon-loadbalancer | 负载均衡模块，可独立使用，也可以和别的模块一起使用。 内置的负载均衡算法都实现在其中。 |
+| ribbon-eureka       | 基于 Eureka 封装的模块，能够快速、方便地集成 Eureka。        |
+| ribbon-transport    | 基于 Netty 实现多协议的支持，比如 HTTP、Tcp、Udp 等。        |
+| ribbon-httpclient   | 基于 Apache HttpClient 封装的 REST 客户端，集成了负载均衡模块，可以直接在项目中使用来调用接口。 |
+| ribbon-example      | Ribbon 使用代码示例，通过这些示例能够让你的学习事半功倍。    |
+
+
+
+#### HttpClient
+
+RestTemplate设计是为了Spring更好的请求并解析Restful风格的接口返回值而设计的，对HttpClient进行了封装以提高其易用性.
+
+使用HttpClient调用远程服务，有这样几个步骤：
+
+- 创建HttpClient对象
+- 请求参数、地址配置
+- 请求封装与发送
+- Http请求结果的获取HttpEntity
+- 获取Http请求结果中的响应体
+- 将响应体转成java对象
+
+实际演示如下
+
+```java
+public class HttpClientTest {
+
+  @Test
+  void httpPost() throws Exception {
+    //发送远程的http请求的地址
+    String url = "http://localhost:8402/sms/send";
+    //创建HttpClient对象
+    CloseableHttpClient client = HttpClients.createDefault();
+    //创建HttpPost对象, 发送post请求
+    HttpPost method = new HttpPost(url);
+    //封装发送到服务提供者的参数
+    NameValuePair phoneNo = new BasicNameValuePair("phoneNo", "13214409773");
+    NameValuePair content = new BasicNameValuePair("content", "HttpClient测试远程服务调用");
+    List<NameValuePair> params = new ArrayList<>();
+    params.add(phoneNo);
+    params.add(content);
+    //封装请求体数据
+    method.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+    //发送具体的http请求
+    HttpResponse response = client.execute(method);
+
+    //获得服务提供者响应的具体数据
+    HttpEntity entity = response.getEntity();
+
+    //获得http的响应体
+    InputStream is = entity.getContent();
+    int len = 0;
+    char[] buf = new char[1024];
+    //使用字符流读
+    InputStreamReader reader = new InputStreamReader(is);
+    StringBuffer sb = new StringBuffer();
+    while((len = reader.read(buf)) != -1){
+      sb.append(String.valueOf(buf, 0, len));
+    }
+
+    //转成对象
+    ObjectMapper mapper = new ObjectMapper();
+    AjaxResponse ajaxResponse = mapper.readValue(sb.toString(), AjaxResponse.class);
+    System.out.println(ajaxResponse);
+
+  }
+
+}
+```
+
+
+
 
 
 #### RestTemplate
 
-- getForObject方法：返回对象为响应体中数据转化成的对象，基本上可以理解为json
-- getForEntity方法：返回对象为ResponseEntity对象，包含了响应中的一些重要数据，比如响应头，响应状态码，响应体等。
-- API
+RestTemplate是Spring提供的一个访问Http服务的客户端类。从名称上来看，该类更多是针对RESTFUL风格API设计的。RestTemplate的底层实现仍然是HttpClient或HttpUrlConnection或OkHttp（三者可选），只是对它进行了封装，从而降低编码复杂度
+
+一些常用方法如下
+
+| HTTP Method | 常用方法      | 描述                                                         |
+| :---------- | :------------ | :----------------------------------------------------------- |
+| GET         | getForObject  | 发起GET请求响应对象                                          |
+| GET         | getForEntity  | 发起GET请求响应结果、包含响应对象、请求头、状态码等HTTP协议详细内容 |
+| POST        | postForObject | 发起POST请求响应对象                                         |
+| POST        | postForEntity | 发起POST请求响应结果、包含响应对象、请求头、状态码等HTTP协议详细内容 |
+| DELETE      | delete        | 发起HTTP的DELETE方法请求                                     |
+| PUT         | put           | 发起HTTP的PUT方法请求                                        |
+
+
+
+使用RestTemplate ，必须是Spring环境，首先将它初始化为一个Bean
+
+```java
+@Configuration
+public class ContextConfig {
+
+    //默认实现，实际与urlConnection是一样的底层实现
+    @Bean
+    @LoadBalanced  //实现远程服务调用的负载均衡
+    public RestTemplate restTemplate(){
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate;
+    }
+   //默认实现
+    @Bean("urlConnection")
+    public RestTemplate urlConnectionRestTemplate(){
+        RestTemplate restTemplate = new RestTemplate(new SimpleClientHttpRequestFactory());
+        return restTemplate;
+    }
+
+    @Bean("httpClient")
+    public RestTemplate httpClientRestTemplate(){
+        RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+        return restTemplate;
+    }
+
+    @Bean("OKHttp3")
+    public RestTemplate OKHttp3RestTemplate(){
+        RestTemplate restTemplate = new RestTemplate(new OkHttp3ClientHttpRequestFactory());
+        return restTemplate;
+    }
+}
+```
+
+
+
+实际演示
+
+```java
+@ExtendWith(SpringExtension.class)  //Junit5
+@SpringBootTest
+public class RestTemplateTest {
+
+  @Resource
+  private RestTemplate restTemplate;
+
+  @Test
+  void httpPostForObject() throws Exception {
+    //发送远程http请求的url
+    String url = "http://localhost:8402/sms/send";
+    //实现负载均衡时，地址是微服务的名称(大写)，不再是某一个微服务实例的ip和端口
+    String balanceUrl = "http://SERVICE-PROVIDE-SMS/sms/send";
+    //发送到远程服务的参数
+    MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+    params.add("phoneNo", "13214409773");
+    params.add("content", "HttpClient测试远程服务调用");
+
+    //通过RestTemplate对象发送post请求
+    AjaxResponse ajaxResponse = restTemplate.postForObject(url, params, AjaxResponse.class);
+
+    System.out.println(ajaxResponse);
+  }
+    
+    @Test
+    void httpPostForEntity() throws Exception {
+        //发送远程http请求的url
+        String url = "http://localhost:8402/sms/send";
+        //发送到远程服务的参数
+        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+        params.add("phoneNo", "13214409773");
+        params.add("content", "HttpClient测试远程服务调用");
+
+        //通过RestTemplate对象发送post请求
+        ResponseEntity<AjaxResponse> entitys = restTemplate.postForEntity(url, params, AjaxResponse.class);
+
+        System.out.println(entitys.getBody());
+
+        //查看响应的状态码
+        System.out.println(entitys.getStatusCodeValue());
+
+        //查看响应头
+        HttpHeaders headMap = entitys.getHeaders();
+        for(Map.Entry<String, List<String>> m : headMap.entrySet()){
+          System.out.println(m.getKey() + ": " + m.getValue());
+        }
+  	}
+}
+```
+
+
 
 
 
@@ -1746,9 +1924,7 @@ public class OrderMain80 {
 - 自实现负载均衡
 
 ```java
-/**
-*使用CAS和自旋锁实现轮询算法
-/
+//使用CAS和自旋锁实现轮询算法
 @Component
 public class MyLB implements LoadBalancer {
 
@@ -2186,7 +2362,7 @@ public class PaymentController {
 
   `http://localhost:8001/payment/hystrix/timeout/31`
 
-  ​
+  
 
 #### 8.2服务消费者80
 
@@ -2945,7 +3121,7 @@ eureka:
 
   添加网关后:http://localhost:9527/payment/get/31
 
-  ​
+  
 
 
 
@@ -3065,7 +3241,7 @@ eureka:
   - Query=username, \d+ #要有参数名称并且是正整数才能路由
   ```
 
-  ​
+  
 
 - 总结
 

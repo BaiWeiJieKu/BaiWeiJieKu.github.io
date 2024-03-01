@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "基于iris的并发抽奖项目"
+title: "golang基于iris的并发抽奖项目"
 categories: golang基础
 tags: golang
 author: 百味皆苦
