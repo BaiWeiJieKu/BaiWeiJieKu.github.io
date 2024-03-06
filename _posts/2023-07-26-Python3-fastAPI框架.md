@@ -323,7 +323,7 @@ pip install pydantic
 from typing import Union, List, Optional
 
 from fastapi import FastAPI
-from pydantic import BaseModel, Field, ValidationError, validator
+from pydantic import BaseModel, Field, ValidationError, field_validator
 import uvicorn
 from datetime import date
 
@@ -335,7 +335,7 @@ class Addr(BaseModel):
 
 
 class User(BaseModel):
-    name = 'root'
+    name: str
     
     # 指定规则
     age: int = Field(default=0, lt=100, gt=0)
@@ -345,7 +345,7 @@ class User(BaseModel):
     addr: Union[Addr, None] = None  # 类型嵌套
 
     # 规则函数
-    @validator('name')
+    @field_validator('name')
     def name_must_alpha(cls, v):
         assert v.isalpha(), 'name must be alpha'
         return v
@@ -365,10 +365,7 @@ async def create_data(data: Data):
 
 
 if __name__ == '__main__':
-    try:
-        User(name="",...)
-    except ValidationError as e:
-        print(e.json())  
+    uvicorn.run("body_param:app", host="127.0.0.1", port=8000, reload=True)  
     
 
 ```
@@ -384,3 +381,92 @@ FastAPI 支持同时定义 Path 参数、Query 参数和请求体参数，FastAP
 参数是单一类型（例如int、float、str、bool等），它将被解释为 query 参数
 
 参数类型为继承 Pydantic 模块的`BaseModel`类的数据模型类，则它将被解释为请求体参数
+
+
+
+## form表单
+
+先安装依赖
+
+在 OAuth2 规范的一种使用方式（密码流）中，需要将用户名、密码作为表单字段发送，而不是 JSON。
+
+FastAPI 可以使用Form组件来接收表单数据，需要先使用`pip install python-multipart`命令进行安装。
+
+```python
+from fastapi import FastAPI, Form
+app = FastAPI()
+@app.post("/form")
+async def create_data_form(username: str = Form(max_length=16, min_length=8, regex='[a-zA-Z]'),
+                           password: str = Form(min_length=8, regex='[a-zA-Z]')):
+    print(f"username:{username},password:{password}")
+    return {"username": username, "password": password}
+
+if __name__ == '__main__':
+    uvicorn.run("body_param:app", host="127.0.0.1", port=8000, reload=True)
+```
+
+
+
+## 文件上传
+
+分为单个上传，批量上传
+
+```python
+from fastapi import FastAPI, File, UploadFile
+app = FastAPI()
+# file: bytes = File()：适合小文件上传
+@app.post("/files/")
+async def create_file(file: bytes = File()):
+    print("file:", file)
+    return {"file_size": len(file)}
+
+
+# 多文件上传
+@app.post("/multiFiles/")
+async def create_files(files: List[bytes] = File()):
+    return {"file_sizes": [len(file) for file in files]}
+
+
+# file: UploadFile：适合大文件上传
+
+@app.post("/uploadFile/")
+async def create_upload_file(file: UploadFile):
+    with open(f"{file.filename}", 'wb') as f:
+        for chunk in iter(lambda: file.file.read(1024), b''):
+            f.write(chunk)
+    return {"filename": file.filename}
+
+
+@app.post("/multiUploadFiles/")
+async def create_upload_files(files: List[UploadFile]):
+    for file in files:
+        path = os.path.join("upload", file.filename)
+        with open(path, 'wb') as f:
+            for line in file.file:
+                f.write(line)
+    return {"filenames": [file.filename for file in files]}
+
+
+if __name__ == '__main__':
+    uvicorn.run("body_param:app", host="127.0.0.1", port=8000, reload=True)
+```
+
+
+
+## request对象
+
+需要在函数中声明Request类型的参数，FastAPI 就会自动传递 Request 对象给这个参数，我们就可以获取到 Request 对象及其属性信息，例如 header、url、cookie、session 等。
+
+```python
+from fastapi import FastAPI, Request
+app = FastAPI()
+@app.get("/items")
+async def items(request: Request):
+    return {
+        "请求URL：": request.url,
+        "请求ip：": request.client.host,
+        "请求宿主：": request.headers.get("user-agent"),
+        "cookies": request.cookies,
+    }
+```
+
