@@ -470,3 +470,243 @@ async def items(request: Request):
     }
 ```
 
+
+
+## 静态文件
+
+在 Web 开发中，需要请求很多静态资源文件（不是由服务器生成的文件），如 css/js 和图片文件等
+
+```python
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+
+app = FastAPI()
+
+# /static是访问路径，statics是资源根目录
+app.mount("/static",StaticFiles(directory="statics"))
+```
+
+
+
+## response响应模型
+
+最终 return 的都是自定义结构的字典，FastAPI 提供了 response_model 参数，声明 return 响应体的模型
+
+response_model 是路径操作的参数，并不是路径函数的参数
+
+FastAPI将使用`response_model`进行以下操作：
+
+- 将输出数据转换为response_model中声明的数据类型。
+- 验证数据结构和类型
+- 将输出数据限制为该model定义的
+- 添加到OpenAPI中
+- 在自动文档系统中使用。
+
+你可以在任意的路径操作中使用 `response_model`参数来声明用于响应的模型
+
+```python
+from typing import Union
+
+from fastapi import FastAPI
+from pydantic import BaseModel, EmailStr
+
+app = FastAPI()
+
+# 入参
+class UserIn(BaseModel):
+    username: str
+    password: str
+    email: EmailStr
+    full_name: Union[str, None] = None
+
+# 出参，不包含敏感信息
+class UserOut(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: Union[str, None] = None
+
+
+@app.post("/user/regin", response_model=UserOut)
+async def create_user(user: UserIn):
+    return user
+```
+
+
+
+response_model_exclude_unset
+
+如果model在NoSQL数据库中具有很多可选属性，但是不想发送很长的JSON响应，其中包含默认值。
+
+```python
+from typing import List, Union
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: str
+    description: Union[str, None] = None
+    price: float
+    tax: float = 10.5
+    tags: List[str] = []
+
+
+items = {
+    "foo": {"name": "Foo", "price": 50.2},
+    "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+    "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+}
+
+# 返回结果中排除未设置的值
+@app.get("/items/{item_id}", response_model=Item, response_model_exclude_unset=True)
+async def read_item(item_id: str):
+    return items[item_id]
+```
+
+
+
+除了`response_model_exclude_unset`以外，还有`response_model_exclude_defaults`和`response_model_exclude_none`，我们可以很直观的了解到他们的意思，不返回是默认值的字段和不返回是None的字段。`response_model_exclude`表示要排除哪些字段，`response_model_include`表示只包含哪些字段
+
+```python
+# response_model_exclude
+@app.get("/items/{item_id}", response_model=Item, response_model_exclude={"description"}, )
+async def read_item(item_id: str):
+    return items[item_id]
+
+# response_model_include  
+@app.get("/items/{item_id}", response_model=Item, response_model_include={"name", "price"}, )
+async def read_item(item_id: str):
+    return items[item_id]
+```
+
+
+
+## jinja2模板引擎
+
+jinja2是Flask作者开发的⼀个模板系统，起初是仿django模板的⼀个模板引擎，为Flask提供模板⽀持，由于其灵活，快速和安全等优点被⼴泛使⽤。
+
+```
+1. 变量取值 {{ }}
+2. 控制结构 {% %}
+```
+
+后端
+
+```python
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+import uvicorn
+
+app = FastAPI()  # 实例化 FastAPI对象
+templates = Jinja2Templates(directory="templates")  # 实例化Jinja2对象，并将文件夹路径设置为以templates命令的文件夹
+
+
+@app.get('/')
+def hello(request: Request):
+    return templates.TemplateResponse(
+        'index.html',
+        {
+            'request': request,  # 注意，返回模板响应时，必须有request键值对，且值为Request请求对象
+            'user': 'yuan',
+            "books": ["金瓶梅", "聊斋", "剪灯新话", "国色天香"],
+            "booksDict": {
+                "金瓶梅": {"price": 100, "publish": "苹果出版社"},
+                "聊斋": {"price": 200, "publish": "橘子出版社"},
+            }
+        }
+    )
+if __name__ == '__main__':
+    uvicorn.run("main:app", port=8080, debug=True, reload=True)
+
+```
+
+
+
+模板
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<h1>{{ user}}</h1>
+
+<p>{{ books.0 }}</p>
+<p>{{ books.1 }}</p>
+<p>{{ books.2 }}</p>
+<p>{{ books.3 }}</p>
+
+<p>{{ booksDict.金瓶梅.price }}</p>
+
+
+</body>
+</html>
+```
+
+
+
+过滤器
+
+变量可以通过“过滤器”进⾏修改，过滤器可以理解为是jinja2⾥⾯的内置函数和字符串处理函数。常⽤的过滤器有：
+
+| **过滤器名称** | **说明**                                     |
+| -------------- | -------------------------------------------- |
+| capitialize    | 把值的⾸字母转换成⼤写，其他⼦母转换为⼩写   |
+| lower          | 把值转换成⼩写形式                           |
+| title          | 把值中每个单词的⾸字母都转换成⼤写           |
+| trim           | 把值的⾸尾空格去掉                           |
+| striptags      | 渲染之前把值中所有的HTML标签都删掉           |
+| join           | 拼接多个值为字符串                           |
+| round          | 默认对数字进⾏四舍五⼊，也可以⽤参数进⾏控制 |
+| safe           | 渲染时值不转义                               |
+
+那么如何使⽤这些过滤器呢？只需要在变量后⾯使⽤管道(|)分割，多个过滤器可以链式调⽤，前⼀个过滤器的输出会作为后⼀个过滤器的输⼊
+
+```
+
+{{ 'abc'| captialize  }}  # Abc
+
+{{ 'abc'| upper  }} # ABC
+
+{{ 'hello world'| title  }} # Hello World
+
+{{ "hello world"| replace('world','yuan') | upper }} # HELLO YUAN
+
+{{ 18.18 | round | int }} # 18
+
+```
+
+
+
+控制语句
+
+jinja2中的if语句类似与Python的if语句，它也具有单分⽀，多分⽀等多种结构，不同的是，条件语句不需要使⽤冒号结尾，⽽结束控制语句，需要使⽤endif关键字；jinja2中的for循环⽤于迭代Python的数据类型，包括列表，元组和字典。在jinja2中不存在while循环。
+
+```
+{% if age > 18 %}
+
+    <p>成年区</p>
+
+{% else %}
+    
+    <p>未成年区</p>
+
+{% endif %}
+
+
+{% for book in books %}
+    <p>{{ book }}</p>
+{% endfor %}
+
+```
+
+
+
