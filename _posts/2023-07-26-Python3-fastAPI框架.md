@@ -667,7 +667,7 @@ if __name__ == '__main__':
 
 那么如何使⽤这些过滤器呢？只需要在变量后⾯使⽤管道(|)分割，多个过滤器可以链式调⽤，前⼀个过滤器的输出会作为后⼀个过滤器的输⼊
 
-```python
+```tex
 
 {{ 'abc'| captialize  }}  # Abc
 
@@ -687,7 +687,7 @@ if __name__ == '__main__':
 
 jinja2中的if语句类似与Python的if语句，它也具有单分⽀，多分⽀等多种结构，不同的是，条件语句不需要使⽤冒号结尾，⽽结束控制语句，需要使⽤endif关键字；jinja2中的for循环⽤于迭代Python的数据类型，包括列表，元组和字典。在jinja2中不存在while循环。
 
-```
+```tex
 {% if age > 18 %}
 
     <p>成年区</p>
@@ -706,4 +706,423 @@ jinja2中的if语句类似与Python的if语句，它也具有单分⽀，多分�
 ```
 
 
+
+## ORM操作
+
+FastAPI也支持数据库的开发，你可以用 PostgreSQL、MySQL、 SQLite Oracle 等
+
+
+
+### 对象映射
+
+模型
+
+```python
+from tortoise.models import Model
+from tortoise import fields
+
+
+class Clas(Model):
+    name = fields.CharField(max_length=255, description='班级名称')
+
+
+class Teacher(Model):
+    # 主键
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=255, description='姓名')
+    tno = fields.IntField(description='账号')
+    pwd = fields.CharField(max_length=255, description='密码')
+
+
+class Student(Model):
+    id = fields.IntField(pk=True)
+    sno = fields.IntField(description='学号')
+    pwd = fields.CharField(max_length=255, description='密码')
+    name = fields.CharField(max_length=255, description='姓名')
+    # 一对多
+    clas = fields.ForeignKeyField('models.Clas', related_name='students')
+    # 多对多
+    courses = fields.ManyToManyField('models.Course', related_name='students',description='学生选课表')
+
+
+class Course(Model):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=255, description='课程名')
+    teacher = fields.ForeignKeyField('models.Teacher', related_name='courses', description='课程讲师')
+```
+
+
+
+### aerich迁移工具
+
+配置：settings.py
+
+```python
+TORTOISE_ORM = {
+    'connections': {
+        'default': {
+            # 'engine': 'tortoise.backends.asyncpg',  PostgreSQL
+            'engine': 'tortoise.backends.mysql',  # MySQL or Mariadb
+            'credentials': {
+                'host': '127.0.0.1',
+                'port': '3306',
+                'user': 'root',
+                'password': 'yuan0316',
+                'database': 'fastapi',
+                'minsize': 1,
+                'maxsize': 5,
+                'charset': 'utf8mb4',
+                "echo": True
+            }
+        },
+    },
+    'apps': {
+        'models': {
+            'models': ['apps.models', "aerich.models"],
+            'default_connection': 'default',
+
+        }
+    },
+    'use_tz': False,
+    'timezone': 'Asia/Shanghai'
+}
+```
+
+
+
+链接
+
+```python
+import uvicorn
+from fastapi import FastAPI
+from tortoise.contrib.fastapi import register_tortoise
+from settings import TORTOISE_ORM
+
+
+app = FastAPI()
+
+# 该方法会在fastapi启动时触发，内部通过传递进去的app对象，监听服务启动和终止事件
+# 当检测到启动事件时，会初始化Tortoise对象，如果generate_schemas为True则还会进行数据库迁移
+# 当检测到终止事件时，会关闭连接
+register_tortoise(
+    app,
+    config=TORTOISE_ORM,
+    # generate_schemas=True,  # 如果数据库为空，则自动生成对应表单，生产环境不要开
+    # add_exception_handlers=True,  # 生产环境不要开，会泄露调试信息
+)
+
+if __name__ == '__main__':
+    uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True,
+                debug=True, workers=1)
+
+```
+
+
+
+安装
+
+```
+pip install aerich
+```
+
+
+
+初始化配置，只需执行一次
+
+```
+aerich init -t settings.TORTOISE_ORM # TORTOISE_ORM配置的位置)
+```
+
+初始化完会在当前目录生成一个文件：pyproject.toml（保存配置文件路径）和一个文件夹：migrations（存放迁移文件）
+
+
+
+初始化数据库
+
+```
+aerich init-db
+```
+
+此时数据库中就有相应的表格
+
+如果`TORTOISE_ORM`配置文件中的`models`改了名，则执行这条命令时需要增加`--app`参数，来指定你修改的名字
+
+
+
+更新模块并进行迁移
+
+修改model类，重新生成迁移文件,比如添加一个字段
+
+```python
+class Admin(Model):
+    ...
+    xxx = fields.CharField(max_length=255)
+```
+
+
+
+执行命令
+
+```
+aerich migrate [--name] (标记修改操作) #  aerich migrate --name add_column
+```
+
+
+
+重新执行迁移，写入数据库
+
+```
+aerich upgrade
+```
+
+
+
+回到上一个版本
+
+```
+aerich downgrade
+```
+
+
+
+查看历史迁移记录
+
+```
+aerich history
+```
+
+
+
+### CRUD
+
+案例
+
+```python
+from fastapi.exceptions import HTTPException
+
+from models import *
+
+from pydantic import BaseModel
+from typing import List, Union
+from fastapi import APIRouter
+
+api_student = APIRouter()
+
+
+@api_student.get("/student")
+async def getAllStudent():
+    # 查询所有数据，只取name值，类似于select name from student
+    students = await Student.all().values("name")
+    
+    # 按条件查询列表
+    # students = await Student.filter(name__icontains='a').values("name", "clas__name")
+    # print("students", students)
+    # for i in students:
+    #     print(i)
+    #
+    
+    # 单个查询
+    # rain = await Student.get(name='rain')
+    # print(rain, type(rain))
+    # print(rain.sno)
+    
+    # 模糊查询
+    stu = await Student.filter(sno__gt = 2001)
+    stu = await Student.filter(sno__range = [1,1000])
+    stu = await Student.filter(sno__in = [2001,2002])
+    
+    # 一对多，多对多查询
+    alvin = await Student.get(name="alvin")
+    print(await alvin.clas.values("name"))
+    students = await Student.all().values("name","clas__name")
+    
+    print(await alvin.courses.all().values("name","teacher__name"))
+    students = await Student.all().values("name","clas__name","courses__name")
+
+    return students
+
+
+class StudentModel(BaseModel):
+    name: str
+    pwd: str
+    sno: int
+    clas_id: Union[int, None] = None
+    courses: List[int] = []
+
+
+@api_student.post("/student")
+async def addStudent(stu: StudentModel):
+    # 添加数据库操作
+    # 方式1
+    # student = Student(name=stu.name, pwd=stu.pwd, sno=stu.sno, clas_id=stu.clas)
+    # await student.save()
+    # 方式2
+    student = await Student.create(name=stu.name, pwd=stu.pwd, sno=stu.sno, clas_id=stu.clas_id)
+    print(student, dir(student))
+
+    # 添加多对多关系记录
+    courses = await Course.filter(id__in=stu.courses)
+    print("courses", courses)
+    await student.courses.add(*courses)
+    print("student", student.courses)
+
+    return student
+
+
+@api_student.put("/student/{student_id}")
+async def update_student(student_id: int, student: StudentModel):
+    # 更新学生信息
+    data = student.dict(exclude_unset=True)
+    
+    # 先移除课程列表，单独做更新操作
+    courses = data.pop("courses")
+    print(data, courses)
+    await Student.filter(id=student_id).update(**data)
+
+    courses = await Course.filter(id__in=student.courses)
+    edit_student = await Student.get(id=student_id)
+    await edit_student.courses.clear()
+    await edit_student.courses.add(*courses)
+
+    return student
+
+
+@api_student.delete("/student/{student_id}")
+async def delete_student(student_id: int):
+    deleted_count = await Student.filter(id=student_id).delete()  # 条件删除
+    if not deleted_count:
+        raise HTTPException(status_code=404, detail=f"Student {student_id} not found")
+    return {}
+
+```
+
+
+
+## 中间件
+
+"中间件"是一个函数,它在每个请求被特定的路径操作处理之前,以及在每个响应之后工作；类似于Java的拦截器
+
+要创建中间件你可以在函数的顶部使用装饰器 `@app.middleware("http")`
+
+中间件参数接收如下参数：
+
+request
+
+一个函数`call_next`，它将接收`request`，作为参数；这个函数将 `request` 传递给相应的 路径操作；然后它将返回由相应的路径操作生成的 `response`
+
+然后你可以在返回 `response` 前进一步修改它
+
+```python
+import uvicorn
+from fastapi import FastAPI
+
+from fastapi import Request
+from fastapi.responses import Response
+import time
+
+app = FastAPI()
+
+
+@app.middleware("http")
+async def m2(request: Request, call_next):
+    # 请求代码块
+    print("m2 request")
+    response = await call_next(request)
+    # 响应代码块
+    response.headers["author"] = "yuan"
+    print("m2 response")
+    return response
+
+
+@app.middleware("http")
+async def m1(request: Request, call_next):
+    # 请求代码块
+    print("m1 request")
+    # if request.client.host in ["127.0.0.1", ]:  # 黑名单
+    #     return Response(content="visit forbidden")
+
+    # if request.url.path in ["/user"]:
+    #     return Response(content="visit forbidden")
+
+    start = time.time()
+
+    response = await call_next(request)
+    # 响应代码块
+    print("m1 response")
+    end = time.time()
+    response.headers["ProcessTimer"] = str(end - start)
+    return response
+
+
+@app.get("/user")
+def get_user():
+    time.sleep(3)
+    print("get_user函数执行")
+    return {
+        "user": "current user"
+    }
+
+
+@app.get("/item/{item_id}")
+def get_item(item_id: int):
+    time.sleep(2)
+    print("get_item函数执行")
+    return {
+        "item_id": item_id
+    }
+
+
+if __name__ == '__main__':
+    uvicorn.run('main:app', host='127.0.0.1', port=8030, reload=True,
+                debug=True, workers=1)
+
+```
+
+
+
+### 解决跨域
+
+```python
+@app.middleware("http")
+async def CORSMiddleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    print(response.headers)
+    return response
+
+```
+
+
+
+第二种方式
+
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+origins = [
+    "http://localhost:63342"
+]
+
+# 框架解决跨域
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # *：代表所有客户端
+    allow_credentials=True,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def main():
+    return {"message": "Hello World"}
+
+
+if __name__ == '__main__':
+    import uvicorn
+
+    uvicorn.run("main:app", host="127.0.0.1", port=8080, debug=True, reload=True)
+
+```
 
