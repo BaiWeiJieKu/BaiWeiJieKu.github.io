@@ -1232,6 +1232,363 @@ async def validation_exception_handler(request, exc):
 
 
 
+## 依赖注入
+
+抽取公共方法，提高代码复用性
+
+```python
+from typing import Optional
+
+from fastapi import APIRouter
+from fastapi import Depends, HTTPException, Header
+
+app05 = APIRouter()
+
+"""Dependencies 创建、导入和声明依赖"""
+
+
+async def common_parameters(q: Optional[str] = None, page: int = 1, limit: int = 100):
+    return {"q": q, "page": page, "limit": limit}
+
+
+@app05.get("/dependency01")
+async def dependency01(commons: dict = Depends(common_parameters)): # 依赖上面函数的返回结果
+    return commons
+
+
+@app05.get("/dependency02")
+def dependency02(commons: dict = Depends(common_parameters)):  # 可以在async def中调用def依赖，也可以在def中导入async def依赖
+    return commons
+
+
+"""Classes as Dependencies 类作为依赖项"""
+
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
+
+
+class CommonQueryParams:
+    def __init__(self, q: Optional[str] = None, page: int = 1, limit: int = 100):
+        self.q = q
+        self.page = page
+        self.limit = limit
+
+
+@app05.get("/classes_as_dependencies")
+# async def classes_as_dependencies(commons: CommonQueryParams = Depends(CommonQueryParams)):
+# async def classes_as_dependencies(commons: CommonQueryParams = Depends()):
+async def classes_as_dependencies(commons=Depends(CommonQueryParams)):
+    response = {}
+    if commons.q:
+        response.update({"q": commons.q})
+    items = fake_items_db[commons.page: commons.page + commons.limit]
+    response.update({"items": items})
+    return response
+
+
+"""Sub-dependencies 子依赖"""
+
+
+def query(q: Optional[str] = None):
+    return q
+
+
+def sub_query(q: str = Depends(query), last_query: Optional[str] = None):
+    if not q:
+        return last_query
+    return q
+
+
+@app05.get("/sub_dependency")
+async def sub_dependency(final_query: str = Depends(sub_query, use_cache=True)):
+    """use_cache默认是True, 表示当多个依赖有一个共同的子依赖时，每次request请求只会调用子依赖一次，多次调用将从缓存中获取"""
+    return {"sub_dependency": final_query}
+
+
+"""Dependencies in path operation decorators 路径操作装饰器中的多依赖"""
+
+
+async def verify_token(x_token: str = Header(...)):
+    """没有返回值的子依赖"""
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+
+async def verify_key(x_key: str = Header(...)):
+    """有返回值的子依赖，但是返回值不会被调用"""
+    if x_key != "fake-super-secret-key":
+        raise HTTPException(status_code=400, detail="X-Key header invalid")
+    return x_key
+
+
+@app05.get("/dependency_in_path_operation", dependencies=[Depends(verify_token), Depends(verify_key)])  # 这时候不是在函数参数中调用依赖，而是在路径操作中
+async def dependency_in_path_operation():
+    return [{"user": "user01"}, {"user": "user02"}]
+
+
+"""Global Dependencies 全局依赖"""
+
+# app05 = APIRouter(dependencies=[Depends(verify_token), Depends(verify_key)])
+
+
+"""Dependencies with yield 带yield的依赖"""
+
+
+# 这个需要Python3.7才支持，Python3.6需要pip install async-exit-stack async-generator
+# 以下都是伪代码
+
+async def get_db():
+    db = "db_connection"
+    try:
+        yield db
+    finally:
+        db.endswith("db_close")
+
+
+async def dependency_a():
+    dep_a = "generate_dep_a()"
+    try:
+        yield dep_a
+    finally:
+        dep_a.endswith("db_close")
+
+
+async def dependency_b(dep_a=Depends(dependency_a)):
+    dep_b = "generate_dep_b()"
+    try:
+        yield dep_b
+    finally:
+        dep_b.endswith(dep_a)
+
+
+async def dependency_c(dep_b=Depends(dependency_b)):
+    dep_c = "generate_dep_c()"
+    try:
+        yield dep_c
+    finally:
+        dep_c.endswith(dep_b)
+```
+
+
+
+## OAuth授权和JWT认证
+
+模拟登录认证
+
+```python
+from datetime import datetime, timedelta
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from pydantic import BaseModel
+
+app06 = APIRouter()
+
+"""OAuth2 密码模式和 FastAPI 的 OAuth2PasswordBearer"""
+
+"""
+OAuth2PasswordBearer是接收URL作为参数的一个类：客户端会向该URL发送username和password参数，然后得到一个Token值
+OAuth2PasswordBearer并不会创建相应的URL路径操作，只是指明客户端用来请求Token的URL地址
+当请求到来的时候，FastAPI会检查请求的Authorization头信息，如果没有找到Authorization头信息，或者头信息的内容不是Bearer token，它会返回401状态码(UNAUTHORIZED)
+"""
+
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/chapter06/token")  # 请求Token的URL地址 http://127.0.0.1:8000/chapter06/token
+
+
+@app06.get("/oauth2_password_bearer")
+async def oauth2_password_bearer(token: str = Depends(oauth2_schema)):
+    return {"token": token}
+
+
+"""基于 Password 和 Bearer token 的 OAuth2 认证"""
+
+fake_users_db = {
+    "john snow": {
+        "username": "john snow",
+        "full_name": "John Snow",
+        "email": "johnsnow@example.com",
+        "hashed_password": "fakehashedsecret",
+        "disabled": False,
+    },
+    "alice": {
+        "username": "alice",
+        "full_name": "Alice Wonderson",
+        "email": "alice@example.com",
+        "hashed_password": "fakehashedsecret2",
+        "disabled": True,
+    },
+}
+
+
+def fake_hash_password(password: str):
+    return "fakehashed" + password
+
+
+class User(BaseModel):
+    username: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
+
+
+class UserInDB(User):
+    hashed_password: str
+
+
+@app06.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user_dict = fake_users_db.get(form_data.username)
+    if not user_dict:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect username or password")
+    user = UserInDB(**user_dict)
+    hashed_password = fake_hash_password(form_data.password)
+    if not hashed_password == user.hashed_password:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect username or password")
+    return {"access_token": user.username, "token_type": "bearer"}
+
+
+def get_user(db, username: str):
+    if username in db:
+        user_dict = db[username]
+        return UserInDB(**user_dict)
+
+
+def fake_decode_token(token: str):
+    user = get_user(fake_users_db, token)
+    return user
+
+
+async def get_current_user(token: str = Depends(oauth2_schema)):
+    user = fake_decode_token(token)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},  # OAuth2的规范，如果认证失败，请求头中返回“WWW-Authenticate”
+        )
+    return user
+
+
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if current_user.disabled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+    return current_user
+
+
+@app06.get("/users/me")
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+
+"""OAuth2 with Password (and hashing), Bearer with JWT tokens 开发基于JSON Web Tokens的认证"""
+
+fake_users_db.update({
+    "john snow": {
+        "username": "john snow",
+        "full_name": "John Snow",
+        "email": "johnsnow@example.com",
+        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "disabled": False,
+    }
+})
+
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"  # 生成密钥 openssl rand -hex 32
+ALGORITHM = "HS256"  # 算法
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 访问令牌过期分钟
+
+
+class Token(BaseModel):
+    """返回给用户的Token"""
+    access_token: str
+    token_type: str
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/chapter06/jwt/token")
+
+
+def verity_password(plain_password: str, hashed_password: str):
+    """对密码进行校验"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def jwt_get_user(db, username: str):
+    if username in db:
+        user_dict = db[username]
+        return UserInDB(**user_dict)
+
+
+def jwt_authenticate_user(db, username: str, password: str):
+    user = jwt_get_user(db=db, username=username)
+    if not user:
+        return False
+    if not verity_password(plain_password=password, hashed_password=user.hashed_password):
+        return False
+    return user
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+@app06.post("/jwt/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = jwt_authenticate_user(db=fake_users_db, username=form_data.username, password=form_data.password)
+    if not user:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+async def jwt_get_current_user(token: str = Depends(oauth2_schema)):
+    credentials_exception = HTTPException(
+        status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token=token, key=SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = jwt_get_user(db=fake_users_db, username=username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+async def jwt_get_current_active_user(current_user: User = Depends(jwt_get_current_user)):
+    if current_user.disabled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+    return current_user
+
+
+@app06.get("/jwt/users/me")
+async def jwt_read_users_me(current_user: User = Depends(jwt_get_current_active_user)):
+    return current_user
+```
+
+
+
 ## jinja2模板引擎
 
 jinja2是Flask作者开发的⼀个模板系统，起初是仿django模板的⼀个模板引擎，为Flask提供模板⽀持，由于其灵活，快速和安全等优点被⼴泛使⽤。

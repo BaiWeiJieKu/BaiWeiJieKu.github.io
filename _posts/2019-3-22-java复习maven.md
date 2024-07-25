@@ -535,3 +535,220 @@ system：非本地仓库引入、存在系统的某个路径下的jar。（一�
 
 
 
+## 多模块项目中统一维护版本号
+
+在java的多模块项目，也就是父子类项目中统一维护项目的版本号
+
+父项目中利用flatten-maven-plugin插件对子模块中的版本号进行替换
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.6.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.fittime.pregnancy.dubbo</groupId>
+    <artifactId>fittime-health-dubbo-pregnancy</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>health-dubbo-pregnancy-service-api</module>
+        <module>health-dubbo-pregnancy-service-impl</module>
+        <module>health-dubbo-pregnancy-entity</module>
+        <module>health-dubbo-pregnancy-common</module>
+        <module>health-dubbo-pregnancy-dao</module>
+    </modules>
+
+    <!-- 统一版本号管理 -->
+    <properties>
+        <revision>1.0.2-SNAPSHOT</revision>
+    </properties>
+
+    <!-- 引入Jar包管理器 -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fittime.boot.dependencies</groupId>
+                <artifactId>fittime-boot-dependencies</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fittime.dubbo.dependencies</groupId>
+                <artifactId>fittime-dubbo-dependencies</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fittime.pregnancy.dubbo</groupId>
+                <artifactId>health-dubbo-pregnancy-common</artifactId>
+                <version>${revision}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fittime.pregnancy.dubbo</groupId>
+                <artifactId>health-dubbo-pregnancy-dao</artifactId>
+                <version>${revision}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fittime.pregnancy.dubbo</groupId>
+                <artifactId>health-dubbo-pregnancy-entity</artifactId>
+                <version>${revision}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fittime.pregnancy.dubbo</groupId>
+                <artifactId>health-dubbo-pregnancy-service-api</artifactId>
+                <version>${revision}</version>
+                <scope>compile</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- nexus start -->
+    <repositories>
+        <repository>
+            <id>rjfittime</id>
+            <url>https://maven.wealthyhealthy.cn/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>rjfittime</id>
+            <url>https://maven.wealthyhealthy.cn/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>https://maven.wealthyhealthy.cn/nexus/content/repositories/snapshots/</url>
+            <uniqueVersion>true</uniqueVersion>
+        </snapshotRepository>
+        <repository>
+            <id>releases</id>
+            <url>https://maven.wealthyhealthy.cn/nexus/content/repositories/releases/</url>
+            <uniqueVersion>true</uniqueVersion>
+        </repository>
+    </distributionManagement>
+    <!-- nexus end -->
+
+    <!-- 插件管理器 -->
+    <build>
+        <plugins>
+            <!-- 添加flatten-maven-plugin插件 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.3.0</version>
+                <inherited>true</inherited>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <configuration>
+                            <!-- 避免IDE将 .flattened-pom.xml 自动识别为功能模块 -->
+                            <updatePomFile>true</updatePomFile>
+                            <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                            <pomElements>
+                                <parent>expand</parent>
+                                <distributionManagement>remove</distributionManagement>
+                                <repositories>remove</repositories>
+                            </pomElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+```
+
+
+
+这个插件会生成一个文件，记得在ignore文件中排除一下
+
+```
+修改.gitignore文件，增加一行.flattened-pom.xml；
+
+不可混合使用${revision}和明确字符串版本号，若出现父子模块版本号混合使用${revision}和明确字符串形式如1.0.0.-SNAPSHOT，在mvn package会出现错误
+```
+
+
+
+
+
+dao子项目，继承父类pom的版本号
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>fittime-health-dubbo-pregnancy</artifactId>
+        <groupId>com.fittime.pregnancy.dubbo</groupId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>health-dubbo-pregnancy-dao</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fittime.pregnancy.dubbo</groupId>
+            <artifactId>health-dubbo-pregnancy-common</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fittime.pregnancy.dubbo</groupId>
+            <artifactId>health-dubbo-pregnancy-entity</artifactId>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>
+```
+
+
+
