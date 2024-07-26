@@ -1589,6 +1589,40 @@ async def jwt_read_users_me(current_user: User = Depends(jwt_get_current_active_
 
 
 
+## 测试用例
+
+test
+
+```python
+from fastapi.testclient import TestClient
+
+from run import app
+
+"""Testing 测试用例"""
+
+client = TestClient(app)  # 先pip install pytest
+
+
+def test_run_bg_task():  # 函数名用“test_”开头是 pytest 的规范。注意不是async def
+    response = client.post(url="/chapter08/background_tasks?framework=FastAPI")
+    assert response.status_code == 200
+    assert response.json() == {"message": "任务已在后台运行"}
+
+
+def test_dependency_run_bg_task():
+    response = client.post(url="/chapter08/dependency/background_tasks")
+    assert response.status_code == 200
+    assert response.json() is None
+
+
+def test_dependency_run_bg_task_q():
+    response = client.post(url="/chapter08/dependency/background_tasks?q=1")
+    assert response.status_code == 200
+    assert response.json() == {"message": "README.md更新成功"}
+```
+
+
+
 ## jinja2模板引擎
 
 jinja2是Flask作者开发的⼀个模板系统，起初是仿django模板的⼀个模板引擎，为Flask提供模板⽀持，由于其灵活，快速和安全等优点被⼴泛使⽤。
@@ -1708,6 +1742,304 @@ jinja2中的if语句类似与Python的if语句，它也具有单分⽀，多分�
     <p>{{ book }}</p>
 {% endfor %}
 
+```
+
+
+
+## 整合SQLAlchemy数据库
+
+先编写数据库连接问卷`datebase.py`
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+SQLALCHEMY_DATABASE_URL = 'sqlite:///./coronavirus.sqlite3'
+# SQLALCHEMY_DATABASE_URL = "postgresql://username:password@host:port/database_name"  # MySQL或PostgreSQL的连接方法
+
+engine = create_engine(
+    # echo=True表示引擎将用repr()函数记录所有语句及其参数列表到日志
+    # 由于SQLAlchemy是多线程，指定check_same_thread=False来让建立的对象任意线程都可使用。这个参数只在用SQLite数据库时设置
+    SQLALCHEMY_DATABASE_URL, encoding='utf-8', echo=True, connect_args={'check_same_thread': False}
+)
+
+# 在SQLAlchemy中，CRUD都是通过会话(session)进行的，所以我们必须要先创建会话，每一个SessionLocal实例就是一个数据库session
+# flush()是指发送数据库语句到数据库，但数据库不一定执行写入磁盘；commit()是指提交事务，将变更保存到数据库文件
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=True)
+
+# 创建基本映射类
+Base = declarative_base(bind=engine, name='Base')
+```
+
+
+
+创建数据表`models.py`
+
+```python
+from sqlalchemy import Column, String, Integer, BigInteger, Date, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
+
+from .database import Base
+
+
+class City(Base):
+    __tablename__ = 'city'  # 数据表的表名
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    province = Column(String(100), unique=True, nullable=False, comment='省/直辖市')
+    country = Column(String(100), nullable=False, comment='国家')
+    country_code = Column(String(100), nullable=False, comment='国家代码')
+    country_population = Column(BigInteger, nullable=False, comment='国家人口')
+    data = relationship('Data', back_populates='city')  # 'Data'是关联的类名；back_populates来指定反向访问的属性名称
+
+    created_at = Column(DateTime, server_default=func.now(), comment='创建时间')
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    __mapper_args__ = {"order_by": country_code}  # 默认是正序，倒序加上.desc()方法
+
+    def __repr__(self):
+        return f'{self.country}_{self.province}'
+
+
+class Data(Base):
+    __tablename__ = 'data'
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    city_id = Column(Integer, ForeignKey('city.id'), comment='所属省/直辖市')  # ForeignKey里的字符串格式不是类名.属性名，而是表名.字段名
+    date = Column(Date, nullable=False, comment='数据日期')
+    confirmed = Column(BigInteger, default=0, nullable=False, comment='确诊数量')
+    deaths = Column(BigInteger, default=0, nullable=False, comment='死亡数量')
+    recovered = Column(BigInteger, default=0, nullable=False, comment='痊愈数量')
+    city = relationship('City', back_populates='data')  # 'City'是关联的类名；back_populates来指定反向访问的属性名称
+
+    created_at = Column(DateTime, server_default=func.now(), comment='创建时间')
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    __mapper_args__ = {"order_by": date.desc()}  # 按日期降序排列
+
+    def __repr__(self):
+        return f'{repr(self.date)}：确诊{self.confirmed}例'
+
+
+""" 附上三个SQLAlchemy教程
+
+SQLAlchemy的基本操作大全 
+    http://www.taodudu.cc/news/show-175725.html
+
+Python3+SQLAlchemy+Sqlite3实现ORM教程 
+    https://www.cnblogs.com/jiangxiaobo/p/12350561.html
+
+SQLAlchemy基础知识 Autoflush和Autocommit
+    https://zhuanlan.zhihu.com/p/48994990
+"""
+```
+
+
+
+入参和出参模型定义`schemas.py`
+
+```python
+from datetime import date as date_
+from datetime import datetime
+
+from pydantic import BaseModel
+
+
+class CreateData(BaseModel):
+    date: date_
+    confirmed: int = 0
+    deaths: int = 0
+    recovered: int = 0
+
+
+class CreateCity(BaseModel):
+    province: str
+    country: str
+    country_code: str
+    country_population: int
+
+
+class ReadData(CreateData):
+    id: int
+    city_id: int
+    updated_at: datetime
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class ReadCity(CreateCity):
+    id: int
+    updated_at: datetime
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+```
+
+
+
+封装增删改查函数`crud.py`
+
+```python
+from sqlalchemy.orm import Session
+
+from coronavirus import models, schemas
+
+
+def get_city(db: Session, city_id: int):
+    return db.query(models.City).filter(models.City.id == city_id).first()
+
+
+def get_city_by_name(db: Session, name: str):
+    return db.query(models.City).filter(models.City.province == name).first()
+
+
+def get_cities(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.City).offset(skip).limit(limit).all()
+
+
+def create_city(db: Session, city: schemas.CreateCity):
+    db_city = models.City(**city.dict())
+    db.add(db_city)
+    db.commit()
+    db.refresh(db_city)
+    return db_city
+
+
+def get_data(db: Session, city: str = None, skip: int = 0, limit: int = 10):
+    if city:
+        return db.query(models.Data).filter(models.Data.city.has(province=city))  # 外键关联查询，这里不是像Django ORM那样Data.city.province
+    return db.query(models.Data).offset(skip).limit(limit).all()
+
+
+def create_city_data(db: Session, data: schemas.CreateData, city_id: int):
+    db_data = models.Data(**data.dict(), city_id=city_id)
+    db.add(db_data)
+    db.commit()
+    db.refresh(db_data)
+    return db_data
+```
+
+
+
+对外接口
+
+```python
+from typing import List
+
+import requests
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+from fastapi.templating import Jinja2Templates
+from pydantic import HttpUrl
+from sqlalchemy.orm import Session
+
+from coronavirus import crud, schemas
+from coronavirus.database import engine, Base, SessionLocal
+from coronavirus.models import City, Data
+
+application = APIRouter()
+
+# 模板
+templates = Jinja2Templates(directory='./coronavirus/templates')
+
+# 数据库
+Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@application.post("/create_city", response_model=schemas.ReadCity)
+def create_city(city: schemas.CreateCity, db: Session = Depends(get_db)):
+    db_city = crud.get_city_by_name(db, name=city.province)
+    if db_city:
+        raise HTTPException(status_code=400, detail="City already registered")
+    return crud.create_city(db=db, city=city)
+
+
+@application.get("/get_city/{city}", response_model=schemas.ReadCity)
+def get_city(city: str, db: Session = Depends(get_db)):
+    db_city = crud.get_city_by_name(db, name=city)
+    if db_city is None:
+        raise HTTPException(status_code=404, detail="City not found")
+    return db_city
+
+
+@application.get("/get_cities", response_model=List[schemas.ReadCity])
+def get_cities(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    cities = crud.get_cities(db, skip=skip, limit=limit)
+    return cities
+
+
+@application.post("/create_data", response_model=schemas.ReadData)
+def create_data_for_city(city: str, data: schemas.CreateData, db: Session = Depends(get_db)):
+    db_city = crud.get_city_by_name(db, name=city)
+    data = crud.create_city_data(db=db, data=data, city_id=db_city.id)
+    return data
+
+
+@application.get("/get_data")
+def get_data(city: str = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    data = crud.get_data(db, city=city, skip=skip, limit=limit)
+    return data
+
+
+def bg_task(url: HttpUrl, db: Session):
+    """这里注意一个坑，不要在后台任务的参数中db: Session = Depends(get_db)这样导入依赖"""
+
+    city_data = requests.get(url=f"{url}?source=jhu&country_code=CN&timelines=false")
+
+    if 200 == city_data.status_code:
+        db.query(City).delete()  # 同步数据前先清空原有的数据
+        for location in city_data.json()["locations"]:
+            city = {
+                "province": location["province"],
+                "country": location["country"],
+                "country_code": "CN",
+                "country_population": location["country_population"]
+            }
+            crud.create_city(db=db, city=schemas.CreateCity(**city))
+
+    coronavirus_data = requests.get(url=f"{url}?source=jhu&country_code=CN&timelines=true")
+
+    if 200 == coronavirus_data.status_code:
+        db.query(Data).delete()
+        for city in coronavirus_data.json()["locations"]:
+            db_city = crud.get_city_by_name(db=db, name=city["province"])
+            for date, confirmed in city["timelines"]["confirmed"]["timeline"].items():
+                data = {
+                    "date": date.split("T")[0],  # 把'2020-12-31T00:00:00Z' 变成 ‘2020-12-31’
+                    "confirmed": confirmed,
+                    "deaths": city["timelines"]["deaths"]["timeline"][date],
+                    "recovered": 0  # 每个城市每天有多少人痊愈，这种数据没有
+                }
+                # 这个city_id是city表中的主键ID，不是coronavirus_data数据里的ID
+                crud.create_city_data(db=db, data=schemas.CreateData(**data), city_id=db_city.id)
+
+
+@application.get("/sync_coronavirus_data/jhu")
+def sync_coronavirus_data(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """从Johns Hopkins University同步COVID-19数据"""
+    background_tasks.add_task(bg_task, "https://coronavirus-tracker-api.herokuapp.com/v2/locations", db)
+    return {"message": "正在后台同步数据..."}
+
+
+@application.get("/")
+def coronavirus(request: Request, city: str = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    data = crud.get_data(db, city=city, skip=skip, limit=limit)
+    return templates.TemplateResponse("home.html", {
+        "request": request,
+        "data": data,
+        "sync_data_url": "/coronavirus/sync_coronavirus_data/jhu"
+    })
 ```
 
 
@@ -2026,15 +2358,16 @@ from fastapi.responses import Response
 import time
 
 app = FastAPI()
+# 注：带yield的依赖的退出部分的代码 和 后台任务 会在中间件之后运行
 
-
+# 拦截http请求
 @app.middleware("http")
-async def m2(request: Request, call_next):
+async def m2(request: Request, call_next): # call_next将接收request请求做为参数
     # 请求代码块
     print("m2 request")
     response = await call_next(request)
     # 响应代码块
-    response.headers["author"] = "yuan"
+    response.headers["author"] = "yuan" # 添加自定义的以“X-”开头的请求头
     print("m2 response")
     return response
 
@@ -2129,5 +2462,49 @@ if __name__ == '__main__':
 
     uvicorn.run("main:app", host="127.0.0.1", port=8080, debug=True, reload=True)
 
+```
+
+
+
+### 后台任务
+
+类似于异步执行
+
+```python
+from typing import Optional
+
+from fastapi import APIRouter, BackgroundTasks, Depends
+
+app08 = APIRouter()
+
+"""Background Tasks 后台任务"""
+
+
+def bg_task(framework: str):
+    with open("README.md", mode="a") as f:
+        f.write(f"## {framework} 框架精讲")
+
+
+@app08.post("/background_tasks")
+async def run_bg_task(framework: str, background_tasks: BackgroundTasks):
+    """
+    :param framework: 被调用的后台任务函数的参数
+    :param background_tasks: FastAPI.BackgroundTasks
+    :return:
+    """
+    background_tasks.add_task(bg_task, framework)
+    return {"message": "任务已在后台运行"}
+
+
+def continue_write_readme(background_tasks: BackgroundTasks, q: Optional[str] = None):
+    if q:
+        background_tasks.add_task(bg_task, "\n> 整体的介绍 FastAPI，快速上手开发，结合 API 交互文档逐个讲解核心模块的使用\n")
+    return q
+
+
+@app08.post("/dependency/background_tasks")
+async def dependency_run_bg_task(q: str = Depends(continue_write_readme)):
+    if q:
+        return {"message": "README.md更新成功"}
 ```
 
