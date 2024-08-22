@@ -535,6 +535,79 @@ system：非本地仓库引入、存在系统的某个路径下的jar。（一�
 
 
 
+## 远程仓库配置
+
+setting
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <localRepository>/Users/pingguo/maven/repository</localRepository>
+  <pluginGroups>
+  </pluginGroups>
+  <proxies>
+  </proxies>
+    
+  <servers>
+    <!-- 上传需要的设置： -->
+    <server>
+        <id>releases</id>
+        <username>admin</username>
+        <password>admin123</password>
+    </server>
+    <server>
+        <id>snapshots</id>
+        <username>admin</username>
+        <password>admin123</password>
+    </server>
+    <server>
+        <id>nexus-public</id>
+        <username>admin</username>
+        <password>admin123</password>
+    </server>
+  </servers>
+    
+  <mirrors>
+    <!-- 配置阿里云的镜像 -->
+    <mirror>  
+      <id>nexus-aliyun</id>  
+      <mirrorOf>central</mirrorOf>    
+      <name>Nexus aliyun</name>  
+      <url>http://maven.aliyun.com/nexus/content/groups/public</url>  
+    </mirror>
+
+    <mirror>
+      <id>alimaven</id>
+      <mirrorOf>central</mirrorOf>
+      <name>aliyun maven</name>
+      <url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
+    </mirror>
+
+    <mirror>
+      <id>tencent</id>
+      <name>tencent maven</name>
+      <url>http://mirrors.cloud.tencent.com/nexus/repository/maven-public/</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+
+    <mirror>
+        <id>public-snapshots</id>
+        <mirrorOf>central</mirrorOf>
+        <url>https://maven.wealthyhealthy.cn/nexus/content/groups/public/</url>
+    </mirror>
+  </mirrors>
+  <profiles>
+  </profiles>
+
+</settings>
+
+```
+
+
+
 ## 多模块项目中统一维护版本号
 
 在java的多模块项目，也就是父子类项目中统一维护项目的版本号
