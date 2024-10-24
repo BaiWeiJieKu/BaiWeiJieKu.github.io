@@ -1962,7 +1962,19 @@ public class MyLB implements LoadBalancer {
   - Feign：是springcloud中的一个轻量级RESTFul的HTTP服务客户端，Feign内置了Ribbon，用来做客户端负载均衡，去调用服务注册中心的服务。使用方式是使用Feign的注解定义接口，调用这个接口，就可以调用服务注册中心的服务。
   - OpenFeign：在Feign基础上支持了springmvc的注解，如@RequestMapping等。OpenFeign的@FeignClient可以解析@RequestMapping下的接口，并通过动态代理的方式产生实现类，实现类中做负载均衡并调用其他服务。
 
+OpenFeign 是一个声明式网络服务客户端，它让编写网络服务客户端变得更简单。使用 Feign 调用其他服务时，我们几乎不需要编写任何代码。我们只需创建一个接口并对其进行注解即可。它支持 OpenFeign 和 Jakarta JAX-RS 注释。
 
+Feign、OpenFeign 和 Spring HttpExchange 都是用于在 Java 应用程序中创建声明式 HTTP 客户端。
+
+| 功能       | Feign                              | OpenFeign                           | Spring HttpExchange              |
+| ---------- | ---------------------------------- | ----------------------------------- | -------------------------------- |
+| 起源与目的 | 由 Netflix 开发                    | 扩展自Feign，功能大大增强           | Spring的一部分                   |
+| Spring集成 | 可用于 Spring 和非 Spring 应用程序 | 通过Spring Cloud OpenFeign 模块集成 | Spring特有                       |
+| 定制       | 可定制的组件、请求和响应           | 可定制的组件、请求和响应            | 更加细粒度的控制                 |
+| 社区       | 不太活跃                           | 非常活跃                            | 亲儿子，没得说                   |
+| 案例       | 微服务、RESTful API 集成           | 微服务、RESTful API 集成            | Spring应用程序中的自定义HTTP交互 |
+
+在Spring Boot项目中，个人更建议使用**HttpExchange**，你无需引入任何其它的依赖。不过OpenFeign 与服务发现和负载平衡等其他 Spring Cloud组件集成得很好。而 HttpExchange 使用 WebClient 来调用 HTTP 请求，因此能更好地控制请求和响应处理。但是，OpenFeign 是基于每请求线程模型的阻塞型客户端，对于每个请求，指定的线程都会阻塞，直到收到响应为止。HttpExchange 使用的 WebClient 是非阻塞和反应式的，因此很容易克服上述性能瓶颈。
 
 #### 7.1使用步骤
 
@@ -2044,9 +2056,11 @@ eureka:
 
 - 启动类
 
+需要使用 **@EnableFeignClients** 注解启用 Feign Clients，该注解可对所有注释为 **@FeignClient** 的接口进行组件扫描。这里配置了basePackages属性来指定要扫描的包，如果你的注解使用在启动类上，那么你可以不用指定。
+
 ```java
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients(basePackages="com.pack.feign")
 public class OrderFeignMain80 {
     public static void main(String[] args) {
         SpringApplication.run(OrderFeignMain80.class,args);
@@ -2060,12 +2074,27 @@ public class OrderFeignMain80 {
 ```java
 @Component
 @FeignClient(value = "CLOUD-PAYMENT-SERVICE")
+//@FeignClient(value = "CLOUD-PAYMENT-SERVICE", url = "http://localhost:8001")
 public interface PaymentFeignService {
 
     @GetMapping(value = "/payment/get/{id}")
     public CommonResult getPaymentById(@PathVariable("id") Long id);
 }
 ```
+
+为了避免模板代码，feign还可以使用继承
+
+```java
+@Component
+@FeignClient(value = "CLOUD-PAYMENT-SERVICE", url = "http://localhost:8001")
+public interface ParentPaymentFeignService extends PaymentFeignService{
+
+    @GetMapping(value = "/payment/get/{parentId}")
+    public CommonResult getParentPaymentById(@PathVariable("parentId") Long parentId);
+}
+```
+
+
 
 - controller
 
@@ -2143,9 +2172,148 @@ ribbon:
   ConnectTimeout: 5000
 ```
 
+#### 7.3 OpenFeign配置
+
+每个 Feign 客户端都由一组组件组成，这些组件共同作用于远程服务调用。无论何时创建命名客户端，Spring Cloud 都会使用 **FeignClientsConfiguration** 为这些组件创建默认值。在该类中的大多数bean定义，我们都可以通过自定义的方式进行覆盖。
+
+默认有：
+
+- Decoder：要对响应进行解码，需要使用封装了 SpringDecoder 的 ResponseEntityDecoder。
+- Encoder：SpringEncoder 用于对 RequestBody 进行编码。
+- Logger：Slf4jLogger 是 Feign 使用的默认日志记录器。
+- Contract：提供注解处理的 SpringMvcContract。
+- Feign.Builder：用于构建Feign组件。
+- Retryer：当容器中不存在断路器相关依赖或为开启时，可配置重试请求的策略。
+- Client：这是全局的，用来处理请求。
+
+自定义的配置如下
+
+Spring Cloud 允许我们通过指定附加配置，用来覆盖 FeignClientsConfiguration 中的默认bean配置。
+
+如下，覆盖 AccountFeignClient 中的默认 HttpClient，使用 **ApacheHttp5Client**。我们需要创建一个配置类 AccountFeignConfiguration 并声明客户端 bean。
+
+```java
+@Configuation
+public class PackAccountFeignConfiguration {
+  @Bean
+  public CloseableHttpClient feignClient() {
+    return HttpClients.createDefault() ;
+  }
+}
+```
+
+接下来，可以在@FeignClient注解中如下定义
+
+```java
+@FeignClient(
+  value = "accountFeignClient",
+  url = "http://localhost:8088/",
+  configuration = PackAccountFeignConfiguration.class
+)
+public interface AccountFeignClient extends UserFeignClient {
+}
+```
+
+通过configuration属性指定我们自定义的配置。你还需要引入下面的依赖
+
+```xml
+<dependency>  
+    <groupId>io.github.openfeign</groupId>  
+    <artifactId>feign-hc5</artifactId>
+</dependency>
+```
+
+如果你使用okhttp，那么也请引入对应的依赖即可。
 
 
-#### 7.3日志打印
+
+还可以通过配置文件进行属性覆盖，比如配置feign客户端超时时间
+
+```yaml
+spring:
+  cloud:
+    openfeign:
+      config:
+        default:
+          connectTimeout: 5000
+```
+
+还可以指定某个客户端的配置，比如给上面定义的客户端AccountFeignClient配置超时时间
+
+```yaml
+spring:
+  cloud:
+    openfeign:
+      config:
+        accountFeignClient:
+          connectTimeout: 5000
+```
+
+修改配置文件和配置类的生效优先级
+
+```yaml
+spring:
+  cloud:
+    openfeign:
+      client:
+        default-to-properties: false
+```
+
+配置读写超时
+
+```yaml
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            read-timeout: 5000
+            connect-timeout: 5000
+```
+
+
+
+#### 7.4拦截器
+
+Feign 提供了 RequestInterceptor 接口，可用于执行身份验证或日志记录等任务。
+
+```java
+@Bean
+RequestInterceptor requestInterceptor() {
+    // 为请求添加自定义的请求header。
+  return requestTemplate -> {
+    requestTemplate.header("requestID", "UUID");
+  } ;
+}
+```
+
+
+
+#### 7.5异常处理
+
+Feign 的默认 **ErrorDecoder** 会在出现错误时抛出 FeignException。我们可以编写自己的自定义 ErrorDecoder。这样，我们就可以进行特定的错误处理。
+
+```java
+@Bean
+ErrorDecoder errorDecoder() {
+  return new ErrorDecoder() {
+    public Exception decode(String methodKey, Response response) {
+      return switch (response.status()) {
+        case 400 -> new BadRequestException(response) ;
+        case 429 -> new TooManyRequestsException(response) ;
+        default -> new Exception("feign client exception") ;
+    } ;
+  } ;
+}
+
+```
+
+
+
+
+
+#### 7.6日志打印
 
 - 对Feign接口的调用情况进行监控和输出
 - 日志级别
@@ -2173,6 +2341,235 @@ logging:
   level:
 # feign日志以什么级别监控哪个接口
     com.atguigu.springcloud.service.PaymentFeignService: debug
+```
+
+指定包目录
+
+```yaml
+logging:
+  level:
+    com.pack.feign: DEBUG
+```
+
+#### 7.7缓存
+
+如果使用 **@EnableCaching** 注解，则会创建并注册一个 CachingCapability Bean，以便 Feign 客户端识别其接口上的 @Cache 注解
+
+```java
+@Cacheable(cacheNames = "infos", key = "#id")
+@GetMapping("/info/{id}")
+public Object info(@PathVariable("id") Integer id) ;
+```
+
+使用redis缓存
+
+```yaml
+spring:
+  cache:
+    type: redis
+    redis:
+      key-prefix: 'feign:'
+      time-to-live: 60s
+```
+
+#### 7.8参数映射
+
+Spring Cloud OpenFeign 提供了等价的 **@SpringQueryMap** 注解，用于将 POJO 或 Map 参数注释为查询参数映射。
+
+feign接口
+
+```java
+@GetMapping("/format")
+Object format(@SpringQueryMap Params params) ;
+```
+
+controller接口
+
+```java
+@GetMapping("/format")
+public Object format(Params params) {
+  return this.demoFeign.format(params) ;
+}
+```
+
+参数对象
+
+```java
+
+public class Params {
+  private Long id ;
+  private String name ;
+}
+```
+
+Spring Cloud OpenFeign 支持 Spring @MatrixVariable 注解。如果方法参数传递的是映射，则 @MatrixVariable 路径段是通过用 = 连接映射中的键值对创建的。如果传递的是不同的对象，则使用 = 将 @MatrixVariable 注解（如果已定义）中提供的名称或注解的变量名称与提供的方法参数连接起来。这里需要路径占位符的名称与@MatrixVariable注解的变量名一致。
+
+```java
+@GetMapping("/m3/{params}")
+public Object matrix3(@MatrixVariable Map<String, List<String>> params)
+```
+
+提供**@CollectionFormat**注解来支持 feign.CollectionFormat。可以通过传递所需的 feign.CollectionFormat 作为注解值，为 Feign 客户端方法（或整个类的所有方法）添加注解。
+
+```java
+@GetMapping("/cf")
+@CollectionFormat(feign.CollectionFormat.CSV)
+public Object cf(@RequestParam("ids") List<String> ids) ;
+
+//请求案例：GET http://localhost:8088/demos/cf?ids=S1,S2,S3
+```
+
+
+
+#### 7.9 feign-reactive
+
+Feign-reactive是一个用于在Spring Cloud应用程序中实现响应式微服务的框架。它支持在Spring Cloud应用程序中实现异步和非阻塞的远程调用。Feign-reactive的一些主要特点：
+
+1. 基于Feign的简洁风格：Feign-reactive继承了Feign的简洁风格，使得在编写基于微服务架构的应用程序时，可以更加方便地实现异步编程。
+2. 支持Reactive编程模型：Feign-reactive提供对Reactive编程模型的支持，使得在编写异步和非阻塞的代码时更加容易。
+3. 异步和非阻塞远程调用：通过Feign-reactive，可以轻松地实现异步和非阻塞的远程调用，从而提高应用程序的响应速度和吞吐量。
+4. 与Spring Cloud集成：Feign-reactive与Spring Cloud集成，使得可以在Spring Cloud应用程序中方便地使用Feign-reactive实现响应式微服务。
+5. 可扩展性：Feign-reactive具有可扩展性，可以根据需要添加自定义的拦截器、编码器和解码器等。
+
+Feign-reactive是一个非常有用的框架，可以帮助开发人员轻松地实现响应式微服务，提高应用程序的性能和吞吐量。
+
+依赖
+
+```xml
+<dependency>
+  <groupId>com.playtika.reactivefeign</groupId>
+  <artifactId>feign-reactor-spring-configuration</artifactId>
+  <version>3.3.0</version>
+</dependency>
+<dependency>
+  <groupId>com.playtika.reactivefeign</groupId>
+  <artifactId>feign-reactor-cloud</artifactId>
+  <version>3.3.0</version>
+</dependency>
+<dependency>
+  <groupId>com.playtika.reactivefeign</groupId>
+  <artifactId>feign-reactor-webclient</artifactId>
+  <version>3.3.0</version>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+</dependency>
+```
+
+远程接口
+
+```java
+@GetMapping("/demos/info/{id}")
+public Object info(@PathVariable("id") Integer id) throws Exception {
+  TimeUnit.SECONDS.sleep(3) ;
+  Map<String, Object> result = new HashMap<>() ;
+  result.put("code", 0) ;
+  result.put("data", id) ;
+  result.put("message", "success") ;
+  return result ;
+}
+```
+
+注解开启反应式功能
+
+```java
+@EnableReactiveFeignClients
+public class AppFeignReactorApplication {}
+```
+
+feign接口定义
+
+```java
+@ReactiveFeignClient(
+    url = "http://localhost:8088/demos", 
+    name = "demoReactorFeign"
+)
+public interface DemoReactorFeign {
+  @GetMapping("/info/{id}")
+  public Mono<Object> info(@PathVariable("id") Integer id) ;
+}
+
+```
+
+测试调用
+
+```java
+@Resource
+private DemoReactorFeign demoReactorFeign ;
+
+@GetMapping("/{id}")
+public Object info(@PathVariable("id") Integer id) {
+  return this.demoReactorFeign.info(id) ;
+}
+```
+
+降级配置
+
+```java
+@ReactiveFeignClient(
+    url = "http://localhost:8088/demos", 
+    name = "demoReactorFeign", 
+    fallback = DemoReactorFeignFallback.class,
+    configuration = {DemoReactorFeignConfig.class}
+)
+public interface DemoReactorFeign {}
+
+
+//降级接口定义
+public class DemoReactorFeignFallback implements DemoReactorFeign {
+
+  @Override
+  public Mono<Object> info(Integer id) {
+    return Mono.just("请求失败") ;
+  }
+
+}
+
+//自定义配置
+public class DemoReactorFeignConfig {
+
+  @Bean
+  public DemoReactorFeignFallback demoReactorFeignFallback() {
+    return new DemoReactorFeignFallback() ;
+  }
+  
+}
+
+//当远程接口调用失败或者超时将会执行对应的fallback
+```
+
+超时配置
+
+```yaml
+reactive:
+  feign:
+    client:
+      config:
+        demoReactorFeign:
+          options:
+            connectTimeoutMillis: 2000
+            readTimeoutMillis: 2000
+```
+
+负载均衡配置
+
+```yaml
+reactive:
+  feign:
+    loadbalancer:
+      enabled: true
+```
+
+断路器配置
+
+```yaml
+reactive:
+  feign:
+    circuit:
+      breaker:
+       enabled: true
 ```
 
 

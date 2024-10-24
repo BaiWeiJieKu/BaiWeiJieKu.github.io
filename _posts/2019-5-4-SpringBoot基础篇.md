@@ -10,7 +10,7 @@ music-id: 5188665
 * content
 {:toc}
 
-# Spring Boot 入门
+# 一、Spring Boot 入门
 
 ## 1、Spring Boot 简介
 
@@ -91,7 +91,7 @@ http://www.gulixueyuan.com/ 谷粒学院
 
 
 
-### 1、创建一个maven工程；（jar）
+### 1、创建maven工程jar
 
 ### 2、导入spring boot相关的依赖
 
@@ -109,7 +109,7 @@ http://www.gulixueyuan.com/ 谷粒学院
     </dependencies>
 ```
 
-### 3、编写一个主程序；启动Spring Boot应用
+### 3、编写一个主程序
 
 ```java
 
@@ -127,7 +127,7 @@ public class HelloWorldMainApplication {
 }
 ```
 
-### 4、编写相关的Controller、Service
+### 4、编写相关的Controller
 
 ```java
 @Controller
@@ -223,7 +223,7 @@ Spring Boot将所有的功能场景都抽取出来，做成一个个的starters�
 
 
 
-### 2、主程序类，主入口类
+### 2、主程序类
 
 ```java
 /**
@@ -308,9 +308,7 @@ J2EE的整体整合解决方案和自动配置都在spring-boot-autoconfigure-1.
 
 
 
-## 6、使用Spring Initializer快速创建Spring Boot项目
-
-### 1、IDEA：使用 Spring Initializer快速创建项目
+## 6、Spring Initializer快速建项目
 
 IDE都支持使用Spring的项目创建向导快速创建一个Spring Boot项目；
 
@@ -323,12 +321,6 @@ IDE都支持使用Spring的项目创建向导快速创建一个Spring Boot项目
   - static：保存所有的静态资源； js css  images；
   - templates：保存所有的模板页面；（Spring Boot默认jar包使用嵌入式的Tomcat，默认不支持JSP页面）；可以使用模板引擎（freemarker、thymeleaf）；
   - application.properties：Spring Boot应用的配置文件；可以修改一些默认设置；
-
-### 2、STS使用 Spring Starter Project快速创建项目
-
-
-
--------------
 
 
 
@@ -397,7 +389,7 @@ server:
 
 ### 2、值的写法
 
-#### 字面量：普通的值（数字，字符串，布尔）
+字面量：普通的值（数字，字符串，布尔）
 
 ​	k: v：字面直接来写；
 
@@ -413,7 +405,7 @@ server:
 
 
 
-#### 对象、Map（属性和值）（键值对）：
+#### （键值对）
 
 ​	k: v：在下一行来写对象的属性和值的关系；注意缩进
 
@@ -510,13 +502,13 @@ public class Person {
 		</dependency>
 ```
 
-#### 1、properties配置文件在idea中默认utf-8可能会乱码
+#### 1、properties配置文件乱码
 
 调整
 
 ![idea配置乱码](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302091825706.png)
 
-#### 2、@Value获取值和@ConfigurationProperties获取值比较
+#### 2、@Value和@ConfigurationProperties
 
 |            | @ConfigurationProperties | @Value |
 | ---------- | ------------------------ | ------ |
@@ -665,7 +657,7 @@ ${random.int(10)}、${random.int[1024,65536]}
 
 
 
-### 2、占位符获取之前配置的值，如果没有可以是用:指定默认值
+### 2、用:指定默认值
 
 ```properties
 person.last-name=张三${random.uuid}
@@ -929,7 +921,7 @@ xxxxProperties:封装配置文件中相关属性；
 
 ### 2、细节
 
-#### 1、@Conditional派生注解（Spring注解版原生的@Conditional作用）
+#### 1、@Conditional派生注解
 
 作用：必须是@Conditional指定的条件成立，才给容器中添加组件，配置类里面的所有内容才生效；
 
@@ -1297,7 +1289,154 @@ slf4j+log4j的方式；
 </dependency>
 ```
 
------------------
+
+
+## 6、日志敏感数据脱敏
+
+自定义PatternLayout
+
+PatternLayout类可以通过模式字符串配置的灵活布局。这个类的目标是格式化一个ILoggingEvent并以{#link String}的形式返回结果。结果的格式取决于转换模式。
+
+```java
+public class MaskingPatternLayout extends PatternLayout {
+
+  private Pattern multilinePattern;
+  private List<String> maskPatterns = new ArrayList<>();
+
+  public void addMaskPattern(String maskPattern) {
+    maskPatterns.add(maskPattern);
+    multilinePattern = Pattern.compile(maskPatterns.stream().collect(Collectors.joining("|")), Pattern.MULTILINE);
+  }
+
+  //负责在应用程序的每条日志信息中屏蔽匹配的数据，前提是这些数据与配置的模式之一相匹配
+  @Override
+  public String doLayout(ILoggingEvent event) {
+    return maskMessage(super.doLayout(event));
+  }
+
+  private String maskMessage(String content) {
+    if (multilinePattern == null) {
+      return content;
+    }
+    StringBuilder sb = new StringBuilder(content);
+    Matcher matcher = multilinePattern.matcher(sb);
+    while (matcher.find()) {
+      IntStream.rangeClosed(1, matcher.groupCount()).forEach(group -> {
+        if (matcher.group(group) != null) {
+          //把敏感数据替换为星号
+          IntStream.range(matcher.start(group), matcher.end(group)).forEach(i -> sb.setCharAt(i, '*'));
+        }
+      });
+    }
+    return sb.toString();
+  }
+}
+```
+
+接下来就可以在logback-spring.xml中配置；logback.xml 中的 maskPatterns 列表可构建多行模式。如果它以属性列表的形式出现，那么每个配置项都会调用 addMaskPattern
+
+```xml
+<appender name="mask" class="ch.qos.logback.core.ConsoleAppender">
+  <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+    <layout class="com.pack.sensitive.log.MaskingPatternLayout">
+      <maskPattern>name\s*=\s*(.*?),</maskPattern>
+	  <maskPattern>password\s*=\s*(.*?),</maskPattern>
+      <maskPattern>\"name\"\s*:\s*\"(.*?)\"</maskPattern>
+      <maskPattern>\"phone\"\s*:\s*\"(.*?)\"</maskPattern>
+      <maskPattern>\"password\"\s*:\s*\"(.*?)\"</maskPattern>
+      <maskPattern>([\w.-]+@[\w.-]+\.\w+)</maskPattern>
+      <pattern>%d{22:mm:ss} %-5level %logger Line:%-3L - %msg%n</pattern>
+      <charset>UTF-8</charset>
+    </layout>
+  </encoder>
+</appender>
+```
+
+接口测试
+
+```java
+User user = new User(1L, "张三", "新疆", "1399999999", "123456789", "xxxooo@qq.com") ;
+logger.info("用户信息: {}", new ObjectMapper().writeValueAsString(user)) ;
+logger.info("直接打印对象: {}", user) ;
+```
+
+
+
+## 7、p6spy数据库sql监控
+
+P6Spy 是一个可无缝拦截和记录数据库数据的框架，无需更改现有应用程序的代码。P6Spy 发行版包括 P6Log，这是一个可记录任何 Java 应用程序的所有 JDBC 事务的应用程序
+
+依赖
+
+```xml
+<dependency>
+    <groupId>com.github.gavlyukovskiy</groupId>
+    <artifactId>p6spy-spring-boot-starter</artifactId>
+    <version>1.9.1</version>
+</dependency>
+```
+
+
+
+模仿数据库操作
+
+```java
+@Mapper
+public interface BigTableMapper {
+
+  @Select("select * from big_table limit #{offset}, 10")
+  List<BigTable> query(Integer offset) ;
+
+}
+```
+
+
+
+配置
+
+```yaml
+decorator:
+  datasource:
+    p6spy:
+      # 将日志执行情况输出到日志文件
+      logging: FILE
+      log-file: spy.log
+    #开启记录功能
+    enabled: true
+    datasource-proxy:
+      multiline: true
+      # 慢查询记录
+      slow-query:
+        # 大于1s则认为慢SQL
+        threshold: 1
+        log-level: WARN
+        enable-logging: true
+        logger-name: SLOW
+    p6spy:
+      # 设置日期输出的格式
+      log-format: '%(executionTime)ms|%(category)|connection%(connectionId)|%(sqlSingleLine)'
+```
+
+自定义监听事件
+
+```java
+@Bean
+public JdbcEventListener myListener() {
+  return new JdbcEventListener() {
+    public void onAfterGetConnection(ConnectionInformation connectionInformation, SQLException e) {
+      if (e != null) {
+        System.err.println(e.getMessage()) ;
+      }
+      System.out.println("获取连接") ;
+    }
+    public void onAfterConnectionClose(ConnectionInformation connectionInformation, SQLException e) {
+      System.out.println("关闭连接") ;
+    }
+  } ;
+}
+```
+
+
 
 # 四、Web开发
 
@@ -1327,7 +1466,7 @@ xxxxProperties:配置类来封装配置文件的内容；
 
 
 
-## 2、SpringBoot对静态资源的映射规则；
+## 2、静态资源映射规则
 
 ```java
 @ConfigurationProperties(prefix = "spring.resources", ignoreUnknownFields = false)
@@ -2146,7 +2285,7 @@ URI：  /资源名称/资源标识       HTTP请求方式区分对资源CRUD操�
 
 3）、员工列表：
 
-#### thymeleaf公共页面元素抽取
+
 
 ```html
 1、抽取公共片段
@@ -3213,213 +3352,532 @@ public ConfigurableApplicationContext run(String... args) {
 
 
 
-# 五、Docker
+## 10、给controller提供统一前缀
 
-## 1、简介
+在Spring Boot应用程序中，每个控制器都可以有自己的URL映射。这使得单个应用程序能够在多个位置提供Web接口。例如，我们可以将API接口分组为逻辑分组，如内部和外部
 
-**Docker**是一个开源的应用容器引擎；是一个轻量级容器技术；
+### 基于servlet上下文
 
-Docker支持将软件编译成一个镜像；然后在镜像中各种软件做好配置，将镜像发布出去，其他使用者可以直接使用这个镜像；
+在Spring应用程序中，负责处理Web请求的主要组件是**DispatcherServlet**。通过自定义这个组件，我们可以相当程度地控制请求的路由方式。
 
-运行中的这个镜像称为容器，容器启动是非常快速的。
+```java
+@Configuration
+public class DispatcherServletCustomConfiguration {
 
-![](https://raw.githubusercontent.com/BaiWeiJieKu/BaiWeiJieKu.github.io/master/images/20180303145450.png)
-
-
-
-![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302091831155.png)
-
-## 2、核心概念
-
-docker主机(Host)：安装了Docker程序的机器（Docker直接安装在操作系统之上）；
-
-docker客户端(Client)：连接docker主机进行操作；
-
-docker仓库(Registry)：用来保存各种打包好的软件镜像；
-
-docker镜像(Images)：软件打包好的镜像；放在docker仓库中；
-
-docker容器(Container)：镜像启动后的实例称为一个容器；容器是独立运行的一个或一组应用
-
-![](https://baiweijieku-1253737556.cos.ap-beijing.myqcloud.com/images/202302091831885.png)
-
-使用Docker的步骤：
-
-1）、安装Docker
-
-2）、去Docker仓库找到这个软件对应的镜像；
-
-3）、使用Docker运行这个镜像，这个镜像就会生成一个Docker容器；
-
-4）、对容器的启动停止就是对软件的启动停止；
-
-## 3、安装Docker
-
-#### 1）、安装linux虚拟机
-
-​	1）、VMWare、VirtualBox（安装）；
-
-​	2）、导入虚拟机文件centos7-atguigu.ova；
-
-​	3）、双击启动linux虚拟机;使用  root/ 123456登陆
-
-​	4）、使用客户端连接linux服务器进行命令操作；
-
-​	5）、设置虚拟机网络；
-
-​		桥接网络===选好网卡====接入网线；
-
-​	6）、设置好网络以后使用命令重启虚拟机的网络
-
-```shell
-service network restart
+  @Bean
+  public DispatcherServlet dispatcherServlet() {
+    return new DispatcherServlet() ;
+  }
+  @Bean
+  public ServletRegistrationBean dispatcherServletRegistration() {
+    ServletRegistrationBean registration = new ServletRegistrationBean(
+      dispatcherServlet(), "/api/") ;
+    registration.setName("dispatcherServlet") ;
+    return registration ;
+  }
+}
 ```
 
-​	7）、查看linux的ip地址
+这是使用编程的方式设置了统一的前缀，其实我们还可以通过如下属性配置
 
-```shell
-ip addr
+```yaml
+spring:
+  mvc:
+    servlet:
+      path: /api
 ```
 
-​	8）、使用客户端连接linux；
+这种方式是通过给dispatcherServlet配置路径访问前缀
 
-#### 2）、在linux虚拟机上安装docker
+### 基于配置属性
 
-步骤：
+可以在配置文件中配置统一路径
 
-```shell
-1、检查内核版本，必须是3.10及以上
-uname -r
-2、安装docker
-yum install docker
-3、输入y确认安装
-4、启动docker
-[root@localhost ~]# systemctl start docker
-[root@localhost ~]# docker -v
-Docker version 1.12.6, build 3e8e77d/1.12.6
-5、开机启动docker
-[root@localhost ~]# systemctl enable docker
-Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /usr/lib/systemd/system/docker.service.
-6、停止docker
-systemctl stop docker
+```yaml
+server:
+  servlet:
+    contextPath: /api
 ```
 
-## 4、Docker常用命令&操作
-
-### 1）、镜像操作
-
-| 操作   | 命令                                       | 说明                                  |
-| ---- | ---------------------------------------- | ----------------------------------- |
-| 检索   | docker  search 关键字  eg：docker  search redis | 我们经常去docker  hub上检索镜像的详细信息，如镜像的TAG。 |
-| 拉取   | docker pull 镜像名:tag                      | :tag是可选的，tag表示标签，多为软件的版本，默认是latest  |
-| 列表   | docker images                            | 查看所有本地镜像                            |
-| 删除   | docker rmi image-id                      | 删除指定的本地镜像                           |
-
-https://hub.docker.com/
-
-### 2）、容器操作
-
-软件镜像（QQ安装程序）----运行镜像----产生一个容器（正在运行的软件，运行的QQ）；
-
-步骤：
-
-````shell
-1、搜索镜像
-[root@localhost ~]# docker search tomcat
-2、拉取镜像
-[root@localhost ~]# docker pull tomcat
-3、根据镜像启动容器
-docker run --name mytomcat -d tomcat:latest
-4、docker ps  
-查看运行中的容器
-5、 停止运行中的容器
-docker stop  容器的id
-6、查看所有的容器
-docker ps -a
-7、启动容器
-docker start 容器id
-8、删除一个容器
- docker rm 容器id
-9、启动一个做了端口映射的tomcat
-[root@localhost ~]# docker run -d -p 8888:8080 tomcat
--d：后台运行
--p: 将主机的端口映射到容器的一个端口    主机端口:容器内部的端口
-
-10、为了演示简单关闭了linux的防火墙
-service firewalld status ；查看防火墙状态
-service firewalld stop：关闭防火墙
-11、查看容器的日志
-docker logs container-name/container-id
-
-更多命令参看
-https://docs.docker.com/engine/reference/commandline/docker/
-可以参考每一个镜像的文档
-
-````
+上面介绍的两种方法的主要优点也是它们的主要缺点：它们会影响应用程序中的每个接口。对于一些应用程序来说，这可能完全没问题。然而，一些应用程序可能需要使用标准的端点映射来与第三方服务进行交互——例如OAuth交换。在这些情况下，这样的全局解决方案可能并不合适
 
 
 
-### 3）、安装MySQL示例
+### 基于注解
 
-```shell
-docker pull mysql
+使用 Spring Expression Language (SpEL) 和标准 **@RequestMapping** 注解。使用这种方法，我们只需在每个控制器中添加一个需要前缀的属性
+
+```java
+@Controller
+//配置文件中我们只需要配置上pack.app.apiPrefix属性即可。
+@RequestMapping(path = "${pack.app.apiPrefix}/users")
+public class UserController {
+}
+```
+
+### 基于nginx反向代理
+
+通过Nginx配置反向代理来管理统一的前缀
+
+```
+server {
+  listen              80;
+  server_name         default;
+
+  location /api/ {
+    proxy_set_header Host $host ;
+    proxy_set_header  X-Real-IP        $remote_addr ;
+    proxy_set_header  X-Forwarded-For  $proxy_add_x_forwarded_for ;
+    proxy_set_header X-NginX-Proxy true ;
+
+    rewrite ^/api/(.*)$ /$1 break ;
+    proxy_pass http://www.pack.com ;
+  }
+}
 ```
 
 
 
-错误的启动
+# 五、异步与任务
 
-```shell
-[root@localhost ~]# docker run --name mysql01 -d mysql
-42f09819908bb72dd99ae19e792e0a5d03c48638421fa64cce5f8ba0f40f5846
+#### 异步任务@Aysnc
 
-mysql退出了
-[root@localhost ~]# docker ps -a
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                           PORTS               NAMES
-42f09819908b        mysql               "docker-entrypoint.sh"   34 seconds ago      Exited (1) 33 seconds ago                            mysql01
-538bde63e500        tomcat              "catalina.sh run"        About an hour ago   Exited (143) About an hour ago                       compassionate_
-goldstine
-c4f1ac60b3fc        tomcat              "catalina.sh run"        About an hour ago   Exited (143) About an hour ago                       lonely_fermi
-81ec743a5271        tomcat              "catalina.sh run"        About an hour ago   Exited (143) About an hour ago                       sick_ramanujan
+- 在Java应用中，绝大多数情况下都是通过同步的方式来实现交互处理的；但是在处理与第三方系统交互的时候，容易造成响应迟缓的情况，之前大部分都是使用多线程来完成此类任务，其实，在Spring 3.x之后，就已经内置了@Async来完美解决这个问题。
+- 两个注解：@EnableAysnc、@Aysnc
+- 首先给springboot启动类添加@EnableAysnc注解，开启异步
+- 然后给需要进行异步调用的方法上添加@Aysnc注解就可以了
 
+关于异步任务Spring内置了非常多的内置实现，你几乎不需要自己去实现。
 
-//错误日志
-[root@localhost ~]# docker logs 42f09819908b
-error: database is uninitialized and password option is not specified 
-  You need to specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD；这个三个参数必须指定一个
+- SyncTaskExecutor：主要应用于测试，同步执行也就是在调用者线程中执行。
+- SimpleAsyncTaskExecutor：每次调用启动一个新线程，不过它支持并发执行，你可以设置并发数。
+- ConcurrentTaskExecutor：一般很少直接使用。
+- ThreadPoolTaskExecutor：最为常用，它公开了JUC中ThreadPoolExecutor的属性，你可以通过bean属性方式进行配置。
+
+配置异步任务线程池
+
+```java
+@Bean
+public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
+  ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor() ;
+  executor.setCorePoolSize(5) ;
+  executor.setMaxPoolSize(5) ;
+  executor.setQueueCapacity(20) ;
+  return executor ;
+}
 ```
 
-正确的启动
+定义异步任务
 
-```shell
-[root@localhost ~]# docker run --name mysql01 -e MYSQL_ROOT_PASSWORD=123456 -d mysql
-b874c56bec49fb43024b3805ab51e9097da779f2f572c22c695305dedd684c5f
-[root@localhost ~]# docker ps
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
-b874c56bec49        mysql               "docker-entrypoint.sh"   4 seconds ago       Up 3 seconds        3306/tcp            mysql01
+```java
+@Resource
+private ThreadPoolTaskExecutor threadPoolTaskExecutor ;
+@Async
+public void async1() {
+  System.err.printf("%s, 异步任务async1执行...%n", Thread.currentThread().getName()) ;
+}
+
+//stop和start方法是Spring6.1新增的新功能，用来停止和暂停异步任务,内部是通过JUC中的Lock锁实现的
+
+
+// 停止异步任务;如果你的异步任务是个耗时任务，那么正在执行的异步任务是不会暂停的，只是新任务不会执行
+public void stop() {
+  this.threadPoolTaskExecutor.stop(() -> {
+    System.err.println("异步任务成功停止...") ;
+  }) ;
+}
+// 恢复异步任务
+public void start() {
+  this.threadPoolTaskExecutor.start() ;
+}
 ```
 
-做了端口映射
 
-```shell
-[root@localhost ~]# docker run -p 3306:3306 --name mysql02 -e MYSQL_ROOT_PASSWORD=123456 -d mysql
-ad10e4bc5c6a0f61cbad43898de71d366117d120e39db651844c0e73863b9434
-[root@localhost ~]# docker ps
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES
-ad10e4bc5c6a        mysql               "docker-entrypoint.sh"   4 seconds ago       Up 2 seconds        0.0.0.0:3306->3306/tcp   mysql02
+
+#### 定时任务@Scheduled
+
+- 项目开发中经常需要执行一些定时任务，比如需要在每天凌晨时候，分析一次前一天的日志信息。
+- Spring为我们提供了异步执行任务调度的方式，提供**TaskExecutor** 、**TaskScheduler** 接口。
+- 两个注解：@EnableScheduling、@Scheduled
+- Spring Boot定时任务的执行原理，其核心先通过ScheduledAnnotationBeanPostProcessor处理器，找到所有的Bean中使用了@Scheduled注解的方法，然后将对应的方法包装到Runnable中
+- 在默认情况下，Spring Boot定时任务的执行线程池使用的是**ThreadPoolTaskSchedulerBean**。内部真正任务调用是通过**ScheduledExecutorService**执行定时任务
+
+@Scheduled支持以下8个参数
+
+- `cron`：表达式，指定任务在特定时间执行；
+- 2.`fixedDelay`：表示上一次任务执行完成后多久再次执行，参数类型为long，单位ms；
+- 3.`fixedDelayString`：与fixedDelay含义一样，只是参数类型变为String；
+- 4.`fixedRate`：表示按一定的频率执行任务，即每次开始执行的时间间隔一致，参数类型为long，单位ms；
+- 5.`fixedRateString`：与fixedRate的含义一样，只是将参数类型变为String；
+- 6.`initialDelay`：表示延迟多久再第一次执行任务，参数类型为long，单位ms；
+- 7.`initialDelayString`：与initialDelay的含义一样，只是将参数类型变为String；
+- 8.`zone`：时区，默认为当前时区。
+
+- cron表达式：
+
+| 字段 | 允许值                       | 允许的特殊字符  |
+| ---- | ---------------------------- | --------------- |
+| 秒   | 0-59                         | , - * /         |
+| 分   | 0-59                         | , - * /         |
+| 小时 | 0-23                         | , - * /         |
+| 日期 | 1-31整数（需要考虑月的天数） | , - * ? / L W C |
+| 月份 | 1-12整数 或 JAN-DEC          | , - * /         |
+| 星期 | 1-7整数 或 SUN-SAT           | , - * ? / L C # |
+
+| 特殊字符 | 代表含义                                                     |
+| -------- | ------------------------------------------------------------ |
+| ,        | 表示列出枚举值。例如：在minutes域使用5,20，则意味着在5分和20分时各触发一次。 |
+| -        | 表示范围。例如在minutes域使用5-20，表示从5分到20分钟每分钟触发一次 |
+| *        | 表示匹配该域的任意值。在minutes域使用 * 表示每分钟。在months里表示每个月。在daysOfWeek域表示一周的每一天。 |
+| /        | 表示起始时间开始触发，然后每隔固定时间触发一次。例如在minutes域使用5/20，则意味着从当前小时的第5分钟开每20分钟触发一次。 |
+| ?        | 只能用在daysofMonth和daysofWeek两个域，表示不指定值，当两个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为 ？。因为daysofMonth和daysofWeek会相互影响。例如想在每月的2号触发调度，不管2号是周几，则只能使用如下写法：0 0 0 2 * ?, 其中最后一位只能用?，而不能使用*，如果使用*表示不管周几都会触发。 |
+| L        | 表示最后，是单词“last”的缩写，只能出现在daysofWeek和dayofMonth域。在daysofWeek域使用5L意思是在指定月的最后的一个星期四触发。在dayofMonth域使用5L或者FRIL意思是在指定月的倒数第5天触发。在使用L参数时，不要指定列表或范围。 |
+| W        | 表示有效工作日(周一到周五),只能出现在daysofMonth域，系统将在离指定日期的最近的有效工作日触发事件。例如：在daysofMonth使用5W，如果5号是周六，则将在最近的工作日周五，即4号触发。如果5号是周日，则在6日(周一)触发。如果5日在星期一到星期五中的一天，则就在5日触发。另外，W的最近寻找不会跨过月份 。 |
+| C        | 和calendar联系后计算过的值                                   |
+| #        | 用于确定每个月第几个周几，只能出现在daysofMonth域。例如在4#2，表示某月的第二个周三。 |
+
+
+
+生成器工具地址-[http://cron.qqe2.com/](https://cron.qqe2.com/)
+
+
+
+
+
+使用@Scheduled注意事项:
+
+- spring的注解@Scheduled 需要写在实现方法上；
+- 定时器的任务方法不能有返回值（如果有返回值，spring初始化的时候会告诉你有个错误、需要设定一个proxytargetclass的某个值为true），不能指向任何的参数；
+- 如果该方法需要与应用程序上下文的其他对象进行交互，通常是通过依赖注入来实现；
+- 实现类上要有组件的注解@Component或者其他组件注解。
+
+- 首先启动类加入@EnableScheduling注解
+
+
+
+配置线程
+
+```java
+@Bean
+ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+  ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler() ;
+  scheduler.setPoolSize(5) ;
+  scheduler.setThreadNamePrefix("scheduler-pack-") ;
+  return scheduler ;
+}
+```
+
+编写需要定时执行的方法
+
+```java
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ScheduledService {
+    @Resource
+	private ThreadPoolTaskScheduler threadPoolTaskScheduler ;
+
+    /**
+     * second(秒), minute（分）, hour（时）, day of month（日）, month（月）, day of week（周几）.
+     * 0 * * * * MON-FRI
+     *  【0 0/5 14,18 * * ?】 每天14点整，和18点整，每隔5分钟执行一次
+     *  【0 15 10 ? * 1-6】 每个月的周一至周六10:15分执行一次
+     *  【0 0 2 ? * 6L】每个月的最后一个周六凌晨2点执行一次
+     *  【0 0 2 LW * ?】每个月的最后一个工作日凌晨2点执行一次
+     *  【0 0 2-4 ? * 1#1】每个月的第一个周一凌晨2点到4点期间，每个整点都执行一次；
+     */
+   // @Scheduled(cron = "0 * * * * MON-SAT")
+    //@Scheduled(cron = "0,1,2,3,4 * * * * MON-SAT")
+   // @Scheduled(cron = "0-4 * * * * MON-SAT")
+    @Scheduled(cron = "0/4 * * * * MON-SAT")  //每4秒执行一次
+    public void hello(){
+        System.out.println("hello ... ");
+    }
+    
+    
+
+    @Scheduled(fixedRate = 3000)
+    public void scheduler() {
+      System.err.printf("%s, 定时任务开始执行...%n", Thread.currentThread().getName()) ;
+    }
+    public void stop() {
+      this.threadPoolTaskScheduler.stop(() -> {
+        System.err.println("定时任务成功停止...") ;
+      }) ;
+    }
+    public void start() {
+      this.threadPoolTaskScheduler.start() ;
+    }
+}
 ```
 
 
 
-几个其他的高级操作
+@Schedule注解的一个缺点就是其定时时间不能动态更改，它适用于具有固定任务周期的任务，若要修改任务执行周期，只能走“停服务→修改任务执行周期→重启服务”这条路。而基于 SchedulingConfigurer 接口方式可以做到。SchedulingConfigurer 接口可以实现在@Configuration等注解类上。
+
+```java
+@Component
+public class TestTask implements SchedulingConfigurer {
+  
+  @Override
+  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+    taskRegistrar.addTriggerTask(new Runnable() {
+      @Override
+      public void run() {
+        // 定时任务要执行的内容
+        System.out.println("【开始执行定时任务。。。】");
+      }
+    }, new Trigger() {
+      @Override
+      public Date nextExecutionTime(TriggerContext triggerContext) {
+        // 定时任务触发，可修改定时任务的执行周期
+        //可以将表达式配置在数据库中
+        String cron = "0 0/5 * * * ?"; 
+        CronTrigger trigger = new CronTrigger(cron);
+        Date nextExecDate = trigger.nextExecutionTime(triggerContext);
+        return nextExecDate;
+      }
+    });
+  }
+}
+
+/*
+ScheduledTaskRegistrar类包括以下几个重要方法：
+void addTriggerTask(Runnable task, Trigger trigger)
+void addTriggerTask(TriggerTask task)
+void addCronTask(Runnable task, String expression)
+void addCronTask(CronTask task)
+void addFixedRateTask(Runnable task, long interval)
+void addFixedRateTask(IntervalTask task)
+void addFixedDelayTask(Runnable task, long delay)
+void addFixedDelayTask(IntervalTask task)
+*/
+
+//提示：如果在数据库修改时格式出现错误，则定时任务会停止，即使重新修改正确；此时只能重新启动项目才能恢复。
+```
+
+
+
+单线程任务丢失，转为异步线程池
+
+默认的 ConcurrentTaskScheduler 计划执行器采用Executors.newSingleThreadScheduledExecutor() 实现单线程的执行器。因此，对同一个调度任务的执行总是同一个线程。如果任务的执行时间超过该任务的下一次执行时间，则会出现任务丢失，跳过该段时间的任务。上述问题有以下解决办法：
+
+采用异步的方式执行调度任务，配置 Spring 的 @EnableAsync，在执行定时任务的方法上标注 @Async配置任务执行池
+
+```java
+//每30秒执行一次
+@Async("taskExecutor")
+@Scheduled(fixedRate = 1000 * 3)
+public void reportCurrentTime(){
+  System.out.println ("线程" + Thread.currentThread().getName() + "开始执行定时任务===&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7&&&====》"
+      + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+  long start = System.currentTimeMillis();
+}
+```
+
+##### 动态管理任务
+
+要实现动态管理任务，就需要记录下每个任务信息。记录任务信息是为了停止任务及再次启动任务，在调度方法都返回了Future对象，可以通过该Future对象来终止任务，可以通过再次调用schedule方法来再次启动任务。所以，我们需要自定义TaskScheduler，在自定义的实现中我们就能很方便的记录管理每个定时任务
+
+首先要自定义一个注解，用来说明任务
+
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Task {
+  /**任务名称*/
+  String value() default "" ;
+}
+```
+
+任务信息实体，该类用来在执行任务前记录当前的信息，以便可以对任务进行停止和重启。
+
+```java
+public class TaskInfo {
+  private Runnable task ;
+  private Instant startTime ;
+  private Trigger trigger ;
+  private Duration period ;
+  private Duration delay ;
+  private ScheduledFuture<?> future ;
+}
+```
+
+自定义线程池
+
+该类的核心作用就2个：
+
+重写任务调度方法，记录任务信息
+
+添加停止/重启任务调度
+
+也可以考虑在该类中实现任务的持久化。
+
+```java
+@Component
+public class PackTaskScheduler extends ThreadPoolTaskScheduler {
+  
+  private static final Map<String, TaskInfo> TASK = new ConcurrentHashMap<>() ;
+  @Override
+  public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
+    ScheduledFuture<?> schedule = super.schedule(task, trigger) ;
+    if (task instanceof ScheduledMethodRunnable smr) {
+      String taskName = parseTask(smr);
+      TASK.put(taskName, new TaskInfo(task, null, trigger, null, null, schedule)) ;
+    }
+    return schedule ;
+  }
+  // 还有其它重写的方法，自行实现
+  private String parseTask(ScheduledMethodRunnable smr) {
+    Method method = smr.getMethod();
+    Task t = method.getAnnotation(Task.class) ;
+    String taskName = method.getName() ; 
+    if (t != null) {
+      String value = t.value() ;
+      if (StringUtils.hasLength(value)) {
+        taskName = value ;
+      }
+    }
+    return taskName ;
+  }
+
+  public void stop(String taskName) {
+    TaskInfo task = TASK.get(taskName) ;
+    if (task != null) {
+      task.getFuture().cancel(true) ;
+    }
+  }
+  public void start(String taskName) {
+    TaskInfo task = TASK.get(taskName) ;
+    if (task != null) {
+      if (task.trigger != null) {
+        this.schedule(task.getTask(), task.getTrigger()) ;
+      }
+      if (task.period != null) {
+        this.scheduleAtFixedRate(task.getTask(), task.getPeriod()) ;
+      }
+    }
+  }
+}
+```
+
+定义一个任务
+
+```java
+@Scheduled(cron = "*/3 * * * * *")
+@Task("测试定时任务-01")
+public void scheduler() throws Exception {
+  System.err.printf("当前时间: %s, 当前线程: %s, 是否虚拟线程: %b%n", new SimpleDateFormat("HH:mm:ss").format(new Date()), Thread.currentThread().getName(), Thread.currentThread().isVirtual()) ;
+}
+```
+
+进行测试
+
+```java
+@Resource
+private PackTaskScheduler packTaskScheduler ;
+
+@GetMapping("stop")
+public Object stop(String taskName) {
+  this.packTaskScheduler.stop(taskName) ;
+  return String.format("停止任务【%s】成功", taskName) ;
+}
+@GetMapping("/start") 
+public Object start(String taskName) {
+  this.packTaskScheduler.start(taskName) ;
+  return String.format("启动任务【%s】成功", taskName) ; 
+}
+```
+
+分别调用上面2个方法可以对具体的任务进行停止及重启。
+
+
+
+##### 配置多任务动态cron(增删启停)
+
+https://www.jb51.net/article/207667.htm
+
+
+
+#### 分布式定时任务（Redis）
+
+依赖
+
+```xml
+<!-- shedlock: 分布式定时任务锁 -->
+<!-- https://mvnrepository.com/artifact/net.javacrumbs.shedlock/shedlock-spring -->
+<dependency>
+    <groupId>net.javacrumbs.shedlock</groupId>
+    <artifactId>shedlock-spring</artifactId>
+    <version>4.29.0</version>
+</dependency>
+<!-- 使用redis做分布式任务 -->
+<!-- https://mvnrepository.com/artifact/net.javacrumbs.shedlock/shedlock-provider-redis-spring -->
+<dependency>
+    <groupId>net.javacrumbs.shedlock</groupId>
+    <artifactId>shedlock-provider-redis-spring</artifactId>
+    <version>4.29.0</version>
+</dependency>
 
 ```
-docker run --name mysql03 -v /conf/mysql:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
-把主机的/conf/mysql文件夹挂载到 mysqldocker容器的/etc/mysql/conf.d文件夹里面
-改mysql的配置文件就只需要把mysql配置文件放在自定义的文件夹下（/conf/mysql）
 
-docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-指定mysql的一些配置参数
+
+
+Shedlock配置类
+
+```java
+@Configuration
+// 开启定时器
+@EnableScheduling
+// 开启定时任务锁，并设置默认锁最大时间为30分钟(PT为固定格式，M为时间单位-分钟)
+@EnableSchedulerLock(defaultLockAtMostFor = "PT30M")
+public class ShedlockConfig {
+
+    @Value("${spring.profiles.active}")
+    private String env;
+
+    /**
+     * 使用redis存储
+     */
+    @Bean
+    public LockProvider lockProvider(RedisTemplate redisTemplate) {
+        // keyPrefix: redis key的前缀
+        // env和keyPrefix 主要用于区分数据来源，保证最终redis-key在使用时不串用即可  ex=> keyPrefix:dev:scheduledTaskName
+        return new RedisLockProvider(redisTemplate.getConnectionFactory(), env, "keyPrefix");
+    }
+
+}
+
+```
+
+
+
+编写定时任务
+
+```java
+@Slf4j
+@Component
+public class Timer {
+
+    /**
+     * 每5秒执行一次
+     *
+     * @SchedulerLock 注解参数
+     * name：锁的名称，同一时间只能执行一个同名的任务
+     * lockAtMostFor：该属性指定在执行节点死亡的情况下应保持锁定多长时间。这只是一个回退，在正常情况下，一旦任务完成就会释放锁。 您必须设置lockAtMostFor一个比正常执行时间长得多的值。如果任务花费的时间超过 lockAtMostFor所产生的行为可能是不可预测的（多个进程将有效地持有锁）
+     * lockAtLeastFor：该属性指定应保留锁的最短时间。它的主要目的是在节点之间的任务和时钟差异非常短的情况下防止从多个节点执行。
+     * <p>
+     * 通过设置lockAtMostFor我们确保即使节点死亡也会释放锁，通过设置lockAtLeastFor 我们确保它在5s内不会执行超过一次。请注意，这lockAtMostFor只是一个安全网，以防执行任务的节点死亡，因此将其设置为明显大于最大估计执行时间的时间。 如果任务花费的时间超过lockAtMostFor，它可能会再次执行并且结果将是不可预测的（更多的进程将持有锁）。
+     */
+    @Scheduled(cron = "*/5 * * * * ?")
+    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "4s", lockAtLeastFor = "4s")
+    public void printCurrentTime() {
+        log.info("现在时间：【{}】", DateTime.now());
+    }
+
+}
+
 ```
 
 
