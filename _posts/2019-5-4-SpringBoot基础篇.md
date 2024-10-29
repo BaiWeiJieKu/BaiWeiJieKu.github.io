@@ -3438,6 +3438,90 @@ server {
 
 
 
+## 11、CORS跨域处理
+
+使用注解
+
+```java
+@RestController
+@RequestMapping("/accounts")
+public class AccountController {
+
+  // @CrossOrigin注释允许对带注释的控制器方法进行跨域请求
+  @CrossOrigin
+  @GetMapping("/{id}")
+  public Account retrieve(@PathVariable Long id) {
+    // ...
+  }
+  @DeleteMapping("/{id}")
+  public void remove(@PathVariable Long id) {
+    // ...
+  }
+}
+```
+
+全局配置
+
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/api/**")
+      .allowedOrigins("http://www.pack.com")
+      .allowedMethods("PUT", "DELETE")
+      .allowedHeaders("header1", "header2", "header3")
+      .exposedHeaders("header1", "header2")
+      .allowCredentials(true).maxAge(3600) ;
+  }
+}
+```
+
+
+
+通过内置过滤器实现
+
+```java
+@Bean
+public CorsFilter corsFilter() {
+  CorsConfiguration config = new CorsConfiguration() ;
+  config.setAllowCredentials(true) ;
+  config.addAllowedOrigin("http://www.pack.com") ;
+  config.addAllowedHeader("*") ;
+  config.addAllowedMethod("*") ;
+  UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource() ;
+  source.registerCorsConfiguration("/**", config) ;
+  CorsFilter filter = new CorsFilter(source) ;
+  return filter ;
+}
+```
+
+自定义过滤器实现
+
+```java
+@WebFilter("/*")
+public class WebCORSFilter implements Filter {
+
+  public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+      throws IOException, ServletException {
+    HttpServletResponse response = (HttpServletResponse) res ;
+    HttpServletRequest request = (HttpServletRequest) req ;
+    String origin = request.getHeader("Origin") ;
+    request.setCharacterEncoding("UTF-8") ;
+    response.setHeader("Access-Control-Allow-Origin", origin) ;
+    response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT") ;
+    response.setHeader("Access-Control-Max-Age", "3600");
+    response.setHeader("Access-Control-Allow-Credentials", "true") ;
+    response.setHeader("Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Account, access-token") ;
+    chain.doFilter(req, res) ;
+  }
+}
+```
+
+
+
 # 五、异步与任务
 
 #### 异步任务@Aysnc
@@ -3453,6 +3537,22 @@ server {
 - SimpleAsyncTaskExecutor：每次调用启动一个新线程，不过它支持并发执行，你可以设置并发数。
 - ConcurrentTaskExecutor：一般很少直接使用。
 - ThreadPoolTaskExecutor：最为常用，它公开了JUC中ThreadPoolExecutor的属性，你可以通过bean属性方式进行配置。
+
+配置默认参数
+
+```yaml
+spring:
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 20
+        queue-capacity: 100
+```
+
+
+
+
 
 配置异步任务线程池
 
@@ -3491,6 +3591,68 @@ public void start() {
   this.threadPoolTaskExecutor.start() ;
 }
 ```
+
+异步任务指定线程池
+
+```java
+@Bean
+ThreadPoolTaskExecutor taskExecutor1() {
+  ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor() ;
+  // 线程池配置
+  return executor ;
+}
+
+// 指定任务要在哪个线程池中运行
+@Async("taskExecutor1")
+public void task4() throws Exception {
+  // 任务
+}
+```
+
+异步任务异常处理
+
+```java
+@Component
+public class PackAsyncConfigurer implements AsyncConfigurer {
+
+  public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+    return new AsyncUncaughtExceptionHandler() {
+      @Override
+      public void handleUncaughtException(Throwable ex, Method method, Object... params) {
+        // TODO
+        System.err.printf("异步任务: %s发生异常, 错误消息: %s%n", method.getDeclaringClass() + "#" + method.getName(), ex.getMessage()) ;
+      }
+    };
+  }
+}
+```
+
+
+
+异步任务获取返回值
+
+```java
+@Async
+public CompletableFuture<String> runTask() throws Exception  {
+  System.err.printf("当前执行的线程: %s%n", Thread.currentThread().getName()) ;
+  // 模拟任务执行
+  TimeUnit.SECONDS.sleep(1) ;
+  return CompletableFuture.completedFuture("数据获取成功") ;
+}
+
+public void task() throws Throwable {
+  System.out.printf("%s start...%n", Thread.currentThread().getName()) ;
+  CompletableFuture<String> task = this.taskServie.runTask() ;
+  String ret = task.join() ;
+  System.out.printf("获取结果: %s%n", ret) ;
+  System.out.printf("%s end...%n", Thread.currentThread().getName()) ;
+}
+
+```
+
+
+
+
 
 
 
