@@ -1945,7 +1945,7 @@ public class WebMvcAutoConfiguration {
 
 
 
-## 5、如何修改SpringBoot的默认配置
+## 5、修改SpringBoot的默认配置
 
 模式：
 
@@ -3520,7 +3520,18 @@ public class WebCORSFilter implements Filter {
 }
 ```
 
+## 12、排除不需要构建的bean
 
+有时候在引入jar包的时候，jar包内有一些自定义的bean，但是我们用不到，不处理的话在启动程序构建bean会报错，所以我们需要排除掉
+
+```java
+@ComponentScan( basePackages = {"com"},excludeFilters ={
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {AppPropertyPlaceholderConfigurer.class, KafkaProducerService.class})})
+@SpringBootApplication
+public class ProviderApplication {}
+```
+
+在扫描com包的时候，排除AppPropertyPlaceholderConfigurer和KafkaProducerService的构建
 
 # 五、异步与任务
 
