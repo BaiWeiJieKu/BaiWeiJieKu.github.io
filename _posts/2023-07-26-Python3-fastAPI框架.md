@@ -18,6 +18,89 @@ music-id: 29393038
 
 
 
+## 环境隔离
+
+类似于Java的jdk和引用的包
+
+### venv工具
+
+venv是Python 3.3及以上版本内置的虚拟环境工具，适合轻量级的环境隔离。使用方法包括创建虚拟环境、激活虚拟环境和安装依赖。优点是内置于Python中，无需额外安装，适合简单项目。缺点是只能管理Python包，无法管理非Python依赖‌
+
+
+
+1:创建虚拟环境
+
+首先，确保你的项目目录下有一个虚拟环境。你可以使用`venv`模块来创建一个。例如，如果你的项目目录是`my_project`，你可以这样创建虚拟环境：
+
+```
+# 在项目目录下创建虚拟环境
+cd my_project
+python -m venv venv
+```
+
+2:：激活虚拟环境
+
+创建虚拟环境后，你需要激活它。激活方法根据操作系统有所不同：
+
+```
+win
+.\venv\Scripts\activate
+
+linux,macos命令：
+source venv/bin/activate
+```
+
+激活后，你的命令行提示符前会显示虚拟环境的名称，表示你已经进入了该虚拟环境。
+
+
+
+3：安装依赖
+
+激活虚拟环境后，你可以使用`pip`来安装项目的依赖。假设你的项目依赖列表在`requirements.txt`文件中，你可以这样安装：
+
+```
+pip install -r requirements.txt
+```
+
+如果你需要安装单个包，比如`requests`，可以使用：
+
+```
+pip install requests
+
+卸载依赖
+pip uninstall requests
+```
+
+4：验证安装
+
+安装完成后，你可以通过运行以下命令来检查是否成功安装了依赖：
+
+```
+pip list
+这会列出所有已安装的包及其版本。你应该能在列表中找到你刚刚安装的包。
+
+```
+
+5：退出虚拟环境
+
+当你完成工作并想退出虚拟环境时，可以简单地运行：
+
+```
+deactivate
+```
+
+这样，你就退出了当前激活的虚拟环境，回到了系统默认的Python环境。
+
+
+
+### virtualenv
+
+virtualenv是一个第三方工具，支持Python 2和Python 3，功能比venv更强大。使用方法包括安装virtualenv、创建虚拟环境和激活虚拟环境。优点是支持Python 2和Python 3，功能丰富。缺点是需要额外安装‌
+
+### conda工具
+
+conda是Anaconda/Miniconda提供的环境管理工具，不仅可以管理Python包，还可以管理非Python依赖，适合数据科学和机器学习项目。使用方法包括创建虚拟环境、激活虚拟环境和安装依赖。优点是支持Python和非Python依赖，适合复杂项目‌
+
 ## 导出依赖
 
 导出项目中使用的依赖和版本
