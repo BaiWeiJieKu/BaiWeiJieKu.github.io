@@ -10,19 +10,14 @@ music-id: 3136952023
 * content
 {:toc}
 
-
 ## 查询操作
 
-
-
 ### 根据字段查询
-
-
 
 ﻿这里主要会使用Query + Criteria 来完成
 
 ```java
-	private static final String COLLECTION_NAME = "demo";
+    private static final String COLLECTION_NAME = "demo";
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -42,8 +37,6 @@ music-id: 3136952023
     }
 ```
 
-
-
 ### and多条件查询
 
 如果要同时满足多个条件，需要利用and来衔接多个查询条件
@@ -53,8 +46,6 @@ Query query = new Query(Criteria.where("user").is("一灰灰blog").and("age").is
 Map result = mongoTemplate.findOne(query, Map.class, COLLECTION_NAME);
 System.out.println("query: " + query + " | andQuery: " + result);
 ```
-
-
 
 ### or或查询
 
@@ -76,8 +67,6 @@ public void orQuery() {
 }
 ```
 
-
-
 ### in查询
 
 包含条件
@@ -90,8 +79,6 @@ public void inQuery() {
     System.out.println("query: " + query + " | inQuery: " + result);
 }
 ```
-
-
 
 ### 数值比较
 
@@ -111,8 +98,6 @@ public void compareBigQuery() {
 }
 ```
 
-
-
 ### 正则查询
 
 不常用
@@ -125,8 +110,6 @@ public void regexQuery() {
 }
 ```
 
-
-
 ### 数量查询
 
 统计常用
@@ -138,8 +121,6 @@ public void countQuery() {
     System.out.println("query: " + query + " | cnt " + cnt);
 }
 ```
-
-
 
 ### 分组查询
 
@@ -155,8 +136,6 @@ public void groupQuery() {
 }
 ```
 
-
-
 ### 排序
 
 比较常用的sort，对于没有这个字段的document也被查出来了
@@ -169,8 +148,6 @@ public void sortQuery() {
     System.out.println("query: " + query + " | sortQuery " + result);
 }
 ```
-
-
 
 ### 分页查询
 
@@ -190,8 +167,6 @@ public void pageQuery() {
     System.out.println("query: " + query + " | skipPageQuery " + result);
 }
 ```
-
-
 
 ## 新增操作
 
@@ -215,11 +190,7 @@ public void upsertNoMatch() {
 }
 ```
 
-
-
 ## 修改操作
-
-
 
 ### 常用
 
@@ -238,10 +209,7 @@ public void upsertNoMatch() {
           "value" : "升职加薪，迎娶白富美"
       }
 }
-  
 ```
-
-
 
 ```java
 // 1. 直接修改值的内容
@@ -281,8 +249,6 @@ Update update = new Update().unset("new-skill");
 mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
 ```
 
-
-
 ### 数组操作
 
 ```java
@@ -291,39 +257,34 @@ private void addData2Array(Query query) {
     String insert = "新添加>>" + System.currentTimeMillis();
     Update update = new Update().addToSet("add", insert);
     mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
-   
+
 
     // push 新增元素，允许出现重复的数据
     update = new Update().push("add", 10);
     mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
-    
-    
+
+
     // 批量插入数据到数组中, 注意不会将重复的数据丢入mongo数组中
     Update update = new Update().addToSet("add").each("2", "2", "3");
     mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
-    
-    
+
+
     // 删除数组中元素
     Update update = new Update().pull("add", "2");
     mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
-    
-    
+
+
     // 使用set，field.index 来更新数组中的值
     // 更新数组中的元素，如果元素存在，则直接更新；如果数组个数小于待更新的索引位置，则前面补null
     Update update = new Update().set("add.1", "updateField");
     mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
-    
+
 
     update = new Update().set("add.10", "nullBefore");
     mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
-    
+
 }
-
-
-
 ```
-
-
 
 ### 文档操作
 
@@ -342,4 +303,3 @@ private void addData2Array(Query query) {
     Update update = new Update().unset("doc.title");
     mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
 ```
-

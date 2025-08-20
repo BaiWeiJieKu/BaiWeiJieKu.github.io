@@ -1,14 +1,171 @@
 ---
 layout: post
-title: "javaPOI操作Excel"
-categories: javaPOI
-tags: POI Excel
+title: "springboot操作Excel"
+categories: springBoot
+tags: Excel springBoot
 author: 百味皆苦
 music-id: 2602106546
 ---
 
 * content
 {:toc}
+## EasyExcel&FastExcel
+
+### starter
+
+EasyExcel (FastExcel)是一个基于 Java 的开源项目，旨在高效、低内存占用地处理 Excel 文件。它能够在节省内存的同时，支持读写大体积（百兆级）的 Excel 文件。
+
+springboot整合fastExcel为starter：https://www.yuque.com/pig4cloud/excel
+
+
+
+### 写Excel
+
+创建一个工作簿，其中包含一张工作表和几个单元格，单元格中包含不同的支持数据类型。
+
+```java
+try (OutputStream os = new FileOutputStream("spring.xlsx");
+    Workbook wb = new Workbook(os, "Spring实战案例", "1.0");) {
+  Worksheet ws = wb.newWorksheet("实战案例") ;
+  ws.value(0, 0, "Spring Boot3实战案例");
+  ws.value(0, 1, LocalDate.now());
+  ws.value(0, 2, "spring") ;
+  ws.value(0, 3, 70D);
+}
+```
+
+基本属性设置
+
+```java
+wb.properties()
+  .setTitle("title property")
+  .setCategory("category property")
+  .setSubject("subject property")
+  .setKeywords("keywords property")
+  .setDescription("description property")
+  .setManager("manager property")
+  .setCompany("company property")
+  .setHyperlinkBase("hyperlinkBase property");
+```
+
+样式和格式设置
+
+```java
+//将单元格样式设置为加粗并使用预定义的填充模式
+ws.style(0, 0).bold().fill(Fill.GRAY125).set();
+
+//为包含时间戳的单元格应用格式
+ws.value(0, 0, LocalDateTime.now());
+ws.style(0, 0).format("yyyy-MM-dd H:mm:ss").set();
+
+//对单元格应用表达式类型的条件格式
+ws.style(0, 0).fillColor("FF8800").set(new ConditionalFormattingExpressionRule("LENB(A1)>1", true));
+
+//在单元格中旋转文本
+ws.style(0, 0).rotation(90).set();
+
+//设置全局默认字体
+wb.setGlobalDefaultFont("Arial", 15.5);
+```
+
+单元格设置
+
+```java
+//为单元格范围设置样式
+ws.range(0, 0, 10, 10).style().horizontalAlignment("center").italic().set();
+//合并单元格
+ws.range(0, 0, 10, 10).merge();
+//为交替行设置阴影效果
+ws.range(0, 0, 10, 10).style().shadeAlternateRows(Color.GRAY2).set();
+```
+
+公式设置
+
+```java
+//在生成的工作簿中，带有公式的单元格不会显示计算后的值
+ws.formula(10, 0, "SUM(A1:A10)");
+// 使用 Range.toString() 方法：
+ws.formula(10, 0, "SUM(" + ws.range(0, 0, 9, 0).toString() + ")");
+```
+
+超链接设置
+
+```java
+// 向单个单元格插入超链接，显示文本为"Baidu"
+ws.hyperlink(0, 0, new HyperLink("https://wwww.baidu.com", "Baidu")); 
+// 向单元格范围插入超链接，显示文本为"dev_folder"
+ws.range(1, 0, 1, 1).setHyperlink(new HyperLink("./dev_soft/test.pdf", "dev_folder"));  
+```
+
+其他设置(https://github.com/dhatim/fastexcel)
+
+```java
+//设置工作表标签颜色
+ws.setTabColor("F381E0");
+//使工作表保持在活动标签页状态
+ws.keepInActiveTab();
+//设置纸张大小和页面方向（在打印预览模式下可见）
+ws.paperSize(PaperSize.A4_PAPER);
+// 横向布局
+ws.pageOrientation("landscape"); 
+//设置下、上、左或右边距
+// 左边距
+ws.leftMargin(0.3);  
+// 下边距
+ws.bottomMargin(0.2);  
+
+//创建冻结窗格（滚动时部分行和列将保持固定）
+//冻结左侧第一列和顶部三行
+ws.freezePane(1, 3);
+```
+
+### 读取Excel
+
+fastexcel的读取模块是Apache POI的流式替代方案。它仅读取单元格内容，忽略样式、图表及许多其他元素。其API设计比Apache POI的流式API更简洁。
+
+```java
+try (InputStream is = new FileInputStream(new File("spring.xlsx")); 
+    ReadableWorkbook wb = new ReadableWorkbook(is)) {
+  Sheet sheet = wb.getFirstSheet();
+  try (Stream<Row> rows = sheet.openStream()) {
+    rows.forEach(r -> {
+      String c1 = r.getCellAsString(0).get() ;
+      LocalDateTime c2 = r.getCellAsDate(1).get() ;
+      String c3 = r.getCellAsString(2).get() ;
+      BigDecimal c4 = r.getCellAsNumber(3).get() ;
+      System.err.println(c1 + ", " + c2 + "," + c3 + ", " + c4) ;
+    });
+  }
+}
+
+@PostMapping
+public ResponseEntity<?> read(@RequestParam MultipartFile file) {
+  try (ReadableWorkbook wb = new ReadableWorkbook(file.getInputStream())) {
+    Sheet sheet = wb.getFirstSheet();
+    try (Stream<Row> rows = sheet.openStream()) {
+      rows.forEach(r -> {
+        String c2 = r.getCellAsString(1).get() ;
+        String c3 = r.getCellAsString(2).get() ;
+        System.err.println(c2 + "," + c3 ) ;
+      });
+    }
+  } catch (Exception e) {
+    e.printStackTrace();
+  }
+  return ResponseEntity.ok("success") ;
+}
+
+
+// 读取所有行到列表
+List<Row> rows = sheet.read(); 
+```
+
+
+
+
+
+## POI操作Excel
+
 ### 创建工作簿
 
 - `poi-3.9-20121203.jar`

@@ -973,6 +973,44 @@ Negative matches:（没有启动，没有匹配成功的自动配置类）
         
 ```
 
+典型的使用场景为：通过配置文件属性（如 pack.payment.mode=alipay）决定加载哪个 Bean
+
+```java
+@Configuration
+public class PaymentConfig {
+  @Bean
+  @ConditionalOnProperty(name = "pack.payment.mode", havingValue = "alipay")
+  public PaymentService alipayService() {
+    return new AlipayService() ;
+  }
+  @Bean
+  @ConditionalOnProperty(name = "pack.payment.mode", havingValue = "weixin")
+  public PaymentService weixinService() {
+    return new WeixinService() ;
+  }
+}
+```
+
+
+
+#### 2、@Profile
+
+基于 Spring Profile 隔离不同环境的实现类，如 **@Profile("prod")** 仅在生产环境生效。
+
+```java
+@Service
+@Profile("prod")
+public class AlipayService implements PaymentService {}
+
+@Service
+@Profile("test")
+public class WeixinService implements PaymentService {}
+```
+
+
+
+
+
 # 三、日志
 
 ## 1、日志框架
@@ -3532,6 +3570,81 @@ public class ProviderApplication {}
 ```
 
 在扫描com包的时候，排除AppPropertyPlaceholderConfigurer和KafkaProducerService的构建
+
+
+
+## 13、异步流式响应
+
+在当今高并发、大数据量场景下，传统同步响应模式常因内存溢出、延迟高等问题成为系统瓶颈。Spring MVC 的 **StreamingResponseBody** 提供了一种高效的异步流式响应方案，允许开发者以 "**边生成边传输**" 的方式处理数据，彻底告别内存中缓存完整响应的时代！无论是百兆级文件下载、实时日志推送，还是动态生成海量 CSV 或流式传输视频，StreamingResponseBody 均能以极低资源占用实现高性能输出。
+
+大文件下载：直接从服务器流式传输大文件到客户端，避免内存溢出。
+
+```java
+@RestController
+public class FileDownloadController {
+  
+  @Value("file:///d:/software/OllamaSetup.exe")
+  private Resource file ;
+  @GetMapping("/download")
+  public ResponseEntity<StreamingResponseBody> downloadFile() throws Exception {
+    String fileName = file.getFilename() ;
+    StreamingResponseBody responseBody = outputStream -> {
+      try (InputStream inputStream = file.getInputStream()) {
+        byte[] buffer = new byte[4096] ;
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+          outputStream.write(buffer, 0, bytesRead) ;
+          // 确保数据及时发送
+          outputStream.flush() ;
+        }
+      } catch (IOException ex) {
+        throw new RuntimeException("文件下载失败", ex) ;
+      }
+    } ;
+    return ResponseEntity.ok()
+        .header("Content-Type", "application/octet-stream")
+        .header("Content-Disposition", 
+            String.format("attachment; filename=%s", URLEncoder.encode(fileName, "UTF-8")))
+        .body(responseBody) ;
+  }
+}
+```
+
+综合考虑自己的环境，或许你还需要设置如下的配置：
+
+```yaml
+spring:
+  mvc:
+    async:
+      request-timeout: -1
+```
+
+推送实时生成的动态数据（如日志）
+
+```java
+@RestController
+public class RealTimeDataController {
+  @GetMapping("/stream/logs")
+  public ResponseEntity<StreamingResponseBody> streamLogs() {
+    StreamingResponseBody responseBody = outputStream -> {
+      for (int i = 0; i < 20; i++) {
+        String log = "日志数据 " + i + " - " + LocalDateTime.now() + "\n";
+        outputStream.write(log.getBytes(StandardCharsets.UTF_8)) ;
+        outputStream.flush() ;
+        // 模拟延迟
+        try {
+          Thread.sleep(new Random().nextInt(1000)) ;
+        } catch (InterruptedException e) {}
+      }
+    };
+    return ResponseEntity.ok()
+        .header("Content-Type", "text/plain;charset=utf-8")
+        .body(responseBody) ;
+  }
+}
+```
+
+
 
 # 五、异步与任务
 
