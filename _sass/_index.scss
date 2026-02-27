@@ -7,6 +7,7 @@
         }
     }
     .left {
+        width: 76%;
         >ul {
             padding: 0;
             >li {
@@ -94,6 +95,7 @@
         }
     }
     .right {
+        width: 24%;
         .wrap {
             .side {
                 margin-bottom: 20px;
@@ -102,10 +104,11 @@
                     margin-right: 3px;
                 }
                 .content-ul[cate] {
-                    overflow: hidden;
+                    overflow-y: auto;
                     list-style: none;
                     margin: 0;
                     padding: 0;
+                    max-height: 260px;
                     li {
                         font-size: 14px;
                         a {
@@ -168,6 +171,12 @@
 }
 @media screen and (max-width: 770px) {
     .page[index] {
+        .left {
+            width: 100%;
+        }
+        .right {
+            width: 100%;
+        }
         .left>ul li {
             h2 {
                 font-size: 22px;

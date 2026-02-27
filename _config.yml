@@ -10,6 +10,7 @@ title: 百味皆苦
 brief-intro: java后端开发攻城狮
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://BaiWeiJieKu.github.io" # the base hostname & protocol for your site
+description: Java 后端开发、分布式、数据库、缓存、中间件等学习与实战笔记整理
 
 permalink: /:year/:month/:day/:title/
 
