@@ -1,4 +1,6 @@
 .page[index] {
+    width: 95%;
+    max-width: 1300px;
     a {
         color: #4d6dad;
         transition: 0.5s ease;
@@ -7,7 +9,7 @@
         }
     }
     .left {
-        width: 76%;
+        width: 78%;
         >ul {
             padding: 0;
             >li {
@@ -95,7 +97,7 @@
         }
     }
     .right {
-        width: 24%;
+        width: 22%;
         .wrap {
             .side {
                 margin-bottom: 20px;
@@ -108,7 +110,7 @@
                     list-style: none;
                     margin: 0;
                     padding: 0;
-                    max-height: 260px;
+                    max-height: 200px;
                     li {
                         font-size: 14px;
                         a {
