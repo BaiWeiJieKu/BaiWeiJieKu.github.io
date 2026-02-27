@@ -14,17 +14,23 @@
             }
             li {
                 color: #333;
+                margin: 20px 0;
+                padding: 18px 22px;
+                border-radius: 8px;
+                background-color: #ffffff;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
                 h2 {
                     border: none;
-                    font-size: 27px;
-                    margin: 0;
+                    font-size: 26px;
+                    margin: 0 0 8px;
                 }
                 .label {
-                    margin-bottom: 15px;
+                    margin-bottom: 12px;
                     overflow: hidden;
                     .label-card {
                         float: left;
-                        margin-right: 15px;
+                        margin-right: 12px;
+                        font-size: 13px;
                         i {
                             padding-right: 0;
                             margin-right: 3px;
@@ -36,29 +42,39 @@
                     }
                 }
                 .excerpt {
+                    margin-top: 4px;
+                    color: #555;
+                    font-size: 14px;
+                    line-height: 1.7;
                     h2 {
-                        font-size: 24px;
-                    }
-                    h3 {
                         font-size: 22px;
                     }
-                    h4 {
+                    h3 {
                         font-size: 20px;
+                    }
+                    h4 {
+                        font-size: 18px;
                     }
                 }
                 .read-all {
+                    margin-top: 8px;
                     text-align: right;
                     font-size: 14px;
                     a {
-                        color: #778ab0;
+                        color: #4d6dad;
                         transition: 0.2s ease;
                         &:hover {
-                            color: #5872a7;
+                            color: #223253;
                         }
                         i {
                             padding-right: 3px;
                         }
                     }
+                }
+                hr {
+                    border: 0;
+                    border-top: 1px dashed #eee;
+                    margin-top: 18px;
                 }
             }
         }
@@ -95,13 +111,13 @@
                         a {
                             display: block;
                             width: 100%;
-                            padding: 2px 0;
+                            padding: 4px 0;
                             border-bottom: 1px solid #eee;
                             &:hover {
-                                background-color: #dbdfee;
+                                background-color: #f3f5ff;
                                 .badge {
-                                    background-color: #dbdfee;
-                                    transform: scale(1.2) rotate(360deg);
+                                    background-color: #d0d8ff;
+                                    transform: scale(1.1);
                                 }
                             }
                             .name {
@@ -119,8 +135,8 @@
                                 font-size: 12px;
                                 color: #fff;
                                 background-color: #bbb;
-                                border-radius: 50%;
-                                transition: 0.5s ease-in-out;
+                                border-radius: 999px;
+                                transition: 0.3s ease-in-out;
                             }
                         }
                         &:last-of-type a {
@@ -131,8 +147,9 @@
                 .content-ul[recent]{
                     padding-bottom: 16px;
                     li{
-                        color:#aaa;
+                        color:#777;
                         font-size: 14px;
+                        line-height: 1.6;
                     }
                 }
                 .tags-cloud {

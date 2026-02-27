@@ -5,11 +5,11 @@ layout: default
 <div class="page clearfix" index>
     <div class="left">
         <h1>Welcome to My Blog!</h1>
-        <small>这里记录着我的java后端学习之路</small>
+        <small>这里记录着我的 Java 后端与技术成长笔记</small>
         <hr>
         <ul>
             {% for post in paginator.posts %}
-              <li>
+              <li class="post-item">
                 <h2>
                   <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
                 </h2>
@@ -34,10 +34,10 @@ layout: default
                     </div>
                 </div>
                 <div class="excerpt">
-                    {{post.excerpt}}
+                    {{ post.excerpt | strip_html | truncate: 180 }}
                 </div>
                 <div class="read-all">
-                    <a  href="{{ post.url | prepend: site.baseurl }}"><i class="fa fa-newspaper-o"></i>Read All</a>
+                    <a  href="{{ post.url | prepend: site.baseurl }}"><i class="fa fa-newspaper-o"></i>阅读全文</a>
                 </div>
                 <hr>
               </li>
