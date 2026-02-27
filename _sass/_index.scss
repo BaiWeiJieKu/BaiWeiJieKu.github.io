@@ -1,8 +1,8 @@
 .page[index] {
-    /* 覆盖全局 .page 的固定宽度，让首页更靠两侧铺开 */
-    width: 100%;
-    max-width: none;
-    margin: 0 20px;
+    /* 覆盖全局 .page 的固定宽度，适度放宽首页内容区 */
+    width: 1200px;
+    max-width: 96%;
+    margin: 0 auto;
     a {
         color: #4d6dad;
         transition: 0.5s ease;
@@ -163,13 +163,14 @@
                     font-weight: normal;
                     max-height: 160px;
                     overflow-y: auto;
+                    overflow-x: hidden;
                     padding: 6px 10px 8px;
                     a {
                         display: inline-block;
                         margin: 2px 4px;
                         padding: 0 4px;
                         border-radius: 5px;
-                        white-space: nowrap;
+                        white-space: normal;
                         &:hover {
                             background-color: #f0e7ce;
                         }
