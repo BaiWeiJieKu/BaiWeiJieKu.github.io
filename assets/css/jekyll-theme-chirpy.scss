@@ -16,3 +16,25 @@
   --highlight-bg-color: #d5f0d7 !important;
   --tb-odd-bg: #d0ecd2 !important;
 }
+
+/* 目录树全部展开 - 覆盖 tocbot 的折叠样式 */
+#toc-wrapper .toc-list-item.is-collapsed > .toc-list {
+  display: block !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+#toc-wrapper .toc-list-item.is-collapsed::before {
+  display: none !important;
+}
+
+/* 弹窗目录也全部展开 */
+#toc-popup-content .toc-list-item.is-collapsed > .toc-list {
+  display: block !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+#toc-popup-content .toc-list-item.is-collapsed::before {
+  display: none !important;
+}

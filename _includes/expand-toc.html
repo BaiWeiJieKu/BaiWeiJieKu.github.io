@@ -1,0 +1,39 @@
+<!-- Expand TOC: re-init tocbot with collapseDepth=6 -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof tocbot === 'undefined') return;
+
+    // Wait for tocbot's own init to finish, then refresh with expanded settings
+    setTimeout(function () {
+      // Sidebar TOC
+      var sidebarToc = document.getElementById('toc');
+      if (sidebarToc) {
+        tocbot.init({
+          tocSelector: '#toc',
+          contentSelector: '.content',
+          ignoreSelector: '[data-toc-skip]',
+          headingSelector: 'h2, h3, h4',
+          orderedList: false,
+          scrollSmooth: false,
+          collapseDepth: 6,
+          headingsOffset: 32
+        });
+      }
+
+      // Popup TOC
+      var popupToc = document.getElementById('toc-popup-content');
+      if (popupToc) {
+        tocbot.init({
+          tocSelector: '#toc-popup-content',
+          contentSelector: '.content',
+          ignoreSelector: '[data-toc-skip]',
+          headingSelector: 'h2, h3, h4',
+          orderedList: false,
+          scrollSmooth: false,
+          collapseDepth: 6,
+          headingsOffset: 48
+        });
+      }
+    }, 500);
+  });
+</script>
