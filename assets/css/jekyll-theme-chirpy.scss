@@ -1,0 +1,18 @@
+---
+---
+
+/* prettier-ignore */
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+/* 护眼绿背景色 */
+:root {
+  --main-bg: #c7edcc;
+  --card-bg: #c7edcc;
+  --sidebar-bg: #b5ddb8;
+  --highlight-bg-color: #d5f0d7;
+  --tb-odd-bg: #d0ecd2;
+}
