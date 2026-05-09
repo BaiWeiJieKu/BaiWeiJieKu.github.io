@@ -1,14 +1,11 @@
 ---
-layout: post
 title:  "elasticSearch入门"
 categories: elasticSearch
-tags: elasticSearch
+tags: [elasticSearch]
 author: 百味皆苦
 music-id: 5188665
 ---
 
-* content
-{:toc}
 ## 简介
 
 - 基于Apache Lucene构建的开源搜索引擎

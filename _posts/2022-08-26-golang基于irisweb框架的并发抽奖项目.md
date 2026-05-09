@@ -1,14 +1,11 @@
 ---
-layout: post
 title: "golang基于iris的并发抽奖项目"
 categories: golang基础
-tags: golang
+tags: [golang]
 author: 百味皆苦
 music-id: 3136952023
 ---
 
-* content
-{:toc}
 ## 框架介绍
 
 六个go语言框架分析：https://blog.csdn.net/dev_csdn/article/details/78740990

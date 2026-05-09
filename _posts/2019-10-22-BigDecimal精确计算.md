@@ -1,14 +1,11 @@
 ---
-layout: post
 title: "BigDecimal精确计算"
 categories: java基础
-tags: BigDecimal
+tags: [BigDecimal]
 author: 百味皆苦
 music-id: 2602106546
 ---
 
-* content
-{:toc}
 ### 简介
 
 - **使用 BigDecimal 来定义浮点数的值，再进行浮点数的运算操作，解决浮点数运算精度丢失问题**

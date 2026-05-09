@@ -1,14 +1,10 @@
 ---
-layout: post
 title: "mongoTemplate"
 categories: MongoDB
-tags: MongoDB 数据库
+tags: [MongoDB, 数据库]
 author: 百味皆苦
 music-id: 3136952023
 ---
-
-* content
-{:toc}
 
 ## 查询操作
 

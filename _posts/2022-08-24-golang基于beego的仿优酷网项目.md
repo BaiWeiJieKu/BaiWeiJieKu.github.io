@@ -1,14 +1,10 @@
 ---
-layout: post
 title: "golang基于beego的仿优酷网项目"
 categories: golang基础
-tags: golang
+tags: [golang]
 author: 百味皆苦
 music-id: 3136952023
 ---
-
-* content
-{:toc}
 
 ## Beego框架特性
 

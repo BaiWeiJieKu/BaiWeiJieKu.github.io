@@ -1,14 +1,11 @@
 ---
-layout: post
 title: "Apache-lang3"
 categories: 工具类
-tags: lang3
+tags: [lang3]
 author: 百味皆苦
 music-id: 2602106546
 ---
 
-* content
-{:toc}
 ### NumberUtils
 
 #### isNumber:判断字符串是否是数字

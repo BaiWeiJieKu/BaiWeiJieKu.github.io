@@ -1,15 +1,10 @@
 ---
-layout: post
 title: "springcloud注册中心Eureka"
 categories: springcloud
-tags: springcloud eureka
+tags: [springcloud, eureka]
 author: 百味皆苦
 music-id: 3136952023
 ---
-
-* content
-{:toc}
-
 
 ## 简介
 

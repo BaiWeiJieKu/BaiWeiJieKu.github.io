@@ -1,15 +1,10 @@
 ---
-layout: post
 title: "Python3-fastAPI框架"
 categories: Python
-tags: Python
+tags: [Python]
 author: 百味皆苦
 music-id: 29393038
 ---
-
-* content
-{:toc}
-
 
 ## 简介
 

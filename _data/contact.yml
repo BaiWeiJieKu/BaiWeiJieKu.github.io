@@ -1,0 +1,18 @@
+#  The contact options.
+
+- type: github
+  icon: "fab fa-github"
+  url: "https://github.com/BaiWeiJieKu"
+
+- type: email
+  icon: "fas fa-envelope"
+  noblank: true # open link in current tab
+  url: "mailto:2534964002@qq.com"
+
+- type: rss
+  icon: "fas fa-rss"
+  noblank: true
+
+- type: weibo
+  icon: "fab fa-weibo"
+  url: "https://weibo.com/百味皆苦zZ"

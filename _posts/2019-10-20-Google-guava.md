@@ -1,15 +1,10 @@
 ---
-layout: post
 title: "Google-guava"
 categories: 工具类
-tags: guava
+tags: [guava]
 author: 百味皆苦
 music-id: 2602106546
 ---
-
-* content
-{:toc}
-
 
 [getting started with Google guava](https://www.processon.com/view/link/5d413527e4b020861117eb7b)
 

@@ -1,15 +1,10 @@
 ---
-layout: post
 title: "springcloud注册中心Nacos"
 categories: springcloud
-tags: springcloud nacos
+tags: [springcloud, nacos]
 author: 百味皆苦
 music-id: 3136952023
 ---
-
-* content
-{:toc}
-
 
 ## 简介
 

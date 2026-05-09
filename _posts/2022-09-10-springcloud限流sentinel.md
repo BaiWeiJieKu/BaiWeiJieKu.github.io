@@ -1,15 +1,10 @@
 ---
-layout: post
 title: "springcloud限流sentinel"
 categories: springcloud
-tags: springcloud gateway
+tags: [springcloud, gateway]
 author: 百味皆苦
 music-id: 3136952023
 ---
-
-* content
-{:toc}
-
 
 ## 简介
 

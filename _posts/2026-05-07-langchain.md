@@ -1,14 +1,10 @@
 ---
-layout: post
 title: "LangChain"
 categories: AI
-tags: AI
+tags: [AI]
 author: 百味皆苦
 music-id: 2602106546
 ---
-
-* content
-{:toc}
 
 ## 一、LangChain 概述
 

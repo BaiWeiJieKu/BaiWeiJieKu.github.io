@@ -1,14 +1,11 @@
 ---
-layout: post
 title:  "Spring Boot整合富文本"
 categories: springBoot
-tags: springBoot
+tags: [springBoot]
 author: 百味皆苦
 music-id: 5188665
 ---
 
-* content
-{:toc}
 ### 简述
 
 - UEditor只提供JSP版本的后端入口代码。但提供了项目源码，因此可以根据业务需求修改源代码。
