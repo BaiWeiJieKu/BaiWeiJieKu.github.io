@@ -5,6 +5,7 @@ tags: [AI]
 author: 百味皆苦
 music-id: 2602106546
 ---
+{% raw %}
 
 ## 一、LangGraph 概述
 
@@ -2749,3 +2750,4 @@ for chunk in app.stream(input, stream_mode=["messages", "updates"], version="v2"
 **文档版本**：v1.1
 
 **文档统计**：涵盖 LangGraph 从入门到生产的完整知识体系，包含核心概念、持久化与记忆、人工干预、流式输出、子图、多 Agent 系统、仿 Dify 工作流引擎、部署方案、最佳实践等
+{% endraw %}

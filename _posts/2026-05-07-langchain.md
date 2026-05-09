@@ -5,6 +5,7 @@ tags: [AI]
 author: 百味皆苦
 music-id: 2602106546
 ---
+{% raw %}
 
 ## 一、LangChain 概述
 
@@ -3519,3 +3520,4 @@ docker-compose down
 **文档版本**：v5.0（AI Agent 实战整合版）
 
 **文档统计**：涵盖 LangChain 从入门到企业级生产的完整知识体系，包含核心概念、情绪判断链、多工具集成、个性化角色 Agent、RAG 进阶技术、Agent 智能体、FastAPI+Telegram+TTS+数字人、企业级部署与运维、Docker 容器化、安全合规、测试评估等
+{% endraw %}

@@ -5,6 +5,7 @@ tags: [spring, ai]
 author: 百味皆苦
 music-id: 3136952023
 ---
+{% raw %}
 
 ## 简介
 
@@ -2954,3 +2955,4 @@ LangChain4j 为 Java 开发者提供了一个全面、灵活的 LLM 应用开发
 - Spring Boot 集成：https://docs.langchain4j.info/tutorials/spring-boot-integration
 - Agent 编排示例：https://github.com/yjmyzz/agentic_tutorial_with_langchain4j
 - Microsoft LangChain4j 入门课程：https://github.com/microsoft/LangChain4j-for-Beginners
+{% endraw %}
