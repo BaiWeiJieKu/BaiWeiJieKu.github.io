@@ -1,15 +1,32 @@
 <!-- Expand TOC: re-init tocbot with collapseDepth=6 -->
 <script>
   (function () {
+    var attempts = 0;
+    var maxAttempts = 30; // 30 * 300ms = 9s max wait
+
     function expandToc() {
       if (typeof tocbot === 'undefined') {
-        // tocbot not loaded yet, retry
-        setTimeout(expandToc, 200);
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(expandToc, 300);
+        }
         return;
       }
 
-      // Sidebar TOC
+      // Check if tocbot has already populated the TOC
       var sidebarToc = document.getElementById('toc');
+      if (sidebarToc && sidebarToc.children.length === 0) {
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(expandToc, 300);
+        }
+        return;
+      }
+
+      // Destroy existing tocbot instances first
+      try { tocbot.destroy(); } catch(e) {}
+
+      // Re-init sidebar TOC with all levels expanded
       if (sidebarToc) {
         tocbot.init({
           tocSelector: '#toc',
@@ -23,7 +40,7 @@
         });
       }
 
-      // Popup TOC
+      // Re-init popup TOC with all levels expanded
       var popupToc = document.getElementById('toc-popup-content');
       if (popupToc) {
         tocbot.init({
@@ -37,9 +54,28 @@
           headingsOffset: 48
         });
       }
+
+      // Remove any remaining collapsed classes
+      setTimeout(function() {
+        document.querySelectorAll('#toc-wrapper .is-collapsed, #toc-popup-content .is-collapsed').forEach(function(el) {
+          el.classList.remove('is-collapsed');
+          el.classList.add('is-visible');
+        });
+        // Force all sub-lists visible
+        document.querySelectorAll('#toc-wrapper .toc-list, #toc-popup-content .toc-list').forEach(function(el) {
+          el.style.maxHeight = 'none';
+          el.style.overflow = 'visible';
+        });
+      }, 100);
     }
 
-    // Wait for tocbot to finish its own init, then expand
-    setTimeout(expandToc, 600);
+    // Start after page load
+    if (document.readyState === 'complete') {
+      setTimeout(expandToc, 500);
+    } else {
+      window.addEventListener('load', function() {
+        setTimeout(expandToc, 500);
+      });
+    }
   })();
 </script>

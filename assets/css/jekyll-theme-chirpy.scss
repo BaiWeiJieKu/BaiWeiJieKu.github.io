@@ -18,23 +18,27 @@
 }
 
 /* 目录树全部展开 - 覆盖 tocbot 的折叠样式 */
-#toc-wrapper .toc-list-item.is-collapsed > .toc-list {
-  display: block !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-
-#toc-wrapper .toc-list-item.is-collapsed::before {
-  display: none !important;
-}
-
-/* 弹窗目录也全部展开 */
+#toc-wrapper .toc-list-item.is-collapsed > .toc-list,
 #toc-popup-content .toc-list-item.is-collapsed > .toc-list {
   display: block !important;
   max-height: none !important;
   overflow: visible !important;
 }
 
+#toc-wrapper .toc-list-item.is-collapsed::before,
 #toc-popup-content .toc-list-item.is-collapsed::before {
+  display: none !important;
+}
+
+/* 强制所有子列表可见 - 防止 tocbot 行内样式覆盖 */
+#toc-wrapper .toc-list,
+#toc-popup-content .toc-list {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* 折叠箭头隐藏 */
+#toc-wrapper .collapse-icon,
+#toc-popup-content .collapse-icon {
   display: none !important;
 }
