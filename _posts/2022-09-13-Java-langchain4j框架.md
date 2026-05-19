@@ -1778,6 +1778,945 @@ public class KnowledgeBaseQAService {
 ```
 
 
+### Graph RAG（图检索增强生成）
+
+传统 RAG 基于向量相似度检索文本片段，擅长回答局部细节问题，但在处理**跨文档关联**、**多跳推理**和**全局性总结**问题时效果有限。Graph RAG 通过引入知识图谱（Knowledge Graph），将文档级检索升级为实体级推理，弥补了这一短板。
+
+#### 为什么需要 Graph RAG？
+
+| 问题场景 | 传统 RAG | Graph RAG |
+|---------|---------|----------|
+| "公司的请假制度是什么？" | ✅ 向量检索即可找到相关片段 | ✅ 同样适用 |
+| "张三和李四在哪些项目上有合作？" | ❌ 跨文档关联难以检索 | ✅ 通过实体关系图遍历找到答案 |
+| "公司所有部门的职责概览" | ❌ 需要汇总大量分散片段 | ✅ 通过社区摘要快速生成 |
+| "A 导致了 B，B 又影响了 C，最终结果是什么？" | ❌ 多跳推理能力弱 | ✅ 沿知识图谱路径推理 |
+
+#### Graph RAG 核心工作流
+
+Graph RAG 分为两个核心阶段：
+
+**索引阶段（离线构建知识图谱）：**
+
+```
+原始文档 → 文本分块 → LLM提取实体和关系 → 构建知识图谱 → 社区检测 → 生成社区摘要
+```
+
+1. **文本分块**：将文档切分为适合 LLM 处理的文本单元
+2. **实体与关系提取**：利用 LLM 从文本中识别实体（人物、组织、概念等）及其之间的关系
+3. **构建知识图谱**：将提取的实体作为节点、关系作为边，构建图结构
+4. **社区检测**：使用 Leiden 等算法对图谱进行层次化社区划分
+5. **社区摘要**：LLM 为每个社区生成摘要描述，形成多层级的知识索引
+
+**查询阶段（在线检索与生成）：**
+
+Graph RAG 通常提供三种查询模式：
+
+| 查询模式 | 适用场景 | 工作原理 |
+|---------|---------|----------|
+| **Local Search** | 针对特定实体的细节问题 | 定位目标实体 → 搜索关联子图 → 注入关联文本片段 → LLM 生成回答 |
+| **Global Search** | 全局性、总结性问题 | 遍历所有社区摘要 → Map-Reduce 分层汇总 → LLM 综合生成全局回答 |
+| **Drift Search** | 介于局部与全局之间 | 结合实体关联和社区信息，沿图谱路径逐步扩展检索范围 |
+
+#### 微软 GraphRAG 方案
+
+微软于 2024 年开源的 [GraphRAG](https://github.com/microsoft/graphrag) 是目前最知名的 Graph RAG 实现，核心创新在于：
+
+- **实体-关系双重抽取**：不仅提取实体，还提取实体间的声明（Claim），如"A 公司收购了 B 公司"
+- **Leiden 社区检测**：将知识图谱划分为层次化社区，支持从局部到全局的多粒度查询
+- **Map-Reduce 全局摘要**：对社区摘要进行分层归并，解决全局性问题的"Lost in the Middle"现象
+
+```
+索引流程：
+  文档 → TextUnits → 实体+关系+声明 → 知识图谱 → Leiden社区 → 社区摘要
+
+查询流程（Global Search）：
+  用户问题 → 选择相关社区 → Map: 各社区独立生成部分答案 → Reduce: 汇总为最终答案
+
+查询流程（Local Search）：
+  用户问题 → 识别目标实体 → 搜索关联子图(实体+关系+声明+文本片段) → LLM生成回答
+```
+
+#### 实战：基于 Neo4j 的知识图谱 RAG
+
+以下是一个在 Java 中结合 Neo4j 图数据库实现 Graph RAG 的方案：
+
+**1. 知识图谱构建（实体关系抽取与存储）：**
+
+```java
+@Component
+@Slf4j
+public class KnowledgeGraphBuilder {
+
+    private final ChatLanguageModel chatModel;
+    private final Driver neo4jDriver;  // Neo4j Java Driver
+
+    /**
+     * 利用 LLM 从文本中提取实体和关系，并存入 Neo4j
+     */
+    public void buildGraphFromText(String text, String sourceDoc) {
+        // 1. 使用结构化输出提取实体和关系
+        record Entity(String name, String type, String description) {}
+        record Relation(String source, String target, String relationType, String description) {}
+        record GraphExtraction(List<Entity> entities, List<Relation> relations) {}
+
+        interface GraphExtractor {
+            @SystemMessage("""
+                从文本中提取实体和它们之间的关系。
+                实体类型包括：Person, Organization, Technology, Concept, Event
+                关系类型包括：WORKS_FOR, DEVELOPS, USES, COLLABORATES_WITH, CAUSED_BY, PART_OF
+                只提取明确提到的关系，不要推测。
+                """)
+            @UserMessage("请从以下文本中提取实体和关系：\n\n{{text}}")
+            GraphExtraction extract(@V("text") String text);
+        }
+
+        GraphExtractor extractor = AiServices.create(GraphExtractor.class, chatModel);
+        GraphExtraction extraction = extractor.extract(text);
+
+        // 2. 将提取结果存入 Neo4j
+        try (Session session = neo4jDriver.session()) {
+            // 创建实体节点
+            for (Entity entity : extraction.entities()) {
+                session.run(
+                    "MERGE (n:`" + entity.type() + "` {name: $name}) " +
+                    "SET n.description = $desc, n.source = $source",
+                    Map.of("name", entity.name(),
+                           "desc", entity.description(),
+                           "source", sourceDoc)
+                );
+            }
+
+            // 创建关系边
+            for (Relation rel : extraction.relations()) {
+                session.run(
+                    "MATCH (a {name: $source}), (b {name: $target}) " +
+                    "MERGE (a)-[r:`" + rel.relationType() + "`]->(b) " +
+                    "SET r.description = $desc",
+                    Map.of("source", rel.source(),
+                           "target", rel.target(),
+                           "desc", rel.description())
+                );
+            }
+        }
+
+        log.info("从文档 {} 中提取了 {} 个实体和 {} 个关系",
+                sourceDoc, extraction.entities().size(), extraction.relations().size());
+    }
+}
+```
+
+**2. 图谱检索与问答：**
+
+```java
+@Service
+public class GraphRAGService {
+
+    private final ChatLanguageModel chatModel;
+    private final Driver neo4jDriver;
+    private final EmbeddingStore<TextSegment> embeddingStore;
+    private final EmbeddingModel embeddingModel;
+
+    /**
+     * Local Search：针对特定实体的查询
+     * 定位目标实体 → 获取关联子图 → 结合向量检索 → LLM 生成回答
+     */
+    public String localSearch(String question) {
+        // 1. 从问题中识别关键实体
+        List<String> entities = extractEntitiesFromQuestion(question);
+
+        // 2. 在 Neo4j 中搜索关联子图
+        String subGraphContext = querySubGraph(entities);
+
+        // 3. 同时进行向量检索，补充细节信息
+        ContentRetriever vectorRetriever = EmbeddingStoreContentRetriever.builder()
+                .embeddingStore(embeddingStore)
+                .embeddingModel(embeddingModel)
+                .maxResults(3)
+                .build();
+
+        // 4. 将图谱上下文和向量检索结果一起传给 LLM
+        interface GraphAssistant {
+            @SystemMessage("""
+                你是一个知识图谱问答助手。请结合提供的图谱关系信息和文档内容回答问题。
+                优先使用图谱中的关系信息进行推理，文档内容作为补充。
+                如果信息不足，请明确说明。
+                """)
+            String answer(@UserMessage String question);
+        }
+
+        String enrichedQuestion = """
+            图谱关系信息：
+            %s
+
+            用户问题：%s
+            """.formatted(subGraphContext, question);
+
+        GraphAssistant assistant = AiServices.create(GraphAssistant.class, chatModel);
+        return assistant.answer(enrichedQuestion);
+    }
+
+    /**
+     * Global Search：全局总结性查询
+     * 遍历社区摘要 → Map-Reduce 分层汇总
+     */
+    public String globalSearch(String question) {
+        // 1. 获取所有社区摘要
+        List<String> communitySummaries = getCommunitySummaries();
+
+        // 2. Map阶段：每个社区独立生成部分回答
+        List<String> partialAnswers = communitySummaries.stream()
+                .map(summary -> {
+                    String prompt = "基于以下社区信息回答问题：\n%s\n\n问题：%s\n"
+                            .formatted(summary, question);
+                    return chatModel.chat(prompt);
+                })
+                .toList();
+
+        // 3. Reduce阶段：汇总所有部分回答
+        String reducePrompt = """
+            以下是来自不同知识社区的部分回答，请综合它们生成一个完整的最终回答：
+            %s
+
+            原始问题：%s
+            """.formatted(String.join("\n---\n", partialAnswers), question);
+
+        return chatModel.chat(reducePrompt);
+    }
+
+    /**
+     * 多跳推理查询：沿知识图谱路径推理
+     */
+    public String multiHopSearch(String question) {
+        // 1. 识别起始实体
+        List<String> startEntities = extractEntitiesFromQuestion(question);
+
+        // 2. 沿图谱关系进行多跳遍历（最多3跳）
+        String pathContext = queryMultiHopPaths(startEntities, 3);
+
+        // 3. LLM 基于路径推理
+        String prompt = """
+            基于以下实体关系路径，逐步推理回答问题：
+            %s
+
+            问题：%s
+            请展示你的推理过程。
+            """.formatted(pathContext, question);
+
+        return chatModel.chat(prompt);
+    }
+
+    // --- 辅助方法 ---
+
+    private List<String> extractEntitiesFromQuestion(String question) {
+        record EntityList(List<String> entities) {}
+        interface EntityExtractor {
+            @SystemMessage("从问题中提取关键实体名称，只返回实体名列表")
+            EntityList extract(@UserMessage String question);
+        }
+        EntityExtractor extractor = AiServices.create(EntityExtractor.class, chatModel);
+        return extractor.extract(question).entities();
+    }
+
+    private String querySubGraph(List<String> entities) {
+        StringBuilder sb = new StringBuilder();
+        try (Session session = neo4jDriver.session()) {
+            for (String entity : entities) {
+                Result result = session.run(
+                    "MATCH (n {name: $name})-[r]-(m) " +
+                    "RETURN n.name AS source, type(r) AS relation, m.name AS target, " +
+                    "labels(n)[0] AS sourceType, labels(m)[0] AS targetType " +
+                    "LIMIT 20",
+                    Map.of("name", entity)
+                );
+                result.forEachRemaining(record ->
+                    sb.append(String.format("(%s:%s)-[%s]->(%s:%s)\n",
+                        record.get("source").asString(),
+                        record.get("sourceType").asString(),
+                        record.get("relation").asString(),
+                        record.get("target").asString(),
+                        record.get("targetType").asString()))
+                );
+            }
+        }
+        return sb.toString();
+    }
+
+    private String queryMultiHopPaths(List<String> entities, int maxHops) {
+        StringBuilder sb = new StringBuilder();
+        try (Session session = neo4jDriver.session()) {
+            for (String entity : entities) {
+                Result result = session.run(
+                    "MATCH path = (n {name: $name})-[r*1.." + maxHops + "]-(m) " +
+                    "RETURN [node IN nodes(path) | node.name] AS names, " +
+                    "       [rel IN relationships(path) | type(rel)] AS rels " +
+                    "LIMIT 10",
+                    Map.of("name", entity)
+                );
+                result.forEachRemaining(record -> {
+                    List<String> names = record.get("names").asList(Value::asString);
+                    List<String> rels = record.get("rels").asList(Value::asString);
+                    sb.append("路径: ");
+                    for (int i = 0; i < names.size(); i++) {
+                        sb.append(names.get(i));
+                        if (i < rels.size()) {
+                            sb.append(" --[").append(rels.get(i)).append("]--> ");
+                        }
+                    }
+                    sb.append("\n");
+                });
+            }
+        }
+        return sb.toString();
+    }
+
+    private List<String> getCommunitySummaries() {
+        List<String> summaries = new ArrayList<>();
+        try (Session session = neo4jDriver.session()) {
+            Result result = session.run(
+                "MATCH (c:Community) RETURN c.summary AS summary ORDER BY c.level, c.id"
+            );
+            result.forEachRemaining(record ->
+                summaries.add(record.get("summary").asString())
+            );
+        }
+        return summaries;
+    }
+}
+```
+
+**3. 文档摄入流水线（同时构建向量库和知识图谱）：**
+
+```java
+@Service
+@Slf4j
+public class DualStoreIngestionService {
+
+    private final KnowledgeGraphBuilder graphBuilder;
+    private final EmbeddingStoreIngestor vectorIngestor;
+
+    /**
+     * 双路摄入：同时构建向量索引和知识图谱
+     */
+    @Async
+    public CompletableFuture<Void> ingestDocument(Document document) {
+        String docId = document.metadata().getString("file_name", "unknown");
+
+        // 路径1：向量索引（用于语义检索）
+        vectorIngestor.ingest(document);
+        log.info("文档 {} 向量索引完成", docId);
+
+        // 路径2：知识图谱（用于关系推理）
+        graphBuilder.buildGraphFromText(document.text(), docId);
+        log.info("文档 {} 知识图谱构建完成", docId);
+
+        return CompletableFuture.completedFuture(null);
+    }
+}
+```
+
+**4. 统一检索（融合向量检索与图谱检索）：**
+
+```java
+@Service
+public class HybridRetrievalService {
+
+    private final GraphRAGService graphRAGService;
+    private final ContentRetriever vectorRetriever;
+    private final ChatLanguageModel chatModel;
+
+    /**
+     * 智能路由：根据问题类型自动选择检索策略
+     */
+    public String ask(String question) {
+        // 1. 判断问题类型
+        QuestionType type = classifyQuestion(question);
+
+        return switch (type) {
+            case FACTUAL -> {
+                // 事实性问题：优先向量检索
+                interface VectorAssistant {
+                    @SystemMessage("基于提供的上下文信息回答问题，如果上下文中没有相关信息请说明")
+                    String answer(@UserMessage String question);
+                }
+                VectorAssistant assistant = AiServices.builder(VectorAssistant.class)
+                        .chatLanguageModel(chatModel)
+                        .contentRetriever(vectorRetriever)
+                        .build();
+                yield assistant.answer(question);
+            }
+            case RELATIONAL -> {
+                // 关系型问题：使用 Graph RAG
+                yield graphRAGService.localSearch(question);
+            }
+            case GLOBAL_SUMMARY -> {
+                // 全局总结性：使用 Graph RAG Global Search
+                yield graphRAGService.globalSearch(question);
+            }
+            case MULTI_HOP -> {
+                // 多跳推理：使用图谱路径推理
+                yield graphRAGService.multiHopSearch(question);
+            }
+        };
+    }
+
+    enum QuestionType { FACTUAL, RELATIONAL, GLOBAL_SUMMARY, MULTI_HOP }
+
+    private QuestionType classifyQuestion(String question) {
+        record Classification(QuestionType type) {}
+        interface QuestionClassifier {
+            @SystemMessage("""
+                判断问题类型：
+                - FACTUAL：简单事实查询（如"XX是什么"）
+                - RELATIONAL：涉及实体间关系（如"A和B的关系"、"谁和谁合作"）
+                - GLOBAL_SUMMARY：全局总结（如"概览"、"总结"、"所有"）
+                - MULTI_HOP：需要多步推理（如"A导致B，B又如何影响C"）
+                """)
+            Classification classify(@UserMessage String question);
+        }
+        QuestionClassifier classifier = AiServices.create(QuestionClassifier.class, chatModel);
+        return classifier.classify(question).type();
+    }
+}
+```
+
+> **企业级建议**：Graph RAG 的构建成本远高于传统 RAG（需要额外的实体抽取和图谱维护），建议在以下场景优先考虑：跨文档关联查询频繁、多跳推理需求强烈、全局性总结是核心功能。对于简单的文档问答场景，传统 RAG 即可满足。
+
+
+### RAG 进阶模式
+
+除了 Graph RAG，学术界和工业界还涌现了多种 RAG 增强模式，针对不同的痛点进行优化：
+
+#### Self-RAG（自反思 RAG）
+
+Self-RAG 由 Akari Asai 等人在 2023 年提出，核心思想是让 LLM 在生成过程中**自我评估和反思**，决定是否需要检索、检索结果是否有用、生成的内容是否忠实于检索结果。
+
+**工作流程：**
+
+```
+用户问题 → LLM判断是否需要检索 →
+  ├─ 不需要 → 直接生成回答
+  └─ 需要 → 检索相关文档 →
+            → LLM评估文档相关性 →
+              ├─ 不相关 → 重新检索或直接生成
+              └─ 相关 → 生成回答 →
+                        → LLM自我评估(是否忠实+是否有用) →
+                          ├─ 不通过 → 重新生成
+                          └─ 通过 → 输出最终回答
+```
+
+**三种反思标记：**
+
+| 标记 | 含义 | 判断标准 |
+|------|------|----------|
+| `Retrieve` | 是否需要检索 | 问题是否需要外部知识 |
+| `ISREL` | 检索结果是否相关 | 文档是否包含回答所需的信息 |
+| `ISSUP` | 生成内容是否忠实 | 回答是否基于检索内容，有无幻觉 |
+
+```java
+/**
+ * Self-RAG 简化实现：在 LangChain4j 中通过多轮对话实现自反思
+ */
+@Service
+public class SelfRAGService {
+
+    private final ChatLanguageModel chatModel;
+    private final ContentRetriever contentRetriever;
+
+    public String ask(String question) {
+        // Step 1: 判断是否需要检索
+        record RetrievalDecision(boolean needRetrieval, String reason) {}
+        interface RetrievalJudge {
+            @SystemMessage("判断以下问题是否需要从外部知识库检索信息才能准确回答。" +
+                           "常识问题不需要检索，专业领域问题需要检索。")
+            RetrievalDecision judge(@UserMessage String question);
+        }
+        RetrievalJudge judge = AiServices.create(RetrievalJudge.class, chatModel);
+        RetrievalDecision decision = judge.judge(question);
+
+        if (!decision.needRetrieval()) {
+            // 无需检索，直接回答
+            return chatModel.chat(question);
+        }
+
+        // Step 2: 检索相关文档
+        List<Content> contents = contentRetriever.retrieve(new Query(question));
+        String context = contents.stream()
+                .map(Content::text)
+                .collect(Collectors.joining("\n---\n"));
+
+        // Step 3: 生成回答
+        String answer = chatModel.chat("基于以下上下文回答问题：\n" + context +
+                "\n\n问题：" + question);
+
+        // Step 4: 自我评估——是否忠实于上下文
+        record FaithfulnessCheck(boolean isFaithful, String explanation) {}
+        interface FaithfulnessChecker {
+            @SystemMessage("""
+                判断生成的回答是否忠实于提供的上下文信息。
+                检查是否存在：编造的信息、与上下文矛盾的陈述、无法从上下文推导出的结论。
+                """)
+            FaithfulnessCheck check(@UserMessage String answerAndContext);
+        }
+        FaithfulnessChecker checker = AiServices.create(FaithfulnessChecker.class, chatModel);
+        String checkInput = "上下文：" + context + "\n\n回答：" + answer;
+        FaithfulnessCheck check = checker.check(checkInput);
+
+        if (check.isFaithful()) {
+            return answer;
+        } else {
+            // 不忠实时重新生成，增加约束提示
+            return chatModel.chat("""
+                请严格基于以下上下文信息回答问题，不要编造任何上下文中未提及的信息：
+                上下文：%s
+
+                问题：%s
+
+                如果上下文中没有足够信息，请回答"根据已知信息无法回答"。
+                """.formatted(context, question));
+        }
+    }
+}
+```
+
+#### CRAG（纠错 RAG）
+
+CRAG（Corrective RAG）由 Yujia Bao 等人在 2024 年提出，核心思想是在检索后增加一个**检索质量评估**环节，对低质量检索结果进行纠正。
+
+**工作流程：**
+
+```
+用户问题 → 检索文档 → 检索质量评估 →
+  ├─ 正确(Correct)：文档相关 → 正常生成回答
+  ├─ 模糊(Ambiguous)：部分相关 → 修正后生成 + 补充网络搜索
+  └─ 错误(Incorrect)：文档不相关 → 丢弃文档 → 进行网络搜索 → 基于搜索结果生成
+```
+
+**与 Self-RAG 的关键区别：**
+
+| 维度 | Self-RAG | CRAG |
+|------|---------|------|
+| 反思时机 | 生成后反思 | 检索后反思 |
+| 纠错方式 | 重新生成 | 补充/替换检索源 |
+| 纠错能力 | 依赖 LLM 自身 | 可引入外部搜索引擎 |
+| 适用场景 | 幻觉控制 | 检索质量不稳定 |
+
+```java
+/**
+ * CRAG 简化实现：检索质量评估 + 纠错
+ */
+@Service
+public class CorrectiveRAGService {
+
+    private final ChatLanguageModel chatModel;
+    private final ContentRetriever contentRetriever;
+
+    public String ask(String question) {
+        // Step 1: 检索相关文档
+        List<Content> contents = contentRetriever.retrieve(new Query(question));
+
+        // Step 2: 评估检索质量
+        record RetrievalAssessment(String verdict, double confidence, String reason) {}
+        interface RetrievalAssessor {
+            @SystemMessage("""
+                评估检索到的文档是否能回答用户问题：
+                - CORRECT：文档包含回答所需的信息（confidence > 0.7）
+                - AMBIGUOUS：文档部分相关但不充分（0.3 < confidence < 0.7）
+                - INCORRECT：文档与问题无关（confidence < 0.3）
+                """)
+            RetrievalAssessment assess(@UserMessage String questionAndDocs);
+        }
+
+        String docsText = contents.stream()
+                .map(Content::text)
+                .collect(Collectors.joining("\n---\n"));
+
+        RetrievalAssessor assessor = AiServices.create(RetrievalAssessor.class, chatModel);
+        RetrievalAssessment assessment = assessor.assess(
+                "问题：" + question + "\n\n检索到的文档：\n" + docsText);
+
+        String finalContext = switch (assessment.verdict()) {
+            case "CORRECT" -> docsText;  // 检索结果可用
+            case "AMBIGUOUS" -> {
+                // 补充网络搜索
+                String webResult = webSearch(question);
+                yield docsText + "\n\n--- 补充网络信息 ---\n" + webResult;
+            }
+            case "INCORRECT" -> {
+                // 丢弃检索结果，完全使用网络搜索
+                log.warn("检索结果不相关，降级为网络搜索: {}", assessment.reason());
+                yield webSearch(question);
+            }
+            default -> docsText;
+        };
+
+        // Step 3: 基于最终上下文生成回答
+        return chatModel.chat("基于以下信息回答问题：\n" + finalContext +
+                "\n\n问题：" + question);
+    }
+
+    private String webSearch(String query) {
+        // 调用搜索引擎API（如 Bing Search API、Google Custom Search）
+        // 返回搜索结果摘要
+        return searchEngine.search(query);
+    }
+}
+```
+
+#### Hybrid RAG（混合检索 RAG）
+
+混合检索结合多种检索策略，取长补短：
+
+| 检索方式 | 优势 | 劣势 |
+|---------|------|------|
+| 向量检索 | 语义相似度匹配，理解同义词和近义表达 | 精确关键词匹配弱，可能漏掉专有名词 |
+| 关键词检索（BM25） | 精确匹配关键词，专有名词检索强 | 无法理解语义相似性 |
+| 图谱检索 | 实体关系推理，多跳查询 | 构建成本高，覆盖率依赖图谱质量 |
+
+**推荐策略：向量 + 关键词混合检索，图谱作为增强：**
+
+```java
+/**
+ * 混合检索实现：向量检索 + BM25关键词检索 + 可选图谱检索
+ */
+@Service
+public class HybridRAGService {
+
+    private final ChatLanguageModel chatModel;
+    private final EmbeddingStore<TextSegment> embeddingStore;
+    private final EmbeddingModel embeddingModel;
+
+    public String ask(String question) {
+        // 1. 向量检索（语义匹配）
+        ContentRetriever vectorRetriever = EmbeddingStoreContentRetriever.builder()
+                .embeddingStore(embeddingStore)
+                .embeddingModel(embeddingModel)
+                .maxResults(5)
+                .minScore(0.5)
+                .build();
+        List<Content> vectorResults = vectorRetriever.retrieve(new Query(question));
+
+        // 2. 关键词检索（BM25，需要外部实现）
+        List<Content> keywordResults = bm25Search(question, 5);
+
+        // 3. 合并去重（简单实现：按文本内容去重）
+        Map<String, Content> merged = new LinkedHashMap<>();
+        for (Content c : vectorResults) {
+            merged.put(c.text().trim(), c);
+        }
+        for (Content c : keywordResults) {
+            merged.putIfAbsent(c.text().trim(), c);
+        }
+        List<Content> finalResults = new ArrayList<>(merged.values());
+
+        // 4. 可选：图谱检索增强（针对关系型问题）
+        if (isRelationalQuestion(question)) {
+            String graphContext = graphRAGService.localSearch(question);
+            // 将图谱上下文作为额外内容加入
+            finalResults.add(Content.from("[知识图谱信息]\n" + graphContext));
+        }
+
+        // 5. 组装上下文并生成回答
+        String context = finalResults.stream()
+                .map(Content::text)
+                .collect(Collectors.joining("\n---\n"));
+
+        return chatModel.chat("""
+            基于以下检索到的信息回答问题。如果信息不足，请说明。
+            
+            检索信息：
+            %s
+            
+            问题：%s
+            """.formatted(context, question));
+    }
+
+    private List<Content> bm25Search(String query, int maxResults) {
+        // 使用 Elasticsearch 的 BM25 检索
+        // 或使用 Lucene 的全文检索
+        return searchEngine.bm25Search(query, maxResults);
+    }
+}
+```
+
+#### RAG 进阶模式对比总结
+
+| 模式 | 核心创新 | 解决的痛点 | 适用场景 | 实现复杂度 |
+|------|---------|-----------|---------|-----------|
+| **Naive RAG** | 基础检索+生成 | LLM知识过时 | 简单文档问答 | ⭐ |
+| **Advanced RAG** | 查询变换+路由+重排 | 检索质量不稳定 | 中等复杂度场景 | ⭐⭐ |
+| **Graph RAG** | 知识图谱+社区摘要 | 跨文档关联+全局总结 | 关系推理密集场景 | ⭐⭐⭐⭐ |
+| **Self-RAG** | 生成后自反思 | LLM幻觉问题 | 高准确性要求场景 | ⭐⭐⭐ |
+| **CRAG** | 检索后纠错 | 检索结果不相关 | 检索源不稳定场景 | ⭐⭐⭐ |
+| **Hybrid RAG** | 多策略融合检索 | 单一检索策略局限 | 通用生产环境 | ⭐⭐⭐ |
+
+> **选型建议**：生产环境推荐从 **Hybrid RAG（向量+关键词）** 起步，根据实际需求逐步叠加 Self-RAG（幻觉控制）或 Graph RAG（关系推理）。不要一开始就追求最复杂的方案，应循序渐进。
+
+
+### RAG 评估体系
+
+构建 RAG 系统后，如何客观评估其效果？RAGAS（Retrieval Augmented Generation Assessment）是目前最流行的 RAG 评估框架。
+
+#### 核心评估指标
+
+RAG 评估需要覆盖检索和生成两个核心环节，主要包括以下指标：
+
+| 指标 | 评估环节 | 含义 | 计算方式 |
+|------|---------|------|----------|
+| **上下文精度** (Context Precision) | 检索 | 检索结果中相关文档的排名是否靠前 | 相关文档在排名中的位置加权 |
+| **上下文召回率** (Context Recall) | 检索 | 所有相关信息是否都被检索到 | 答案中的信息被检索上下文覆盖的比例 |
+| **忠实度** (Faithfulness) | 生成 | 生成回答是否忠实于检索上下文 | 回答中的声明能在上下文中找到依据的比例 |
+| **答案相关性** (Answer Relevancy) | 生成 | 回答是否与问题相关 | 回答与问题的语义相关度 |
+
+**评估流程：**
+
+```
+准备测试集（问题+标准答案+相关文档）
+    ↓
+RAG系统生成回答
+    ↓
+自动计算各项指标分数（0-1）
+    ↓
+分析短板：检索问题 or 生成问题
+    ↓
+针对性优化
+```
+
+#### 评估指标详解
+
+**1. 忠实度（Faithfulness）—— 最关键的指标：**
+
+```
+忠实度 = 可从上下文中找到依据的声明数 / 回答中的总声明数
+
+示例：
+问题：什么是微服务？
+上下文：微服务是一种架构风格，将应用拆分为独立部署的小服务。
+回答：微服务是一种架构风格，将应用拆分为小服务，通常使用Docker部署。
+
+声明1: "微服务是一种架构风格" → 上下文有依据 ✅
+声明2: "将应用拆分为小服务" → 上下文有依据 ✅
+声明3: "通常使用Docker部署" → 上下文无依据 ❌
+
+忠实度 = 2/3 = 0.67
+```
+
+**2. 上下文精度（Context Precision）：**
+
+```
+上下文精度 = 相关文档是否排在前面
+
+检索结果：[相关, 不相关, 相关, 不相关]
+精度 = (1/1 + 2/3) / 2 = 0.83
+
+理想情况：所有相关文档排在最前面
+```
+
+**3. 上下文召回率（Context Recall）：**
+
+```
+上下文召回率 = 标准答案中的信息被检索上下文覆盖的比例
+
+标准答案包含5个关键点，检索上下文覆盖了4个
+召回率 = 4/5 = 0.8
+```
+
+#### 评估实现
+
+```java
+/**
+ * RAG 评估服务：自动化评估 RAG 系统效果
+ */
+@Service
+@Slf4j
+public class RAGEvaluationService {
+
+    private final ChatLanguageModel chatModel;
+
+    /**
+     * 评估单个问答对
+     */
+    public EvaluationResult evaluate(String question, String groundTruth,
+                                      String retrievedContext, String generatedAnswer) {
+
+        record FaithfulnessScore(double score, List<String> supportedClaims,
+                                  List<String> unsupportedClaims) {}
+        record RelevanceScore(double score, String reason) {}
+        record EvaluationResult(double faithfulness, double answerRelevancy,
+                                 String analysis) {}
+
+        interface FaithfulnessEvaluator {
+            @SystemMessage("""
+                评估生成的回答是否忠实于提供的上下文。
+                1. 将回答拆分为独立的声明
+                2. 判断每个声明是否能从上下文中找到依据
+                3. 计算忠实度分数 = 有依据的声明数 / 总声明数
+                """)
+            FaithfulnessScore evaluateFaithfulness(@UserMessage String contextAndAnswer);
+        }
+
+        interface RelevanceEvaluator {
+            @SystemMessage("""
+                评估生成的回答是否与原始问题相关。
+                考虑：回答是否切题、是否完整、是否包含无关信息。
+                返回0到1之间的分数。
+                """)
+            RelevanceScore evaluateRelevance(@UserMessage String questionAndAnswer);
+        }
+
+        // 评估忠实度
+        FaithfulnessEvaluator faithEval = AiServices.create(FaithfulnessEvaluator.class, chatModel);
+        String faithInput = "上下文：" + retrievedContext + "\n\n回答：" + generatedAnswer;
+        FaithfulnessScore faithScore = faithEval.evaluateFaithfulness(faithInput);
+
+        // 评估答案相关性
+        RelevanceEvaluator relEval = AiServices.create(RelevanceEvaluator.class, chatModel);
+        String relInput = "问题：" + question + "\n\n回答：" + generatedAnswer;
+        RelevanceScore relScore = relEval.evaluateRelevance(relInput);
+
+        String analysis = String.format(
+            "忠实度: %.2f (无依据声明: %s)\n答案相关性: %.2f (%s)",
+            faithScore.score(),
+            faithScore.unsupportedClaims(),
+            relScore.score(),
+            relScore.reason()
+        );
+
+        log.info("RAG评估 - 问题: {} | 忠实度: {:.2f} | 相关性: {:.2f}",
+                question, faithScore.score(), relScore.score());
+
+        return new EvaluationResult(faithScore.score(), relScore.score(), analysis);
+    }
+
+    /**
+     * 批量评估
+     */
+    public BatchEvaluationResult evaluateBatch(List<TestCase> testCases) {
+        List<EvaluationResult> results = testCases.stream()
+                .map(tc -> evaluate(tc.question(), tc.groundTruth(),
+                        tc.retrievedContext(), tc.generatedAnswer()))
+                .toList();
+
+        double avgFaithfulness = results.stream()
+                .mapToDouble(EvaluationResult::faithfulness).average().orElse(0);
+        double avgRelevancy = results.stream()
+                .mapToDouble(EvaluationResult::answerRelevancy).average().orElse(0);
+
+        log.info("批量评估完成 - 平均忠实度: {:.2f}, 平均相关性: {:.2f}",
+                avgFaithfulness, avgRelevancy);
+
+        return new BatchEvaluationResult(avgFaithfulness, avgRelevancy, results);
+    }
+
+    record TestCase(String question, String groundTruth,
+                    String retrievedContext, String generatedAnswer) {}
+}
+```
+
+> **评估实践建议**：构建 RAG 系统时，应先准备 50-100 个标注好的测试用例（包含问题、标准答案、相关文档），作为回归测试基准。每次调整参数或算法后重新评估，确保效果提升而非退化。
+
+
+### RAG 优化实战经验
+
+#### 1. 分割策略优化
+
+分割是影响 RAG 效果的第一道关卡：
+
+| 策略 | 适用场景 | 推荐参数 |
+|------|---------|----------|
+| 按段落分割 | 自然语言文章、报告 | maxSegmentSize=300-500 token, overlap=30-50 |
+| 按句子分割 | 法律条文、FAQ | maxSegmentSize=200 token, overlap=20 |
+| 递归分割 | 通用场景（推荐） | maxSegmentSize=300, overlap=30 |
+| 按语义分割 | 主题变化明显的文档 | 动态分割，相似度阈值0.8 |
+
+**关键原则：**
+- **重叠（Overlap）**：相邻片段保留 10%-15% 的重叠，避免关键信息被切断
+- **粒度平衡**：太大会包含无关信息（噪声），太小会丢失上下文（碎片化）
+- **元数据附加**：每个片段保留文档标题、章节路径等元数据，帮助 LLM 理解来源
+
+#### 2. 检索质量优化
+
+```java
+// 多种优化手段
+ContentRetriever optimizedRetriever = EmbeddingStoreContentRetriever.builder()
+        .embeddingStore(embeddingStore)
+        .embeddingModel(embeddingModel)
+        .maxResults(10)          // 多检索一些，后续靠重排序筛选
+        .minScore(0.5)           // 过滤低分结果
+        .queryTransformer(       // 查询优化
+            CompressingQueryTransformer.builder()
+                .chatLanguageModel(model)
+                .build())
+        .build();
+```
+
+**检索优化清单：**
+
+| 优化手段 | 效果 | 实现方式 |
+|---------|------|----------|
+| 查询扩展 | 提升召回率 | 将一个查询扩展为多个变体，合并检索结果 |
+| 查询压缩 | 提升精度 | 将多轮对话压缩为独立查询 |
+| HyDE（假设文档嵌入） | 提升语义匹配 | LLM 先生成假设性答案，用答案的嵌入去检索 |
+| 重排序 | 提升精度 | 使用 Cross-Encoder 对检索结果重排序 |
+| 元数据过滤 | 缩小检索范围 | 按分类、时间、来源等过滤 |
+| 混合检索 | 综合提升 | 向量检索 + BM25 关键词检索 |
+
+#### 3. 常见踩坑与解决方案
+
+| 问题 | 原因 | 解决方案 |
+|------|------|----------|
+| 回答"不知道"但文档中有答案 | 检索未命中 | 降低 minScore、增加 maxResults、优化查询 |
+| 回答编造信息 | 幻觉 | 添加 SystemMessage 强调只基于上下文、使用 Self-RAG |
+| 回答不够具体 | 检索到的片段太泛 | 缩小分割粒度、提高 minScore |
+| 中文检索效果差 | 嵌入模型对中文支持弱 | 使用中文优化的嵌入模型（如 bge-large-zh） |
+| 长文档回答不完整 | 只检索到部分片段 | 增大 maxResults、使用 Parent-Child 检索策略 |
+| 回答重复冗余 | 多个片段内容重叠 | 对检索结果去重、优化分割重叠率 |
+
+
+### RAG vs 微调对比
+
+在实际项目中，常常面临一个选择：是使用 RAG 还是微调（Fine-tuning）来增强 LLM 的能力？
+
+| 维度 | RAG | 微调 |
+|------|-----|------|
+| **知识更新** | 实时更新，修改文档即可 | 需要重新训练，成本高 |
+| **知识来源可追溯** | ✅ 可追溯到具体文档 | ❌ 知识内化在参数中，无法追溯 |
+| **幻觉控制** | 较好（基于检索事实） | 一般（可能产生幻觉） |
+| **领域适配** | 无需训练，即插即用 | 需要大量标注数据和训练 |
+| **私有数据** | ✅ 数据不离开本地 | ⚠️ 训练数据需上传 |
+| **推理能力** | 不增强，只是提供事实 | 可增强特定任务的推理模式 |
+| **风格/语气控制** | 通过提示词控制 | ✅ 可学习特定风格和语气 |
+| **延迟** | 较高（检索+生成） | 较低（仅生成） |
+| **成本** | 向量数据库+嵌入API | GPU训练+推理资源 |
+| **适用数据量** | 大量文档（万级以上） | 中等标注数据（千级） |
+
+**组合策略（推荐）：**
+
+```
+RAG + 微调 组合方案：
+
+1. 基础模型选择：选择通用能力强的基座模型
+2. 微调：用领域数据微调，增强领域术语理解和输出风格
+3. RAG：叠加 RAG，提供实时、可追溯的知识补充
+4. 效果：既有领域适配能力，又有实时知识更新能力
+```
+
+**选择决策树：**
+
+```
+需要让LLM获取最新知识？
+  ├─ 是 → RAG
+  └─ 否 → 需要改变LLM的输出风格/格式？
+            ├─ 是 → 微调
+            └─ 否 → 知识是否频繁变化？
+                      ├─ 是 → RAG
+                      └─ 否 → 数据量是否足够微调？
+                                ├─ 是 → RAG + 微调
+                                └─ 否 → RAG
+```
+
+> **实践建议**：大多数企业场景下，优先选择 RAG。RAG 的知识可追溯性在合规场景中尤为重要。只有在需要深度领域适配或特定输出风格时，才考虑微调或 RAG + 微调组合。
+
+
 ## Agent（智能代理）
 
 Agent 是 LLM 应用的最高级形态，能够自主规划和使用工具来完成复杂任务。
