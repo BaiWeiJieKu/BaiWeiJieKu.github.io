@@ -5,7 +5,6 @@ tags: [Python]
 author: 百味皆苦
 music-id: 29393038
 ---
-{% raw %}
 
 ## 简介
 
@@ -2587,4 +2586,3 @@ async def dependency_run_bg_task(q: str = Depends(continue_write_readme)):
         return {"message": "README.md更新成功"}
 ```
 
-{% endraw %}

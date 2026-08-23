@@ -5,7 +5,6 @@ tags: [golang]
 author: 百味皆苦
 music-id: 3136952023
 ---
-{% raw %}
 
 ## Beego框架特性
 
@@ -2002,4 +2001,3 @@ func GetChannelVideoListEs(channelId int, regionId int, typeId int, end string, 
 
 
 
-{% endraw %}

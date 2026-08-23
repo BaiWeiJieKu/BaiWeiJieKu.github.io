@@ -5,7 +5,6 @@ tags: [golang]
 author: 百味皆苦
 music-id: 3136952023
 ---
-{% raw %}
 
 ## 框架介绍
 
@@ -2381,4 +2380,3 @@ type ObjLoginuser struct {
 
 
 
-{% endraw %}

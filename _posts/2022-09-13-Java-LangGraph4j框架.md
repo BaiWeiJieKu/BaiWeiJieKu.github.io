@@ -1,11 +1,10 @@
 ---
 title: "Java-LangGraph4j框架"
 categories: spring
-tags: [spring, ai, langgraph]
+tags: [spring, AI, langgraph]
 author: 百味皆苦
 music-id: 3136952023
 ---
-{% raw %}
 
 ## 简介
 
@@ -2391,4 +2390,3 @@ LangGraph4j 为 Java 开发者提供了构建复杂 AI 智能体工作流的完�
 
 **与 LangChain4j 的关系**：LangChain4j 提供了 LLM 集成的"原子能力"（模型调用、RAG、工具、记忆），而 LangGraph4j 提供了"编排能力"（流程控制、状态管理、多智能体协作）。两者互补，共同构成 Java AI 应用开发的完整技术栈。
 
-{% endraw %}

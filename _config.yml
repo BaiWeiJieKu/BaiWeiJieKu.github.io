@@ -170,6 +170,15 @@ collections:
   tabs:
     output: true
     sort_by: order
+  favorites:
+    output: true
+    sort_by: order
+  yixue:
+    output: true
+    sort_by: date
+  zhongyi:
+    output: true
+    sort_by: date
 
 defaults:
   - scope:
@@ -192,6 +201,28 @@ defaults:
     values:
       layout: page
       permalink: /:title/
+  - scope:
+      path: ""
+      type: favorites
+    values:
+      layout: page
+      permalink: /favorites/:title/
+  - scope:
+      path: ""
+      type: yixue
+    values:
+      layout: post
+      comments: true
+      toc: true
+      permalink: /yixue/:title/
+  - scope:
+      path: ""
+      type: zhongyi
+    values:
+      layout: post
+      comments: true
+      toc: true
+      permalink: /zhongyi/:title/
 
 sass:
   style: compressed
