@@ -44,28 +44,79 @@
 }
 
 /* =========================================================
- * 可隐藏左侧菜单栏（响应式）
- * - <850px：沿用 Chirpy 移动端抽屉（#sidebar-trigger + sidebar-display）
- * - ≥850px：顶栏/侧栏按钮可折叠，状态写入 localStorage
+ * 可隐藏左侧菜单栏 + 固定顶栏 + 层级面包屑（响应式）
  * ========================================================= */
 
-/* 桌面端显示侧栏切换，并修正顶栏 flex 排布：
- * [☰][面包屑] .......... [搜索]
- */
+/* 顶栏滚动时始终吸顶（mobile 用 fixed，避免祖先 transform 破坏 sticky） */
+#topbar-wrapper {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  background-color: var(--topbar-bg, rgba(199, 237, 204, 0.92));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 849px) {
+  #topbar-wrapper {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  /* fixed 后脱离文档流，给内容区补回顶栏高度 */
+  #main-wrapper > .container {
+    padding-top: 3rem;
+  }
+}
+
+/* 各分辨率统一：[☰][面包屑……][搜索] */
+#topbar {
+  justify-content: flex-start !important;
+  gap: 0.15rem;
+}
+
+#sidebar-trigger {
+  display: block !important;
+  flex-shrink: 0;
+  margin-right: 0.15rem;
+}
+
+#topbar-title {
+  display: none !important;
+}
+
+#breadcrumb {
+  display: block !important;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 0.15rem;
+}
+
+#search-trigger {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+#search {
+  margin-left: auto;
+}
+
+/* 移动端展开搜索时隐藏面包屑，避免挤在一起 */
+#topbar:has(#search.d-flex) #breadcrumb {
+  display: none !important;
+}
+
+/* 桌面端侧栏折叠 */
 @media (min-width: 850px) {
-  #topbar {
-    justify-content: flex-start !important;
-  }
-
-  #sidebar-trigger {
-    display: block !important;
-    order: -1;
-    margin-right: 0.35rem;
-    flex-shrink: 0;
-  }
-
-  #search {
-    margin-left: auto;
+  #search-trigger {
+    display: none !important;
   }
 
   #sidebar {
@@ -88,7 +139,6 @@
     margin-left: 0 !important;
   }
 
-  /* 侧栏右缘折叠把手（展开时固定在视口；折叠后靠顶栏 ☰ 重新打开） */
   #sidebar-collapse-btn {
     position: fixed;
     top: 0.85rem;
@@ -118,14 +168,17 @@
   }
 }
 
-/* 移动端不显示桌面折叠把手 */
 @media (max-width: 849px) {
   #sidebar-collapse-btn {
     display: none !important;
   }
+
+  /* 移动端搜索展开时仍让取消按钮靠右 */
+  #search-cancel {
+    margin-left: auto;
+  }
 }
 
-/* 超宽屏侧栏 300px */
 @media (min-width: 1650px) {
   html.sidebar-collapsed #sidebar {
     transform: translateX(-300px);
@@ -137,7 +190,6 @@
   }
 }
 
-/* 中等桌面折叠后主栏吃满宽度 */
 @media (min-width: 850px) and (max-width: 1199px) {
   html.sidebar-collapsed #main-wrapper > .container {
     max-width: 100%;

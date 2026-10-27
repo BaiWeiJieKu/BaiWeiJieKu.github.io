@@ -1,0 +1,127 @@
+﻿<!-- The Top Bar (override): sticky + hierarchical breadcrumbs -->
+
+<header id="topbar-wrapper" class="flex-shrink-0" aria-label="Top Bar">
+  <div
+    id="topbar"
+    class="d-flex align-items-center justify-content-between px-lg-3 h-100"
+  >
+    <button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar">
+      <i class="fas fa-bars fa-fw"></i>
+    </button>
+
+    <nav id="breadcrumb" aria-label="Breadcrumb">
+      {% assign lang = include.lang %}
+      {% assign home_label = site.data.locales[lang].tabs.home | default: 'Home' %}
+
+      {% if page.layout == 'home' %}
+        <span>{{ home_label }}</span>
+
+      {% elsif page.layout == 'category' %}
+        <span><a href="{{ '/' | relative_url }}">{{ home_label }}</a></span>
+        <span>
+          <a href="{{ '/categories/' | relative_url }}">
+            {{- site.data.locales[lang].tabs.categories | default: 'Categories' -}}
+          </a>
+        </span>
+        <span>{{ page.title }}</span>
+
+      {% elsif page.layout == 'tag' %}
+        <span><a href="{{ '/' | relative_url }}">{{ home_label }}</a></span>
+        <span>
+          <a href="{{ '/tags/' | relative_url }}">
+            {{- site.data.locales[lang].tabs.tags | default: 'Tags' -}}
+          </a>
+        </span>
+        <span>{{ page.title }}</span>
+
+      {% elsif page.layout == 'post' %}
+        <span><a href="{{ '/' | relative_url }}">{{ home_label }}</a></span>
+
+        {% if page.collection == 'yixue' %}
+          <span>
+            <a href="{{ '/yixue/' | relative_url }}">易学</a>
+          </span>
+        {% elsif page.collection == 'zhongyi' %}
+          <span>
+            <a href="{{ '/zhongyi/' | relative_url }}">中医</a>
+          </span>
+        {% elsif page.categories.size > 0 %}
+          <span>
+            <a href="{{ '/categories/' | relative_url }}">
+              {{- site.data.locales[lang].tabs.categories | default: 'Categories' -}}
+            </a>
+          </span>
+          {% assign cat = page.categories | first %}
+          {% assign cat_slug = cat | slugify | url_encode %}
+          <span>
+            <a href="{{ '/categories/' | append: cat_slug | append: '/' | relative_url }}">
+              {{- cat -}}
+            </a>
+          </span>
+        {% else %}
+          <span>
+            <a href="{{ '/archives/' | relative_url }}">
+              {{- site.data.locales[lang].tabs.archives | default: 'Archives' -}}
+            </a>
+          </span>
+        {% endif %}
+
+        <span>{{ page.title }}</span>
+
+      {% elsif page.collection == 'favorites' %}
+        <span><a href="{{ '/' | relative_url }}">{{ home_label }}</a></span>
+        <span>
+          <a href="{{ '/collections/' | relative_url }}">收藏</a>
+        </span>
+        <span>{{ page.title }}</span>
+
+      {% elsif page.collection == 'tabs' %}
+        <span><a href="{{ '/' | relative_url }}">{{ home_label }}</a></span>
+        {% assign tab_key = '' %}
+        {% assign segments = page.url | split: '/' %}
+        {% for seg in segments reversed %}
+          {% if seg != empty %}
+            {% assign tab_key = seg %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+        <span>{{ site.data.locales[lang].tabs[tab_key] | default: page.title }}</span>
+
+      {% else %}
+        <span><a href="{{ '/' | relative_url }}">{{ home_label }}</a></span>
+        <span>{{ page.title | default: page.layout | capitalize }}</span>
+      {% endif %}
+    </nav>
+
+    <!-- Kept for Chirpy search-bar JS; replaced visually by breadcrumb on all viewports -->
+    <div id="topbar-title" aria-hidden="true">
+      {% if page.layout == 'home' %}
+        {{- site.data.locales[lang].title | default: site.title -}}
+      {% elsif page.collection == 'tabs' or page.layout == 'page' %}
+        {%- capture tab_key -%}{{ page.url | split: '/' }}{%- endcapture -%}
+        {{- site.data.locales[lang].tabs[tab_key] | default: page.title -}}
+      {% else %}
+        {{- site.data.locales[lang].layout[page.layout] | default: page.layout | capitalize -}}
+      {% endif %}
+    </div>
+
+    <button type="button" id="search-trigger" class="btn btn-link" aria-label="Search">
+      <i class="fas fa-search fa-fw"></i>
+    </button>
+
+    <search id="search" class="align-items-center ms-3 ms-lg-0">
+      <i class="fas fa-search fa-fw"></i>
+      <input
+        class="form-control"
+        id="search-input"
+        type="search"
+        aria-label="search"
+        autocomplete="off"
+        placeholder="{{ site.data.locales[lang].search.hint | capitalize }}..."
+      >
+    </search>
+    <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">
+      {{- site.data.locales[lang].search.cancel -}}
+    </button>
+  </div>
+</header>
