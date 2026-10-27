@@ -42,3 +42,111 @@
 #toc-popup-content .collapse-icon {
   display: none !important;
 }
+
+/* =========================================================
+ * 可隐藏左侧菜单栏（响应式）
+ * - <850px：沿用 Chirpy 移动端抽屉（#sidebar-trigger + sidebar-display）
+ * - ≥850px：顶栏/侧栏按钮可折叠，状态写入 localStorage
+ * ========================================================= */
+
+/* 桌面端显示侧栏切换，并修正顶栏 flex 排布：
+ * [☰][面包屑] .......... [搜索]
+ */
+@media (min-width: 850px) {
+  #topbar {
+    justify-content: flex-start !important;
+  }
+
+  #sidebar-trigger {
+    display: block !important;
+    order: -1;
+    margin-right: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  #search {
+    margin-left: auto;
+  }
+
+  #sidebar {
+    transition: transform 0.28s ease, visibility 0.28s ease;
+    will-change: transform;
+  }
+
+  #main-wrapper {
+    transition: margin-left 0.28s ease;
+  }
+
+  html.sidebar-collapsed #sidebar {
+    transform: translateX(-260px);
+    -webkit-transform: translateX(-260px);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  html.sidebar-collapsed #main-wrapper {
+    margin-left: 0 !important;
+  }
+
+  /* 侧栏右缘折叠把手（展开时固定在视口；折叠后靠顶栏 ☰ 重新打开） */
+  #sidebar-collapse-btn {
+    position: fixed;
+    top: 0.85rem;
+    left: calc(260px - 2.1rem);
+    z-index: 1021;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 1px solid var(--sidebar-border-color, rgba(0, 0, 0, 0.12));
+    border-radius: 0.4rem;
+    background: var(--sidebar-btn-bg, rgba(255, 255, 255, 0.7));
+    color: var(--sidebar-btn-color, inherit);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color 0.2s ease, left 0.28s ease, opacity 0.2s ease;
+  }
+
+  #sidebar-collapse-btn:hover {
+    background: var(--sidebar-hover-bg, rgba(0, 0, 0, 0.06));
+  }
+
+  html.sidebar-collapsed #sidebar-collapse-btn {
+    display: none;
+  }
+}
+
+/* 移动端不显示桌面折叠把手 */
+@media (max-width: 849px) {
+  #sidebar-collapse-btn {
+    display: none !important;
+  }
+}
+
+/* 超宽屏侧栏 300px */
+@media (min-width: 1650px) {
+  html.sidebar-collapsed #sidebar {
+    transform: translateX(-300px);
+    -webkit-transform: translateX(-300px);
+  }
+
+  #sidebar-collapse-btn {
+    left: calc(300px - 2.1rem);
+  }
+}
+
+/* 中等桌面折叠后主栏吃满宽度 */
+@media (min-width: 850px) and (max-width: 1199px) {
+  html.sidebar-collapsed #main-wrapper > .container {
+    max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sidebar,
+  #main-wrapper {
+    transition: none !important;
+  }
+}
