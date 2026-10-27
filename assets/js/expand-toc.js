@@ -58,6 +58,37 @@
     return mount.children.length > 0 || hasHeadings;
   }
 
+  function hideTocPopup() {
+    var popup = document.getElementById('toc-popup');
+    if (!popup || !popup.open) return;
+
+    /* Prefer Chirpy close button so lockScroll / closing animation still run */
+    var closeBtn = document.getElementById('toc-popup-close');
+    if (closeBtn) {
+      closeBtn.click();
+      return;
+    }
+
+    if (typeof popup.close === 'function') {
+      popup.close();
+      document.documentElement.classList.remove('overflow-hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  }
+
+  function bindPopupAnchorClose() {
+    var content = document.getElementById('toc-popup-content');
+    if (!content || content.dataset.anchorCloseBound === '1') return;
+
+    content.addEventListener('click', function (e) {
+      var link = e.target.closest('a.toc-link, a[href^="#"]');
+      if (!link || !content.contains(link)) return;
+      /* Defer so hash navigation / scroll can start first */
+      setTimeout(hideTocPopup, 0);
+    });
+    content.dataset.anchorCloseBound = '1';
+  }
+
   function ensureFab() {
     if (document.getElementById('toc-fab')) return;
     if (!document.getElementById('toc-popup')) return;
@@ -95,6 +126,7 @@
       return;
     }
 
+    bindPopupAnchorClose();
     ensureFab();
   }
 
