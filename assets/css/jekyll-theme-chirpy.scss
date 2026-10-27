@@ -73,6 +73,48 @@
   }
 }
 
+/*
+ * 手机/平板大纲条：Chirpy 的 #toc-bar 默认 sticky top:0，
+ * 会被我们吸顶的 #topbar-wrapper 盖住。下移一截顶栏高度。
+ */
+@media (max-width: 1199px) {
+  #toc-bar:not(.invisible) {
+    top: 3rem !important;
+    z-index: 1015;
+  }
+
+  /* 浮动大纲按钮：滚动后仍可随时打开弹层 */
+  #toc-fab {
+    position: fixed;
+    right: 1rem;
+    bottom: 5.5rem;
+    z-index: 1016;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--btn-border-color, rgba(0, 0, 0, 0.12));
+    background: var(--card-bg, #c7edcc);
+    color: var(--text-color, inherit);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  #toc-fab:hover,
+  #toc-fab:focus-visible {
+    background: var(--sidebar-hover-bg, rgba(0, 0, 0, 0.06));
+  }
+}
+
+@media (min-width: 1200px) {
+  #toc-fab {
+    display: none !important;
+  }
+}
+
 /* 各分辨率统一：[☰][面包屑……][搜索] */
 #topbar {
   justify-content: flex-start !important;
